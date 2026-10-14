@@ -239,6 +239,115 @@
   if (head) head.after(reel); else main.prepend(reel);
   main.classList.add("has-reel");
 
+  /* ---------- 先看哪幾支（data-needs）：例如作業影片要先看兩支補充 ----------
+     <section class="unit" id="03-…" data-needs="s1-github s2-mermaid">。
+     - 清單（桌機直排）：從那幾支的縮圖左邊拉一條細線，在清單左邊的空隙匯成一條，往上接到這一支、箭頭指進去；線旁直寫「先看」。
+       那幾支都看完了，線變淡、「先看」變 ✓。滑到其中一支，線和相關的項目一起亮。
+     - 影片本身：標題下面一行「先看」＋那幾支的小縮圖，點了就換過去；看完的打勾。手機橫排的清單沒有線，靠這一行。 */
+  const NS = "http://www.w3.org/2000/svg";
+  const needSets = [];
+  function refreshNeeds() {
+    needSets.forEach((n) => {
+      const met = n.ks.every((k) => items[k].classList.contains("is-done"));
+      n.svg.classList.toggle("is-met", met);
+      n.lab.textContent = met ? "✓" : tr("reel.needs", "先看");
+      n.links.forEach((a, j) => a.classList.toggle("is-done", items[n.ks[j]].classList.contains("is-done")));
+    });
+  }
+  units.forEach((unit, i) => {
+    const ks = (unit.dataset.needs || "").split(/\s+/).map((id) => units.findIndex((u) => u.id === id)).filter((k) => k >= 0 && k !== i);
+    if (!ks.length) return;
+    // 影片標題下面那一行
+    const row = document.createElement("p");
+    row.className = "needs";
+    const key = document.createElement("span");
+    key.className = "needs-k";
+    key.dataset.ui = "reel.needs";
+    key.textContent = "先看";
+    row.append(key);
+    const links = ks.map((k, j) => {
+      if (j) {
+        const plus = document.createElement("span");
+        plus.className = "needs-plus";
+        plus.setAttribute("aria-hidden", "true");
+        plus.textContent = "+";
+        row.append(plus);
+      }
+      const a = document.createElement("a");
+      a.className = "needs-a";
+      a.href = "#" + units[k].id;
+      const im = document.createElement("img");
+      im.alt = "";
+      im.width = 64;
+      im.height = 36;
+      im.loading = "lazy";
+      im.src = items[k].querySelector("img").src;
+      const n = document.createElement("span");
+      const src = items[k].querySelector(".reel-n");
+      n.className = "needs-n";
+      if (src.dataset.ui) { n.dataset.ui = src.dataset.ui; n.dataset.n = src.dataset.n; }
+      n.textContent = src.textContent;
+      a.append(im, n);
+      a.addEventListener("click", (e) => { e.preventDefault(); select(units[k], { scroll: true, hash: true }); });
+      row.append(a);
+      return a;
+    });
+    const title = unit.querySelector(".unit-title");
+    if (title) title.after(row); else unit.prepend(row);
+    if (I18N) I18N.apply(row);
+
+    // 清單上的線（畫在 .reel 上：它是 sticky，絕對定位以它為準）
+    const svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("class", "reel-needs");
+    svg.setAttribute("aria-hidden", "true");
+    const line = document.createElementNS(NS, "path");
+    const head = document.createElementNS(NS, "path");
+    head.setAttribute("class", "reel-needs-head");
+    svg.append(line, head);
+    const lab = document.createElement("span");
+    lab.className = "reel-needs-k";
+    lab.setAttribute("aria-hidden", "true");
+    reel.append(svg, lab);
+    const draw = () => {
+      const vertical = getComputedStyle(list).flexDirection === "column";
+      svg.style.display = lab.style.display = vertical ? "" : "none";
+      if (!vertical) return;
+      const R = reel.getBoundingClientRect();
+      const at = (b) => { const r = b.querySelector(".reel-thumb").getBoundingClientRect(); return { x: r.left - R.left, y: r.top - R.top + r.height / 2 }; };
+      const to = at(items[i]);
+      const from = ks.map((k) => at(items[k]));
+      const sx = -15, rr = 8;
+      const low = Math.max(...from.map((p) => p.y));
+      let d = "";
+      from.forEach((p) => { d += `M${(p.x - 6).toFixed(1)} ${p.y.toFixed(1)}H${sx + rr}Q${sx} ${p.y.toFixed(1)} ${sx} ${(p.y - rr).toFixed(1)}`; });
+      d += `M${sx} ${(low - rr).toFixed(1)}V${(to.y + rr).toFixed(1)}Q${sx} ${to.y.toFixed(1)} ${sx + rr} ${to.y.toFixed(1)}H${(to.x - 5).toFixed(1)}`;
+      line.setAttribute("d", d);
+      head.setAttribute("d", `M${(to.x - 11).toFixed(1)} ${(to.y - 4).toFixed(1)}L${(to.x - 4).toFixed(1)} ${to.y.toFixed(1)}L${(to.x - 11).toFixed(1)} ${(to.y + 4).toFixed(1)}`);
+      svg.setAttribute("width", R.width);
+      svg.setAttribute("height", R.height);
+      lab.style.left = sx + "px";
+      lab.style.top = ((to.y + low) / 2).toFixed(1) + "px";
+    };
+    const hot = (on) => {
+      svg.classList.toggle("is-hot", on);
+      lab.classList.toggle("is-hot", on);
+      ks.concat(i).forEach((k) => items[k].classList.toggle("is-need", on));
+    };
+    ks.concat(i).forEach((k) => {
+      items[k].addEventListener("pointerenter", () => hot(true));
+      items[k].addEventListener("pointerleave", () => hot(false));
+    });
+    needSets.push({ ks, svg, lab, links, draw });
+  });
+  if (needSets.length) {
+    const redraw = () => needSets.forEach((n) => n.draw());
+    if (window.ResizeObserver) new ResizeObserver(redraw).observe(list);
+    window.addEventListener("resize", redraw);
+    document.addEventListener("langchange", () => { refreshNeeds(); requestAnimationFrame(redraw); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(redraw);
+    requestAnimationFrame(redraw);
+  }
+
   /* 觀看進度：清單上緣的細線看到哪就填到哪（記在這台瀏覽器） */
   const storeKey = (id) => `watched:${location.pathname}#${id}`;
   const readP = (id) => { try { return Math.min(1, Number(localStorage.getItem(storeKey(id))) || 0); } catch (e) { return 0; } };
@@ -252,6 +361,7 @@
     const paint = () => {
       item.style.setProperty("--p", best);
       item.classList.toggle("is-done", best >= 0.95);
+      refreshNeeds();
     };
     paint();
     vid.addEventListener("timeupdate", () => {

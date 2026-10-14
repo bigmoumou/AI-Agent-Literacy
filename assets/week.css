@@ -309,6 +309,33 @@ main.has-reel > .unit { grid-column: 1; grid-row: 2; margin-top: 0; } /* 一次�
 .reel-item.is-playing .reel-n::before { content: ""; width: .42rem; height: .42rem; border-radius: 50%; background: var(--accent); animation: reel-breathe 1.8s ease-in-out infinite; }
 @keyframes reel-breathe { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
 .reel-t { font-size: .95rem; font-weight: 700; line-height: 1.45; color: var(--ink-2); transition: color .2s; }
+
+/* 先看哪幾支（section 的 data-needs，video.js 畫）：清單左邊的空隙裡一條細線，從要先看的那幾支匯到這一支，線旁直寫「先看」。
+   不用框和底色：一條手感的細線、一個小箭頭、兩個字。看完了線變淡、字變 ✓。 */
+.reel-needs { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+.reel-needs path { fill: none; stroke: var(--accent); stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; opacity: .55; transition: opacity .3s, stroke .3s, stroke-width .3s; }
+.reel-needs.is-hot path { opacity: 1; stroke-width: 1.8; }
+.reel-needs.is-met path { stroke: var(--ink-3); opacity: .45; }
+.reel-needs-k {
+  position: absolute; transform: translate(-50%, -50%); writing-mode: vertical-rl; padding: .35rem 0; background: var(--bg);
+  font-family: var(--font-mono); font-size: .72rem; font-weight: 700; letter-spacing: .3em; line-height: 1; color: var(--accent); opacity: .8;
+  pointer-events: none; transition: opacity .3s, color .3s;
+}
+.reel-needs-k.is-hot { opacity: 1; }
+.reel-needs.is-met + .reel-needs-k { color: var(--ink-3); letter-spacing: 0; }
+.reel-item.is-need .reel-thumb img { opacity: 1; }
+.reel-item.is-need .reel-t { color: var(--ink); }
+
+/* 影片標題下面那一行：「先看」＋小縮圖（點了換過去）；看完的打勾 */
+.needs { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .7rem; margin: -.2rem 0 1.1rem; }
+.needs-k { font-family: var(--font-mono); font-size: .76rem; font-weight: 700; letter-spacing: .14em; color: var(--accent); }
+.needs-k::after { content: "→"; margin-left: .55rem; letter-spacing: 0; }
+.needs-plus { font-family: var(--font-mono); font-size: .8rem; color: var(--ink-3); }
+.needs-a { display: inline-flex; align-items: center; gap: .5rem; color: var(--ink-2); text-decoration: none; font-family: var(--font-mono); font-size: .76rem; font-weight: 700; letter-spacing: .08em; }
+.needs-a img { display: block; width: 4rem; height: 2.25rem; object-fit: cover; border-radius: 4px; opacity: .7; transition: opacity .3s; }
+.needs-a:hover, .needs-a:focus-visible { color: var(--ink); }
+.needs-a:hover img, .needs-a:focus-visible img { opacity: 1; }
+.needs-a.is-done .needs-n::after { content: " ✓"; color: var(--ink-3); }
 .reel-item:hover .reel-t, .reel-item[aria-current="true"] .reel-t { color: var(--ink); }
 
 /* 換影片時：播放器和重點輕輕淡入（只往上移 10px），重點一則接一則 */
