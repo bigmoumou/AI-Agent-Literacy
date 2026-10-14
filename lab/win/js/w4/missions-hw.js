@@ -106,6 +106,21 @@
   function remoteTree(key) { return key ? LAB.github.treeAt(key) : {}; }
   function treeHasPersonal(tree) { return Object.keys(tree).some(function (p) { return personal(tree[p]); }); }
 
+  /* 作業 ① 第 1 步的提示：照表單的進度往前走（倉庫名 → Add README → Create repository）。
+     Create repository 在還沒填名字時是 disabled（CSS pointer-events: none），seeable() 看不到它，
+     原本的 chain 就退回去指「＋」（老師 10-14 抓到）。所以表單打開時一律指表單裡下一個要做的地方。 */
+  function newRepoCue(app, fallback) {
+    var name = K.inWins(app, 'gh-repo-name')();
+    if (name) {
+      if (!String(name.value || '').trim()) return name;
+      var rd = K.inWins(app, 'gh-add-readme')();
+      if (rd && !rd.checked) return rd.parentNode || rd;
+      var cr = K.inWins(app, 'gh-create')();
+      if (cr) return cr.disabled ? name : cr;   // 名字不合格（例如撞名）時 Create 還是灰的：回去指倉庫名
+    }
+    return K.chain(K.inWins(app, 'gh-new-repo'), K.inWins(app, 'gh-plus'), fallback)();
+  }
+
   var VIDEO_NAME = '（影片裡的示範帳號是 xiaoan-demo，這裡是 an；真正做作業時，換成你自己的帳號。）';
 
   /* ================================================================== 9 · 作業 ①：放上 GitHub */
@@ -133,7 +148,7 @@
         text: '打開 Microsoft Edge（按開始，點 Microsoft Edge），到 `github.com`，按右上角「＋」›「New repository」，建一個叫 `firenze-museums-hw` 的倉庫：選 Public，打開 Add README，按 Create repository。',
         hint: '名字別跟 Week 3 的資料夾 Firenze-Museums 同名：電腦不分大小寫，Firenze-Museums 和 firenze-museums 是同一個名字，clone 的時候會撞名。Public 才能讓老師看到；Add README 會讓倉庫一開始就有一個 README.md。',
         answer: 'Edge › github.com › ＋ › New repository › Repository name：firenze-museums-hw › Public › Add README › Create repository。',
-        target: K.chain(K.inWins('edge', 'gh-create'), K.inWins('edge', 'gh-new-repo'), K.inWins('edge', 'gh-plus'), T_EDGE),
+        target: function () { return newRepoCue('edge', T_EDGE); },
         check: function (ev, api) {
           var d = api.seen('github:repo-created', function (x) { return x.visibility === 'public' && x.readme; }, { since: 'mission' });
           if (d) api.state.repo = d.repo;
