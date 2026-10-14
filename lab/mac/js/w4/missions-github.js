@@ -17,7 +17,7 @@
   var MAP = 'GitHub 雲端倉庫 ⇄ 你電腦上的倉庫資料夾 · clone 拿一份回家 · add＋commit 存一個版本（只在你的電腦）· push 送上雲 · pull 拿回最新';
 
   /* ------------------------------------------------------------------ small helpers */
-  function same(api, a, b) { try { return !!api.same(a, b); } catch (e) { return false; } }
+  function same(api, a, b) { try { return !!(api ? api.same(a, b) : LAB.vfs.same(a, b)); } catch (e) { return false; } }
   function under(path, dir) { try { return LAB.vfs.same(path, dir) || LAB.vfs.isUnder(LAB.vfs.canon(path), LAB.vfs.canon(dir)); } catch (e) { return false; } }
   function norm(s) { return String(s || '').replace(/\s+$/, ''); }
   function gx() { return LAB.shell && LAB.shell.gitExt ? LAB.shell.gitExt : null; }
@@ -48,7 +48,8 @@
       if (!map) return;
       map.forEach(function (inst) {
         var s = inst && inst.session;
-        if (s && s.cwd && under(s.cwd, HW)) { s.cwd = DESKTOP; if (s.env) s.env.PWD = DESKTOP; }
+        // back to ~, where the first step's 「cd Desktop」 works (cue audit 2026-10-14: DESKTOP made that command fail)
+        if (s && s.cwd && under(s.cwd, HW)) { s.cwd = '/Users/an'; if (s.env) s.env.PWD = '/Users/an'; }
       });
     } catch (e) { /* no Terminal yet */ }
   }
@@ -84,6 +85,7 @@
   }
   function seeable(el) {
     if (!el || !el.getBoundingClientRect) return false;
+    if (LAB.missions && LAB.missions.seeable) return LAB.missions.seeable(el);       // the engine's version looks at the visible part (a button half under the edge of a window still counts)
     var r = el.getBoundingClientRect();
     if (r.width < 2 || r.height < 2) return false;
     var t = null;
@@ -122,29 +124,70 @@
         try { el = typeof part === 'function' ? part(api) : document.querySelector(part); } catch (e) { el = null; }
         if (!el) continue;
         if ((typeof part === 'function' && part.trusted) || seeable(el)) return el;
-        if (!fallback) fallback = el;
+        if (LAB.missions && LAB.missions.scrolledOut && LAB.missions.scrolledOut(el)) return el;       // below the fold of its own window: the cue scrolls it into view
+        if (!fallback && el.getBoundingClientRect && el.getBoundingClientRect().width > 0) fallback = el;       // a hidden element (a closed dialog's button) is no fallback
       }
       return fallback;
     };
   }
   var fdItem = function (p) { return inWins('finder', 'fd-item', p); };
   var fdSide = function (p) { return inWins('finder', 'fd-sidebar-item', p); };
-  function finderWalk(paths, side) { return chain.apply(null, paths.map(fdItem).concat([fdSide(side || DESKTOP), dock('finder')])); }
+  function finderWalk(paths, side) {
+    var items = paths.map(fdItem), rest = chain(fdSide(side || DESKTOP), dock('finder'));
+    return function (api) {
+      var l = liveWins('finder'), top = l.length ? l[l.length - 1] : null;
+      for (var i = 0; i < items.length; i++) {
+        var el = null;
+        try { el = items[i](api); } catch (e) { el = null; }
+        if (!el) continue;
+        if (seeable(el)) return el;
+        // covered: in the front Finder window bring Finder forward (not the sidebar, which goes back up); in an older window behind, go on
+        if (top && top.el.contains(el)) return document.querySelector(dock('finder'));
+      }
+      return rest(api);
+    };
+  }
   var termShown = trusted(function () {
     var l = liveWins('terminal');
     if (!l.length) return null;
     var w = l[l.length - 1], screen = w.el.querySelector('[data-lab=term-screen]');
     if (!seeable(screen)) return null;
-    var f = LAB.wm.focused();
-    if (f && f.id === w.id) return w.el.querySelector('[data-lab=term-input]');
-    return screen;
+    var f = LAB.wm.focused(), inp = w.el.querySelector('[data-lab=term-input]');
+    if (f && f.id === w.id && inp && document.activeElement === inp) return inp;     // the keyboard is in it: the student is typing
+    return screen;                                                                  // in front but the keyboard is elsewhere (card button clicked): click the screen
   });
   var T_TERM = chain(termShown, dock('terminal'));
   var inSafari = function (lab, path) { return inWins('safari', lab, path); };
   var sfAddress = inSafari('sf-address');
   var T_SAFARI = chain(sfAddress, dock('safari'));
-  var T_SAFARI_RELOAD = chain(inSafari('sf-reload'), sfAddress, dock('safari'));
+  /* the file name inside a row of the repository page: the row is wide and most of it is the commit-message link, so a click in its middle
+     opens the wrong page (cue audit 2026-10-14) */
+  var ghFileLink = function (path) {
+    var row = inSafari('gh-file-row', path);
+    return function () { var r = row(); return r ? r.querySelector('a.gh-rname') : null; };
+  };
+  /* reloading only means something while Safari already shows the repository; on its start page (or any other page) the address has to be typed */
+  var showsRepo = function () {
+    var l = liveWins('safari'), i, p;
+    for (i = l.length - 1; i >= 0; i--) {
+      p = l[i].el.querySelector('[data-lab=gh-page]');
+      if (p) return /^(repo|tree|file|commits)$/.test(p.getAttribute('data-view') || '');
+    }
+    return false;
+  };
+  var T_SAFARI_RELOAD = chain(function () { return showsRepo() ? inSafari('sf-reload')() : null; }, sfAddress, dock('safari'));
   var T_CODE = chain(inSafari('gh-copy-url'), inSafari('gh-code-button'), sfAddress, dock('safari'));
+  /* the TextEdit window that shows a file: its text area, once it is open (the Finder behind it is no longer the thing to use) */
+  var teBox = function (path) {
+    return function () {
+      var l = liveWins('textedit'), i, w;
+      for (i = l.length - 1; i >= 0; i--) {
+        w = l[i];
+        if (w.state && w.state.path && same(null, w.state.path, path)) return w.el.querySelector('[data-lab=te-text]');
+      }
+      return null;
+    };
+  };
 
   /* ------------------------------------------------------------------ traps (one quiet line for a known beginner mistake) */
   var NOT_A_REPO = '這裡不是倉庫：先 `cd` 走進 firenze-museums-hw（提示字元最後一個字要是 firenze-museums-hw），再輸入。';
@@ -294,7 +337,8 @@
         text: '用文字編輯打開桌面上 `firenze-museums-hw` 裡的 README.md，在最後面加一行自己的說明，按 Command+S 存檔。',
         hint: '在 Finder 打開桌面的 firenze-museums-hw，對 README.md 按右鍵 › 打開方式 › 文字編輯。存檔之後標題的「已編輯」就會消失。',
         answer: 'Finder › 桌面 › firenze-museums-hw › README.md › 右鍵 › 打開方式 › 文字編輯；加一行字；Command+S。',
-        target: finderWalk([HW + '/README.md', HW], DESKTOP),
+        menuPath: ['打開方式', '文字編輯'],
+        target: chain(teBox(HW + '/README.md'), finderWalk([HW + '/README.md', HW], DESKTOP)),
         check: function (ev, api) { var t = api.read(HW + '/README.md'); return t !== null && t !== README0; },
         trap: function (ev, api) {
           if (ev && ev.name === 'editor:save' && ev.data && same(api, ev.data.path, HW + '/README.md') && api.read(HW + '/README.md') === README0) return '存檔了，但內容沒有變：在最後面加一行字，再按 Command+S。';
@@ -439,7 +483,7 @@
         text: '假裝你在另一台電腦：到 Safari 打開 `github.com/an/firenze-museums-hw`，點 README.md，再點右上角的鉛筆圖示（Edit this file），把內容改一行。',
         hint: '這等於另一台電腦（或同學）改了雲端的檔案；你桌面上的檔案還是舊的。網址列輸入網址後按 Return。',
         answer: 'Safari › 倉庫頁 › README.md › 鉛筆圖示 › 改一行字。',
-        target: chain(inSafari('gh-edit'), inSafari('gh-file-row', 'README.md'), sfAddress, dock('safari')),
+        target: chain(inSafari('gh-edit'), ghFileLink('README.md'), sfAddress, dock('safari')),
         check: function (ev, api) { return !!api.seen('github:edit-open', function (d) { return d.repo === REPO && d.path === 'README.md'; }); }
       },
       {

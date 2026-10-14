@@ -69,6 +69,7 @@
   }
   function seeable(el) {
     if (!el || !el.getBoundingClientRect) return false;
+    if (LAB.missions && LAB.missions.seeable) return LAB.missions.seeable(el);       // the engine's version looks at the visible part (a button half under the edge of a window still counts)
     var r = el.getBoundingClientRect();
     if (r.width < 2 || r.height < 2) return false;
     var t = null;
@@ -98,6 +99,7 @@
       return first;
     };
   }
+  function trusted(fn) { fn.trusted = true; return fn; }      // the function already checked that its element is visible
   function chain() {
     var parts = [].slice.call(arguments);
     return function (api) {
@@ -106,8 +108,9 @@
         var part = parts[i], el = null;
         try { el = typeof part === 'function' ? part(api) : document.querySelector(part); } catch (e) { el = null; }
         if (!el) continue;
-        if (seeable(el)) return el;
-        if (!fallback) fallback = el;
+        if ((typeof part === 'function' && part.trusted) || seeable(el)) return el;
+        if (LAB.missions && LAB.missions.scrolledOut && LAB.missions.scrolledOut(el)) return el;       // below the fold of its own window: the cue scrolls it into view
+        if (!fallback && el.getBoundingClientRect && el.getBoundingClientRect().width > 0) fallback = el;       // a hidden element (a closed dialog's button) is no fallback
       }
       return fallback;
     };
@@ -115,13 +118,48 @@
   function fdItem(p) { return inWins('finder', 'fd-item', p); }
   function fdSide(p) { return inWins('finder', 'fd-sidebar-item', p); }
   function finderWalk(paths, side) {
-    return chain.apply(null, paths.map(fdItem).concat([fdSide(side || DESKTOP), dock('finder')]));
+    var items = paths.map(fdItem), rest = chain(fdSide(side || DESKTOP), dock('finder'));
+    return function (api) {
+      var l = liveWins('finder'), top = l.length ? l[l.length - 1] : null;
+      for (var i = 0; i < items.length; i++) {
+        var el = null;
+        try { el = items[i](api); } catch (e) { el = null; }
+        if (!el) continue;
+        if (seeable(el)) return el;
+        // covered: in the front Finder window bring Finder forward (not the sidebar, which goes back up); in an older window behind, go on
+        if (top && top.el.contains(el)) return document.querySelector(dock('finder'));
+      }
+      return rest(api);
+    };
   }
   var cxComposer = inWins('codex', 'cx-composer');
   var cxProject = inWins('codex', 'cx-project', FM);
-  var T_COMPOSER = chain(cxComposer, cxProject, dock('codex'));
+  /* "put a sentence into the Firenze-Museums chat": the composer only when the open chat is the project's, else the project row first
+     (a Codex window that was just opened shows New chat, and a sentence sent from there never reaches the project; cue audit 2026-10-14) */
+  var T_COMPOSER = chain(function (api) {
+    var c = null;
+    try { c = api.codex.activeChat(); } catch (e) { c = null; }
+    return c && !isNullish(c.projectPath) && same(api, c.projectPath, FM) ? cxComposer() : null;
+  }, cxProject, dock('codex'));
   var T_PROJECT = chain(cxProject, dock('codex'));
   var T_ANNOTATE = chain('[data-lab=cxb-annotate]', dock('codex'));
+  /* nothing to point at while Codex is answering the comment that was just sent: the student waits (the ring must not jump back to Annotate) */
+  function whileIdle(target) {
+    return function (api) {
+      try { if (api.codex && api.codex.isBusy && api.codex.isBusy()) return null; } catch (e) { /* ignore */ }
+      return target(api);
+    };
+  }
+  /* the comment card of Annotate: the box until something is written in it, then the Send button (which is disabled while the box is empty) */
+  var T_COMMENT = whileIdle(chain(function () {
+    var ta = null, send = null, l = liveWins('codex'), i;
+    for (i = l.length - 1; i >= 0 && !ta; i--) { ta = l[i].el.querySelector('[data-lab=cxb-comment-input]'); send = l[i].el.querySelector('[data-lab=cxb-comment-send]'); }
+    if (!ta) return null;
+    return String(ta.value || '').trim() && send && !send.disabled ? send : ta;
+  }, '[data-lab=cxb-annotate]'));
+  /* Annotate is on and nothing is chosen yet: the heading of the page (a transparent box over it, see cxbrowser.js; the page lives in a sandboxed
+     frame, so there is no element of it to circle), else the whole page view (the shield) */
+  var T_PAGE = chain(trusted(function () { return LAB.cxbrowser && LAB.cxbrowser.cueTarget ? LAB.cxbrowser.cueTarget('h1') : null; }), inWins('codex', 'cxb-shield'), dock('codex'));
   var T_PHONE = chain('[data-lab=cxb-viewport-btn][data-mode=phone]', dock('codex'));
   var T_DESKTOP = chain('[data-lab=cxb-viewport-btn][data-mode=desktop]', dock('codex'));
   var T_SAFARI_ADDR = chain('[data-lab=sf-address]', dock('safari'));
@@ -330,6 +368,7 @@
         text: '點一下網頁最上面的大標題。',
         hint: '點一個元素，或是拖出一個範圍都可以。選好之後旁邊會出現留言框。',
         answer: '點一下「佛羅倫斯美術館」那行大字。',
+        target: T_PAGE,
         check: function (ev, api) {
           return !!api.seen('cxbrowser:annotate-select');
         },
@@ -343,7 +382,7 @@
         text: '在留言框裡寫一句話，按 Send：[[標題字太小，改大一點]]',
         hint: '留言框裡寫你想要的樣子，例如「字太小」「這兩張卡片靠太近」。你選的那個元素會跟著留言一起交給 Codex，所以不用解釋是哪一個。',
         answer: '把那句貼到留言框，按 Send。',
-        target: chain('[data-lab=cxb-comment-input]', '[data-lab=cxb-annotate]'),
+        target: T_COMMENT,
         check: function (ev, api) {
           return !!(api.seen('codex:reply', replyIs(['annotate_edit'])) && codexWrote(api, CSS));
         },

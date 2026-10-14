@@ -22,6 +22,7 @@
   }
   function seeable(el) {
     if (!el || !el.getBoundingClientRect) return false;
+    if (LAB.missions && LAB.missions.seeable) return LAB.missions.seeable(el);       // the engine's version looks at the visible part (a button half under the edge of a window still counts)
     var r = el.getBoundingClientRect();
     if (r.width < 2 || r.height < 2) return false;
     var t = null;
@@ -62,8 +63,9 @@
         var part = parts[i], el = null;
         try { el = typeof part === 'function' ? part(api) : document.querySelector(part); } catch (e) { el = null; }
         if (!el) continue;
-        if (seeable(el)) return el;
-        if (!fallback) fallback = el;
+        if ((typeof part === 'function' && part.trusted) || seeable(el)) return el;
+        if (LAB.missions && LAB.missions.scrolledOut && LAB.missions.scrolledOut(el)) return el;       // below the fold of its own window: the cue scrolls it into view
+        if (!fallback && el.getBoundingClientRect && el.getBoundingClientRect().width > 0) fallback = el;       // a hidden element (a closed dialog's button) is no fallback
       }
       return fallback;
     };
@@ -71,10 +73,61 @@
   var fdItem = function (p) { return inWins('finder', 'fd-item', p); };
   var fdSide = function (p) { return inWins('finder', 'fd-sidebar-item', p); };
   function finderWalk(paths, side) {
-    return chain.apply(null, paths.map(fdItem).concat([fdSide(side || W4.DESKTOP || '/Users/an/Desktop'), dock('finder')]));
+    var items = paths.map(fdItem), rest = chain(fdSide(side || W4.DESKTOP || '/Users/an/Desktop'), dock('finder'));
+    return function (api) {
+      var l = liveWins('finder'), top = l.length ? l[l.length - 1] : null;
+      for (var i = 0; i < items.length; i++) {
+        var el = null;
+        try { el = items[i](api); } catch (e) { el = null; }
+        if (!el) continue;
+        if (seeable(el)) return el;
+        // covered: in the front Finder window bring Finder forward (not the sidebar, which goes back up); in an older window behind, go on
+        if (top && top.el.contains(el)) return document.querySelector(dock('finder'));
+      }
+      return rest(api);
+    };
   }
   var cxComposer = inWins('codex', 'cx-composer');
   var cxProject = function (p) { return inWins('codex', 'cx-project', p); };
+  /* typing in the Terminal: the hidden input while the keyboard is in the front Terminal (the cue leaves it alone), else the screen to click
+     (same rule as missions-week3.js; the old homework target was always the whole screen, even while the student was typing) */
+  var termShown = function () {
+    var l = liveWins('terminal');
+    if (!l.length) return null;
+    var w = l[l.length - 1], screen = w.el.querySelector('[data-lab=term-screen]');
+    if (!seeable(screen)) return null;
+    var f = LAB.wm.focused(), inp = w.el.querySelector('[data-lab=term-input]');
+    if (f && f.id === w.id && inp && document.activeElement === inp) return inp;
+    return screen;
+  };
+  termShown.trusted = true;
+  var T_TERM = chain(termShown, dock('terminal'));
+
+  /* the text area of the Code window that shows `path` (null when that file is not open there) */
+  function codeEditor(path) {
+    return function () {
+      var l = liveWins('code'), i, ed;
+      for (i = l.length - 1; i >= 0; i--) { ed = byPath(l[i].el, 'cd-editor', path); if (ed && seeable(ed)) return ed; }
+      return null;
+    };
+  }
+  /* "open the file in Code, show its preview, then edit it": the Finder item of the folder -> the file in EXPLORER -> the preview button
+     (it is a toggle: once the preview is on it is NOT the thing to click again) -> the text area (cue audit 2026-10-14: the ring used to stay
+     on the preview button, and edit steps had no cue at all) */
+  function codeFlow(path, folder) {
+    return chain(function () {
+      var l = liveWins('code'), i, ed, btn;
+      for (i = l.length - 1; i >= 0; i--) {
+        ed = byPath(l[i].el, 'cd-editor', path);
+        if (!ed || !seeable(ed)) continue;
+        btn = l[i].el.querySelector('[data-lab=cd-preview-btn]');
+        if (btn && !btn.hidden && btn.getAttribute('aria-pressed') !== 'true') return btn;
+        return ed;
+      }
+      return null;
+    }, inWins('code', 'cd-explorer-row', path), fdItem(folder), desktopIcon(folder), fdSide(W4.DESKTOP || '/Users/an/Desktop'), dock('finder'));
+  }
+  function editTarget(path) { return chain(codeEditor(path), inWins('code', 'cd-explorer-row', path), dock('code')); }
 
   /* the first diagram of a Markdown file, parsed (null when the file or the diagram is missing) */
   function fileAst(api, path) {
@@ -110,7 +163,8 @@
   /* one quiet line for the usual reasons a diagram does not come out */
   function mermaidTrap(path) {
     return function (ev) {
-      if (!ev || ev.name !== 'mermaid:render' || !ev.data || ev.data.ok || !renderOf(ev.data, path || ARCH)) return null;
+      if (!ev || ev.name !== 'mermaid:render' || !ev.data || !renderOf(ev.data, path || ARCH)) return null;
+      if (ev.data.ok) return '';          // it draws now: the earlier complaint is settled, the quiet line goes away (the engine takes '' as 「resolved」)
       var er = ev.data.error || {};
       if (er.kind === 'fullwidth') return '預覽出不來：有符號打成全形了（例如 ［ ］、－－＞、｜）。括號、箭頭、| 都要用半形，輸入法切到英文（ABC）再打。';
       if (er.kind === 'unclosed') return '預覽出不來：有括號沒關起來。[ 要有 ]，( 要有 )，{ 要有 }。看看錯誤訊息說的那一行，也看看它的前一行。';
@@ -128,9 +182,11 @@
     api.ensureSeed(FM + '/site');
   }
 
+  function trusted(fn) { fn.trusted = true; return fn; }      // the function already checked that its element is visible (chain takes it as it is)
   W4.kit = {
+    trusted: trusted,
     same: same, dock: dock, liveWins: liveWins, seeable: seeable, byPath: byPath, inWins: inWins, desktopIcon: desktopIcon, chain: chain,
-    fdItem: fdItem, fdSide: fdSide, finderWalk: finderWalk, cxComposer: cxComposer, cxProject: cxProject,
+    fdItem: fdItem, fdSide: fdSide, finderWalk: finderWalk, cxComposer: cxComposer, cxProject: cxProject, T_TERM: T_TERM, codeFlow: codeFlow, editTarget: editTarget, codeEditor: codeEditor,
     fileAst: fileAst, diamonds: diamonds, hasDiamond: hasDiamond, hasLabeledFromDiamond: hasLabeledFromDiamond, hasNewBoxAfterF: hasNewBoxAfterF,
     mermaidTrap: mermaidTrap, ensureBase4: ensureBase4, renderOf: renderOf, ARCH: ARCH
   };
@@ -150,6 +206,8 @@
     prepare: function (api) {
       ensureBase4(api);
       api.ensureSeed(ARCH, { overwrite: true });          // the diagram as the Week 3 homework left it
+      // a Code window of an earlier try already shows the file with its preview on (and its file list folded away): the first step starts from scratch
+      try { LAB.wm.byApp('code').forEach(function (w) { w.close(true); }); } catch (e) { /* no Code window */ }
     },
     steps: [
       {
@@ -158,7 +216,8 @@
         hint: '在 Finder 對 Firenze-Museums 按右鍵 › 打開方式 › Code。預覽按鈕在標籤列的右邊，滑鼠移上去會寫 Open Preview to the Side。預覽太擠的話，按 Command+B 收起左邊的檔案列表。',
         answer: 'Finder › 桌面 › Firenze-Museums › 右鍵 › 打開方式 › Code；點 ARCHITECTURE.md；按右上角的預覽按鈕（或 Shift+Command+V）。',
         replay: 'mission',
-        target: chain(inWins('code', 'cd-preview-btn'), inWins('code', 'cd-explorer-row', ARCH), fdItem(FM), desktopIcon(FM), fdSide(W4.DESKTOP || '/Users/an/Desktop'), dock('finder')),
+        menuPath: ['打開方式', 'Code'],
+        target: codeFlow(ARCH, FM),
         check: function (ev, api) {
           var opened = api.seen('editor:open', function (d) { return d.appId === 'code' && same(api, d.path, ARCH); });
           var prev = api.seen('code:preview', function (d) { return d.on && same(api, d.path, ARCH); });
@@ -172,6 +231,7 @@
         hint: 'TD 是 Top Down，由上往下；LR 是 Left to Right，由左往右。改完預覽會自己更新。',
         answer: '`flowchart TD`',
         replay: 'mission',
+        target: editTarget(ARCH),
         check: function (ev, api) {
           return !!api.seen('mermaid:render', function (d) { return d.ok && d.dir === 'TB' && renderOf(d, ARCH); });
         },
@@ -183,6 +243,7 @@
         hint: '`A[文字]` 的 A 是代號，[ ] 裡是方塊上的字，--> 是箭頭。F 已經有了，同一個代號寫第二次，就是接回同一個方塊。括號和箭頭都要用半形。',
         answer: '新增一行（前面空四格）：`    F --> H[交作業]`',
         replay: 'mission',
+        target: editTarget(ARCH),
         check: function (ev, api) {
           return !!api.seen('mermaid:render', function (d) { return d.ok && renderOf(d, ARCH) && hasNewBoxAfterF(d.ast); });
         },
@@ -194,6 +255,7 @@
         hint: '菱形用大括號 { }，圓角用小括號 ( )。把 B 接到新的代號 G，G 再接到 C。',
         answer: '`B --> G{資料完整嗎？}` 和 `G --> C`（原來的 `B --> C` 可以刪掉）',
         replay: 'mission',
+        target: editTarget(ARCH),
         check: function (ev, api) {
           return !!api.seen('mermaid:render', function (d) { return d.ok && renderOf(d, ARCH) && hasDiamond(d.ast); });
         },
@@ -205,6 +267,7 @@
         hint: '箭頭上寫字：`-->|字|`。「否」接回前面的代號 A，圖會自己繞回去。',
         answer: '`G -->|是| C` 和 `G -->|否| A`',
         replay: 'mission',
+        target: editTarget(ARCH),
         check: function (ev, api) {
           return !!api.seen('mermaid:render', function (d) { return d.ok && renderOf(d, ARCH) && hasLabeledFromDiamond(d.ast); });
         },
@@ -216,6 +279,7 @@
         hint: '存好之後，這個檔案才能 commit、push 到 GitHub；GitHub 也會用同樣的字把圖畫出來。',
         answer: 'Command+S',
         replay: 'mission',
+        target: editTarget(ARCH),
         // decided by what is on the disk: the saved file holds the new box, the diamond and the labelled arrow, and it parses
         check: function (ev, api) {
           var ast = fileAst(api, ARCH);
@@ -225,7 +289,7 @@
           var t = mermaidTrap(ARCH)(ev, api);
           if (t) return t;
           if (ev && ev.name === 'editor:save' && ev.data && same(api, ev.data.path, ARCH)) return '存好了，但檔案裡還缺東西：要有接在 F 後面的新方塊、一個菱形，和菱形出來有字的箭頭。看看預覽。';
-          return null;
+          return t;                                 // '' (the diagram draws again: clear the line) or null
         }
       },
       {
@@ -234,6 +298,7 @@
         text: '故意弄壞一次：把某一行的 `[` 改成全形的 `［`，看看預覽怎麼說，再改回來。',
         hint: '圖出不來最常見的原因：括號沒關，或是打成全形。錯誤訊息會說第幾行；問題常在前一行。看不懂英文沒關係，整段貼給 Codex 修。',
         answer: '把 `[` 改成 `［`，看預覽的錯誤，再改回 `[`。',
+        target: editTarget(ARCH),
         check: function (ev, api) {
           if (ev && ev.name === 'mermaid:render' && ev.data && renderOf(ev.data, ARCH)) {
             if (!ev.data.ok) api.state.brokeOnce = true;

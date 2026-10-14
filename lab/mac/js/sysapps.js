@@ -691,7 +691,7 @@
       bg,
       h('div', { class: 'sy-lock-top' }, dateEl, timeEl),
       h('div', { class: 'sy-lock-user' }, avatar(76), h('div', { class: 'sy-lock-name' }, 'an'),
-        h('div', { class: 'sy-lock-hint' }, '點一下或按 Enter 解鎖'), h('div', { class: 'sy-lock-note' }, '練習版：不用輸入密碼')));
+        h('div', { class: 'sy-lock-hint' }, '點一下或按 Return 解鎖'), h('div', { class: 'sy-lock-note' }, '練習版：不用輸入密碼')));
     function unlock() {
       if (!lockEl) return;
       var el = lockEl; lockEl = null;
@@ -1932,7 +1932,13 @@
     var url = s;
     if (!/^[a-z][a-z0-9+.\-]*:\/\//i.test(s)) {
       if (/^[^\s\/]+\.[a-z]{2,}([\/:?#].*)?$/i.test(s) || /^localhost([:\/].*)?$/i.test(s) || /^\d{1,3}(\.\d{1,3}){3}([:\/].*)?$/.test(s)) url = 'https://' + s;
-      else return { kind: 'search', url: 'search:' + s, query: s };
+      else {
+        // a whole line pasted from notes.md (「來源：https://…（查詢日期：…）」, what a student gets by selecting the line): the practice browser reads
+        // the address out of it (it stops at a space, a full-width bracket, a comma or a full stop) instead of searching for the words
+        var em = /https?:\/\/[^\s（）()「」『』<>，。、]+/i.exec(s);
+        if (!em) return { kind: 'search', url: 'search:' + s, query: s };
+        url = em[0].replace(/[.,;:!?]+$/, '');
+      }
     }
     var m = /^[a-z][a-z0-9+.\-]*:\/\/(?:[^@\/?#]*@)?([^\/?#:]*)(?::\d+)?([^?#]*)/i.exec(url) || [];
     var host = (m[1] || '').toLowerCase().replace(/^www\./, '');

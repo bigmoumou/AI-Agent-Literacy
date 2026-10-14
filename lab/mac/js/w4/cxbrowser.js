@@ -384,7 +384,10 @@
     var hoverEl = h('div', { class: 'cxb-hover', hidden: true }, h('span', { class: 'cxb-hover-tag' }));
     var selEl = h('div', { class: 'cxb-sel', hidden: true, dataset: { lab: 'cxb-selection' } });
     var dragEl = h('div', { class: 'cxb-drag', hidden: true });
-    var shield = h('div', { class: 'cxb-shield', dataset: { lab: 'cxb-shield' } });
+    // a transparent, click-through box inside the shield: the cue ring of a mission step wants an element to circle, and an element of the page
+    // lives in the sandboxed frame (v.cueTarget places this box over it; same as the Windows lab, cue audit 2026-10-14)
+    var cueBox = h('div', { class: 'cxb-cuebox', hidden: true, 'aria-hidden': 'true', dataset: { lab: 'cxb-cue-target' } });
+    var shield = h('div', { class: 'cxb-shield', dataset: { lab: 'cxb-shield' } }, cueBox);
     var page = h('div', { class: 'cxb-page' }, scaler, hoverEl, selEl, dragEl, shield, load);
     var root = h('div', { class: 'cxb', dataset: { lab: 'cxb-panel' } }, top, nav, page);
     host.appendChild(root);
@@ -628,6 +631,15 @@
       emit('cxbrowser:annotate-select', { selector: S.sel.selector, tag: S.sel.tag, text: S.sel.text });
     }
     v.select = select;
+    /* where the student has to click in the page: the box over the first element matching `selector` while Annotate is on and nothing is chosen yet */
+    v.cueTarget = function (selector) {
+      var el = null;
+      if (S.annotate && !S.sel && v.doc && S.kind === 'file') { try { el = v.doc.querySelector(selector); } catch (e) { el = null; } }
+      if (!el) { cueBox.hidden = true; return null; }
+      cueBox.hidden = false;
+      place(cueBox, rectInPage(el));
+      return cueBox;
+    };
 
     var down = null;
     shield.addEventListener('pointerdown', function (e) {
@@ -952,6 +964,8 @@
     view.select(e, false, null);
     return snapshotSel();
   };
+  /* a mission cue: the element of the page the student has to click in Annotate mode (null when there is nothing to point at yet) */
+  api.cueTarget = function (selector) { return view && view.cueTarget ? view.cueTarget(selector) : null; };
   api.comment = function (text) {
     if (!view || !view.cardTa) return false;
     view.cardTa.value = text;

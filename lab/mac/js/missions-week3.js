@@ -130,6 +130,7 @@
   /* the hit-test of the element's centre: true when the element itself (or something inside it) is what the pointer would meet */
   function seeable(el) {
     if (!el || !el.getBoundingClientRect) return false;
+    if (LAB.missions && LAB.missions.seeable) return LAB.missions.seeable(el);       // the engine's version looks at the visible part (a button half under the edge of a window still counts)
     var r = el.getBoundingClientRect();
     if (r.width < 2 || r.height < 2) return false;
     var t = null;
@@ -174,7 +175,8 @@
         try { el = typeof part === 'function' ? part(api) : document.querySelector(part); } catch (e) { el = null; }
         if (!el) continue;
         if ((typeof part === 'function' && part.trusted) || seeable(el)) return el;
-        if (!fallback) fallback = el;
+        if (LAB.missions && LAB.missions.scrolledOut && LAB.missions.scrolledOut(el)) return el;       // below the fold of its own window: the cue scrolls it into view
+        if (!fallback && el.getBoundingClientRect && el.getBoundingClientRect().width > 0) fallback = el;       // a hidden element (a closed dialog's button) is no fallback
       }
       return fallback;
     };
@@ -184,7 +186,21 @@
   var fdSeg = function (p) { return inWins('finder', 'fd-pathbar-seg', p); };
   /* walking to a folder in Finder: the deepest of `paths` that is on screen, else the sidebar item `side`, else Finder in the Dock */
   function finderWalk(paths, side) {
-    return chain.apply(null, paths.map(fdItem).concat([fdSide(side || DESKTOP), dock('finder')]));
+    var items = paths.map(fdItem), rest = chain(fdSide(side || DESKTOP), dock('finder'));
+    return function (api) {
+      var l = liveWins('finder'), top = l.length ? l[l.length - 1] : null;
+      for (var i = 0; i < items.length; i++) {
+        var el = null;
+        try { el = items[i](api); } catch (e) { el = null; }
+        if (!el) continue;
+        if (seeable(el)) return el;
+        // the item exists but another window covers it. In the front Finder window, bringing Finder forward uncovers it (the sidebar item
+        // below would send the student back up the folders); in an older Finder window behind, raising Finder changes nothing, so the walk
+        // goes on with the shallower items and the front window's sidebar (cue audit 2026-10-14)
+        if (top && top.el.contains(el)) return document.querySelector(dock('finder'));
+      }
+      return rest(api);
+    };
   }
   /* typing in the Terminal: with the window already focused the student is typing (the target is the hidden input, which the
      cue leaves alone); otherwise the whole screen is the thing to click. No Terminal window: the Dock icon. */
@@ -195,7 +211,10 @@
     var screen = w.el.querySelector('[data-lab=term-screen]');
     if (!seeable(screen)) return null;
     var f = LAB.wm.focused();
-    if (f && f.id === w.id) return w.el.querySelector('[data-lab=term-input]');
+    var inp = w.el.querySelector('[data-lab=term-input]');
+    // the window is in front AND the keyboard is in it: the student is typing. If the keyboard sits elsewhere (the card's 「提示」 button
+    // was clicked), the screen is the thing to click (cue audit 2026-10-14)
+    if (f && f.id === w.id && inp && document.activeElement === inp) return inp;
     return screen;
   });
   var T_TERM = chain(termShown, dock('terminal'));
@@ -291,12 +310,17 @@
         text: '在桌面空白處按右鍵，選「新增檔案夾」（macOS 選單裡資料夾叫「檔案夾」），命名為「Practice」，按 Return（Windows 鍵盤是 Enter）。',
         hint: '如果找不到空白處，先把 Finder 視窗拖開或最小化。筆電觸控板：用兩指點一下就是右鍵。新增後名字會變成可以直接輸入的狀態；輸入法先切到英文（ABC）再打 Practice。',
         answer: '右鍵 → 新增檔案夾 → 輸入 Practice → Return。',
+        // nothing to circle on the empty desktop itself; once the right-click menu is open the ring walks to 新增檔案夾, then to the name box
+        // (cue audit 2026-10-14, ported from the Windows lab)
+        menuPath: ['新增檔案夾'],
+        target: function () { return document.querySelector('[data-lab=desktop-rename]'); },
         check: function (ev, api) {
           return !!(api.exists(DESKTOP + '/Practice') && api.vfs.isDir(DESKTOP + '/Practice'));      // case-insensitive, like macOS
         },
         trap: function (ev, api) {
           // a new folder on the Desktop with another name (「Practise」, 「Practice 」, 「練習」 …)
           if (!ev || api.exists(DESKTOP + '/Practice')) return null;
+          if (document.querySelector('[data-lab=desktop-rename]')) return null;      // the name box is open: the student is typing the name right now (cue audit 2026-10-14)
           var list = [];
           try { list = api.vfs.list(DESKTOP); } catch (e) { list = []; }
           var odd = null;
@@ -530,7 +554,7 @@
         id: 's2',
         text: '走到管理室：輸入 `cd Downloads`，按 Return（Windows 鍵盤是 Enter），再輸入 `ls`，看到 week3.zip。',
         hint: 'cd 後面接資料夾名字，ls 看一圈。下載項目在終端機裡叫 Downloads（管理室）。提示字元最後一個字不是 ~ 的話，找不到 Downloads，改用 `cd ~/Downloads`。',
-        answer: '`cd Downloads`，Return；`ls`，Return。會看到 syllabus.pdf 和 week3.zip。',
+        answer: '`cd Downloads`，Return；`ls`，Return。會看到 syllabus.pdf 和 week3.zip。人不在社區（~）的話，輸入 `cd ~/Downloads`。',
         where: HOME,
         replay: 'mission',
         target: T_TERM,
@@ -795,7 +819,14 @@
         text: '把桌面上的 Project 資料夾，拖進 Codex 左邊的側邊欄。',
         hint: '按住 Project 圖示不放，拖到 Codex 左邊那一欄，看到側邊欄亮起藍框再放開。放開後桌面上的 Project 還在，這是正常的：只是告訴 Codex 它在哪裡。如果 Codex 蓋住了桌面圖示，先把視窗往左拖開一點，或從 Finder 視窗裡拖。',
         answer: 'Project 圖示 → 按住拖 → 放進 Codex 側邊欄。（也可以：Finder 對 Project 按右鍵 → 打開方式 → Codex。）',
-        target: chain(desktopIcon(PROJECT), fdItem(PROJECT)),
+        // on a small screen the Codex window covers the desktop icon: then its title bar is what to drag aside first (the hint says so)
+        target: chain(desktopIcon(PROJECT), fdItem(PROJECT), function () {
+          var ic = desktopIcon(PROJECT)();
+          if (!ic) return null;
+          var rc = ic.getBoundingClientRect(), top = document.elementFromPoint(rc.left + rc.width / 2, rc.top + rc.height / 2), l = liveWins('codex'), i;
+          for (i = l.length - 1; i >= 0; i--) if (top && l[i].el.contains(top)) return l[i].el.querySelector('.lab-win-bar');
+          return null;
+        }),
         check: function (ev, api) {
           return !!(
             api.seen('codex:trust-prompt', function (d) { return same(api, d.path, PROJECT); }) ||
@@ -870,9 +901,9 @@
       {
         id: 's2',
         text: '請 Codex 寫報告：點「複製」，貼進輸入框，再按 Return。[[幫我寫一份報告到 output/report.md]]',
-        hint: '點「複製」，再點 Codex 的輸入框，按 Ctrl+V（Mac 用 Command+V）貼上。等它出現 Created output/report.md 就是做完了。',
+        hint: '點「複製」，再點 Codex 的輸入框，按 Command+V（Windows 鍵盤是 Ctrl+V）貼上。等它出現 Created output/report.md 就是做完了。',
         answer: '把「幫我寫一份報告到 output/report.md」貼到輸入框，按 Return。',
-        target: chain(cxComposer, cxProject, dock('codex')),
+        target: T_PROJECT_CHAT,                    // the composer only while the open chat is the Project's, else the Project row first
         check: function (ev, api) {
           return !!api.seen('codex:reply', function (d) { return d.intent === 'write_report' && same(api, d.projectPath, PROJECT); });
         },
@@ -917,6 +948,7 @@
         text: '用 Code（就是影片裡的 VS Code）打開 Project 資料夾。',
         hint: '資料夾可以拖到 Code 的視窗或 Dock 圖示上，也可以在 Finder 用右鍵的「打開方式」選 Code（不是 Codex）。',
         answer: 'Finder 對 Project 按右鍵 → 打開方式 → Code。',
+        menuPath: ['打開方式', 'Code'],
         replay: 'mission',
         target: chain(fdItem(PROJECT), desktopIcon(PROJECT), fdSide(DESKTOP), dock('finder')),
         check: function (ev, api) {
@@ -1010,13 +1042,14 @@
       },
       {
         id: 's5',
-        text: '改在專案底下重做：點側邊欄的 Project，再把同一句話貼進輸入框（複製過的話，直接貼）。',
+        text: '改在專案底下重做：點側邊欄的 Project，點「複製」，把同一句話貼進輸入框，再按 Return。[[幫我寫一份報告到 output/report.md]]',
         hint: '這次輸入框上方會有 Project 標籤，檔案會寫進 Project 底下的 output。',
         answer: '點 Project → 輸入「幫我寫一份報告到 output/report.md」→ Return。',
         target: T_PROJECT_CHAT,
         check: function (ev, api) {
           return !!api.seen('codex:reply', function (d) { return d.intent === 'write_report' && same(api, d.projectPath, PROJECT); });
-        }
+        },
+        trap: orphanReplyTrap('write_report')      // the open chat is still the New chat of step 2: the sentence sent from there does not count
       },
       {
         id: 's6',
@@ -1104,7 +1137,12 @@
         hint: '把滑鼠移到 Project 那一列，右邊會出現「+」；一定要開新對話，不要接著剛剛那個。新對話的短期記憶是空的，但 AGENTS.md 每次都會帶入。',
         answer: '點 Project 那一列右邊的 +，輸入「你目前遵守哪些規則？」，Return。',
         replay: 'mission',
-        target: chain(cxPlus, cxProject, dock('codex')),
+        // the + first; once the new chat of the Project is open (not the chat of step 2) the composer is what to use, not the + again
+        target: chain(function (api) {
+          var c = null;
+          try { c = api.codex.activeChat(); } catch (e) { c = null; }
+          return c && !isNullish(c.projectPath) && same(api, c.projectPath, PROJECT) && c.id !== api.state.agentsChat ? cxComposer() : null;
+        }, cxPlus, cxProject, dock('codex')),
         check: function (ev, api) {
           return !!api.seen('codex:reply', function (d) {
             return d.intent === 'ask_rules' && same(api, d.projectPath, PROJECT) && d.chatId !== api.state.agentsChat;
@@ -1124,7 +1162,12 @@
         text: '對照看看：按 New chat（沒有專案），問同一句話。',
         hint: '這個對話看不到專案裡的 AGENTS.md。',
         answer: '點最上面的 New chat，輸入「你目前遵守哪些規則？」，Return。',
-        target: chain(cxNew, dock('codex')),
+        // New chat first; once a chat without a project is open, the composer is what to use, not New chat again
+        target: chain(function (api) {
+          var c = null;
+          try { c = api.codex.activeChat(); } catch (e) { c = null; }
+          return c && isNullish(c.projectPath) ? cxComposer() : null;
+        }, cxNew, dock('codex')),
         check: function (ev, api) {
           return !!api.seen('codex:reply', function (d) { return d.intent === 'ask_rules' && isNullish(d.projectPath); });
         }
