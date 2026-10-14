@@ -25,7 +25,7 @@
 | | [02 AGENTS.md 與上下文管理](https://learning-analytics-tools.pages.dev/weeks/week03/#02-agents-md-context) | 3:40 |
 | | [03 作業：佛羅倫斯美術館資料收集](https://learning-analytics-tools.pages.dev/weeks/week03/#03-homework-firenze) | 2:55 |
 | | [補充 1 終端機介紹（Mac）](https://learning-analytics-tools.pages.dev/weeks/week03/#s1-terminal-mac)・[補充 2（Windows）](https://learning-analytics-tools.pages.dev/weeks/week03/#s2-terminal-win) | 4:09・4:12 |
-| Week 4 | [01 AI Agent 內建瀏覽器](https://learning-analytics-tools.pages.dev/weeks/week04/#01-built-in-browser) | 2:29 |
+| Week 4 | [01 AI Agent 內建瀏覽器](https://learning-analytics-tools.pages.dev/weeks/week04/#01-built-in-browser) | 2:28 |
 | | [02 內建瀏覽器的三件事：看、改、查](https://learning-analytics-tools.pages.dev/weeks/week04/#02-browser-uses) | 2:52 |
 | | [03 作業：GitHub、Mermaid、內建瀏覽器](https://learning-analytics-tools.pages.dev/weeks/week04/#03-homework-github) | 3:23 |
 | | [補充 1 GitHub 入門](https://learning-analytics-tools.pages.dev/weeks/week04/#s1-github)・[補充 2 Mermaid 流程圖](https://learning-analytics-tools.pages.dev/weeks/week04/#s2-mermaid) | 3:42・4:10 |
