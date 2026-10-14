@@ -8,7 +8,7 @@
   'use strict';
 
   var HOST = 'an 的 MacBook Air';
-  var BACK_URL = '../../weeks/week03/#lab-mac';
+  var BACK_URL = (LAB.weekInfo && LAB.weekInfo[LAB.week] ? LAB.weekInfo[LAB.week].back : '../../weeks/week03/#lab-mac');
   var h = LAB.util.h;
 
   // static strings only (DESIGN §0.5)
@@ -143,7 +143,7 @@
     try { same = !!document.referrer && new URL(document.referrer).origin === window.location.origin; } catch (e) { /* ignore */ }
     if (same && window.history.length > 1) {
       window.history.back();
-      setTimeout(function () { window.location.href = BACK_URL; }, 800);   // back did nothing: go to Week 3
+      setTimeout(function () { window.location.href = BACK_URL; }, 800);   // back did nothing: go to the course page of this week
     } else {
       window.location.href = BACK_URL;
     }

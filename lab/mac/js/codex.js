@@ -19,6 +19,7 @@
     nextN: 1,
     nextOrder: 1,
     pendingTrust: null,    // path whose Trust modal is showing
+    panel: null,           // id of the open right-hand panel (Week 4 hooks, see api.panels); null in Week 3
     composer: {},          // chatId -> text typed but not sent (memory only)
     collapsed: {},         // project path -> true
     listeners: []
@@ -243,8 +244,8 @@
   };
   api.intents = [];
 
-  function pickIntent(text, rawText, chat, project, cwd) {
-    var ctx = { chat: chat, project: project, cwd: cwd, rawText: rawText };
+  function pickIntent(text, rawText, chat, project, cwd, extra) {
+    var ctx = { chat: chat, project: project, cwd: cwd, rawText: rawText, annotation: extra && extra.annotation ? extra.annotation : null };
     for (var i = 0; i < intentList.length; i++) {
       var d = intentList[i].def, ok = false;
       try { ok = !!d.test(text, ctx); } catch (e) { console.error('[codex] intent test failed', d.id, e); }
@@ -255,7 +256,7 @@
 
   /* The recording context: reads happen now (so run() can use them), everything with a side effect or a visible step is
      queued and replayed on the reply timeline (§4.4.4: a side effect happens exactly when its step line appears). */
-  function makeCtx(chat, project, text, rawText) {
+  function makeCtx(chat, project, text, rawText, extra) {
     var cwd = workingDir(chat);
     var shadow = new Map();        // folded abs path -> string content | {dir:true}
     var actions = [], texts = [], files = [];
@@ -305,9 +306,12 @@
       list: function (rel) {
         try { return vfs.list(abs(rel === undefined ? '.' : rel)); } catch (e) { return []; }
       },
-      step: function (t) { actions.push({ type: 'step', text: String(t) }); },
-      say: function (t) { texts.push(String(t)); }
+      step: function (t, apply) { actions.push({ type: 'step', text: String(t), apply: typeof apply === 'function' ? apply : undefined }); },
+      say: function (t) { texts.push(String(t)); },
+      annotation: extra && extra.annotation ? extra.annotation : null
     };
+    // later weeks (Week 4: the built-in browser) hang their own helpers on ctx; with no extension registered nothing happens here
+    api.ctxExtensions.forEach(function (fn) { try { fn(ctx, { chat: chat, project: project }); } catch (e) { console.error('[codex] ctx extension failed', e); } });
     return { ctx: ctx, actions: actions, texts: texts, files: files };
   }
 
@@ -322,9 +326,9 @@
     chat.timers.push(id);
   }
 
-  function runReply(chat, intent, rawText, text) {
+  function runReply(chat, intent, rawText, text, extra) {
     var project = chat.projectPath ? findProject(chat.projectPath) : null;
-    var rec = makeCtx(chat, project, text, rawText);
+    var rec = makeCtx(chat, project, text, rawText, extra);
     var started = chat.pending.startedAt;
 
     function play() {
@@ -399,14 +403,27 @@
     return Array.from(String(rawText).replace(/\s+/g, ' ').trim()).slice(0, 12).join('') || 'New chat';
   }
 
-  function send(chat, rawIn) {
+  /* a page annotation (Week 4: Annotate in the browser panel) travels with the message as plain data */
+  function cleanAnnotation(a) {
+    if (!isObj(a)) return null;
+    var o = { selector: cleanStr(a.selector, 200), tag: cleanStr(a.tag, 40), text: cleanStr(a.text, 160) };
+    if (Array.isArray(a.candidates)) o.candidates = a.candidates.filter(function (x) { return typeof x === 'string'; }).slice(0, 8).map(function (x) { return x.slice(0, 200); });
+    if (typeof a.region === 'boolean') o.region = a.region;
+    if (typeof a.file === 'string') o.file = a.file.slice(0, 400);
+    return o.selector || o.tag ? o : null;
+  }
+  function send(chat, rawIn, extra) {
     var rawText = String(rawIn === undefined || rawIn === null ? '' : rawIn).replace(/^\s+|\s+$/g, '');
     if (!rawText || !chat || chat.busy || chat.removed) return false;
     if (rawText.length > MAX_TEXT) rawText = rawText.slice(0, MAX_TEXT);
     var project = chat.projectPath ? findProject(chat.projectPath) : null;
     var text = norm(rawText);
-    var intent = pickIntent(text, rawText, chat, project, workingDir(chat)) || FALLBACK;
-    chat.messages.push({ role: 'user', text: rawText });
+    var ann = extra && extra.annotation ? cleanAnnotation(extra.annotation) : null;
+    var xtra = ann ? { annotation: ann } : undefined;
+    var intent = pickIntent(text, rawText, chat, project, workingDir(chat), xtra) || FALLBACK;
+    var umsg = { role: 'user', text: rawText };
+    if (ann) umsg.annotation = ann;
+    chat.messages.push(umsg);
     if (chat.draft) {
       chat.draft = false;
       chat.title = titleFor(intent, rawText);
@@ -416,10 +433,12 @@
     delete M.composer[chat.id];
     chat.busy = true;
     chat.pending = { status: null, steps: [], text: '', startedAt: LAB.clock.ms() };
-    emit('codex:send', { chatId: chat.id, projectPath: chat.projectPath, text: rawText });
+    var sendPayload = { chatId: chat.id, projectPath: chat.projectPath, text: rawText };
+    if (ann) sendPayload.annotation = { selector: ann.selector, tag: ann.tag };
+    emit('codex:send', sendPayload);
     notify('all');
     dirty();
-    runReply(chat, intent, rawText, text);
+    runReply(chat, intent, rawText, text, xtra);
     return true;
   }
 
@@ -719,6 +738,7 @@
   };
   api.activeChat = function () { var c = activeChat(); return c ? clone({ id: c.id, title: c.title, projectPath: c.projectPath, messages: c.messages, createdAt: c.createdAt, draft: c.draft }) : null; };
   api.workingDir = function (chat) { return workingDir(chat); };
+  api.isBusy = function () { var c = activeChat(); return !!(c && c.busy); };      // the open chat is still answering (Week 4: the browser's comment card waits for it)
   api.pendingTrust = function () { return M.pendingTrust; };
 
   function addProjectInternal(path) {
@@ -772,7 +792,31 @@
   /* extras for tests and later weeks */
   api.newChat = function (projectPath) { openWindow(); uiNewChat(projectPath ? vfs.canon(projectPath) : null); };
   api.selectProject = function (path) { openWindow(); uiSelectProject(vfs.canon(path)); };
-  api.sendMessage = function (text) { ensureActive(); return send(activeChat(), text); };
+  api.sendMessage = function (text, extra) { ensureActive(); return send(activeChat(), text, extra); };
+  /* Week 4 hooks (DESIGN §23): a right-hand panel next to the chat (the built-in browser) and helpers an intent can use.
+     Nothing in here does anything until a Week 4 module registers an extension or a panel, so Week 3 is unchanged. */
+  api.ctxExtensions = [];
+  var panelDefs = {};
+  api.panels = {
+    /* def = {mount(host, win, ctl) -> disposeFn|undefined, wantWidth?: 1120, wantHeight?: 690} */
+    register: function (id, def) { panelDefs[id] = def; },
+    open: function (id) {
+      if (!panelDefs[id]) return false;
+      openWindow();
+      if (M.panel !== id) { M.panel = id; notify('panel'); }
+      else notify('panel-grow');
+      return true;
+    },
+    close: function (id) {
+      if (id && M.panel !== id) return false;
+      if (M.panel === null) return false;
+      M.panel = null; notify('panel');
+      return true;
+    },
+    current: function () { return M.panel; },
+    host: function () { return curView && curView.panelEl && !curView.panelEl.hidden ? curView.panelEl : null; },
+    win: function () { return curView ? curView.win : null; }
+  };
   api.openFolder = function (path, via) { openWindow(); return projectFlow(vfs.canon(path), via); };
 
   LAB.codex = api;
@@ -882,12 +926,21 @@
     }
     if (last < s.length) parent.appendChild(document.createTextNode(s.slice(last)));
   }
+  /* **bold** (the real Codex shows it bold): matched pairs only; an unmatched ** stays as typed */
+  function boldInto(parent, s) {
+    var parts = s.split('**');
+    if (parts.length < 3 || parts.length % 2 === 0) { plainWithPaths(parent, s); return; }
+    parts.forEach(function (part, i) {
+      if (!part) return;
+      if (i % 2 === 1) { var b = h('strong', null); plainWithPaths(b, part); parent.appendChild(b); } else plainWithPaths(parent, part);
+    });
+  }
   function inlineInto(parent, s) {
     var parts = s.split('`');
     if (parts.length % 2 === 0) { plainWithPaths(parent, s); return; }
     parts.forEach(function (part, i) {
       if (!part) return;
-      if (i % 2 === 1) parent.appendChild(h('code', null, part)); else plainWithPaths(parent, part);
+      if (i % 2 === 1) parent.appendChild(h('code', null, part)); else boldInto(parent, part);
     });
   }
   function richInto(el, text) {
@@ -952,7 +1005,9 @@
     var compEl = h('div', { class: 'cx-comp' }, ta, h('div', { class: 'cx-comp-row' }, plusBtn, h('span', { class: 'cx-grow' }), meta, sendBtn));
     var footEl = h('div', { class: 'cx-foot' }, h('div', { class: 'cx-foot-in' }, chipsEl, compEl));
     mainEl.appendChild(headEl); mainEl.appendChild(bodyEl); mainEl.appendChild(footEl);
-    root.appendChild(sideEl); root.appendChild(mainEl);
+    var panelEl = h('aside', { class: 'cx-panel', hidden: true, dataset: { lab: 'cx-panel' } });
+    var panelMounted = null;
+    root.appendChild(sideEl); root.appendChild(mainEl); root.appendChild(panelEl);
 
     /* ---------- composer ---------- */
     function autosize() {
@@ -1055,6 +1110,13 @@
       return h('div', { class: 'cx-step' + (done ? ' is-done' : '') }, h('span', { class: 'cx-chk' }, icon('check', 13)), h('span', { class: 'cx-sl' }, label));
     }
     function msgNode(m) {
+      if (m.role === 'user' && m.annotation) {
+        var an = m.annotation;
+        return h('div', { class: 'cx-msg cx-user-row' }, h('div', { class: 'cx-user-col' },
+          h('div', { class: 'cx-annot', dataset: { lab: 'cx-annotation' }, title: an.selector },
+            h('span', { class: 'cx-annot-tag' }, '<' + (an.tag || 'div') + '>'), an.text ? h('span', { class: 'cx-annot-text' }, an.text) : null),
+          h('div', { class: 'cx-user' }, m.text)));
+      }
       if (m.role === 'user') return h('div', { class: 'cx-msg cx-user-row' }, h('div', { class: 'cx-user' }, m.text));
       var box = h('div', { class: 'cx-msg cx-asst' });
       (m.steps || []).forEach(function (s) { box.appendChild(stepNode(s, true)); });
@@ -1192,6 +1254,41 @@
     }
     win.own(function () { if (offModal) { offModal(); offModal = null; } trustEl = null; });
 
+    /* ---------- right-hand panel (Week 4 hooks; api.panels) ---------- */
+    function growForPanel(def) {
+      try {
+        var zr = LAB.stage && LAB.stage.zoomRect ? LAB.stage.zoomRect() : null;
+        if (!zr) return;
+        var r = win.getRect();
+        var wantW = Math.min((def && def.wantWidth) || 1120, zr.w - 12), wantH = Math.min((def && def.wantHeight) || 690, zr.h);
+        var nw = Math.max(r.w, wantW), nh = Math.max(r.h, wantH);
+        if (nw === r.w && nh === r.h) return;
+        var nx = Math.max(zr.x, Math.min(r.x, zr.x + zr.w - nw)), ny = Math.max(zr.y, Math.min(r.y, zr.y + zr.h - nh));
+        win.setRect({ x: nx, y: ny, w: nw, h: nh });
+      } catch (e) { /* the window keeps its size */ }
+    }
+    function unmountPanel() {
+      if (panelMounted && panelMounted.dispose) { try { panelMounted.dispose(); } catch (e) { console.error('[codex] panel dispose failed', e); } }
+      panelMounted = null;
+      panelEl.textContent = '';
+      panelEl.hidden = true;
+      root.classList.remove('has-panel');
+    }
+    function syncPanel(grow) {
+      var want = M.panel && panelDefs[M.panel] ? M.panel : null;
+      if (panelMounted && panelMounted.id !== want) unmountPanel();
+      if (!want) { if (!panelMounted) { panelEl.hidden = true; root.classList.remove('has-panel'); } return; }
+      if (!panelMounted) {
+        panelEl.hidden = false;
+        root.classList.add('has-panel');
+        growForPanel(panelDefs[want]);
+        var d = null;
+        try { d = panelDefs[want].mount(panelEl, win, { close: function () { api.panels.close(want); } }); } catch (e) { console.error('[codex] panel mount failed', e); }
+        panelMounted = { id: want, dispose: typeof d === 'function' ? d : null };
+      } else if (grow) growForPanel(panelDefs[want]);
+    }
+    win.own(function () { unmountPanel(); });
+
     /* ---------- drop targets (§3.10 rule 9): sidebar and main, both show the green + ---------- */
     function addDrop(el, kind) {
       var onlyDirs = kind === 'sidebar';
@@ -1220,6 +1317,8 @@
     win.own(onModel(function (kind) {
       if (kind === 'pending') { syncPending(); return; }
       if (kind === 'trust') { syncTrust(); return; }
+      if (kind === 'panel') { syncPanel(false); return; }
+      if (kind === 'panel-grow') { syncPanel(true); return; }
       if (kind === 'composer') { syncComposerText(); return; }
       if (kind === 'focus') { setTimeout(focusComposer, 0); return; }
       if (kind === 'focus-if-idle') { if (win.isFocused() && !M.pendingTrust) setTimeout(focusComposer, 0); return; }
@@ -1230,12 +1329,13 @@
     win.own(win.on('resize', function () { autosize(); }));
     win.own(function () { M.pendingTrust = null; if (curView === view) curView = null; });   // closing the window drops an unanswered prompt silently
 
-    view.win = win; view.ta = ta; view.focusComposer = focusComposer;
+    view.win = win; view.ta = ta; view.focusComposer = focusComposer; view.panelEl = panelEl;
     curView = view;
     ensureActive();
     renderSidebar();
     syncMain();
     syncTrust();
+    syncPanel(false);
     focusComposer();
     return view;
   }

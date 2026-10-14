@@ -93,7 +93,7 @@
     var ext = LAB.vfs.extname(st.name).toLowerCase();
     if (ext === '.zip' || st.kind === 'zip') return 'zip';
     if (st.kind === 'app' || ext === '.app') return APP_NAME[st.name.toLowerCase()] || null;
-    if (EXT_TEXT[ext]) return 'textedit';
+    if (EXT_TEXT[ext] || (LAB.week === 4 && ext === '.css')) return 'textedit';          // Week 4: style.css opens in Notepad
     if (ext === '.pdf') return reg.get('edge') ? 'edge' : null;
     if (EXT_IMAGE[ext]) return reg.get('photos') ? 'photos' : null;
     if (ext === '.docx' || ext === '.doc') return 'word';

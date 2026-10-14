@@ -1,0 +1,148 @@
+/* w4-cxbrowser.css — the built-in browser panel of the Codex window (Week 4, DESIGN §23). Loaded only for ?week=4.
+   Same dark palette as codex.css; the page area itself is white (it is a web page). Prefix: cxb- (panel), plus the two hooks
+   codex.js adds to its own window (.cx-panel, .cx-annot). */
+
+/* ---------------------------------------------------------------- the panel column in the Codex window
+   (Windows: 120 + 250 + 340 = 710 px, so the default 720 px Codex window shows the whole toolbar; the Mac file has 260 and 360) */
+.cx-root.has-panel .cx-side { flex: 0 1 176px; width: 176px; min-width: 120px; padding-left: 6px; padding-right: 6px; }
+.cx-root.has-panel .cx-main { min-width: 250px; }
+.cx-panel {
+  flex: 0 1 52%; min-width: 340px; max-width: 760px; min-height: 0; position: relative; display: flex; flex-direction: column;
+  background: #1b1b1b; border-left: 1px solid #2e2e2e; overflow: hidden;
+}
+.cx-panel[hidden] { display: none; }
+
+/* the window's drag strip stops where the panel starts (cxbrowser.js sets --cxb-w on the window) */
+.lab-win.cxb-open .lab-win-bar { right: var(--cxb-w, 0px); }
+
+/* an annotation that travels with a message: the page element the student pointed at, above the bubble */
+.cx-user-col { max-width: 78%; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; min-width: 0; }
+.cx-user-col .cx-user { max-width: 100%; }
+.cx-annot {
+  display: flex; align-items: baseline; gap: 8px; max-width: 100%; padding: 3px 0 3px 9px; border-left: 2px solid #3b82f6;
+  color: #9a9a9a; font-size: 12.5px; line-height: 1.45; overflow: hidden;
+}
+.cx-annot-tag { flex: none; font-family: var(--lab-font-mono); font-size: 12px; color: #8fb6ff; }
+.cx-annot-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+
+/* ---------------------------------------------------------------- the browser */
+.cxb { --cxb-line: #2e2e2e; --cxb-pill: #2c2c2c; --cxb-ink: #d9d9d9; --cxb-mute: #8f8f8f; --cxb-blue: #3b82f6; display: flex; flex-direction: column; flex: 1; min-height: 0; color: var(--cxb-ink); font-size: 13px; line-height: 1.3; }
+.cxb button, .cxb input, .cxb textarea { font-family: inherit; }
+.cxb button:focus-visible, .cxb input:focus-visible, .cxb textarea:focus-visible { outline: 2px solid #6aa3ff; outline-offset: -2px; }
+
+.cxb-top { flex: none; display: flex; align-items: center; gap: 8px; padding: 8px 8px 0 10px; height: 42px; }
+.cxb-tab {
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 11px; border: 1px solid #3a3a3a; border-radius: 9px;
+  background: #232323; color: #e6e6e6; font-size: 13px; white-space: nowrap; overflow: hidden;
+}
+.cxb-fav { flex: none; width: 11px; height: 11px; border-radius: 50%; background: #5c5c5c; }
+.cxb-tab-title { overflow: hidden; text-overflow: ellipsis; }
+
+.cxb-ib {
+  flex: none; width: 28px; height: 28px; padding: 0; margin: 0; border: 0; border-radius: 50%; background: none; color: #b4b4b4;
+  display: inline-flex; align-items: center; justify-content: center; cursor: default;
+}
+.cxb-ib:hover:not(:disabled) { background: #2c2c2c; color: #fff; }
+.cxb-ib:disabled { color: #555; }
+
+.cxb-width { flex: none; display: flex; align-items: center; gap: 0; height: 28px; border: 1px solid #3a3a3a; border-radius: 8px; overflow: hidden; }
+.cxb-width-note { padding: 0 7px 0 8px; font-size: 11px; color: var(--cxb-mute); white-space: nowrap; border-right: 1px solid #333; height: 100%; display: inline-flex; align-items: center; }
+.cxb-seg {
+  display: inline-flex; align-items: center; gap: 5px; height: 100%; padding: 0 9px; margin: 0; border: 0; background: none; color: #b4b4b4;
+  font-size: 12px; cursor: default; white-space: nowrap;
+}
+.cxb-seg + .cxb-seg { border-left: 1px solid #333; }
+.cxb-seg:hover { background: #262626; color: #fff; }
+.cxb-seg.is-on { background: #333; color: #fff; }
+.cxb-ann {
+  flex: none; display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 11px; margin: 0; border: 1px solid #3a3a3a; border-radius: 8px;
+  background: none; color: #d0d0d0; font-size: 12.5px; cursor: default; white-space: nowrap;
+}
+.cxb-ann:hover { background: #262626; color: #fff; }
+.cxb-ann.is-on { background: #1f3a66; border-color: #3b82f6; color: #cfe0ff; }
+
+.cxb-nav { flex: none; display: flex; align-items: center; gap: 2px; padding: 6px 10px 8px 6px; }
+.cxb-addr {
+  flex: 1; min-width: 0; height: 30px; margin-left: 6px; padding: 0 14px; border: 0; border-radius: 15px; background: var(--cxb-pill); color: #ececec;
+  font-size: 13px; text-align: center; outline: none; -webkit-user-select: text; user-select: text; text-overflow: ellipsis;
+}
+.cxb-addr::placeholder { color: #777; }
+.cxb-addr:focus { text-align: left; box-shadow: inset 0 0 0 1.5px var(--cxb-blue); background: #262626; }
+/* a narrow panel (small screens): the tab and the close button on the first row, the width buttons and Annotate on a second row */
+.cxb.is-narrow .cxb-top { flex-wrap: wrap; height: auto; row-gap: 6px; padding-bottom: 2px; }
+.cxb.is-narrow .cxb-tab { order: 1; flex: 1 1 calc(100% - 40px); }
+.cxb.is-narrow .cxb-ib[data-lab=cxb-close] { order: 2; }
+.cxb.is-narrow .cxb-width { order: 3; margin-left: 2px; }
+.cxb.is-narrow .cxb-ann { order: 4; margin-left: auto; }
+
+/* ---------------------------------------------------------------- the page area */
+.cxb-page { position: relative; flex: 1; min-height: 0; overflow: hidden; background: #141414; -webkit-user-select: none; user-select: none; }
+.cxb.is-phone .cxb-page { background: #101010; }
+.cxb-scaler { position: absolute; top: 0; left: 0; transform-origin: 0 0; background: #fff; overflow: hidden; }
+.cxb.is-phone .cxb-scaler { box-shadow: 0 0 0 1px #333; }
+.cxb-framehold { position: absolute; top: 0; right: 0; bottom: 0; left: 0; }
+.cxb-frame { display: block; width: 100%; height: 100%; border: 0; background: #fff; }
+.cxb-native { position: absolute; top: 0; right: 0; bottom: 0; left: 0; overflow: auto; background: #fff; color: #222; -webkit-user-select: text; user-select: text; }
+.cxb-native[hidden], .cxb-frame[hidden] { display: none; }
+.cxb-blank { min-height: 100%; background: #1f1f1f; }
+.cxb-wait { background: #1c1c1c; }
+
+/* the progress light: a bar that sweeps while the page loads (and never stops when the connection is broken) */
+.cxb-load { position: absolute; left: 0; right: 0; top: 0; height: 3px; z-index: 3; overflow: hidden; pointer-events: none; }
+.cxb-load[hidden] { display: none; }
+.cxb-load::before { content: ""; position: absolute; top: 0; bottom: 0; left: -40%; width: 40%; background: linear-gradient(90deg, rgba(91, 157, 255, 0), #5b9dff, rgba(91, 157, 255, 0)); animation: cxb-sweep 1.4s ease-in-out infinite; }
+@keyframes cxb-sweep { from { left: -40%; } to { left: 100%; } }
+@media (prefers-reduced-motion: reduce) { .cxb-load::before { animation: none; left: 0; width: 100%; opacity: .6; } }
+
+/* ---------------------------------------------------------------- Annotate */
+.cxb-shield { position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 4; pointer-events: none; touch-action: none; }
+.cxb-shield.is-on { pointer-events: auto; cursor: crosshair; }
+.cxb-hover, .cxb-sel, .cxb-drag { position: absolute; z-index: 5; pointer-events: none; box-sizing: border-box; border-radius: 2px; }
+.cxb-hover[hidden], .cxb-sel[hidden], .cxb-drag[hidden] { display: none; }
+.cxb-hover { border: 1.5px solid #3b82f6; background: rgba(59, 130, 246, .13); }
+.cxb-hover-tag { position: absolute; left: -1.5px; bottom: 100%; margin-bottom: 1px; padding: 1px 6px; border-radius: 4px 4px 4px 0; background: #3b82f6; color: #fff; font: 10.5px/1.4 var(--lab-font-mono); white-space: nowrap; }
+.cxb-hover.is-top .cxb-hover-tag { bottom: auto; top: 100%; margin: 1px 0 0; border-radius: 0 4px 4px 4px; }
+.cxb-sel { border: 2px solid #3b82f6; background: rgba(59, 130, 246, .10); }
+.cxb-drag { border: 1.5px solid #5b9dff; background: rgba(91, 157, 255, .12); }
+
+.cxb-comment {
+  position: absolute; z-index: 6; width: 268px; padding: 10px; box-sizing: border-box; background: #262626; border: 1px solid #424242; border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .5); -webkit-user-select: none; user-select: none;
+}
+.cxb-comment-what { display: flex; align-items: baseline; gap: 7px; margin-bottom: 7px; min-width: 0; font-size: 12px; color: #9a9a9a; }
+.cxb-comment-tag { flex: none; font-family: var(--lab-font-mono); color: #8fb6ff; }
+.cxb-comment-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.cxb-comment-input {
+  display: block; width: 100%; box-sizing: border-box; min-height: 58px; max-height: 120px; margin: 0; padding: 7px 9px; resize: none; border: 1px solid #3c3c3c; border-radius: 8px;
+  background: #1f1f1f; color: #ececec; font-size: 13.5px; line-height: 1.5; outline: none; -webkit-user-select: text; user-select: text;
+}
+.cxb-comment-input::placeholder { color: #7b7b7b; }
+.cxb-comment-input:focus { border-color: #3b82f6; }
+.cxb-comment-busy { margin-top: 8px; font-size: 12px; line-height: 1.4; color: #e0b46a; }
+.cxb-comment-busy[hidden] { display: none; }
+.cxb-comment-row { display: flex; justify-content: flex-end; gap: 8px; margin-top: 9px; }
+.cxb-btn { height: 28px; padding: 0 14px; margin: 0; border-radius: 14px; font-size: 12.5px; cursor: default; }
+.cxb-btn-pri { border: 0; background: #f2f2f2; color: #111; font-weight: 600; }
+.cxb-btn-pri:hover:not(:disabled) { background: #fff; }
+.cxb-btn-pri:disabled { background: #4a4a4a; color: #8a8a8a; }
+.cxb-btn-sec { border: 1px solid #4a4a4a; background: none; color: #e0e0e0; }
+.cxb-btn-sec:hover { background: #303030; }
+
+/* ---------------------------------------------------------------- the made-up pages that are not the student's own */
+.cxb-note { margin: 22px 0 0; padding-top: 10px; border-top: 1px solid #e4e4e4; font-size: 12px; color: #777; }
+.cxb-sr { min-height: 100%; padding: 22px 34px 32px; box-sizing: border-box; font-family: var(--lab-font-ui); color: #222; background: #fff; }
+.cxb-sr-head { display: flex; align-items: center; gap: 18px; margin-bottom: 20px; }
+.cxb-sr-brand { font-size: 22px; font-weight: 700; color: #3b5f9a; letter-spacing: .2px; }
+.cxb-sr-box { flex: 1; max-width: 560px; height: 38px; display: flex; align-items: center; padding: 0 16px; border: 1px solid #d6d6d6; border-radius: 19px; font-size: 15px; }
+.cxb-sr-list { max-width: 640px; }
+.cxb-sr-item { margin-bottom: 20px; }
+.cxb-sr-url { font-size: 12.5px; color: #4a7a4a; }
+.cxb-sr-title { display: inline-block; margin: 2px 0; font-size: 18px; color: #1a4fa0; text-decoration: none; cursor: pointer; }
+.cxb-sr-title:hover { text-decoration: underline; }
+.cxb-sr-snip { font-size: 14px; line-height: 1.5; color: #444; }
+.cxb-off { min-height: 100%; padding: 80px 40px; box-sizing: border-box; font-family: var(--lab-font-ui); color: #333; background: #fff; }
+.cxb-off-t { font-size: 22px; font-weight: 600; margin-bottom: 8px; }
+.cxb-off-u { font-family: var(--lab-font-mono); font-size: 13px; color: #666; margin-bottom: 18px; overflow-wrap: anywhere; }
+.cxb-off-p { font-size: 14px; line-height: 1.6; color: #555; max-width: 520px; }
+.cxb-plain { margin: 0; padding: 14px 18px; font: 13px/1.55 var(--lab-font-mono); color: #222; white-space: pre-wrap; overflow-wrap: anywhere; }
+.cxb-clicked { outline: 2px solid #3b82f6; outline-offset: 2px; }

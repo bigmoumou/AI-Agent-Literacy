@@ -1,0 +1,740 @@
+/* mermaid.js [PORTABLE] — LAB.mermaid (Week 4, SPEC §5.3). Draws the flowcharts the course teaches, from the text the student typed:
+   `flowchart TD|TB|BT|LR|RL` (or `graph`), nodes `A[ ]` `A( )` `A{ }` `A([ ])` `A[( )]` `A(( ))` `A[[ ]]` `A{{ }}` `A> ]`, links
+   `-->` `---` `-.->` `==>` `--o` `--x` `<-->`, link text `-->|text|` or `-- text -->`, chains `A --> B --> C`, `A & B --> C`,
+   `%%` comments. Anything else (subgraph, classDef, other diagram types) is reported as "not in the practice version".
+
+   LAB.mermaid.parse(src, {startLine}) → { ok, type, dir, nodes:[{id,label,shape}], edges:[{from,to,label,style,arrow,both}], error }
+       error = { line, col, text, hint }   text is the Mermaid-style "Parse error on line N: …" block, hint a Traditional Chinese
+       practice-only line (full-width symbols, unclosed brackets, a wrong arrow …).
+   LAB.mermaid.render(src, {theme:'light'|'dark', startLine}) → { ok, svg, ast } | { ok:false, error, ast }
+   LAB.mermaid.element(src, opts) → HTMLElement   a `.mm-wrap` with the SVG or an error box; emits `mermaid:render`
+       opts: theme, startLine, where ('code'|'github'), path, lab (data-lab of the wrap), errorLab, emit (false = silent)
+   LAB.mermaid.blocks(markdown) → [{ src, line, fenceLine }]   the ```mermaid blocks of a document (1-based lines)
+   Everything is built with DOM calls (no innerHTML): the text is the student's data (DESIGN §0.5). */
+(function (LAB) {
+  'use strict';
+
+  var h = LAB.util.h;
+  var SVGNS = 'http://www.w3.org/2000/svg';
+  var MAX_NODES = 80, MAX_EDGES = 240;
+  var FONT = '"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif';
+  var FONT_PX = 14, LINE_H = 18;
+
+  /* ================================================================== parser */
+  var ID_RE;
+  try { ID_RE = new RegExp('[\\p{L}\\p{N}_]+', 'uy'); }
+  catch (e0) { ID_RE = /[A-Za-z0-9_À-⿿぀-﻿￰-￿]+/y; }
+  var EDGE_RE = /(<)?(?:(-{2,}>)|(-{3,})|(={2,}>)|(={3,})|(-\.+->)|(-\.+-)|(-{2}[ox])(?=[\s;&]|$))/y;
+  var INLINE_RE = /(<)?(--|==|-\.)(?=[ \t])/y;
+  var TERM = { '--': /[ \t](-{2,}>|-{3,})(?=[\s;&]|$)/g, '==': /[ \t](={2,}>|={3,})(?=[\s;&]|$)/g, '-.': /[ \t](\.+->|\.+-)(?=[\s;&]|$)/g };
+  var KEYWORD_RE = /^(subgraph|end|classDef|class|style|linkStyle|click|direction|accTitle|accDescr|callback|href)(?![A-Za-z0-9_])/;
+  var OTHER_TYPES = /^\s*(sequenceDiagram|classDiagram|stateDiagram|stateDiagram-v2|erDiagram|gantt|pie|journey|gitGraph|mindmap|timeline|quadrantChart|xychart-beta|requirementDiagram|C4Context|sankey-beta|block-beta|architecture-beta|packet-beta|kanban)(?![A-Za-z0-9_-])/;
+  var SHAPES = [                       // longest opener first
+    ['((', '))', 'circle', 'DOUBLECIRCLEEND'], ['([', '])', 'stadium', 'STADIUMEND'], ['[(', ')]', 'cylinder', 'CYLINDEREND'],
+    ['[[', ']]', 'subroutine', 'SUBROUTINEEND'], ['{{', '}}', 'hexagon', 'DIAMOND_STOP'], ['(', ')', 'round', 'PE'],
+    ['[', ']', 'rect', 'SQE'], ['{', '}', 'diamond', 'DIAMOND_STOP'], ['>', ']', 'asym', 'SQE']
+  ];
+  var TOKEN = { '-': 'MINUS', '[': 'SQS', ']': 'SQE', '(': 'PS', ')': 'PE', '{': 'DIAMOND_START', '}': 'DIAMOND_STOP', '|': 'PIPE',
+    '>': 'TAGEND', '<': 'TAGSTART', ';': 'SEMI', ':': 'COLON', '&': 'AMP', '"': 'STR', '=': 'EQUALS', '.': 'DOT', ',': 'COMMA' };
+
+  function tokenName(ch) {
+    if (!ch) return "'EOF'";
+    if (TOKEN[ch]) return "'" + TOKEN[ch] + "'";
+    if (/[A-Za-z0-9_]/.test(ch)) return "'NODE_STRING'";
+    if (ch.charCodeAt(0) > 127) return "'UNICODE_TEXT'";
+    return "'" + ch + "'";
+  }
+  function isFullWidth(ch) {
+    if (!ch) return false;
+    var c = ch.charCodeAt(0);
+    return (c >= 0xFF01 && c <= 0xFF5E) || (c >= 0x3001 && c <= 0x303F) || c === 0x2014 || c === 0x2015 || c === 0x2192 || c === 0x2190 ||
+      c === 0x2018 || c === 0x2019 || c === 0x201C || c === 0x201D || c === 0x2026 || c === 0x3000;
+  }
+
+  function Fail(err) { this.err = err; }
+
+  function parse(src, opts) {
+    opts = opts || {};
+    var startLine = opts.startLine || 0;
+    var lines = String(src === undefined || src === null ? '' : src).replace(/\r\n?/g, '\n').split('\n');
+    var ast = { ok: true, type: 'flowchart', dir: 'TB', nodes: [], edges: [], error: null };
+    var nodeMap = new Map();
+
+    // the English block counts lines from the `flowchart` line (as Mermaid does); the practice hint talks about the line the student sees in the file
+    function fl(ln) { return startLine ? startLine + ln - 1 : ln; }
+    function lineNote(ln) { return startLine ? '（上面英文訊息裡的 line ' + ln + '，是從 flowchart 那一行算起的第 ' + ln + ' 行。）' : ''; }
+
+    /* build the Mermaid-style error block: line, the line itself, a caret under the column, then what was expected */
+    function fail(ln, col, expecting, gotCh, kind, extra) {
+      var srcLine = lines[ln - 1] || '';
+      var ctx = srcLine, shift = 0;
+      if (ctx.length > 60) {
+        var st = Math.max(0, col - 30);
+        ctx = (st > 0 ? '...' : '') + ctx.slice(st, st + 60) + (st + 60 < srcLine.length ? '...' : '');
+        shift = (st > 0 ? 3 : 0) - st;
+      }
+      var caret = new Array(Math.max(0, col + shift) + 1).join('-') + '^';
+      var plain = kind === 'header' && extra;                      // the diagram type was not recognised: Mermaid prints no position
+      var text = plain ? extra : 'Parse error on line ' + ln + ':\n' + ctx + '\n' + caret + '\n' + (extra || ('Expecting ' + expecting + ', got ' + tokenName(gotCh)));
+      var hint = '練習版提示：';
+      if (kind === 'fullwidth') hint += '第 ' + fl(ln) + ' 行的「' + gotCh + '」是全形符號。括號、箭頭、| 都要用半形（英文輸入法下打的那種）。' + lineNote(ln);
+      else if (kind === 'unclosed') hint += '第 ' + fl(ln) + ' 行有括號沒有關起來（[ 要有 ]，( 要有 )，{ 要有 }）。問題有時在這一行，有時在前一行。' + lineNote(ln);
+      else if (kind === 'arrow') hint += '第 ' + fl(ln) + ' 行的箭頭要寫 -->（兩個減號加一個大於符號）。' + lineNote(ln);
+      else if (kind === 'header') hint += '第一行要寫 flowchart TD（由上往下）或 flowchart LR（由左往右）。注意英文字母的大小寫。';
+      else if (kind === 'unsupported') hint += '練習版的 Mermaid 只畫流程圖（flowchart），這個功能還沒有做。' + lineNote(ln);
+      else hint += '第 ' + fl(ln) + ' 行有看不懂的地方。檢查括號有沒有關起來、箭頭是不是 -->、符號是不是半形。錯誤訊息說的行號，問題常在前一行。' + lineNote(ln);
+      throw new Fail({ line: ln, col: col, text: text, hint: hint, kind: kind || 'syntax' });
+    }
+
+    function ensureNode(id, label, shape) {
+      var n = nodeMap.get(id);
+      if (!n) {
+        if (nodeMap.size >= MAX_NODES) fail(1, 0, '', '', 'syntax', 'Too many nodes (the practice version draws at most ' + MAX_NODES + ')');
+        n = { id: id, label: id, shape: 'rect', explicit: false };
+        nodeMap.set(id, n);
+        ast.nodes.push(n);
+      }
+      if (shape) { n.shape = shape; n.label = label; n.explicit = true; }
+      return n;
+    }
+
+    function parseLine(line, ln, i0) {
+      var i = i0, n = line.length;
+      function ws() { while (i < n && (line.charAt(i) === ' ' || line.charAt(i) === '\t')) i++; }
+      function unexpected(expecting, kind) {
+        var ch = line.charAt(i);
+        if (!kind) kind = isFullWidth(ch) ? 'fullwidth' : (ch === '-' || ch === '=' ? 'arrow' : 'syntax');
+        fail(ln, i, expecting, ch, kind);
+      }
+
+      function parseNode() {
+        ID_RE.lastIndex = i;
+        var m = ID_RE.exec(line);
+        if (!m || m.index !== i) unexpected("'NODE_STRING', 'STR', 'UNICODE_TEXT'");
+        var id = m[0];
+        i += id.length;
+        var save = i;
+        ws();
+        var shape = null, label = null;
+        for (var s = 0; s < SHAPES.length && !shape; s++) {
+          var op = SHAPES[s][0];
+          if (line.substr(i, op.length) !== op) continue;
+          var close = SHAPES[s][1], j = i + op.length;
+          while (j < n && line.charAt(j) === ' ') j++;
+          var text;
+          if (line.charAt(j) === '"') {
+            var q = line.indexOf('"', j + 1);
+            if (q < 0) { i = n; fail(ln, n, "'STR'", '', 'unclosed', 'Expecting \'STR\', got \'EOF\''); }
+            text = line.slice(j + 1, q);
+            var after = q + 1;
+            while (after < n && line.charAt(after) === ' ') after++;
+            if (line.substr(after, close.length) !== close) { i = after; fail(ln, after, "'" + SHAPES[s][3] + "'", line.charAt(after), 'unclosed'); }
+            i = after + close.length;
+          } else {
+            var end = line.indexOf(close, j);
+            // the text of a box cannot contain the bracket that opened it: `A[one --> B[two]` is a box that was never closed
+            if (op.length === 1 && op !== '>') {
+              var again = line.indexOf(op, j);
+              if (again >= 0 && (end < 0 || again < end)) fail(ln, again, "'" + SHAPES[s][3] + "'", op, 'unclosed');
+            }
+            if (end < 0) { fail(ln, n, "'" + SHAPES[s][3] + "'", '', 'unclosed', 'Expecting \'' + SHAPES[s][3] + '\', got \'NEWLINE\''); }
+            text = line.slice(j, end);
+            i = end + close.length;
+          }
+          shape = SHAPES[s][2];
+          label = text.replace(/<br\s*\/?>/gi, '\n').replace(/^\s+|\s+$/g, '');
+        }
+        if (!shape) i = save;                       // spaces after a bare id belong to the statement, not to the node
+        if (line.substr(i, 3) === ':::') { i += 3; ID_RE.lastIndex = i; var cm = ID_RE.exec(line); if (cm && cm.index === i) i += cm[0].length; }
+        return ensureNode(id, label === '' ? id : label, shape);
+      }
+
+      function parseGroup() {
+        var g = [parseNode()];
+        ws();
+        while (line.charAt(i) === '&') { i++; ws(); g.push(parseNode()); ws(); }
+        return g;
+      }
+
+      function parseEdge() {
+        var style = 'normal', arrow = true, both = false, label = null, m;
+        EDGE_RE.lastIndex = i;
+        m = EDGE_RE.exec(line);
+        if (m && m.index === i) {
+          both = !!m[1];
+          if (m[2]) { style = 'normal'; arrow = true; }
+          else if (m[3]) { style = 'normal'; arrow = false; }
+          else if (m[4]) { style = 'thick'; arrow = true; }
+          else if (m[5]) { style = 'thick'; arrow = false; }
+          else if (m[6]) { style = 'dotted'; arrow = true; }
+          else if (m[7]) { style = 'dotted'; arrow = false; }
+          else if (m[8]) { style = 'normal'; arrow = m[8].charAt(2) === 'o' ? 'circle' : 'cross'; }
+          i += m[0].length;
+          var save = i;
+          ws();
+          if (line.charAt(i) === '|') {
+            var e = line.indexOf('|', i + 1);
+            if (e < 0) { fail(ln, n, "'PIPE'", '', 'unclosed', 'Expecting \'PIPE\', got \'NEWLINE\''); }
+            label = line.slice(i + 1, e).replace(/^\s*"([\s\S]*)"\s*$/, '$1').replace(/^\s+|\s+$/g, '');
+            i = e + 1;
+          } else i = save;
+          return { style: style, arrow: arrow, both: both, label: label };
+        }
+        INLINE_RE.lastIndex = i;
+        m = INLINE_RE.exec(line);
+        if (m && m.index === i) {
+          var kind = m[2], re = TERM[kind];
+          re.lastIndex = i + m[0].length;
+          var t = re.exec(line);
+          if (t) {
+            label = line.slice(i + m[0].length, t.index).replace(/^\s*"([\s\S]*)"\s*$/, '$1').replace(/^\s+|\s+$/g, '');
+            style = kind === '==' ? 'thick' : (kind === '-.' ? 'dotted' : 'normal');
+            arrow = /[>]$/.test(t[1]);
+            i = t.index + t[0].length;
+            return { style: style, arrow: arrow, both: !!m[1], label: label };
+          }
+        }
+        return null;
+      }
+
+      for (;;) {
+        ws();
+        if (i >= n || line.substr(i, 2) === '%%') return;
+        if (line.charAt(i) === ';') { i++; continue; }
+        var kw = KEYWORD_RE.exec(line.slice(i));
+        if (kw) {
+          // a node may be called `end` or `style1`, but these words at the start of a statement are Mermaid syntax
+          var rest = line.slice(i + kw[0].length);
+          if (!/^\s*(-|=|<|;|$)/.test(rest) || kw[1] === 'subgraph' || kw[1] === 'classDef' || kw[1] === 'linkStyle' || kw[1] === 'click' || kw[1] === 'direction') {
+            fail(ln, i, '', '', 'unsupported', 'Parse error: \'' + kw[1] + '\' is not supported in the practice version');
+          }
+        }
+        var group = parseGroup();
+        for (;;) {
+          ws();
+          if (i >= n || line.charAt(i) === ';' || line.substr(i, 2) === '%%') break;
+          var edgeStart = i;
+          var ed = parseEdge();
+          if (!ed) { i = edgeStart; unexpected("'SEMI', 'NEWLINE', 'SPACE', 'EOF', 'AMP', 'START_LINK'"); }
+          ws();
+          var next = parseGroup();
+          group.forEach(function (a) {
+            next.forEach(function (b) {
+              if (ast.edges.length >= MAX_EDGES) fail(ln, i, '', '', 'syntax', 'Too many links (the practice version draws at most ' + MAX_EDGES + ')');
+              ast.edges.push({ from: a.id, to: b.id, label: ed.label, style: ed.style, arrow: ed.arrow, both: ed.both });
+            });
+          });
+          group = next;
+        }
+      }
+    }
+
+    try {
+      var li = 0, first = null;
+      // blank lines, comments and a ---front matter--- block before the header
+      while (li < lines.length) {
+        var t = lines[li];
+        if (/^\s*$/.test(t) || /^\s*%%/.test(t)) { li++; continue; }
+        if (/^---\s*$/.test(t)) { var k = li + 1; while (k < lines.length && !/^---\s*$/.test(lines[k])) k++; li = k + 1; continue; }
+        first = t;
+        break;
+      }
+      if (first === null) {
+        ast.type = '';
+        fail(1, 0, '', '', 'header', 'Error: No diagram type detected (the text is empty)');
+      }
+      var hm = /^\s*(flowchart|graph)(?![A-Za-z0-9_])(?:[ \t]+(TB|TD|BT|RL|LR)(?![A-Za-z0-9_]))?/.exec(first);
+      if (!hm) {
+        ast.type = '';
+        var ot = OTHER_TYPES.exec(first);
+        if (ot) fail(li + 1, 0, '', '', 'unsupported', 'Parse error: the diagram type \'' + ot[1] + '\' is not supported in the practice version');
+        fail(li + 1, 0, '', '', 'header', 'UnknownDiagramError: No diagram type detected matching given configuration for text: ' + first.replace(/^\s+/, '').slice(0, 40));
+      }
+      ast.dir = hm[2] ? (hm[2] === 'TD' ? 'TB' : hm[2]) : 'TB';
+      var rest0 = first.slice(hm[0].length);
+      if (/\S/.test(rest0) && !/^\s*(;|%%)/.test(rest0)) {
+        fail(li + 1, hm[0].length + (rest0.length - rest0.replace(/^\s+/, '').length), "'DIR', 'SEMI', 'NEWLINE'", rest0.replace(/^\s+/, '').charAt(0), 'syntax');
+      }
+      parseLine(first, li + 1, hm[0].length);
+      for (var r = li + 1; r < lines.length; r++) parseLine(lines[r], r + 1, 0);
+    } catch (e) {
+      if (e instanceof Fail) { ast.ok = false; ast.error = e.err; }
+      else throw e;
+    }
+    ast.nodes.forEach(function (nd) { delete nd.explicit; });
+    return ast;
+  }
+
+  /* ================================================================== layout */
+  var mctx = null, mcache = new Map();
+  function measure(str) {
+    var hit = mcache.get(str);
+    if (hit !== undefined) return hit;
+    var w = null;
+    try {
+      if (!mctx) { var cv = document.createElement('canvas'); mctx = cv.getContext('2d'); }
+      if (mctx) { mctx.font = FONT_PX + 'px ' + FONT; w = mctx.measureText(str).width; }
+    } catch (e) { w = null; }
+    if (!w || !isFinite(w)) w = (LAB.util.displayWidth ? LAB.util.displayWidth(str) : str.length) * (FONT_PX * 0.55);
+    if (mcache.size > 400) mcache.clear();
+    mcache.set(str, w);
+    return w;
+  }
+
+  function nodeSize(n) {
+    var ls = String(n.label || n.id).split('\n');
+    var tw = 0;
+    ls.forEach(function (l) { tw = Math.max(tw, measure(l)); });
+    var th = ls.length * LINE_H;
+    var w, hh;
+    switch (n.shape) {
+      case 'diamond': {
+        var a = tw / 2 + 36;
+        var b = Math.max(30, (th / 2) / (1 - tw / (2 * a)) + 6);
+        w = 2 * a; hh = 2 * b;
+        break;
+      }
+      case 'circle': { var r = Math.sqrt(tw * tw / 4 + th * th / 4) + 14; w = hh = 2 * r; break; }
+      case 'hexagon': w = tw + 56; hh = th + 24; break;
+      case 'cylinder': w = tw + 36; hh = th + 44; break;
+      case 'stadium': w = tw + 44; hh = Math.max(40, th + 22); break;
+      case 'subroutine': w = tw + 44; hh = Math.max(40, th + 22); break;
+      case 'asym': w = tw + 44; hh = Math.max(40, th + 22); break;
+      default: w = tw + 34; hh = Math.max(40, th + 22);
+    }
+    return { w: Math.max(w, 44), h: Math.max(hh, 36), lines: ls };
+  }
+
+  function layout(ast) {
+    var dir = ast.dir, horiz = dir === 'LR' || dir === 'RL';
+    var N = ast.nodes.map(function (n, i) {
+      var s = nodeSize(n);
+      return { id: n.id, ref: n, lines: s.lines, real: true, order: i, w: s.w, h: s.h, rd: horiz ? s.w : s.h, cd: horiz ? s.h : s.w, rank: 0, c: 0, r: 0, ups: [], downs: [] };
+    });
+    var byId = new Map();
+    N.forEach(function (n) { byId.set(n.id, n); });
+    var E = ast.edges.map(function (e, i) { return { ref: e, i: i, from: byId.get(e.from), to: byId.get(e.to), rev: false, loop: e.from === e.to, chain: [] }; });
+
+    // --- break cycles: a link that points back at a node still on the DFS stack is laid out reversed
+    var out = new Map();
+    N.forEach(function (n) { out.set(n, []); });
+    E.forEach(function (e) { if (!e.loop) out.get(e.from).push(e); });
+    var state = new Map();
+    N.forEach(function (n) {
+      if (state.get(n)) return;
+      var stack = [{ n: n, k: 0 }];
+      state.set(n, 1);
+      while (stack.length) {
+        var top = stack[stack.length - 1], outs = out.get(top.n);
+        if (top.k < outs.length) {
+          var e = outs[top.k++], st = state.get(e.to);
+          if (st === 1) e.rev = true;
+          else if (!st) { state.set(e.to, 1); stack.push({ n: e.to, k: 0 }); }
+        } else { state.set(top.n, 2); stack.pop(); }
+      }
+    });
+
+    // --- ranks: longest path from the sources
+    var indeg = new Map(), succ = new Map(), hasPred = new Map();
+    N.forEach(function (n) { indeg.set(n, 0); succ.set(n, []); hasPred.set(n, false); });
+    E.forEach(function (e) {
+      if (e.loop) return;
+      e.up = e.rev ? e.to : e.from;
+      e.down = e.rev ? e.from : e.to;
+      succ.get(e.up).push(e.down);
+      indeg.set(e.down, indeg.get(e.down) + 1);
+      hasPred.set(e.down, true);
+    });
+    var queue = N.filter(function (n) { return indeg.get(n) === 0; });
+    var seen = 0;
+    while (queue.length) {
+      var u = queue.shift();
+      seen++;
+      succ.get(u).forEach(function (v) {
+        if (v.rank < u.rank + 1) v.rank = u.rank + 1;
+        indeg.set(v, indeg.get(v) - 1);
+        if (indeg.get(v) === 0) queue.push(v);
+      });
+    }
+    // a source that feeds only deeper nodes moves down next to its first successor
+    N.forEach(function (n) {
+      if (hasPred.get(n) || !succ.get(n).length) return;
+      var m = Infinity;
+      succ.get(n).forEach(function (v) { m = Math.min(m, v.rank); });
+      if (m - 1 > n.rank) n.rank = m - 1;
+    });
+
+    // --- layers with dummy items on long links
+    var maxRank = 0;
+    N.forEach(function (n) { maxRank = Math.max(maxRank, n.rank); });
+    var layers = [];
+    for (var ri = 0; ri <= maxRank; ri++) layers.push([]);
+    N.forEach(function (n) { layers[n.rank].push(n); });
+    E.forEach(function (e) {
+      if (e.loop) return;
+      var items = [e.up];
+      for (var rk = e.up.rank + 1; rk < e.down.rank; rk++) {
+        var d = { dummy: true, real: false, rank: rk, rd: 0, cd: 0, c: 0, r: 0, order: e.up.order + 0.5 + e.i * 0.0001, ups: [], downs: [] };
+        layers[rk].push(d);
+        items.push(d);
+      }
+      items.push(e.down);
+      for (var q = 0; q + 1 < items.length; q++) { items[q].downs.push(items[q + 1]); items[q + 1].ups.push(items[q]); }
+      e.chain = items;
+    });
+    layers.forEach(function (L) { L.sort(function (a, b) { return a.order - b.order; }); });
+
+    // --- order inside the layers: barycenter sweeps
+    function indexAll() { layers.forEach(function (L) { L.forEach(function (it, ix) { it.ix = ix; }); }); }
+    function bary(it, key) {
+      var nb = it[key];
+      if (!nb.length) return it.ix;
+      var s = 0;
+      nb.forEach(function (x) { s += x.ix; });
+      return s / nb.length;
+    }
+    indexAll();
+    for (var pass = 0; pass < 4; pass++) {
+      var down = pass % 2 === 0, rr;
+      for (var step = 0; step < layers.length; step++) {
+        rr = down ? step : layers.length - 1 - step;
+        if (down ? rr === 0 : rr === layers.length - 1) continue;
+        var L = layers[rr], key = down ? 'ups' : 'downs';
+        var bs = L.map(function (it) { return { it: it, b: bary(it, key) }; });
+        bs.sort(function (a, b) { return (a.b - b.b) || (a.it.ix - b.it.ix); });
+        for (var z = 0; z < bs.length; z++) L[z] = bs[z].it;
+        L.forEach(function (it, ix) { it.ix = ix; });
+      }
+    }
+
+    // --- cross-axis positions
+    function gap(a, b) { return a.dummy || b.dummy ? 18 : 40; }
+    layers.forEach(function (L) {
+      var x = 0;
+      L.forEach(function (it, k) { it.c = x + it.cd / 2; x += it.cd + (k + 1 < L.length ? gap(it, L[k + 1]) : 0); });
+      var shift = x / 2;
+      L.forEach(function (it) { it.c -= shift; });
+    });
+    function relax(L, key) {
+      var n = L.length;
+      if (!n) return;
+      var want = L.map(function (it) {
+        var nb = it[key];
+        if (!nb.length) return it.c;
+        var s = 0;
+        nb.forEach(function (x) { s += x.c; });
+        return s / nb.length;
+      });
+      var pl = new Array(n), pr = new Array(n), k;
+      pl[0] = want[0];
+      for (k = 1; k < n; k++) pl[k] = Math.max(want[k], pl[k - 1] + (L[k - 1].cd + L[k].cd) / 2 + gap(L[k - 1], L[k]));
+      pr[n - 1] = want[n - 1];
+      for (k = n - 2; k >= 0; k--) pr[k] = Math.min(want[k], pr[k + 1] - (L[k].cd + L[k + 1].cd) / 2 - gap(L[k], L[k + 1]));
+      for (k = 0; k < n; k++) L[k].c = (pl[k] + pr[k]) / 2;
+    }
+    for (var iter = 0; iter < 6; iter++) {
+      for (var a1 = 1; a1 < layers.length; a1++) relax(layers[a1], 'ups');
+      for (var a2 = layers.length - 2; a2 >= 0; a2--) relax(layers[a2], 'downs');
+    }
+
+    // --- rank-axis positions
+    var labelGap = new Array(layers.length + 1);
+    for (var lg = 0; lg < labelGap.length; lg++) labelGap[lg] = 0;
+    E.forEach(function (e) {
+      if (e.loop || !e.ref.label) return;
+      for (var k2 = 0; k2 + 1 < e.chain.length; k2++) labelGap[e.chain[k2 + 1].rank] = 24;
+    });
+    var pos = 0, prevMax = 0;
+    layers.forEach(function (L, r) {
+      var mx = 0;
+      L.forEach(function (it) { mx = Math.max(mx, it.rd); });
+      pos = r === 0 ? mx / 2 : pos + prevMax / 2 + 56 + labelGap[r] + mx / 2;
+      L.forEach(function (it) { it.r = pos; });
+      prevMax = mx;
+    });
+
+    // --- to screen coordinates
+    function toXY(it) {
+      var x, y;
+      if (dir === 'TB') { x = it.c; y = it.r; }
+      else if (dir === 'BT') { x = it.c; y = -it.r; }
+      else if (dir === 'LR') { x = it.r; y = it.c; }
+      else { x = -it.r; y = it.c; }
+      it.x = x; it.y = y;
+    }
+    layers.forEach(function (L) { L.forEach(toXY); });
+    // the unit vector of the rank axis on the screen
+    var axis = dir === 'TB' ? [0, 1] : dir === 'BT' ? [0, -1] : dir === 'LR' ? [1, 0] : [-1, 0];
+    var cross = [axis[1] === 0 ? 0 : 1, axis[0] === 0 ? 0 : 1];       // the other axis (positive direction)
+
+    // --- links: pairs that run both ways, or twice, are spread sideways
+    var groups = new Map();
+    E.forEach(function (e) {
+      if (e.loop) return;
+      var key = e.from.id < e.to.id ? e.from.id + '\u0001' + e.to.id : e.to.id + '\u0001' + e.from.id;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(e);
+    });
+    groups.forEach(function (list) { list.forEach(function (e, k) { e.lat = list.length > 1 ? (k - (list.length - 1) / 2) * 16 : 0; }); });
+
+    var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    function grow(x0, y0, x1, y1) { minX = Math.min(minX, x0); minY = Math.min(minY, y0); maxX = Math.max(maxX, x1); maxY = Math.max(maxY, y1); }
+    N.forEach(function (n) { grow(n.x - n.w / 2, n.y - n.h / 2, n.x + n.w / 2, n.y + n.h / 2); });
+
+    function sideAnchor(n, sgn) {                       // the middle of a side across the rank axis
+      return { x: n.x + cross[0] * sgn * n.w / 2, y: n.y + cross[1] * sgn * n.h / 2 };
+    }
+    function endAnchor(n, sgn, lat) {                   // the middle of a side along the rank axis (sgn +1 = away from the sources)
+      return { x: n.x + axis[0] * sgn * n.w / 2 + cross[0] * lat, y: n.y + axis[1] * sgn * n.h / 2 + cross[1] * lat };
+    }
+    function bez(A, B, tA, tB) {
+      var d = Math.sqrt((B.x - A.x) * (B.x - A.x) + (B.y - A.y) * (B.y - A.y));
+      var k = Math.max(18, Math.min(90, d * 0.42));
+      return { a: A, b: B, c1: { x: A.x + tA[0] * k, y: A.y + tA[1] * k }, c2: { x: B.x - tB[0] * k, y: B.y - tB[1] * k } };
+    }
+
+    var out2 = [];
+    E.forEach(function (e) {
+      var r = { e: e, ref: e.ref, segs: [], label: null, loop: e.loop };
+      if (e.loop) {
+        var n0 = e.from, sx = n0.x + n0.w / 2, sy = n0.y;
+        r.loopPath = 'M ' + f(sx) + ' ' + f(sy - 8) + ' C ' + f(sx + 44) + ' ' + f(sy - 30) + ' ' + f(sx + 44) + ' ' + f(sy + 30) + ' ' + f(sx) + ' ' + f(sy + 8);
+        grow(sx, sy - 30, sx + 60, sy + 30);
+        if (e.ref.label) r.label = { x: sx + 48, y: sy, text: e.ref.label };
+        out2.push(r);
+        return;
+      }
+      var items = e.chain, pts = [], tans = [];
+      var multi = items.length > 2;
+      if (e.rev && multi) {
+        // a long link that goes back: leaves and arrives on the side of the nodes, along the dummy items
+        var sm = 0;
+        for (var q = 1; q + 1 < items.length; q++) sm += items[q].c;
+        sm /= (items.length - 2);
+        var ends = (e.up.c + e.down.c) / 2;
+        var sgn = sm >= ends ? 1 : -1;
+        var sa = sideAnchor(e.down, sgn), ea = sideAnchor(e.up, sgn);
+        // drawn from `from` (= down) to `to` (= up)
+        pts.push(sa); tans.push([cross[0] * sgn, cross[1] * sgn]);
+        for (var q2 = items.length - 2; q2 >= 1; q2--) { pts.push({ x: items[q2].x, y: items[q2].y }); tans.push([-axis[0], -axis[1]]); }
+        pts.push(ea); tans.push([-cross[0] * sgn, -cross[1] * sgn]);
+      } else {
+        var sgn2 = e.rev ? -1 : 1;                         // direction of drawing along the rank axis
+        var first = e.rev ? e.down : e.up, last = e.rev ? e.up : e.down;
+        pts.push(endAnchor(first, sgn2, e.lat)); tans.push([axis[0] * sgn2, axis[1] * sgn2]);
+        var mids = items.slice(1, items.length - 1);
+        if (e.rev) mids.reverse();
+        mids.forEach(function (m) { pts.push({ x: m.x, y: m.y }); tans.push([axis[0] * sgn2, axis[1] * sgn2]); });
+        pts.push(endAnchor(last, -sgn2, e.lat)); tans.push([axis[0] * sgn2, axis[1] * sgn2]);
+      }
+      for (var p = 0; p + 1 < pts.length; p++) {
+        var tA = tans[p], tB = p + 2 === pts.length ? tans[p + 1] : tans[p + 1];
+        // the end tangent is the direction the line travels as it arrives; for interior points that is the same axis direction
+        var seg = bez(pts[p], pts[p + 1], tA, p + 2 === pts.length ? tB : tans[p + 1]);
+        r.segs.push(seg);
+        grow(Math.min(seg.a.x, seg.b.x, seg.c1.x, seg.c2.x), Math.min(seg.a.y, seg.b.y, seg.c1.y, seg.c2.y), Math.max(seg.a.x, seg.b.x, seg.c1.x, seg.c2.x), Math.max(seg.a.y, seg.b.y, seg.c1.y, seg.c2.y));
+      }
+      if (e.ref.label) {
+        var sc = r.segs.length, lp;
+        if (sc % 2 === 0) lp = { x: r.segs[sc / 2].a.x, y: r.segs[sc / 2].a.y };
+        else {
+          var sg = r.segs[(sc - 1) / 2];
+          lp = { x: (sg.a.x + 3 * sg.c1.x + 3 * sg.c2.x + sg.b.x) / 8, y: (sg.a.y + 3 * sg.c1.y + 3 * sg.c2.y + sg.b.y) / 8 };
+        }
+        r.label = { x: lp.x, y: lp.y, text: e.ref.label };
+      }
+      out2.push(r);
+    });
+    out2.forEach(function (r) {
+      if (!r.label) return;
+      var lw = measure(r.label.text) + 14;
+      r.label.w = lw; r.label.h = 22;
+      grow(r.label.x - lw / 2, r.label.y - 11, r.label.x + lw / 2, r.label.y + 11);
+    });
+    var PAD = 20;
+    return { nodes: N, edges: out2, ox: PAD - minX, oy: PAD - minY, width: Math.ceil(maxX - minX + PAD * 2), height: Math.ceil(maxY - minY + PAD * 2) };
+  }
+  function f(v) { return Math.round(v * 10) / 10; }
+
+  /* ================================================================== drawing */
+  var THEMES = {
+    light: { fill: '#ececff', stroke: '#9370db', text: '#333333', line: '#333333', labelBg: '#e8e8e8', labelText: '#333333' },
+    dark: { fill: '#2b2b3a', stroke: '#8a7bd1', text: '#e6e6e6', line: '#c9c9c9', labelBg: '#262626', labelText: '#e6e6e6' }
+  };
+  var svgSeq = 0;
+  function sv(tag, attrs, kids) {
+    var el = document.createElementNS(SVGNS, tag);
+    if (attrs) for (var k in attrs) if (Object.prototype.hasOwnProperty.call(attrs, k) && attrs[k] !== null && attrs[k] !== undefined) el.setAttribute(k, String(attrs[k]));
+    if (kids) kids.forEach(function (c) { if (c) el.appendChild(c); });
+    return el;
+  }
+  function segPath(segs) {
+    var d = 'M ' + f(segs[0].a.x) + ' ' + f(segs[0].a.y);
+    segs.forEach(function (s) { d += ' C ' + f(s.c1.x) + ' ' + f(s.c1.y) + ', ' + f(s.c2.x) + ' ' + f(s.c2.y) + ', ' + f(s.b.x) + ' ' + f(s.b.y); });
+    return d;
+  }
+
+  function draw(ast, lay, theme) {
+    var T = THEMES[theme] || THEMES.light;
+    var id = 'mm' + (++svgSeq);
+    var svg = sv('svg', {
+      xmlns: SVGNS, viewBox: '0 0 ' + lay.width + ' ' + lay.height, width: lay.width, height: lay.height, class: 'mm-svg', role: 'img',
+      'aria-label': '流程圖，' + ast.nodes.length + ' 個方塊'
+    });
+    svg.style.minWidth = Math.round(lay.width * 0.62) + 'px';
+    svg.style.maxWidth = '100%';
+    svg.style.height = 'auto';
+    svg.style.fontFamily = FONT;
+    var defs = sv('defs', null, [
+      sv('marker', { id: id + '-a', viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 9, markerHeight: 9, markerUnits: 'userSpaceOnUse', orient: 'auto' }, [sv('path', { d: 'M 0 0 L 10 5 L 0 10 z', fill: T.line })]),
+      sv('marker', { id: id + '-s', viewBox: '0 0 10 10', refX: 1, refY: 5, markerWidth: 9, markerHeight: 9, markerUnits: 'userSpaceOnUse', orient: 'auto' }, [sv('path', { d: 'M 10 0 L 0 5 L 10 10 z', fill: T.line })]),
+      sv('marker', { id: id + '-o', viewBox: '0 0 10 10', refX: 11, refY: 5, markerWidth: 9, markerHeight: 9, markerUnits: 'userSpaceOnUse', orient: 'auto' }, [sv('circle', { cx: 5, cy: 5, r: 4, fill: T.fill, stroke: T.line, 'stroke-width': 1.4 })]),
+      sv('marker', { id: id + '-x', viewBox: '0 0 10 10', refX: 11, refY: 5, markerWidth: 9, markerHeight: 9, markerUnits: 'userSpaceOnUse', orient: 'auto' }, [sv('path', { d: 'M 1 1 L 9 9 M 9 1 L 1 9', stroke: T.line, 'stroke-width': 1.8, fill: 'none' })])
+    ]);
+    svg.appendChild(defs);
+    var root = sv('g', { transform: 'translate(' + f(lay.ox) + ' ' + f(lay.oy) + ')' });
+    svg.appendChild(root);
+
+    var gEdges = sv('g', { class: 'mm-edges', fill: 'none' }), gNodes = sv('g', { class: 'mm-nodes' }), gLabels = sv('g', { class: 'mm-labels' });
+    root.appendChild(gEdges); root.appendChild(gNodes); root.appendChild(gLabels);
+
+    lay.edges.forEach(function (r) {
+      var ref = r.ref;
+      var sw = ref.style === 'thick' ? 3.2 : 1.7;
+      var attrs = { d: r.loop ? r.loopPath : segPath(r.segs), stroke: T.line, 'stroke-width': sw, fill: 'none', class: 'mm-edge', 'data-from': ref.from, 'data-to': ref.to };
+      if (ref.style === 'dotted') attrs['stroke-dasharray'] = '3 4';
+      if (ref.arrow === true) attrs['marker-end'] = 'url(#' + id + '-a)';
+      else if (ref.arrow === 'circle') attrs['marker-end'] = 'url(#' + id + '-o)';
+      else if (ref.arrow === 'cross') attrs['marker-end'] = 'url(#' + id + '-x)';
+      if (ref.both) attrs['marker-start'] = 'url(#' + id + '-s)';
+      gEdges.appendChild(sv('path', attrs));
+      if (r.label) {
+        var L = r.label;
+        gLabels.appendChild(sv('rect', { x: f(L.x - L.w / 2), y: f(L.y - L.h / 2), width: f(L.w), height: f(L.h), rx: 4, fill: T.labelBg, opacity: 0.92, class: 'mm-label-bg' }));
+        var tx = sv('text', { x: f(L.x), y: f(L.y + 5), 'text-anchor': 'middle', 'font-size': 13, fill: T.labelText, class: 'mm-label' });
+        tx.textContent = L.text;
+        gLabels.appendChild(tx);
+      }
+    });
+
+    lay.nodes.forEach(function (n) {
+      var g = sv('g', { class: 'mm-node mm-' + n.ref.shape, 'data-id': n.id, 'data-shape': n.ref.shape });
+      var x = n.x, y = n.y, w = n.w, hh = n.h, st = { fill: T.fill, stroke: T.stroke, 'stroke-width': 1.4 }, shape;
+      var hw = w / 2, hhh = hh / 2;
+      function P(arr) { return arr.map(function (p) { return f(x + p[0]) + ',' + f(y + p[1]); }).join(' '); }
+      switch (n.ref.shape) {
+        case 'diamond': shape = sv('polygon', mix(st, { points: P([[0, -hhh], [hw, 0], [0, hhh], [-hw, 0]]) })); break;
+        case 'circle': shape = sv('circle', mix(st, { cx: f(x), cy: f(y), r: f(hw) })); break;
+        case 'round': shape = sv('rect', mix(st, { x: f(x - hw), y: f(y - hhh), width: f(w), height: f(hh), rx: 12, ry: 12 })); break;
+        case 'stadium': shape = sv('rect', mix(st, { x: f(x - hw), y: f(y - hhh), width: f(w), height: f(hh), rx: f(hhh), ry: f(hhh) })); break;
+        case 'hexagon': { var k = 16; shape = sv('polygon', mix(st, { points: P([[-hw + k, -hhh], [hw - k, -hhh], [hw, 0], [hw - k, hhh], [-hw + k, hhh], [-hw, 0]]) })); break; }
+        case 'asym': shape = sv('polygon', mix(st, { points: P([[-hw, -hhh], [hw, -hhh], [hw, hhh], [-hw, hhh], [-hw + 14, 0]]) })); break;
+        case 'cylinder': {
+          var ry = 8, top = y - hhh;
+          shape = sv('path', mix(st, { d: 'M ' + f(x - hw) + ' ' + f(top + ry) + ' A ' + f(hw) + ' ' + ry + ' 0 0 1 ' + f(x + hw) + ' ' + f(top + ry) + ' L ' + f(x + hw) + ' ' + f(y + hhh - ry) +
+            ' A ' + f(hw) + ' ' + ry + ' 0 0 1 ' + f(x - hw) + ' ' + f(y + hhh - ry) + ' Z M ' + f(x - hw) + ' ' + f(top + ry) + ' A ' + f(hw) + ' ' + ry + ' 0 0 0 ' + f(x + hw) + ' ' + f(top + ry) }));
+          break;
+        }
+        case 'subroutine':
+          shape = sv('g', null, [sv('rect', mix(st, { x: f(x - hw), y: f(y - hhh), width: f(w), height: f(hh), rx: 3 })),
+            sv('path', { d: 'M ' + f(x - hw + 8) + ' ' + f(y - hhh) + ' V ' + f(y + hhh) + ' M ' + f(x + hw - 8) + ' ' + f(y - hhh) + ' V ' + f(y + hhh), stroke: T.stroke, 'stroke-width': 1.4, fill: 'none' })]);
+          break;
+        default: shape = sv('rect', mix(st, { x: f(x - hw), y: f(y - hhh), width: f(w), height: f(hh), rx: 3, ry: 3 }));
+      }
+      g.appendChild(shape);
+      var lines = n.lines, total = lines.length;
+      var ty = (n.ref.shape === 'cylinder' ? 4 : 0);
+      lines.forEach(function (ln, i) {
+        var t = sv('text', { x: f(x), y: f(y + ty + (i - (total - 1) / 2) * LINE_H + 5), 'text-anchor': 'middle', 'font-size': FONT_PX, fill: T.text, class: 'mm-text' });
+        t.textContent = ln;
+        g.appendChild(t);
+      });
+      gNodes.appendChild(g);
+    });
+    return svg;
+  }
+  function mix(a, b) { var o = {}, k; for (k in a) o[k] = a[k]; for (k in b) o[k] = b[k]; return o; }
+
+  /* ================================================================== public */
+  function render(src, opts) {
+    opts = opts || {};
+    var ast = parse(src, opts);
+    if (!ast.ok) return { ok: false, error: ast.error, ast: ast };
+    if (!ast.nodes.length) {
+      ast.ok = false;
+      ast.error = { line: 1, col: 0, text: 'Nothing to draw: the diagram has no nodes yet.', hint: '練習版提示：先在 flowchart 那一行下面寫一行，例如 A[開始] --> B[結束]。', kind: 'empty' };
+      return { ok: false, error: ast.error, ast: ast };
+    }
+    var lay = layout(ast);
+    return { ok: true, svg: draw(ast, lay, opts.theme || 'light'), ast: ast };
+  }
+
+  var styleDone = false;
+  function ensureStyle() {
+    if (styleDone || !document.head) return;
+    styleDone = true;
+    var st = document.createElement('style');
+    st.setAttribute('data-mm', '1');
+    st.textContent =
+      '.mm-wrap { margin: 12px 0; overflow: auto; text-align: center; }' +
+      '.mm-wrap .mm-svg { display: inline-block; vertical-align: top; }' +
+      '.mm-error { margin: 12px 0; padding: 10px 14px; border: 1px solid #d1242f; border-radius: 6px; background: rgba(209,36,47,.07); color: #b4232d; text-align: left; font: 12.5px/1.55 var(--lab-font-mono, monospace); white-space: pre-wrap; -webkit-user-select: text; user-select: text; }' +
+      '.mm-error .mm-hint { display: block; margin-top: 8px; font: 13px/1.6 var(--lab-font-ui, sans-serif); color: inherit; }' +
+      '.mm-wrap[data-theme="dark"] .mm-error { color: #ff9a9a; border-color: #d65a5a; background: rgba(255,120,120,.08); }';
+    document.head.appendChild(st);
+  }
+  function errorBox(err, lab) {
+    var box = h('div', { class: 'mm-error', role: 'alert', dataset: { lab: lab || 'mermaid-error', line: err && err.line ? String(err.line) : '' } });
+    box.appendChild(document.createTextNode(err ? err.text : 'Error'));
+    if (err && err.hint) box.appendChild(h('span', { class: 'mm-hint' }, err.hint));
+    return box;
+  }
+  function element(src, opts) {
+    opts = opts || {};
+    ensureStyle();
+    var r = render(src, opts);
+    var wrap = h('div', { class: 'mm-wrap', 'data-theme': opts.theme || 'light', dataset: { lab: opts.lab || 'mermaid', state: r.ok ? 'ok' : 'error' } });
+    if (r.ok) wrap.appendChild(r.svg);
+    else wrap.appendChild(errorBox(r.error, opts.errorLab));
+    if (opts.emit !== false) {
+      try {
+        LAB.bus.emit('mermaid:render', {
+          ok: r.ok, where: opts.where || '', path: opts.path || '', dir: r.ast ? r.ast.dir : '', nodes: r.ast ? r.ast.nodes.length : 0,
+          edges: r.ast ? r.ast.edges.length : 0, error: r.ok ? null : { line: r.error.line, text: r.error.text, kind: r.error.kind },
+          // the parsed diagram as plain data, so a mission can look at what the student drew without reading the file
+          ast: r.ast ? {
+            dir: r.ast.dir,
+            nodes: r.ast.nodes.map(function (n) { return { id: n.id, label: n.label, shape: n.shape }; }),
+            edges: r.ast.edges.map(function (e) { return { from: e.from, to: e.to, label: e.label, style: e.style }; })
+          } : null
+        });
+      } catch (e) { /* the bus never throws, but the diagram must still show */ }
+    }
+    return wrap;
+  }
+  function blocks(md) {
+    var lines = String(md === undefined || md === null ? '' : md).replace(/\r\n?/g, '\n').split('\n');
+    var out = [], i = 0;
+    while (i < lines.length) {
+      var m = /^(\s{0,3})(`{3,}|~{3,})\s*mermaid\b[^`]*$/i.exec(lines[i]);
+      if (!m) { i++; continue; }
+      var fence = m[2], body = [], start = i;
+      i++;
+      while (i < lines.length) {
+        var c = /^(\s{0,3})(`{3,}|~{3,})\s*$/.exec(lines[i]);
+        if (c && c[2].charAt(0) === fence.charAt(0) && c[2].length >= fence.length) break;
+        body.push(lines[i]);
+        i++;
+      }
+      out.push({ src: body.join('\n'), line: start + 2, fenceLine: start + 1 });
+      i++;
+    }
+    return out;
+  }
+
+  LAB.mermaid = {
+    parse: parse, render: render, element: element, blocks: blocks, layout: layout,
+    /* the first (or every) diagram of a Markdown text, parsed: [{ast, line}] — for the missions' checks */
+    parseDoc: function (md) { return blocks(md).map(function (b) { return { ast: parse(b.src, { startLine: b.line }), line: b.line }; }); }
+  };
+})(window.LAB);

@@ -120,7 +120,7 @@
         LAB.ui.confirm(null, { title: '要重設全部嗎？', text: '這會清除你在這個練習裡建立的檔案、對話和任務進度，無法復原。', ok: '重設', cancel: '取消', danger: true })
           .then(function (ok) { if (ok) LAB.store.reset('all'); });
       } },
-      { label: '回到課程 Week 3', action: function () { window.location.href = '../../weeks/week03/'; } }
+      { label: '回到課程 ' + (LAB.weekLabel ? LAB.weekLabel() : 'Week 3'), action: function () { window.location.href = (LAB.weekInfo && LAB.weekInfo[LAB.week] ? LAB.weekInfo[LAB.week].url : '../../weeks/week03/'); } }
     ];
   }
 

@@ -2835,7 +2835,8 @@
   function gitRoot(s) {
     var vfs = s.vfs, p = s.cwd;
     for (;;) {
-      if (vfs.isDir(vfs.join(p, '.git'))) return p;
+      // with the remote half loaded (Week 4, gitremote.js) repositories are keyed by their real-case path, so `cd desktop` finds the same one
+      if (vfs.isDir(vfs.join(p, '.git'))) return S.gitExt ? vfs.canon(p) : p;
       if (p === '/') return null;
       p = vfs.dirname(p);
     }
@@ -2915,8 +2916,13 @@
     var s = ctx.session, vfs = s.vfs, color = ctx.tty;
     function C(code, t) { return color ? sgr(code, t) : t; }
     var sub = args[0], rest = args.slice(1);
-    if (sub === undefined || sub === '-h' || sub === '--help' || sub === 'help') { ctx.out(GIT_USAGE); return sub === undefined ? 1 : 0; }
+    if (sub === undefined || sub === '-h' || sub === '--help' || sub === 'help') { ctx.out(S.gitExt ? GIT_USAGE.replace('init, status, add, commit, log, branch, checkout, switch, diff, config', S.gitExt.usage) : GIT_USAGE); return sub === undefined ? 1 : 0; }
     if (sub === '--version' || sub === '-v' || sub === 'version') { ctx.out('git version 2.50.1 (Apple Git-155)\n'); return 0; }
+    // Week 4: clone / remote / push / pull / fetch live in gitremote.js (LAB.shell.gitExt); without it nothing here changes
+    var gx = S.gitExt;
+    if (gx && gx.handles(sub)) {
+      return gx.run(sub, rest, ctx, { repoOf: repoOf, gitRoot: gitRoot, workTree: workTree, gitChanges: gitChanges, C: C });
+    }
     if (sub === 'config') {
       var list = rest.filter(function (a) { return a !== '--global' && a !== '--local' && a !== '--system'; });
       if (list[0] === '--list' || list[0] === '-l') { Object.keys(sys.gitConfig).sort().forEach(function (k) { ctx.out(k + '=' + sys.gitConfig[k] + '\n'); }); return 0; }
@@ -2940,7 +2946,8 @@
           ['hooks', 'info', 'objects', 'refs'].forEach(function (d) { vfs.mkdir(vfs.join(g, d), { by: 'terminal' }); });
         } catch (e1) { ctx.err('fatal: ' + vfs.errText(e1.code || 'EINVAL') + '\n'); return 128; }
         sys.gitRepos.set(base, null); sys.gitRepos.delete(base);
-        repoOf(base);
+        if (S.gitExt) sys.gitRepos.delete(vfs.canon(base));
+        repoOf(S.gitExt ? vfs.canon(base) : base);
       }
       ctx.out((again ? 'Reinitialized existing' : 'Initialized empty') + ' Git repository in ' + vfs.canon(g) + '/\n');
       return 0;
@@ -2982,6 +2989,8 @@
         return 0;
       }
       var out = 'On branch ' + repo.branch + '\n';
+      var upText = S.gitExt ? S.gitExt.upstream(repo) : '';
+      if (upText) out += upText + '\n';
       if (!headId) out += '\nNo commits yet\n\n';
       // every section ends with an empty line, as git prints it
       if (ch.staged.length) {
@@ -3026,6 +3035,7 @@
       if (amIdx >= 0) msg = rest[amIdx + 1];
       var ch2 = gitChanges(repo, wt);
       if (!ch2.staged.length) {
+        if (S.gitExt) { ctx.out(S.gitExt.commitNothing(repo, ch2, C)); return 1; }
         ctx.out('On branch ' + repo.branch + '\n' + (ch2.untracked.length ? 'Untracked files:\n  (use "git add <file>..." to include in what will be committed)\n' + ch2.untracked.map(function (u) { return '\t' + u + '\n'; }).join('') + '\nnothing added to commit but untracked files present (use "git add" to track)\n' : (ch2.unstaged.length ? 'no changes added to commit (use "git add" and/or "git commit -a")\n' : 'nothing to commit, working tree clean\n')));
         return 1;
       }
@@ -3062,6 +3072,8 @@
         var deco = n === 0 ? ' (' + C('1;36', 'HEAD -> ') + C('1;32', repo.branch) + ')' : '';
         var others = Object.keys(repo.branches).filter(function (b) { return b !== repo.branch && repo.branches[b] === c.id; });
         if (others.length) deco = deco ? deco.slice(0, -1) + ', ' + others.join(', ') + ')' : ' (' + others.join(', ') + ')';
+        var remoteRefs = S.gitExt ? S.gitExt.refsAt(repo, c.id) : [];
+        if (remoteRefs.length) { var rr = remoteRefs.map(function (r) { return C('1;31', r); }).join(', '); deco = deco ? deco.slice(0, -1) + ', ' + rr + ')' : ' (' + rr + ')'; }
         if (one) lines.push(C('33', shortHash(c.id)) + deco + ' ' + c.msg);
         else lines.push(C('33', 'commit ' + c.id) + deco + '\nAuthor: ' + c.author + '\nDate:   ' + gitDate(c.time) + '\n\n    ' + c.msg + '\n');
       });
@@ -3136,7 +3148,7 @@
       ctx.out(diffOut);
       return 0;
     }
-    ctx.err("git: '" + sub + "' is not a git command. See 'git --help'.\n（練習版的 git 只做：init status add commit log branch checkout switch diff config）\n");
+    ctx.err("git: '" + sub + "' is not a git command. See 'git --help'.\n（練習版的 git 只做：" + (S.gitExt ? "init status add commit log branch checkout switch diff config clone remote push pull fetch" : "init status add commit log branch checkout switch diff config") + "）\n");
     return 1;
   });
 

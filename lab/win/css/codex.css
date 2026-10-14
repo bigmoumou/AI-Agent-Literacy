@@ -89,6 +89,7 @@
 .cx-li { position: relative; padding-left: 16px; }
 .cx-li::before { content: "•"; position: absolute; left: 3px; color: #8a8a8a; }
 .cx-gap2 { height: .6em; }
+.cx-asst strong { font-weight: 700; color: #f4f4f4; }
 .cx-asst code { font-family: var(--lab-font-mono); font-size: 13px; background: var(--cx-code); border-radius: 4px; padding: 1px 5px; }
 .cx-path { font-family: var(--lab-font-mono); font-size: 13px; color: #f0f0f0; overflow-wrap: anywhere; }
 .cx-pre { margin: 6px 0; padding: 8px 12px; border-radius: 8px; background: #252525; font-family: var(--lab-font-mono); font-size: 12.5px; line-height: 1.5; white-space: pre; overflow-x: auto; color: #dcdcdc; }

@@ -1,0 +1,754 @@
+/* github-pages.js — the fake github.com that Safari shows (Week 4, SPEC §5.5). Line B. [SKIN]
+   English interface in the look of the real site (light theme), drawn here: the marks and icons are our own, nothing is copied from
+   GitHub's artwork, and every page ends with 「練習版：這不是真的 GitHub 網站」. All content comes from LAB.github (github.js); a page
+   is rebuilt from the model every time it is drawn, so a reload shows what push / web commits changed.
+
+   Pages: /                    dashboard (the "+" menu → New repository)
+          /new                 Create a new repository (name, visibility, Add README)
+          /an                  profile with the repository list
+          /an/<repo>           file list, latest commit, "N Commits", green Code button (HTTPS address + copy), README
+          /an/<repo>/tree/main/<dir>      a folder      /an/<repo>/blob/main/<file>  a file (.md is rendered, mermaid blocks drawn)
+          /an/<repo>/edit/main/<file>     the pencil: text box, "Commit changes…", message, "Commit changes"
+          /an/<repo>/commits/main         the commit list      /an/<repo>/commit/<id>  one commit with its changes
+          anything else, or a repository that does not exist: a 404 page
+   Events: github:view {repo, view, path, commits, lastMsg, visibility, mermaid} on every drawn page, github:copy-url {repo, url},
+           github:edit-open {repo, path}; the model emits github:repo-created and github:web-commit.
+   Hooks (data-lab): gh-page (data-view), gh-plus, gh-new-repo, gh-new-repo-btn, gh-repo-name, gh-visibility, gh-add-readme, gh-create,
+           gh-code-button, gh-copy-url, gh-file-row (data-path), gh-readme, gh-readme-edit, gh-edit, gh-edit-text, gh-commit,
+           gh-commit-msg, gh-commit-confirm, gh-commits-link, gh-commit-row (data-id), gh-mermaid, gh-mermaid-error. */
+(function (LAB) {
+  'use strict';
+
+  var h = LAB.util.h, G = LAB.github, W = LAB.web;
+  var SVGNS = 'http://www.w3.org/2000/svg';
+  var HOST = 'https://github.com';
+  var USER = G.user;
+
+  /* ------------------------------------------------------------------ icons (our own simple strokes, 16×16) */
+  var ICONS = {
+    menu: ['M2.5 4h11', 'M2.5 8h11', 'M2.5 12h11'],
+    search: ['M7 2.75a4.25 4.25 0 1 0 0 8.5a4.25 4.25 0 0 0 0-8.5z', 'M10.2 10.2L13.5 13.5'],
+    plus: ['M8 3v10', 'M3 8h10'],
+    caret: ['M4.5 6.25L8 9.75l3.5-3.5'],
+    folder: ['M1.75 3.75h4.2l1.4 1.6h6.9v7.4a.75.75 0 0 1-.75.75H2.5a.75.75 0 0 1-.75-.75z'],
+    file: ['M4 1.75h5l3.25 3.25v9.25H4z', 'M9 1.75V5h3.25'],
+    branch: ['M5 3.25v9.5', 'M11 5.5c0 3-6 2-6 5.5', 'M5 3.25m-1.4 0a1.4 1.4 0 1 0 2.8 0a1.4 1.4 0 1 0-2.8 0', 'M11 5m-1.4 0a1.4 1.4 0 1 0 2.8 0a1.4 1.4 0 1 0-2.8 0', 'M5 12.75m-1.4 0a1.4 1.4 0 1 0 2.8 0a1.4 1.4 0 1 0-2.8 0'],
+    clock: ['M8 2a6 6 0 1 0 0 12A6 6 0 0 0 8 2z', 'M8 4.75V8l2.25 1.5'],
+    commit: ['M8 5.5a2.5 2.5 0 1 0 0 5a2.5 2.5 0 0 0 0-5z', 'M1.5 8h4', 'M10.5 8h4'],
+    book: ['M2 3.5C4 2.75 6.2 3 8 4.25 9.8 3 12 2.75 14 3.5v9c-2-.75-4.2-.5-6 .75-1.8-1.25-4-1.5-6-.75z', 'M8 4.25v9'],
+    repo: ['M3 2.75h9.5v10.5H4.5a1.5 1.5 0 0 1-1.5-1.5z', 'M3 11.75a1.5 1.5 0 0 1 1.5-1.5h8'],
+    copy: ['M5.5 5.5h7.25a.75.75 0 0 1 .75.75v7.25a.75.75 0 0 1-.75.75H5.5a.75.75 0 0 1-.75-.75V6.25a.75.75 0 0 1 .75-.75z', 'M3.25 10.5H3a.75.75 0 0 1-.75-.75V2.75A.75.75 0 0 1 3 2h6.75a.75.75 0 0 1 .75.75v.25'],
+    check: ['M3 8.5l3.2 3.2L13 4.8'],
+    pencil: ['M10.75 2.75l2.5 2.5-7.5 7.5-3.25.75.75-3.25z', 'M9.5 4l2.5 2.5'],
+    code: ['M5.5 4.5L2 8l3.5 3.5', 'M10.5 4.5L14 8l-3.5 3.5'],
+    issue: ['M8 2.5a5.5 5.5 0 1 0 0 11a5.5 5.5 0 0 0 0-11z', 'M8 7.25v.01'],
+    pr: ['M4.5 4.5m-1.4 0a1.4 1.4 0 1 0 2.8 0a1.4 1.4 0 1 0-2.8 0', 'M4.5 11.5m-1.4 0a1.4 1.4 0 1 0 2.8 0a1.4 1.4 0 1 0-2.8 0', 'M4.5 5.9v4.2', 'M11.5 11.5m-1.4 0a1.4 1.4 0 1 0 2.8 0a1.4 1.4 0 1 0-2.8 0', 'M11.5 10.1V6.5a2 2 0 0 0-2-2H8'],
+    play: ['M8 2.5a5.5 5.5 0 1 0 0 11a5.5 5.5 0 0 0 0-11z', 'M6.75 5.75l3.5 2.25-3.5 2.25z'],
+    star: ['M8 2l1.8 3.7 4 .55-2.9 2.85.7 4L8 11.1 4.4 13.1l.7-4L2.2 6.25l4-.55z'],
+    eye: ['M1.5 8S4 3.75 8 3.75 14.5 8 14.5 8 12 12.25 8 12.25 1.5 8 1.5 8z', 'M8 6.25a1.75 1.75 0 1 0 0 3.5a1.75 1.75 0 0 0 0-3.5z'],
+    fork: ['M4.5 3.25m-1.3 0a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0-2.6 0', 'M11.5 3.25m-1.3 0a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0-2.6 0', 'M8 12.75m-1.3 0a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0-2.6 0', 'M4.5 4.55V6.5a1.5 1.5 0 0 0 1.5 1.5h4a1.5 1.5 0 0 0 1.5-1.5V4.55', 'M8 8v3.45'],
+    tag: ['M2.25 2.25h5.5l6 6-5.5 5.5-6-6z', 'M5 5m-.6 0a.6.6 0 1 0 1.2 0a.6.6 0 1 0-1.2 0'],
+    bell: ['M4 11V7.25a4 4 0 0 1 8 0V11l1.25 1.5h-10.5z', 'M6.75 14h2.5']
+  };
+  function ic(name, size, cls) {
+    var d = ICONS[name] || [];
+    var s = document.createElementNS(SVGNS, 'svg');
+    s.setAttribute('viewBox', '0 0 16 16'); s.setAttribute('width', String(size || 16)); s.setAttribute('height', String(size || 16));
+    s.setAttribute('class', 'gh-ic' + (cls ? ' ' + cls : '')); s.setAttribute('aria-hidden', 'true'); s.setAttribute('focusable', 'false');
+    d.forEach(function (p) { var e = document.createElementNS(SVGNS, 'path'); e.setAttribute('d', p); s.appendChild(e); });
+    return s;
+  }
+  /* the site's mark: a branching line in a dark circle (ours, not the real logo) */
+  function mark(size) {
+    var s = document.createElementNS(SVGNS, 'svg');
+    s.setAttribute('viewBox', '0 0 32 32'); s.setAttribute('width', String(size || 32)); s.setAttribute('height', String(size || 32)); s.setAttribute('class', 'gh-mark'); s.setAttribute('aria-hidden', 'true');
+    var c = document.createElementNS(SVGNS, 'circle'); c.setAttribute('cx', '16'); c.setAttribute('cy', '16'); c.setAttribute('r', '15'); s.appendChild(c);
+    [['M11 8.5v15', 'gh-m-line'], ['M21 11.5c0 5.5-10 3.5-10 8.5', 'gh-m-line']].forEach(function (p) { var e = document.createElementNS(SVGNS, 'path'); e.setAttribute('d', p[0]); e.setAttribute('class', p[1]); s.appendChild(e); });
+    [[11, 8.5], [21, 11.5], [11, 23.5]].forEach(function (pt) { var e = document.createElementNS(SVGNS, 'circle'); e.setAttribute('cx', String(pt[0])); e.setAttribute('cy', String(pt[1])); e.setAttribute('r', '2.6'); e.setAttribute('class', 'gh-m-dot'); s.appendChild(e); });
+    return s;
+  }
+
+  /* ------------------------------------------------------------------ small helpers */
+  function enc(path) { return String(path).split('/').map(encodeURIComponent).join('/'); }
+  function dec(seg) { try { return decodeURIComponent(seg); } catch (e) { return seg; } }
+  function A(ctx, path, kids, attrs) { return W.link(ctx, HOST + path, kids, attrs); }
+  function inert(text) { LAB.ui.toast(text || '練習版沒有這個功能'); }
+  function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+  function splitLines(text) {
+    if (text === '' || text === null || text === undefined) return [];
+    var a = String(text).split('\n');
+    if (a[a.length - 1] === '') a.pop();
+    return a;
+  }
+  function sizeLabel(n) { return n < 1024 ? n + ' Bytes' : (n / 1024).toFixed(2).replace(/\.?0+$/, '') + ' KB'; }
+  function utf8len(s) { var n = 0, i, c; for (i = 0; i < s.length; i++) { c = s.charCodeAt(i); n += c < 0x80 ? 1 : c < 0x800 ? 2 : (c >= 0xd800 && c <= 0xdbff) ? (i++, 4) : 3; } return n; }
+  function authorName(c) { return String(c.author || '').replace(/\s*<.*$/, '') || USER; }
+  function unique(arr) { var seen = {}; return arr.filter(function (x) { if (seen[x]) return false; seen[x] = 1; return true; }); }
+  function avatar(name, size) { return h('span', { class: 'gh-avatar', style: { width: (size || 20) + 'px', height: (size || 20) + 'px', fontSize: Math.round((size || 20) * 0.55) + 'px' }, 'aria-hidden': 'true' }, String(name).charAt(0).toUpperCase()); }
+
+  /* ------------------------------------------------------------------ file lists */
+  function listDir(tree, dir) {
+    var prefix = dir ? dir + '/' : '', dirs = {}, files = [];
+    Object.keys(tree).forEach(function (p) {
+      if (prefix && p.indexOf(prefix) !== 0) return;
+      var rest = p.slice(prefix.length), i = rest.indexOf('/');
+      if (i < 0) files.push({ name: rest, path: p, type: 'file' });
+      else dirs[rest.slice(0, i)] = 1;
+    });
+    var out = Object.keys(dirs).sort(function (a, b) { return a.toLowerCase() < b.toLowerCase() ? -1 : 1; }).map(function (d) { return { name: d, path: prefix + d, type: 'dir' }; });
+    files.sort(function (a, b) { return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1; });
+    return out.concat(files);
+  }
+  function changedUnder(a, b, entry) {
+    var k, pre;
+    if (entry.type === 'file') return a[entry.path] !== b[entry.path];
+    pre = entry.path + '/';
+    for (k in a) { if (k.indexOf(pre) === 0 && a[k] !== b[k]) return true; }
+    for (k in b) { if (k.indexOf(pre) === 0 && !(k in a)) return true; }
+    return false;
+  }
+  function lastTouch(chain, entry) {
+    for (var i = 0; i < chain.length; i++) {
+      var pt = chain[i + 1] ? chain[i + 1].tree : {};
+      if (changedUnder(chain[i].tree, pt, entry)) return chain[i];
+    }
+    return chain.length ? chain[chain.length - 1] : null;
+  }
+
+  /* ------------------------------------------------------------------ markdown (A's LAB.markdown / LAB.mermaid; plain text when they are missing) */
+  /* A's LAB.mermaid.element draws the diagram (or its error box) and emits mermaid:render {where:'github'}; we add the site's own frame */
+  function mermaidBox(src, state, path, info) {
+    if (!LAB.mermaid || !LAB.mermaid.element) return h('pre', { class: 'gh-pre' }, src);
+    var el = LAB.mermaid.element(src, { theme: 'light', where: 'github', path: path, lab: 'gh-mermaid', errorLab: 'gh-mermaid-error-text', startLine: info && info.line });
+    if (el.getAttribute('data-state') === 'error') {
+      state.mermaid = 'error';
+      return h('div', { class: 'gh-mermaid-error', dataset: { lab: 'gh-mermaid-error' }, role: 'alert' }, h('p', null, 'Unable to render rich display'), el);
+    }
+    if (state.mermaid !== 'error') state.mermaid = 'ok';
+    return h('div', { class: 'gh-mermaid' }, el);
+  }
+  function plainMarkdown(text) {
+    var frag = document.createDocumentFragment(), lines = splitLines(text), i = 0, para = [];
+    function flush() { if (para.length) { frag.appendChild(h('p', null, para.join(' '))); para = []; } }
+    while (i < lines.length) {
+      var l = lines[i], m;
+      if (/^```/.test(l)) { flush(); var code = []; i++; while (i < lines.length && !/^```/.test(lines[i])) { code.push(lines[i]); i++; } frag.appendChild(h('pre', { class: 'gh-pre' }, code.join('\n'))); }
+      else if ((m = /^(#{1,6})\s+(.*)$/.exec(l))) { flush(); frag.appendChild(h('h' + m[1].length, null, m[2])); }
+      else if (/^\s*$/.test(l)) flush();
+      else para.push(l);
+      i++;
+    }
+    flush();
+    return frag;
+  }
+  /* → { node, mermaid: null|'ok'|'error' }. ctx/repo make the links in the text work inside the practice web. */
+  function markdownNode(text, path, ctx, repo) {
+    var state = { mermaid: null }, body = h('div', { class: 'gh-md' });
+    function linker(href, label) {
+      if (!ctx) return null;
+      var url = href;
+      if (/^https?:\/\//i.test(href)) url = href;
+      else if (/^[a-z][a-z0-9+.\-]*:/i.test(href) || href.charAt(0) === '#') return null;
+      else if (repo) {
+        var dir = path.indexOf('/') >= 0 ? path.slice(0, path.lastIndexOf('/') + 1) : '';
+        var rel = href.charAt(0) === '/' ? href.slice(1) : dir + href;
+        url = HOST + '/' + USER + '/' + repo.name + '/blob/' + repo.defaultBranch + '/' + enc(rel.replace(/^\.\//, ''));
+      } else return null;
+      return W.link(ctx, url, label);
+    }
+    if (LAB.markdown && LAB.markdown.render) {
+      var frag = null;
+      try { frag = LAB.markdown.render(text, { mermaid: function (src, info) { return mermaidBox(src, state, path, info); }, link: linker }); } catch (e) { frag = null; state.mermaid = null; }
+      body.appendChild(frag || plainMarkdown(text));
+    } else {
+      body.appendChild(plainMarkdown(text));
+    }
+    return { node: body, mermaid: state.mermaid };
+  }
+
+  /* ------------------------------------------------------------------ chrome: the header with its two menus, and a tiny popover manager */
+  function popovers(root) {
+    var open = null;
+    function close() { if (open) { open.panel.hidden = true; open.trigger.setAttribute('aria-expanded', 'false'); open = null; } }
+    root.addEventListener('mousedown', function (e) {
+      if (!open) return;
+      if (open.panel.contains(e.target) || open.trigger.contains(e.target)) return;
+      close();
+    });
+    root.addEventListener('keydown', function (e) { if (e.key === 'Escape' && open) close(); });
+    return {
+      bind: function (trigger, panel) {
+        panel.hidden = true;
+        trigger.setAttribute('aria-haspopup', 'true'); trigger.setAttribute('aria-expanded', 'false');
+        trigger.addEventListener('click', function (e) {
+          e.preventDefault();
+          if (open && open.panel === panel) { close(); return; }
+          close();
+          panel.hidden = false; trigger.setAttribute('aria-expanded', 'true');
+          open = { panel: panel, trigger: trigger };
+        });
+      },
+      close: close
+    };
+  }
+
+  function menuItem(ctx, text, path, attrs) {
+    return path ? A(ctx, path, text, Object.assign({ class: 'gh-menu-item', role: 'menuitem' }, attrs || {})) :
+      h('button', { type: 'button', class: 'gh-menu-item', role: 'menuitem', on: { click: function () { inert(); } } }, text);
+  }
+
+  function header(ctx, pops, repo) {
+    var plusBtn = h('button', { type: 'button', class: 'gh-hbtn', 'aria-label': 'Create new…', title: 'Create new…', dataset: { lab: 'gh-plus' } }, ic('plus', 16), ic('caret', 12));
+    var plusMenu = h('div', { class: 'gh-pop gh-menu', role: 'menu' },
+      menuItem(ctx, 'New repository', '/new', { dataset: { lab: 'gh-new-repo' } }),
+      menuItem(ctx, 'Import repository'), menuItem(ctx, 'New gist'), menuItem(ctx, 'New organization'));
+    var avBtn = h('button', { type: 'button', class: 'gh-hbtn gh-hav', 'aria-label': 'Open user navigation menu', title: USER, dataset: { lab: 'gh-avatar' } }, avatar(USER, 24), ic('caret', 12));
+    var avMenu = h('div', { class: 'gh-pop gh-menu gh-menu-right', role: 'menu' },
+      h('div', { class: 'gh-menu-who' }, 'Signed in as ', h('strong', null, USER)),
+      menuItem(ctx, 'Your profile', '/' + USER), menuItem(ctx, 'Your repositories', '/' + USER + '?tab=repositories'),
+      h('button', { type: 'button', class: 'gh-menu-item', role: 'menuitem', on: { click: function () { inert('練習版不會真的登出'); } } }, 'Sign out'));
+    pops.bind(plusBtn, plusMenu); pops.bind(avBtn, avMenu);
+    var crumb = repo ? h('span', { class: 'gh-crumb' }, A(ctx, '/' + USER, USER), h('span', { class: 'gh-slash' }, '/'), A(ctx, '/' + USER + '/' + repo.name, h('strong', null, repo.name))) : h('span', { class: 'gh-crumb' }, A(ctx, '/', 'Dashboard'));
+    var search = h('button', { type: 'button', class: 'gh-hsearch', on: { click: function () { inert(); } } }, ic('search', 14), h('span', null, 'Type '), h('kbd', null, '/'), h('span', null, ' to search'));
+    return h('header', { class: 'gh-header' },
+      h('div', { class: 'gh-hwrap' },
+        h('button', { type: 'button', class: 'gh-hbtn gh-hmenu', 'aria-label': 'Open global navigation menu', on: { click: function () { inert(); } } }, ic('menu', 16)),
+        A(ctx, '/', [mark(28), h('span', { class: 'gh-hname' }, 'GitHub')], { class: 'gh-hhome', 'aria-label': 'Homepage' }),
+        crumb,
+        h('span', { class: 'gh-hgrow' }),
+        search,
+        h('span', { class: 'gh-hpos' }, plusBtn, plusMenu),
+        h('button', { type: 'button', class: 'gh-hbtn', 'aria-label': 'Notifications', on: { click: function () { inert(); } } }, ic('bell', 16)),
+        h('span', { class: 'gh-hpos' }, avBtn, avMenu)));
+  }
+
+  function shell(ctx, view, repo, content) {
+    var root = h('div', { class: 'gh-page', dataset: { lab: 'gh-page', view: view } });
+    var pops = popovers(root);
+    root.appendChild(header(ctx, pops, repo));
+    var body = content(pops);
+    root.appendChild(body);
+    root.appendChild(h('footer', { class: 'gh-foot' }, h('p', null, '練習版：這不是真的 GitHub 網站。')));
+    if (window.ResizeObserver) {
+      var ro = new ResizeObserver(function () {
+        if (!root.isConnected) { ro.disconnect(); return; }
+        root.classList.toggle('is-narrow', root.clientWidth < 900); root.classList.toggle('is-compact', root.clientWidth < 1040);
+      });
+      ro.observe(root);
+    }
+    return root;
+  }
+
+  /* ------------------------------------------------------------------ the repository header (name, visibility, tabs) */
+  function repoHead(ctx, repo, active) {
+    var tab = function (name, icon, on, path) {
+      var attrs = { class: 'gh-tab' + (on ? ' is-on' : '') };
+      var kids = [ic(icon, 16), h('span', null, name)];
+      if (path) return A(ctx, path, kids, attrs);
+      return h('button', { type: 'button', class: attrs.class, on: { click: function () { inert('練習版只做 Code 這一頁'); } } }, kids);
+    };
+    var cnt = function (icon, label, n) { return h('button', { type: 'button', class: 'gh-btn gh-btn-sm', on: { click: function () { inert(); } } }, ic(icon, 16), h('span', null, label), h('span', { class: 'gh-count' }, String(n))); };
+    return h('div', { class: 'gh-repohead' },
+      h('div', { class: 'gh-wrap gh-reponame' },
+        ic('repo', 16, 'gh-muted'),
+        A(ctx, '/' + USER, USER, { class: 'gh-owner' }), h('span', { class: 'gh-slash' }, '/'),
+        A(ctx, '/' + USER + '/' + repo.name, h('strong', null, repo.name), { class: 'gh-rname', dataset: { lab: 'gh-repo-title' } }),
+        h('span', { class: 'gh-label', dataset: { lab: 'gh-visibility-label' } }, cap(repo.visibility)),
+        h('span', { class: 'gh-hgrow' }),
+        cnt('eye', 'Watch', 1), cnt('fork', 'Fork', 0), cnt('star', 'Star', 0)),
+      h('nav', { class: 'gh-wrap gh-tabs', 'aria-label': 'Repository' },
+        tab('Code', 'code', active === 'code', '/' + USER + '/' + repo.name),
+        tab('Issues', 'issue', false), tab('Pull requests', 'pr', false), tab('Actions', 'play', false)));
+  }
+
+  /* ------------------------------------------------------------------ the green Code button and its panel */
+  function copyButton(ctx, repo, getUrl, hook) {
+    var btn = h('button', { type: 'button', class: 'gh-copybtn', 'aria-label': 'Copy url to clipboard', title: 'Copy url to clipboard', dataset: { lab: hook || 'gh-copy-url' } }, ic('copy', 16));
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      var u = getUrl();
+      LAB.clipboard.setText(u);
+      btn.textContent = ''; btn.appendChild(ic('check', 16, 'gh-ok')); btn.title = 'Copied!';
+      LAB.bus.emit('github:copy-url', { repo: repo.key, url: u, via: 'code' });
+      setTimeout(function () { if (btn.isConnected) { btn.textContent = ''; btn.appendChild(ic('copy', 16)); btn.title = 'Copy url to clipboard'; } }, 1600);
+    });
+    return btn;
+  }
+  function codeButton(ctx, repo, pops) {
+    var urls = { https: G.cloneUrl(repo.key), ssh: 'git@github.com:' + repo.owner + '/' + repo.name + '.git' };
+    var mode = 'https';
+    var input = h('input', { type: 'text', class: 'gh-urlinput', readonly: true, value: urls.https, 'aria-label': 'Clone URL', dataset: { lab: 'gh-clone-url' } });
+    var note = h('p', { class: 'gh-pop-note' }, 'Clone using the web URL.');
+    var subtabs = h('div', { class: 'gh-subtabs', role: 'tablist' });
+    function drawTabs() {
+      subtabs.textContent = '';
+      [['https', 'HTTPS'], ['ssh', 'SSH'], ['cli', 'GitHub CLI']].forEach(function (t) {
+        subtabs.appendChild(h('button', { type: 'button', role: 'tab', class: 'gh-subtab' + (mode === t[0] ? ' is-on' : ''), 'aria-selected': mode === t[0] ? 'true' : 'false', dataset: { lab: 'gh-url-tab', tab: t[0] }, on: { click: function () {
+          if (t[0] === 'cli') { inert('練習版沒有 GitHub CLI'); return; }
+          mode = t[0]; input.value = urls[mode]; note.textContent = mode === 'ssh' ? 'Use a password-protected SSH key.（練習版的終端機只能用 HTTPS 網址）' : 'Clone using the web URL.'; drawTabs();
+        } } }, t[1]));
+      });
+    }
+    drawTabs();
+    var panel = h('div', { class: 'gh-pop gh-codepop', dataset: { lab: 'gh-code-panel' } },
+      h('div', { class: 'gh-codepop-head' }, h('span', { class: 'gh-codetab is-on' }, ic('code', 14), ' Local'), h('button', { type: 'button', class: 'gh-codetab', on: { click: function () { inert(); } } }, 'Codespaces')),
+      h('div', { class: 'gh-codepop-body' },
+        h('div', { class: 'gh-clone-title' }, ic('code', 14), h('strong', null, 'Clone')),
+        subtabs,
+        h('div', { class: 'gh-urlrow' }, input, copyButton(ctx, repo, function () { return input.value; })),
+        note),
+      h('button', { type: 'button', class: 'gh-menu-item', on: { click: function () { inert(); } } }, 'Open with GitHub Desktop'),
+      h('button', { type: 'button', class: 'gh-menu-item', on: { click: function () { inert(); } } }, 'Download ZIP'));
+    var btn = h('button', { type: 'button', class: 'gh-btn gh-btn-green', dataset: { lab: 'gh-code-button' } }, ic('code', 16), h('span', null, 'Code'), ic('caret', 12));
+    pops.bind(btn, panel);
+    return h('span', { class: 'gh-hpos' }, btn, panel);
+  }
+
+  /* ------------------------------------------------------------------ the repository page */
+  function emitView(repo, view, extra) {
+    var chain = repo ? G.chain(repo.key, repo.defaultBranch) : [];
+    var d = { repo: repo ? repo.key : '', view: view, path: '', commits: chain.length, lastMsg: chain.length ? chain[0].msg : '', visibility: repo ? repo.visibility : '', mermaid: null };
+    if (extra) Object.keys(extra).forEach(function (k) { d[k] = extra[k]; });
+    LAB.bus.emit('github:view', d);
+  }
+
+  function commitBar(ctx, repo, chain, commit, countLabel) {
+    var c = commit || chain[0];
+    return h('div', { class: 'gh-cbar' },
+      avatar(authorName(c), 20), h('strong', { class: 'gh-cauthor' }, authorName(c)),
+      A(ctx, '/' + USER + '/' + repo.name + '/commit/' + c.id, c.msg, { class: 'gh-cmsg', title: c.msg }),
+      h('span', { class: 'gh-grow' }),
+      A(ctx, '/' + USER + '/' + repo.name + '/commit/' + c.id, c.id.slice(0, 7), { class: 'gh-hash' }),
+      h('span', { class: 'gh-muted' }, '·'), h('span', { class: 'gh-muted' }, G.ago(c.time)),
+      countLabel ? A(ctx, '/' + USER + '/' + repo.name + '/commits/' + repo.defaultBranch, [ic('clock', 16), h('strong', null, chain.length + ' ' + (chain.length === 1 ? 'Commit' : 'Commits'))], { class: 'gh-commits-link', dataset: { lab: 'gh-commits-link' } }) : null);
+  }
+
+  function emptyRepo(ctx, repo, pops) {
+    var url = G.cloneUrl(repo.key);
+    var cmd = function (lines) { return h('pre', { class: 'gh-pre gh-cmd' }, lines.join('\n')); };
+    return h('div', { class: 'gh-wrap gh-empty' },
+      h('div', { class: 'gh-box gh-quick' },
+        h('h2', null, 'Quick setup — if you’ve done this kind of thing before'),
+        h('div', { class: 'gh-urlrow' }, h('span', { class: 'gh-seg' }, 'HTTPS'), h('input', { type: 'text', class: 'gh-urlinput', readonly: true, value: url, 'aria-label': 'Clone URL' }), copyButton(ctx, repo, function () { return url; }, 'gh-copy-url')),
+        h('p', { class: 'gh-muted' }, 'Get started by creating a new file or uploading an existing file. We recommend every repository include a README, LICENSE, and .gitignore.')),
+      h('div', { class: 'gh-box gh-quick' },
+        h('h3', null, '…or create a new repository on the command line'),
+        cmd(['echo "# ' + repo.name + '" >> README.md', 'git init', 'git add README.md', 'git commit -m "first commit"', 'git branch -M main', 'git remote add origin ' + url, 'git push -u origin main'])),
+      h('div', { class: 'gh-box gh-quick' },
+        h('h3', null, '…or push an existing repository from the command line'),
+        cmd(['git remote add origin ' + url, 'git branch -M main', 'git push -u origin main'])));
+  }
+
+  function repoPage(ctx, repo, dir, view) {
+    var branch = repo.defaultBranch, chain = G.chain(repo.key, branch);
+    var tree = chain.length ? chain[0].tree : {};
+    var mermaidState = null;
+    var root = shell(ctx, view, repo, function (pops) {
+      var wrap = h('div', null, repoHead(ctx, repo, 'code'));
+      if (!chain.length) { wrap.appendChild(emptyRepo(ctx, repo, pops)); return wrap; }
+      var entries = listDir(tree, dir);
+      if (dir && !entries.length) {
+        wrap.appendChild(h('div', { class: 'gh-wrap gh-404' }, h('h1', null, '404'), h('p', { class: 'gh-lead' }, 'This is not the web page you are looking for.'), h('p', { class: 'gh-muted' }, 'There is no folder called ' + dir + '.')));
+        return wrap;
+      }
+      var base = '/' + USER + '/' + repo.name;
+      // the bar above the table: branch, counts, Go to file, Add file, Code
+      var branchBtn = h('button', { type: 'button', class: 'gh-btn gh-btn-sm', on: { click: function () { inert('練習版只有 main 一個分支'); } } }, ic('branch', 16), h('strong', null, branch), ic('caret', 12));
+      var top = h('div', { class: 'gh-actions' },
+        branchBtn,
+        h('button', { type: 'button', class: 'gh-linkbtn', on: { click: function () { inert('練習版只有 main 一個分支'); } } }, ic('branch', 16), h('strong', null, '1'), ' Branch'),
+        h('button', { type: 'button', class: 'gh-linkbtn', on: { click: function () { inert(); } } }, ic('tag', 16), h('strong', null, '0'), ' Tags'),
+        h('span', { class: 'gh-grow' }),
+        h('button', { type: 'button', class: 'gh-btn gh-btn-sm', on: { click: function () { inert(); } } }, ic('search', 14), h('span', null, 'Go to file')),
+        h('button', { type: 'button', class: 'gh-btn gh-btn-sm', on: { click: function () { inert('練習版請用鉛筆圖示在網頁上改檔案'); } } }, ic('plus', 14), h('span', null, 'Add file'), ic('caret', 12)),
+        codeButton(ctx, repo, pops));
+      // the file table
+      var table = h('div', { class: 'gh-box gh-files', role: 'table' });
+      var latest = dir ? lastTouch(chain, { type: 'dir', path: dir }) : chain[0];
+      table.appendChild(commitBar(ctx, repo, chain, latest, true));
+      if (dir) {
+        var up = dir.indexOf('/') >= 0 ? dir.slice(0, dir.lastIndexOf('/')) : '';
+        table.appendChild(h('div', { class: 'gh-row', role: 'row' }, h('span', { class: 'gh-ricon' }), A(ctx, up ? base + '/tree/' + branch + '/' + enc(up) : base, '..', { class: 'gh-rname' })));
+      }
+      entries.forEach(function (e) {
+        var c = lastTouch(chain, e);
+        var href = base + (e.type === 'dir' ? '/tree/' : '/blob/') + branch + '/' + enc(e.path);
+        table.appendChild(h('div', { class: 'gh-row', role: 'row', dataset: { lab: 'gh-file-row', path: e.path, type: e.type } },
+          h('span', { class: 'gh-ricon ' + (e.type === 'dir' ? 'is-dir' : 'is-file') }, ic(e.type === 'dir' ? 'folder' : 'file', 16)),
+          A(ctx, href, e.name, { class: 'gh-rname' }),
+          A(ctx, base + '/commit/' + c.id, c.msg, { class: 'gh-rmsg gh-muted', title: c.msg }),
+          h('span', { class: 'gh-rtime gh-muted' }, G.ago(c.time))));
+      });
+      // README of this folder
+      var readme = entries.filter(function (e) { return e.type === 'file' && /^readme(\.md|\.markdown|\.txt)?$/i.test(e.name); })[0];
+      var main = h('div', { class: 'gh-main' }, top, table);
+      if (readme) {
+        var md = /\.md$|\.markdown$/i.test(readme.name) ? markdownNode(tree[readme.path], readme.path, ctx, repo) : { node: h('pre', { class: 'gh-pre' }, tree[readme.path]), mermaid: null };
+        mermaidState = md.mermaid;
+        main.appendChild(h('section', { class: 'gh-box gh-readme', dataset: { lab: 'gh-readme' } },
+          h('div', { class: 'gh-boxhead' }, ic('book', 16), h('strong', null, 'README'), h('span', { class: 'gh-grow' }),
+            A(ctx, base + '/edit/' + branch + '/' + enc(readme.path), ic('pencil', 16), { class: 'gh-iconbtn', title: 'Edit file', 'aria-label': 'Edit file', dataset: { lab: 'gh-readme-edit' } })),
+          h('div', { class: 'gh-boxbody' }, md.node)));
+      }
+      var side = h('aside', { class: 'gh-side' },
+        h('div', { class: 'gh-sideblock' }, h('h3', null, 'About'), h('p', { class: 'gh-muted' }, repo.description || 'No description, website, or topics provided.'),
+          h('p', { class: 'gh-sidelist' }, ic('book', 16), ' Readme'), h('p', { class: 'gh-sidelist' }, ic('star', 16), h('strong', null, '0'), ' stars'), h('p', { class: 'gh-sidelist' }, ic('eye', 16), h('strong', null, '1'), ' watching'), h('p', { class: 'gh-sidelist' }, ic('fork', 16), h('strong', null, '0'), ' forks')),
+        h('div', { class: 'gh-sideblock' }, h('h3', null, 'Releases'), h('p', { class: 'gh-muted' }, 'No releases published')),
+        h('div', { class: 'gh-sideblock' }, h('h3', null, 'Packages'), h('p', { class: 'gh-muted' }, 'No packages published')));
+      wrap.appendChild(h('div', { class: 'gh-wrap gh-cols' }, main, side));
+      return wrap;
+    });
+    emitView(repo, view, { path: dir || '', mermaid: mermaidState });
+    return root;
+  }
+
+  /* ------------------------------------------------------------------ a file */
+  function filePage(ctx, repo, path) {
+    var branch = repo.defaultBranch, chain = G.chain(repo.key, branch), tree = chain.length ? chain[0].tree : {};
+    var base = '/' + USER + '/' + repo.name;
+    if (!chain.length || !Object.prototype.hasOwnProperty.call(tree, path)) return notFound(ctx, 'This file does not exist: ' + path, repo.key + '/' + path);
+    var text = tree[path], isMd = /\.(md|markdown)$/i.test(path), mode = isMd ? 'preview' : 'code';
+    var lines = splitLines(text), touch = lastTouch(chain, { type: 'file', path: path });
+    var mermaidState = null;
+    var root = shell(ctx, 'file', repo, function (pops) {
+      var wrap = h('div', null, repoHead(ctx, repo, 'code'));
+      // breadcrumb
+      var parts = path.split('/'), crumb = h('div', { class: 'gh-breadcrumb' }, A(ctx, base, repo.name, { class: 'gh-rname' }));
+      parts.forEach(function (seg, i) {
+        crumb.appendChild(h('span', { class: 'gh-slash' }, '/'));
+        var sub = parts.slice(0, i + 1).join('/');
+        crumb.appendChild(i === parts.length - 1 ? h('strong', null, seg) : A(ctx, base + '/tree/' + branch + '/' + enc(sub), seg, { class: 'gh-rname' }));
+      });
+      var bodyHolder = h('div', { class: 'gh-boxbody gh-filebody' });
+      var seg = h('div', { class: 'gh-segs' });
+      function draw() {
+        bodyHolder.textContent = '';
+        if (mode === 'preview') { var md = markdownNode(text, path, ctx, repo); mermaidState = md.mermaid; bodyHolder.appendChild(md.node); bodyHolder.classList.add('is-preview'); }
+        else {
+          bodyHolder.classList.remove('is-preview');
+          var tb = h('table', { class: 'gh-code' }), body = h('tbody');
+          lines.slice(0, 600).forEach(function (l, i) { body.appendChild(h('tr', null, h('td', { class: 'gh-ln' }, String(i + 1)), h('td', { class: 'gh-lc' }, l))); });
+          tb.appendChild(body); bodyHolder.appendChild(tb);
+        }
+        if (isMd) {
+          seg.textContent = '';
+          [['preview', 'Preview'], ['code', 'Code']].forEach(function (m) {
+            seg.appendChild(h('button', { type: 'button', class: 'gh-seg' + (mode === m[0] ? ' is-on' : ''), dataset: { lab: 'gh-file-mode', mode: m[0] }, on: { click: function () { mode = m[0]; draw(); } } }, m[1]));
+          });
+        }
+      }
+      draw();
+      var copyText = h('button', { type: 'button', class: 'gh-iconbtn', title: 'Copy file', 'aria-label': 'Copy file', on: { click: function () { LAB.clipboard.setText(text); LAB.ui.toast('已拷貝檔案內容'); } } }, ic('copy', 16));
+      var pencil = A(ctx, base + '/edit/' + branch + '/' + enc(path), ic('pencil', 16), { class: 'gh-iconbtn', title: 'Edit this file', 'aria-label': 'Edit this file', dataset: { lab: 'gh-edit' } });
+      var box = h('div', { class: 'gh-box gh-filebox' },
+        commitBar(ctx, repo, chain, touch, false),
+        h('div', { class: 'gh-boxhead gh-filehead' }, isMd ? seg : null, h('span', { class: 'gh-muted gh-fileinfo' }, lines.length + ' lines (' + lines.length + ' loc) · ' + sizeLabel(utf8len(text))), h('span', { class: 'gh-grow' }), copyText, pencil),
+        bodyHolder);
+      wrap.appendChild(h('div', { class: 'gh-wrap' }, crumb, box));
+      return wrap;
+    });
+    emitView(repo, 'file', { path: path, mermaid: mermaidState });
+    return root;
+  }
+
+  /* ------------------------------------------------------------------ editing a file on the web */
+  function editPage(ctx, repo, path) {
+    var branch = repo.defaultBranch, chain = G.chain(repo.key, branch), tree = chain.length ? chain[0].tree : {};
+    var base = '/' + USER + '/' + repo.name;
+    if (!chain.length || !Object.prototype.hasOwnProperty.call(tree, path)) return notFound(ctx, 'This file does not exist: ' + path, repo.key + '/' + path);
+    var original = tree[path];
+    var root = shell(ctx, 'edit', repo, function () {
+      var wrap = h('div', null, repoHead(ctx, repo, 'code'));
+      var ta = h('textarea', { class: 'gh-edit-text', spellcheck: 'false', 'aria-label': 'Editing ' + path, dataset: { lab: 'gh-edit-text' } });
+      ta.value = original;
+      var commitBtn = h('button', { type: 'button', class: 'gh-btn gh-btn-green', disabled: true, dataset: { lab: 'gh-commit' } }, 'Commit changes…');
+      var cancel = A(ctx, base + '/blob/' + branch + '/' + enc(path), 'Cancel changes', { class: 'gh-btn' });
+      var tab = 'edit';
+      var holder = h('div', { class: 'gh-editholder' }, ta);
+      var tabs = h('div', { class: 'gh-segs' });
+      function drawTabs() {
+        tabs.textContent = '';
+        [['edit', 'Edit'], ['preview', 'Preview']].forEach(function (t) {
+          tabs.appendChild(h('button', { type: 'button', class: 'gh-seg' + (tab === t[0] ? ' is-on' : ''), on: { click: function () {
+            tab = t[0]; holder.textContent = '';
+            if (tab === 'edit') holder.appendChild(ta);
+            else holder.appendChild(h('div', { class: 'gh-boxbody' }, /\.(md|markdown)$/i.test(path) ? markdownNode(ta.value, path, ctx, repo).node : h('pre', { class: 'gh-pre' }, ta.value)));
+            drawTabs();
+          } } }, t[1]));
+        });
+      }
+      drawTabs();
+      ta.addEventListener('input', function () { commitBtn.disabled = ta.value === original; });
+      ta.addEventListener('keydown', function (e) { e.stopPropagation(); });
+      commitBtn.addEventListener('click', function () { if (!commitBtn.disabled) openDialog(); });
+
+      var msg = h('input', { type: 'text', class: 'gh-input', value: 'Update ' + path.split('/').pop(), 'aria-label': 'Commit message', autocomplete: 'off', dataset: { lab: 'gh-commit-msg' } });
+      var extra = h('textarea', { class: 'gh-input gh-extra', placeholder: 'Add an optional extended description…', 'aria-label': 'Extended description' });
+      var confirm = h('button', { type: 'button', class: 'gh-btn gh-btn-green', dataset: { lab: 'gh-commit-confirm' } }, 'Commit changes');
+      var dlgCancel = h('button', { type: 'button', class: 'gh-btn' }, 'Cancel');
+      var dialog = h('div', { class: 'gh-modal-back', hidden: true },
+        h('div', { class: 'gh-modal', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Commit changes' },
+          h('h2', null, 'Commit changes'),
+          h('label', { class: 'gh-field' }, h('span', null, 'Commit message'), msg),
+          h('label', { class: 'gh-field' }, h('span', null, 'Extended description'), extra),
+          h('div', { class: 'gh-radio' }, h('label', null, h('input', { type: 'radio', name: 'gh-branch', checked: true }), h('span', null, h('span', null, ' Commit directly to the '), h('strong', { class: 'gh-label' }, branch), ' branch.'))),
+          h('div', { class: 'gh-radio is-off' }, h('label', null, h('input', { type: 'radio', name: 'gh-branch', disabled: true }), h('span', null, ' Create a new branch for this commit and start a pull request.'))),
+          h('div', { class: 'gh-modal-actions' }, dlgCancel, confirm)));
+      function openDialog() { dialog.hidden = false; try { msg.focus(); msg.select(); } catch (e) { /* ignore */ } }
+      function closeDialog() { dialog.hidden = true; }
+      dlgCancel.addEventListener('click', closeDialog);
+      dialog.addEventListener('mousedown', function (e) { if (e.target === dialog) closeDialog(); });
+      function doCommit() {
+        var m = msg.value.trim() || ('Update ' + path.split('/').pop());
+        var c = G.webCommit(repo.key, path, ta.value, m);
+        if (c) ctx.navigate(HOST + base + '/blob/' + branch + '/' + enc(path));
+      }
+      confirm.addEventListener('click', doCommit);
+      msg.addEventListener('keydown', function (e) {
+        e.stopPropagation();
+        if (LAB.ui.isImeEnter(e)) return;
+        if (e.key === 'Enter') { e.preventDefault(); doCommit(); }
+        else if (e.key === 'Escape') { e.preventDefault(); closeDialog(); }
+      });
+      extra.addEventListener('keydown', function (e) { e.stopPropagation(); });
+
+      var crumb = h('div', { class: 'gh-breadcrumb' }, A(ctx, base, repo.name, { class: 'gh-rname' }));
+      path.split('/').forEach(function (seg, i, arr) { crumb.appendChild(h('span', { class: 'gh-slash' }, '/')); crumb.appendChild(i === arr.length - 1 ? h('strong', null, seg) : h('span', null, seg)); });
+      crumb.appendChild(h('span', { class: 'gh-muted' }, ' in '));
+      crumb.appendChild(h('span', { class: 'gh-label' }, branch));
+      wrap.appendChild(h('div', { class: 'gh-wrap' },
+        h('div', { class: 'gh-edithead' }, crumb, h('span', { class: 'gh-grow' }), cancel, commitBtn),
+        h('div', { class: 'gh-box gh-editbox' }, h('div', { class: 'gh-boxhead' }, tabs), holder)));
+      wrap.appendChild(dialog);
+      return wrap;
+    });
+    emitView(repo, 'edit', { path: path });
+    LAB.bus.emit('github:edit-open', { repo: repo.key, path: path });
+    return root;
+  }
+
+  /* ------------------------------------------------------------------ commits */
+  function commitsPage(ctx, repo) {
+    var branch = repo.defaultBranch, chain = G.chain(repo.key, branch), base = '/' + USER + '/' + repo.name;
+    var root = shell(ctx, 'commits', repo, function () {
+      var wrap = h('div', null, repoHead(ctx, repo, 'code'));
+      var list = h('div', { class: 'gh-commitlist' });
+      var lastDay = '';
+      chain.forEach(function (c) {
+        var day = G.dateLabel(c.time);
+        if (day !== lastDay) { lastDay = day; list.appendChild(h('div', { class: 'gh-dayhead' }, ic('commit', 16), 'Commits on ' + day)); }
+        var title = c.msg.split('\n')[0];
+        list.appendChild(h('div', { class: 'gh-crow', dataset: { lab: 'gh-commit-row', id: c.id } },
+          h('div', { class: 'gh-cmain' },
+            h('div', null, A(ctx, base + '/commit/' + c.id, title, { class: 'gh-ctitle' })),
+            h('div', { class: 'gh-muted gh-cmeta' }, avatar(authorName(c), 16), h('strong', null, authorName(c)), ' committed ' + G.ago(c.time))),
+          h('div', { class: 'gh-cside' },
+            A(ctx, base + '/commit/' + c.id, c.id.slice(0, 7), { class: 'gh-hash gh-hashbtn' }),
+            h('button', { type: 'button', class: 'gh-iconbtn', title: 'Copy the full SHA', 'aria-label': 'Copy the full SHA', on: { click: function () { LAB.clipboard.setText(c.id); LAB.ui.toast('已拷貝 commit 編號'); } } }, ic('copy', 16)))));
+      });
+      if (!chain.length) list.appendChild(h('p', { class: 'gh-muted gh-pad' }, 'There are no commits yet.'));
+      wrap.appendChild(h('div', { class: 'gh-wrap' },
+        h('div', { class: 'gh-edithead' }, h('h1', { class: 'gh-h1' }, 'Commits'), h('span', { class: 'gh-grow' }), h('button', { type: 'button', class: 'gh-btn gh-btn-sm', on: { click: function () { inert('練習版只有 main 一個分支'); } } }, ic('branch', 16), h('strong', null, branch), ic('caret', 12))),
+        list));
+      return wrap;
+    });
+    emitView(repo, 'commits', { path: '' });
+    return root;
+  }
+
+  /* one commit with its changes */
+  function diffRows(a, b) {
+    var x = a === null ? [] : splitLines(a), y = b === null ? [] : splitLines(b), s = 0, rows = [], i, j;
+    while (s < x.length && s < y.length && x[s] === y[s]) s++;
+    var ex = x.length, ey = y.length;
+    while (ex > s && ey > s && x[ex - 1] === y[ey - 1]) { ex--; ey--; }
+    var xm = x.slice(s, ex), ym = y.slice(s, ey), mid = [];
+    if (xm.length * ym.length > 90000) { xm.forEach(function (l) { mid.push(['-', l]); }); ym.forEach(function (l) { mid.push(['+', l]); }); }
+    else {
+      var dp = [];
+      for (i = 0; i <= xm.length; i++) { dp.push(new Array(ym.length + 1).fill(0)); }
+      for (i = xm.length - 1; i >= 0; i--) for (j = ym.length - 1; j >= 0; j--) dp[i][j] = xm[i] === ym[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+      i = 0; j = 0;
+      while (i < xm.length && j < ym.length) {
+        if (xm[i] === ym[j]) { mid.push([' ', xm[i]]); i++; j++; }
+        else if (dp[i + 1][j] >= dp[i][j + 1]) { mid.push(['-', xm[i]]); i++; }
+        else { mid.push(['+', ym[j]]); j++; }
+      }
+      while (i < xm.length) { mid.push(['-', xm[i++]]); }
+      while (j < ym.length) { mid.push(['+', ym[j++]]); }
+    }
+    x.slice(Math.max(0, s - 3), s).forEach(function (l) { rows.push([' ', l]); });
+    rows = rows.concat(mid);
+    x.slice(ex, Math.min(x.length, ex + 3)).forEach(function (l) { rows.push([' ', l]); });
+    return rows;
+  }
+  function commitPage(ctx, repo, id) {
+    var c = repo.commits[id];
+    if (!c) {
+      var full = Object.keys(repo.commits).filter(function (k) { return k.indexOf(id) === 0; });
+      if (full.length === 1) c = repo.commits[full[0]];
+    }
+    if (!c) return notFound(ctx, 'No commit found: ' + id, repo.key + '/commit/' + id);
+    var base = '/' + USER + '/' + repo.name, pt = c.parent && repo.commits[c.parent] ? repo.commits[c.parent].tree : {};
+    var paths = unique(Object.keys(c.tree).concat(Object.keys(pt))).filter(function (p) { return c.tree[p] !== pt[p]; }).sort();
+    var root = shell(ctx, 'commit', repo, function () {
+      var wrap = h('div', null, repoHead(ctx, repo, 'code'));
+      var files = h('div', null);
+      paths.forEach(function (p) {
+        var a = Object.prototype.hasOwnProperty.call(pt, p) ? pt[p] : null, b = Object.prototype.hasOwnProperty.call(c.tree, p) ? c.tree[p] : null;
+        var tb = h('table', { class: 'gh-code gh-diff' }), body = h('tbody');
+        diffRows(a, b).slice(0, 400).forEach(function (r) { body.appendChild(h('tr', { class: r[0] === '+' ? 'is-add' : r[0] === '-' ? 'is-del' : '' }, h('td', { class: 'gh-ln' }, r[0] === ' ' ? '' : r[0]), h('td', { class: 'gh-lc' }, r[1]))); });
+        tb.appendChild(body);
+        files.appendChild(h('div', { class: 'gh-box gh-diffbox' }, h('div', { class: 'gh-boxhead' }, h('strong', null, p), h('span', { class: 'gh-muted' }, a === null ? ' (new file)' : b === null ? ' (deleted)' : '')), tb));
+      });
+      wrap.appendChild(h('div', { class: 'gh-wrap' },
+        h('div', { class: 'gh-box gh-commitbox' },
+          h('h1', { class: 'gh-h1' }, c.msg.split('\n')[0]),
+          h('div', { class: 'gh-muted gh-cmeta' }, avatar(authorName(c), 20), h('strong', null, authorName(c)), ' committed ' + G.ago(c.time)),
+          h('div', { class: 'gh-muted gh-cmeta' }, 'commit ', h('code', null, c.id.slice(0, 7)), c.parent ? [' · parent ', h('code', null, c.parent.slice(0, 7))] : ' · first commit')),
+        h('p', { class: 'gh-muted gh-pad' }, 'Showing ' + paths.length + ' changed ' + (paths.length === 1 ? 'file' : 'files') + '.'),
+        files));
+      return wrap;
+    });
+    emitView(repo, 'commit', { path: '' });
+    return root;
+  }
+
+  /* ------------------------------------------------------------------ New repository */
+  function newPage(ctx) {
+    var root = shell(ctx, 'new', null, function () {
+      var name = h('input', { type: 'text', class: 'gh-input', 'aria-label': 'Repository name', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false', dataset: { lab: 'gh-repo-name' } });
+      var status = h('p', { class: 'gh-status', 'aria-live': 'polite' });
+      var vis = h('select', { class: 'gh-input gh-select', 'aria-label': 'Choose visibility', dataset: { lab: 'gh-visibility' } },
+        h('option', { value: 'public' }, 'Public'), h('option', { value: 'private' }, 'Private'));
+      vis.value = 'public';
+      var readme = h('input', { type: 'checkbox', class: 'gh-switch-input', role: 'switch', 'aria-label': 'Add README', dataset: { lab: 'gh-add-readme' } });
+      var create = h('button', { type: 'button', class: 'gh-btn gh-btn-green', disabled: true, dataset: { lab: 'gh-create' } }, 'Create repository');
+      var visNote = h('p', { class: 'gh-muted gh-small' }, 'Anyone on the internet can see this repository. You choose who can commit.');
+      function check() {
+        var raw = name.value, n = G.cleanName(raw);
+        if (!raw.trim()) { status.textContent = ''; status.className = 'gh-status'; create.disabled = true; return; }
+        if (!G.validName(n)) { status.textContent = 'Repository name may only contain letters, numbers, hyphens, underscores and periods.'; status.className = 'gh-status is-bad'; create.disabled = true; return; }
+        if (G.get(USER + '/' + n)) { status.textContent = 'The repository ' + n + ' already exists on this account.'; status.className = 'gh-status is-bad'; create.disabled = true; return; }
+        status.textContent = n + ' is available.'; status.className = 'gh-status is-good'; create.disabled = false;
+      }
+      function submit() {
+        if (create.disabled) return;
+        var r = G.createRepo({ name: name.value, visibility: vis.value, readme: readme.checked });
+        if (r.ok) ctx.navigate(HOST + '/' + USER + '/' + r.repo.name);
+        else check();
+      }
+      name.addEventListener('input', check);
+      name.addEventListener('keydown', function (e) { e.stopPropagation(); if (LAB.ui.isImeEnter(e)) return; if (e.key === 'Enter') { e.preventDefault(); submit(); } });
+      vis.addEventListener('keydown', function (e) { e.stopPropagation(); });
+      vis.addEventListener('change', function () { visNote.textContent = vis.value === 'public' ? 'Anyone on the internet can see this repository. You choose who can commit.' : 'You choose who can see and commit to this repository.'; });
+      create.addEventListener('click', submit);
+      var sw = h('label', { class: 'gh-switch' }, readme, h('span', { class: 'gh-switch-track' }, h('i')));
+      return h('div', { class: 'gh-wrap gh-newwrap' },
+        h('h1', { class: 'gh-h1' }, 'Create a new repository'),
+        h('p', { class: 'gh-muted' }, 'A repository contains all project files, including the revision history. Already have a project repository elsewhere? Import a repository.'),
+        h('p', { class: 'gh-muted gh-small' }, 'Required fields are marked with an asterisk (*).'),
+        h('h2', { class: 'gh-h2' }, 'General'),
+        h('div', { class: 'gh-formrow' },
+          h('div', { class: 'gh-field' }, h('span', null, 'Owner *'), h('div', { class: 'gh-owner-box' }, avatar(USER, 20), h('span', null, USER))),
+          h('span', { class: 'gh-slash gh-slash-big' }, '/'),
+          h('label', { class: 'gh-field gh-grow' }, h('span', null, 'Repository name *'), name)),
+        status,
+        h('h2', { class: 'gh-h2' }, 'Configuration'),
+        h('div', { class: 'gh-cfgrow' }, h('div', null, h('strong', null, 'Choose visibility *'), visNote), vis),
+        h('div', { class: 'gh-cfgrow' }, h('div', null, h('strong', null, 'Add README'), h('p', { class: 'gh-muted gh-small' }, 'READMEs can be used as longer descriptions. About READMEs')), sw),
+        h('div', { class: 'gh-newfoot' }, create));
+    });
+    emitView(null, 'new', {});
+    return root;
+  }
+
+  /* ------------------------------------------------------------------ dashboard, profile, 404 */
+  function homePage(ctx) {
+    var root = shell(ctx, 'home', null, function () {
+      var repos = G.list();
+      var list = h('ul', { class: 'gh-replist' });
+      repos.forEach(function (r) { list.appendChild(h('li', null, ic('repo', 16, 'gh-muted'), A(ctx, '/' + r.key, r.key, { class: 'gh-rname' }))); });
+      if (!repos.length) list.appendChild(h('li', { class: 'gh-muted' }, 'You don’t have any repositories yet.'));
+      var feed = h('div', { class: 'gh-feed' });
+      var acts = [];
+      repos.forEach(function (r) { G.chain(r.key, r.defaultBranch).slice(0, 4).forEach(function (c) { acts.push({ r: r, c: c }); }); });
+      acts.sort(function (a, b) { return b.c.time - a.c.time; }).slice(0, 6).forEach(function (a) {
+        feed.appendChild(h('div', { class: 'gh-feeditem' }, avatar(authorName(a.c), 24), h('div', null, h('div', null, h('strong', null, authorName(a.c)), ' committed to ', A(ctx, '/' + a.r.key, a.r.key), ' ', h('span', { class: 'gh-muted' }, G.ago(a.c.time))), h('div', { class: 'gh-muted' }, a.c.msg.split('\n')[0]))));
+      });
+      if (!acts.length) feed.appendChild(h('p', { class: 'gh-muted' }, 'Nothing here yet. Create a repository to get started.'));
+      return h('div', { class: 'gh-wrap gh-dash' },
+        h('aside', { class: 'gh-dashside' },
+          h('div', { class: 'gh-sidehead' }, h('h3', null, 'Top repositories'), A(ctx, '/new', [ic('repo', 16), ' New'], { class: 'gh-btn gh-btn-green gh-btn-sm', dataset: { lab: 'gh-new-repo-btn' } })),
+          list),
+        h('main', { class: 'gh-dashmain' }, h('h1', { class: 'gh-h1' }, 'Home'), h('h2', { class: 'gh-h2' }, 'Recent activity'), feed));
+    });
+    emitView(null, 'home', {});
+    return root;
+  }
+  function profilePage(ctx) {
+    var root = shell(ctx, 'profile', null, function () {
+      var list = h('div', { class: 'gh-box gh-replistbox' });
+      G.list().forEach(function (r) {
+        var chain = G.chain(r.key, r.defaultBranch);
+        list.appendChild(h('div', { class: 'gh-reprow' }, h('div', null, A(ctx, '/' + r.key, r.name, { class: 'gh-rname gh-big' }), ' ', h('span', { class: 'gh-label' }, cap(r.visibility))), h('div', { class: 'gh-muted gh-small' }, 'Updated ' + G.ago(chain.length ? chain[0].time : r.createdAt))));
+      });
+      if (!G.list().length) list.appendChild(h('p', { class: 'gh-muted gh-pad' }, USER + ' doesn’t have any public repositories yet.'));
+      return h('div', { class: 'gh-wrap gh-profile' },
+        h('aside', { class: 'gh-profside' }, avatar(USER, 96), h('h1', { class: 'gh-h1' }, G.author), h('p', { class: 'gh-muted' }, USER)),
+        h('main', { class: 'gh-profmain' }, h('h2', { class: 'gh-h2' }, 'Repositories ', h('span', { class: 'gh-count' }, String(G.list().length))), list));
+    });
+    emitView(null, 'profile', {});
+    return root;
+  }
+  function notFound(ctx, why, what) {
+    var root = shell(ctx, '404', null, function () {
+      return h('div', { class: 'gh-wrap gh-404' },
+        h('h1', null, '404'), h('p', { class: 'gh-lead' }, 'This is not the web page you are looking for.'), h('p', { class: 'gh-muted' }, why || ''),
+        A(ctx, '/', 'Back to GitHub home', { class: 'gh-btn' }));
+    });
+    emitView(null, '404', { repo: what || '' });
+    return root;
+  }
+
+  /* ------------------------------------------------------------------ routing */
+  function route(info, ctx) {
+    var segs = info.path.split('/').filter(function (s) { return s !== ''; }).map(dec);
+    if (!segs.length) return homePage(ctx);
+    if (segs.length === 1 && segs[0].toLowerCase() === 'new') return newPage(ctx);
+    if (segs[0].toLowerCase() !== USER) return notFound(ctx, 'There is no user or repository called ' + segs[0] + ' in this practice.', segs.slice(0, 2).join('/'));
+    if (segs.length === 1) return profilePage(ctx);
+    var repo = G.get(USER + '/' + segs[1]);
+    if (!repo) return notFound(ctx, 'The repository ' + USER + '/' + segs[1] + ' does not exist.', USER + '/' + segs[1]);
+    if (segs.length === 2) return repoPage(ctx, repo, '', 'repo');
+    var kind = segs[2], rest = segs.slice(4).join('/');
+    if (kind === 'tree') return rest ? repoPage(ctx, repo, rest, 'tree') : repoPage(ctx, repo, '', 'repo');
+    if (kind === 'blob' && rest) return filePage(ctx, repo, rest);
+    if (kind === 'edit' && rest) return editPage(ctx, repo, rest);
+    if (kind === 'commits') return commitsPage(ctx, repo);
+    if (kind === 'commit' && segs[3]) return commitPage(ctx, repo, segs[3]);
+    return notFound(ctx, 'There is nothing at this address.', repo.key + '/' + segs.slice(2).join('/'));
+  }
+
+  function titleOf(info) {
+    var segs = info.path.split('/').filter(function (s) { return s !== ''; }).map(dec);
+    if (!segs.length) return 'GitHub';
+    if (segs.length === 1 && segs[0].toLowerCase() === 'new') return 'Create a New Repository';
+    var repo = segs.length >= 2 && segs[0].toLowerCase() === USER ? G.get(USER + '/' + segs[1]) : null;
+    if (segs.length === 1 && segs[0].toLowerCase() === USER) return USER + ' (' + G.author + ')';
+    if (!repo) return 'Page not found · GitHub';
+    var full = repo.key;
+    if (segs.length === 2) return 'GitHub - ' + full;
+    var kind = segs[2], rest = segs.slice(4).join('/');
+    if (kind === 'blob' && rest) return repo.name + '/' + rest + ' at ' + repo.defaultBranch + ' · ' + full;
+    if (kind === 'edit' && rest) return 'Editing ' + repo.name + '/' + rest + ' at ' + repo.defaultBranch + ' · ' + full;
+    if (kind === 'tree') return repo.name + (rest ? '/' + rest : '') + ' at ' + repo.defaultBranch + ' · ' + full;
+    if (kind === 'commits') return 'Commits · ' + full;
+    if (kind === 'commit') return 'Commit · ' + full;
+    return 'Page not found · GitHub';
+  }
+
+  W.register({ host: 'github.com', title: titleOf, build: route });
+
+  LAB.githubPages = { route: route, titleOf: titleOf };
+})(window.LAB);

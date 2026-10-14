@@ -29,6 +29,7 @@
   LAB.icons.add('cd-run', g('<path d="M8 5l11 7-11 7z"/>'));
   LAB.icons.add('cd-ext', g('<rect x="4.5" y="12" width="6.5" height="6.5" rx="1"/><rect x="11.5" y="12" width="6.5" height="6.5" rx="1"/><rect x="4.5" y="5" width="6.5" height="6.5" rx="1"/><rect x="13" y="3.5" width="6.5" height="6.5" rx="1"/>'));
   LAB.icons.add('cd-file', g('<path d="M7.5 3.5H14l4.5 4.5v11A1.5 1.5 0 0 1 17 20.5H7.5A1.5 1.5 0 0 1 6 19V5a1.5 1.5 0 0 1 1.5-1.5z"/><path d="M14 3.5V8h4.5"/><path d="M9 13h6M9 16.5h6"/>'));
+  LAB.icons.add('cd-preview', g('<rect x="3.5" y="5" width="13" height="14" rx="1.6"/><path d="M10 5v14"/><circle cx="17" cy="14.5" r="3"/><path d="M19.3 16.8l2.2 2.2"/>'));
   LAB.icons.add('cd-watermark', '<svg viewBox="0 0 64 64"><g fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 18L8 32l14 14"/><path d="M42 18l14 14-14 14"/><path d="M36 14L28 50"/></g></svg>');
   /* title-bar glyphs (16 px boxes, 1.2 stroke) */
   function t16(inner) { return '<svg viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">' + inner + '</g></svg>'; }
@@ -322,7 +323,13 @@
     var tabsEl = h('div', { class: 'cd-tabs', role: 'tablist' });
     var emptyEl = h('div', { class: 'cd-empty', 'aria-hidden': 'true' }, LAB.icons.el('cd-watermark', { size: 120 }));
     var panes = h('div', { class: 'cd-panes' }, emptyEl);
-    var editorCol = h('div', { class: 'cd-editor-col' }, tabsEl, panes);
+    // Week 4: "Open Preview to the Side" sits at the right end of the tab strip; without LAB.markdown (Week 3) the DOM is what it always was
+    var prevBtn = null, tabsHost = tabsEl;
+    if (LAB.markdown) {
+      prevBtn = h('button', { type: 'button', class: 'cd-act-btn', hidden: true, 'aria-label': 'Open Preview to the Side', title: 'Open Preview to the Side (Ctrl+Shift+V)', dataset: { lab: 'cd-preview-btn' } }, LAB.icons.el('cd-preview', { size: 18 }));
+      tabsHost = h('div', { class: 'cd-tabsrow' }, tabsEl, h('div', { class: 'cd-tab-actions' }, prevBtn));
+    }
+    var editorCol = h('div', { class: 'cd-editor-col' }, tabsHost, panes);
 
     var posEl = h('span', { class: 'cd-st-item', dataset: { lab: 'cd-pos' } });
     var langEl = h('span', { class: 'cd-st-item' });
@@ -358,7 +365,65 @@
       win.state.path = active ? active.path : '';
       win.state.dirty = !!(active && active.dirty);
       win.state.folder = rootDir || '';
+      syncPreviewBtn();
     }
+
+    /* ---- Markdown preview (Week 4): a pane to the right of the editor; mermaid code blocks are drawn as diagrams ---- */
+    function isMd(t) { return !!(t && !t.binary && /\.(md|markdown)$/i.test(t.path)); }
+    function previewOn(t) { return !!(t && t.prev && !t.prev.hidden); }
+    function syncPreviewBtn() {
+      if (!prevBtn) return;
+      var ok = isMd(active);
+      prevBtn.hidden = !ok;
+      prevBtn.classList.toggle('is-on', ok && previewOn(active));
+      prevBtn.setAttribute('aria-pressed', ok && previewOn(active) ? 'true' : 'false');
+    }
+    function renderPreview(t) {
+      if (!t || !t.prev || !LAB.markdown) return;
+      var top = t.prevBody ? t.prevBody.scrollTop : 0;
+      t.prev.textContent = '';
+      var head = h('div', { class: 'cd-prev-head' }, 'Preview ' + vfs.basename(t.path));
+      var body = h('div', { class: 'cd-prev-body md' });
+      body.appendChild(LAB.markdown.render(t.ta.value, { mermaidOptions: { theme: 'dark', where: 'code', path: t.path, lab: 'cd-preview-mermaid', errorLab: 'cd-preview-error' } }));
+      t.prev.appendChild(head);
+      t.prev.appendChild(body);
+      t.prevBody = body;
+      body.scrollTop = top;
+    }
+    function schedulePreview(t) {
+      if (!previewOn(t)) return;
+      if (t.prevTimer) clearTimeout(t.prevTimer);
+      t.prevTimer = setTimeout(function () { t.prevTimer = 0; renderPreview(t); }, 150);
+    }
+    function togglePreview(t, force) {
+      t = t || active;
+      if (!LAB.markdown || !isMd(t)) return false;
+      var on = force === undefined ? !previewOn(t) : !!force;
+      if (on) {
+        if (!t.prev) { t.prev = h('div', { class: 'cd-preview', dataset: { lab: 'cd-preview', path: t.path } }); t.pane.appendChild(t.prev); }
+        t.prev.hidden = false;
+        t.pane.classList.add('has-preview');
+        // a diagram needs room: a narrow window is widened (never beyond the desktop) the first time a preview opens
+        try {
+          var rc = win.getRect(), sa = LAB.stage && LAB.stage.spawnArea ? LAB.stage.spawnArea() : null;
+          if (sa && !win.isZoomed() && rc.w < 1060) {
+            var nw = Math.min(1100, sa.w - 8);
+            if (nw > rc.w + 40) win.setRect({ x: Math.max(8, Math.min(rc.x, sa.w - nw)), y: rc.y, w: nw, h: rc.h });
+          }
+        } catch (eW) { /* the size is only a courtesy */ }
+        // still narrow: fold the explorer away while the preview is open (it comes back when the preview closes)
+        try { if (sidebarOpen && win.getRect().w < 1100) { toggleSidebar(false); t.sbHidden = true; } } catch (eS) { /* ignore */ }
+        renderPreview(t);
+      } else if (t.prev) {
+        t.prev.hidden = true;
+        t.pane.classList.remove('has-preview');
+        if (t.sbHidden) { t.sbHidden = false; toggleSidebar(true); }
+      }
+      syncPreviewBtn();
+      LAB.bus.emit('code:preview', { path: t.path, on: on });
+      return true;
+    }
+    if (prevBtn) prevBtn.addEventListener('click', function () { togglePreview(active); });
     function updateStatus() {
       if (active && !active.binary) {
         var pos = active.ta.selectionStart || 0;
@@ -590,9 +655,11 @@
         pane.appendChild(gut);
         pane.appendChild(ta);
         ta.addEventListener('scroll', function () { gutIn.style.transform = 'translateY(' + (-ta.scrollTop) + 'px)'; });
-        ta.addEventListener('input', function () { renderGutter(t); setDirty(t); updateStatus(); });
+        ta.addEventListener('input', function () { renderGutter(t); setDirty(t); updateStatus(); schedulePreview(t); });
         ['keyup', 'click', 'select', 'focus'].forEach(function (n) { ta.addEventListener(n, updateStatus); });
         ta.addEventListener('keydown', function (e) {
+          // Week 4: Ctrl+Shift+V toggles the Markdown preview (the key router lets V through in a text field, so it is handled here)
+          if (LAB.markdown && (e.metaKey || e.ctrlKey) && e.shiftKey && !e.altKey && (e.key === 'v' || e.key === 'V')) { e.preventDefault(); togglePreview(t); return; }
           if (e.key === 'Tab' && !e.metaKey && !e.ctrlKey && !e.altKey && !e.shiftKey && !LAB.ui.isImeEnter(e)) { e.preventDefault(); insertText(ta, '    '); }
         });
         ta.addEventListener('paste', function (e) {
@@ -725,6 +792,7 @@
         t.ta.scrollTop = top;
         renderGutter(t);
         if (t === active) updateStatus();
+        schedulePreview(t);
       }
     }
     function retarget(p, e) { return e.path + p.slice(e.from.length); }
@@ -855,10 +923,14 @@
       isSidebarOpen: function () { return sidebarOpen; },
       hasActive: function () { return !!active && !active.binary; },
       activeTextarea: function () { return active && !active.binary ? active.ta : null; },
-      isDirty: function () { return !!(active && active.dirty); }
+      isDirty: function () { return !!(active && active.dirty); },
+      togglePreview: togglePreview,
+      canPreview: function () { return !!LAB.markdown && isMd(active); },
+      previewOpen: function () { return previewOn(active); }
     };
     ctls.set(win.id, ctl);
     win.own(function () { ctls.delete(win.id); ddClose(); });
+    win.own(function () { tabs.forEach(function (t) { if (t.prevTimer) { clearTimeout(t.prevTimer); t.prevTimer = 0; } }); });
     win.own(LAB.bus.on('fs:change', onFs));
     win.own(LAB.bus.on('dnd:drop', function () { lastDndEnd = Date.now(); flushTree(); }));
     win.own(LAB.bus.on('dnd:cancel', function () { lastDndEnd = Date.now(); flushTree(); }));
@@ -974,6 +1046,11 @@
   LAB.keys.on('mod+w', function () {
     var c = activeCtl();
     if (!c || !c.closeActive()) return false;      // no open tab: the global handler closes the window
+  }, { scope: 'code' });
+  LAB.keys.on('mod+shift+v', function () {
+    var c = activeCtl();
+    if (!c || !c.canPreview()) return false;
+    c.togglePreview();
   }, { scope: 'code' });
   LAB.keys.on('mod+b', function () {
     var c = activeCtl();

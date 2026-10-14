@@ -109,7 +109,7 @@ An AI teaching-video demonstration site for the Learning Analytics Tools course 
 | AI 教學影片（HLS）、封面、縮圖，以及每週的文字（繁體中文原文與簡中、英文、越南文翻譯） | 已公開，CC BY-NC-SA 4.0 |
 | Week 6 到 Week 16 | 依課程進度陸續開放 |
 | 學生作品展示（作品集） | 已上線，陸續加入學生同意公開的作品；著作權屬於各作者 |
-| 練習用的模擬電腦（課堂練習） | Mac 版、Windows 版都已上線（Week 3 的 10 個任務，可以直接選；終端機、系統設定、檔案管理都可以真的操作） |
+| 練習用的模擬電腦（課堂練習） | Mac 版、Windows 版都已上線，每週同一台電腦、換那週的任務：Week 3 有 10 個任務（終端機、Finder、Codex），Week 4 有 11 個（內建瀏覽器、GitHub、Mermaid、作業） |
 | 教學影片生成 prompt：每支影片的 `brief.md`、動態素材規格、三方案提案 | 規劃中，整理後公開 |
 | 製作經驗：逐輪審查紀錄與整理過的教訓 | 規劃中，整理後公開 |
 | 製作專案（場景程式、音訊腳本）與 mp4 原檔 | 目前不在這個 repo；repo 只放要公開的成品 |

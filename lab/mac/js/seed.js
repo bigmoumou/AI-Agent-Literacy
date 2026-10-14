@@ -58,7 +58,19 @@
     ];
   }
 
+  /* Week 4 (and later weeks) add their own starting files without touching the Week 3 tree: a module registers
+     LAB.seed.extend(function (root, h) {...}) while its script loads; build() runs the extenders on the finished tree,
+     so LAB.seed.tree / nodeAt / restore (and therefore api.ensureSeed) all know the extra files. h = {T, D, F, BIN}. */
+  var extenders = [];
+
   function build() {
+    var root = buildBase();
+    for (var i = 0; i < extenders.length; i++) {
+      try { extenders[i](root, { T: T, D: D, F: F, BIN: BIN }); } catch (e) { console.error('[seed] extender failed', e); }
+    }
+    return root;
+  }
+  function buildBase() {
     var appStub = function (m) { return { t: 'f', m: T(m), x: '', s: 0, k: 'app' }; };
     return D('2026-09-01 08:00', {
       'Applications': D('2026-09-01 08:00', {
@@ -143,6 +155,7 @@
   }
 
   LAB.seed = {
+    extend: function (fn) { if (typeof fn === 'function') extenders.push(fn); },
     imageUrl: imageUrl,
     photos: function () { return PHOTOS.map(function (ph) { return { name: ph[0], url: 'img/photos/' + ph[0], size: ph[2] }; }); },
     tree: function () { return build(); },

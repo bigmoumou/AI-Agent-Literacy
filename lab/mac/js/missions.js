@@ -53,6 +53,10 @@
   /* ------------------------------------------------------------ registry */
   missions.register = function (m) {
     var i;
+    // ?week=N (LAB.week, lab.js): only that week's missions are kept; a mission without a week is a Week 3 mission
+    // (a week that is not a course week in LAB.weekInfo, such as the 9 the tests use for their own missions, is always kept)
+    var mw = m.week || 3;
+    if (LAB.weekInfo && LAB.weekInfo[mw] && mw !== (LAB.week || 3)) return;
     for (i = 0; i < registry.length; i++) { if (registry[i].id === m.id) { registry.splice(i, 1); break; } }
     registry.push(m);
     registry.sort(function (a, b) { return (a.week - b.week) || (a.order - b.order); });
@@ -592,7 +596,7 @@
       ctl.push(link('釘住', 'pin', function () { LAB.layout.setRailMode('pinned'); }, { 'data-lab': 'rail-pin', title: '一直開著，點 Mac 時不收起' }));
     }
     var head = h('div', { class: 'lab-rail-head' },
-      h('a', { class: 'lab-rail-link', href: '../../weeks/week03/' }, '← Week 3'),
+      h('a', { class: 'lab-rail-link', href: (LAB.weekInfo && LAB.weekInfo[LAB.week] ? LAB.weekInfo[LAB.week].url : '../../weeks/week03/') }, '← ' + (LAB.weekLabel ? LAB.weekLabel() : 'Week 3')),
       h('span', { class: 'lab-rail-label' }, '練習用的 Mac'),
       h('span', { class: 'lab-rail-ctl' }, ctl));
 
@@ -1087,7 +1091,7 @@
   /* ------------------------------------------------------------ the picker (§19.2) */
   function sheetEyebrow(m) {
     var idx = registry.indexOf(m);
-    return '第 ' + (idx + 1) + ' 個任務' + (m.minutes ? ' · 約 ' + m.minutes + ' 分鐘' : '') + (m.tag ? ' · ' + (/Week/.test(m.tag) ? m.tag : 'Week 3 補充 1') : '');
+    return '第 ' + (idx + 1) + ' 個任務' + (m.minutes ? ' · 約 ' + m.minutes + ' 分鐘' : '') + (m.tag ? ' · ' + (/Week/.test(m.tag) || (LAB.week || 3) !== 3 ? m.tag : 'Week 3 補充 1') : '');
   }
   /* eyebrow, title, intro and the step to begin with: the start page of a mission */
   function announceNodes(m) {
@@ -1218,7 +1222,7 @@
     var check = greenCheck(Date.now() + 200);          // pops in a moment after the sheet, so it is seen
     var nodes = [
       h('div', { class: 'lab-ms-check', dataset: { lab: 'msheet-check' } }, check),
-      h('h1', { class: 'lab-ms-title', id: 'lab-msheet-t' }, allDone ? 'Week 3 的任務全部完成' : '任務 ' + (idx + 1) + ' 完成'),
+      h('h1', { class: 'lab-ms-title', id: 'lab-msheet-t' }, allDone ? (LAB.weekLabel ? LAB.weekLabel() : 'Week 3') + ' 的任務全部完成' :'任務 ' + (idx + 1) + ' 完成'),
       h('p', { class: 'lab-ms-intro', dataset: { lab: 'msheet-outro' } }, inline(m.outro || '這個任務完成了。', 'sheet-copy'))
     ];
     function toPicker() { swapView(sheet, pickListSpec({})); }

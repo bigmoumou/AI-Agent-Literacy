@@ -2508,11 +2508,14 @@
   function cmdGit(ctx) {
     var s = ctx.session, vfs = s.vfs, args = ctx.rawArgs.map(String), sub = args[0] || '';
     if (!sub || sub === '--help' || sub === 'help' || sub === '-h') {
-      ctx.out('usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]\n           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]\n           [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--no-lazy-fetch]\n           [--no-optional-locks] [--no-advice] [--bare] [--git-dir=<path>]\n           [--work-tree=<path>] [--namespace=<name>] [--config-env=<name>=<envvar>]\n           <command> [<args>]\n\nThese are common Git commands used in various situations:\n\nstart a working area (see also: git help tutorial)\n   clone     Clone a repository into a new directory\n   init      Create an empty Git repository or reinitialize an existing one\n\nwork on the current change (see also: git help everyday)\n   add       Add file contents to the index\n\nexamine the history and state (see also: git help revisions)\n   diff      Show changes between commits, commit and working tree, etc\n   log       Show commit logs\n   status    Show the working tree status\n\ngrow, mark and tweak your common history\n   branch    List, create, or delete branches\n   commit    Record changes to the repository\n   switch    Switch branches\n');
+      ctx.out('usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]\n           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]\n           [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--no-lazy-fetch]\n           [--no-optional-locks] [--no-advice] [--bare] [--git-dir=<path>]\n           [--work-tree=<path>] [--namespace=<name>] [--config-env=<name>=<envvar>]\n           <command> [<args>]\n\nThese are common Git commands used in various situations:\n\nstart a working area (see also: git help tutorial)\n   clone     Clone a repository into a new directory\n   init      Create an empty Git repository or reinitialize an existing one\n\nwork on the current change (see also: git help everyday)\n   add       Add file contents to the index\n\nexamine the history and state (see also: git help revisions)\n   diff      Show changes between commits, commit and working tree, etc\n   log       Show commit logs\n   status    Show the working tree status\n\ngrow, mark and tweak your common history\n   branch    List, create, or delete branches\n   commit    Record changes to the repository\n   switch    Switch branches\n' + (LAB.shell.gitExt ? LAB.shell.gitExt.collab : ''));
       return sub ? 0 : 1;
     }
     if (sub === '--version' || sub === 'version') { ctx.out('git version ' + GIT_VER + '\n'); return 0; }
     var rest = args.slice(1);
+    // Week 4: clone / remote / push / pull / fetch live in js/w4/gitremote.js (LAB.shell.gitExt); without it nothing here changes
+    var gx = LAB.shell.gitExt;
+    if (gx && gx.handles(sub)) return gx.run(sub, rest, ctx);
     if (sub === 'config') {
       var g = rest.filter(function (a) { return a !== '--global' && a !== '--local' && a !== '--system'; });
       if (g[0] === '--list' || g[0] === '-l') { var cf = termState.gitConfig; var lines = []; if (cf.name) lines.push('user.name=' + cf.name); if (cf.email) lines.push('user.email=' + cf.email); lines.push('core.autocrlf=true'); ctx.out(lines.join('\n') + '\n'); return 0; }
@@ -2552,6 +2555,7 @@
         return 0;
       }
       out.push('On branch ' + st.head);
+      if (gx && gx.upstream(st)) out.push(gx.upstream(st).replace(/\n$/, ''));
       if (!st.branches[st.head]) out.push('', 'No commits yet');
       if (L.staged.length) { out.push('', 'Changes to be committed:', st.branches[st.head] ? '  (use "git restore --staged <file>..." to unstage)' : '  (use "git rm --cached <file>..." to unstage)'); L.staged.forEach(function (e) { out.push('\t' + padR(e[0] + ':', 12) + e[1]); }); }
       if (L.unstaged.length) { out.push('', 'Changes not staged for commit:', '  (use "git add <file>..." to update what will be committed)', '  (use "git restore <file>..." to discard changes in working directory)'); L.unstaged.forEach(function (e) { out.push('\t' + padR(e[0] + ':', 12) + e[1]); }); }
@@ -2589,6 +2593,7 @@
       Object.keys(head).forEach(function (p) { if (!st.index[p]) { changed.push(p); del += lineCount(head[p].c); } });
       if (!changed.length) {
         var L2 = gitStatusLists(st, work), u2 = collapseUntracked(L2.untracked, st.index), o2 = ['On branch ' + st.head];
+        if (gx && gx.upstream(st)) o2.push(gx.upstream(st).replace(/\n$/, ''));
         if (!st.branches[st.head]) o2.push('', 'Initial commit');
         if (L2.unstaged.length) { o2.push('', 'Changes not staged for commit:', '  (use "git add <file>..." to update what will be committed)', '  (use "git restore <file>..." to discard changes in working directory)'); L2.unstaged.forEach(function (e) { o2.push('\t' + padR(e[0] + ':', 12) + e[1]); }); }
         if (u2.length) { o2.push('', 'Untracked files:', '  (use "git add <file>..." to include in what will be committed)'); u2.forEach(function (p) { o2.push('\t' + p); }); }
@@ -2615,6 +2620,7 @@
         var cm = st.commits[cid], refs = [];
         if (cnt === 0) refs.push('HEAD -> ' + st.head);
         Object.keys(st.branches).forEach(function (b) { if (st.branches[b] === cid && !(cnt === 0 && b === st.head)) refs.push(b); });
+        if (gx) gx.refsAt(st, cid).forEach(function (r) { refs.push(r); });
         var rtxt = refs.length ? ' (' + refs.join(', ') + ')' : '';
         if (one) logs.push(cid.slice(0, 7) + rtxt + ' ' + cm.msg);
         else { var dd = new Date(cm.ts); logs.push('commit ' + cid + rtxt + '\nAuthor: ' + cm.name + ' <' + cm.email + '>\nDate:   ' + DAY_EN[dd.getDay()].slice(0, 3) + ' ' + ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][dd.getMonth()] + ' ' + dd.getDate() + ' ' + two(dd.getHours()) + ':' + two(dd.getMinutes()) + ':' + two(dd.getSeconds()) + ' ' + dd.getFullYear() + ' +0800\n\n    ' + cm.msg + '\n'); }

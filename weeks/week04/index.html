@@ -306,6 +306,68 @@
       </ol>
     </section>
 
+
+    <!-- 課堂練習：不是影片，是在瀏覽器裡執行的模擬電腦（lab/mac/、lab/win/，前端而已）。
+         class 是 unit-lab：video.js 在清單上寫「練習 1」，縮圖用 data-thumb；沒有 <video>，所以沒有長度、觀看進度，
+         也不會被「下一支」自動打開。膠捲裡是左右兩台筆電（Mac｜Windows），點哪一台就在同一個分頁打開那一個練習。 -->
+    <section class="unit unit-lab" id="lab-mac" aria-labelledby="ulab-title" data-thumb="lab/thumb.jpg">
+      <h2 class="unit-title" id="ulab-title"><span class="unit-num" data-ui="video.lab" data-n="1">練習 1</span><span data-i18n
+        data-zh-hans="进入远程电脑"
+        data-en="Enter the Remote Computer"
+        data-vi="Vào máy tính từ xa">進入遠端電腦</span></h2>
+
+      <!-- 左右兩台筆電（Mac｜Windows）：滑鼠在哪一半，那一台就亮起來、螢幕掃過一道光（assets/video.js 的 labDuo、assets/week.css 的 .lab-duo）。
+           筆電外框是 CSS 畫的，螢幕裡是練習環境的截圖（lab/screen-mac.jpg、lab/screen-win.jpg，製作/lab-win/poster/make_screens.py 產生）。 -->
+      <div class="film">
+        <div class="player lab-duo">
+          <a class="lab-side" data-os="mac" href="../../lab/mac/?week=4" aria-label="進入遠端電腦（Mac）" data-i18n-attr="aria-label"
+            data-zh-hans="进入远程电脑（Mac）" data-en="Enter the remote computer (Mac)" data-vi="Vào máy tính từ xa (Mac)">
+            <span class="lp lp-mac" aria-hidden="true">
+              <span class="lp-lid"><span class="lp-screen"><img src="lab/screen-mac.jpg" alt="" width="1440" height="900" loading="lazy" decoding="async"><span class="lp-glint"></span></span><span class="lp-notch"></span></span>
+              <span class="lp-base"></span>
+            </span>
+            <span class="lab-cap" aria-hidden="true"><span class="lab-os">Mac</span><span class="lab-cta"><span data-ui="lab.go">進入遠端電腦</span><span class="arrow">→</span></span></span>
+          </a>
+          <a class="lab-side" data-os="win" href="../../lab/win/?week=4" aria-label="進入遠端電腦（Windows）" data-i18n-attr="aria-label"
+            data-zh-hans="进入远程电脑（Windows）" data-en="Enter the remote computer (Windows)" data-vi="Vào máy tính từ xa (Windows)">
+            <span class="lp lp-win" aria-hidden="true">
+              <span class="lp-lid"><span class="lp-screen"><img src="lab/screen-win.jpg" alt="" width="1440" height="900" loading="lazy" decoding="async"><span class="lp-glint"></span></span><span class="lp-cam"></span></span>
+              <span class="lp-base"></span>
+            </span>
+            <span class="lab-cap" aria-hidden="true"><span class="lab-os">Windows</span><span class="lab-cta"><span data-ui="lab.go">進入遠端電腦</span><span class="arrow">→</span></span></span>
+          </a>
+        </div>
+      </div>
+
+      <p class="lab-intro" data-i18n
+        data-zh-hans="这不是视频，而是一台在浏览器里打开的“远程电脑”，和 Week 3 是同一台，换成这周的任务，有 Mac 和 Windows 两种，选你平常用的那一种。外观和操作都像真的电脑，但只是练习用的，弄坏了随时重来，不会动到你自己的电脑。连线后先选一个任务（例如“clone：拿一份回家”），再照着任务卡一步一步做；要离开时，点画面上方中间的“中断连接”。每次进入都是一台全新的电脑；刷新页面或离开后，这次的进度不会留下。"
+        data-en="This is not a video. It is the same “remote computer” as in Week 3, with this week's missions, and it opens in your browser, in two kinds, Mac and Windows: pick the one you normally use. It looks and works like a real computer, but it is only for practice, so you can break things and start over without touching your own computer. After it connects, pick a mission (for example “clone：拿一份回家”, taking a copy home with clone), then follow the task card step by step; to leave, click “中斷連線” (Disconnect) at the top centre. Every visit starts a brand-new computer; if you refresh the page or leave, this visit’s progress is not kept."
+        data-vi="Đây không phải video mà là chiếc “máy tính từ xa” giống Week 3, đổi sang nhiệm vụ của tuần này, mở ngay trong trình duyệt, có hai loại Mac và Windows: hãy chọn loại bạn hay dùng. Trông và dùng giống máy thật nhưng chỉ để luyện tập, bạn cứ thoải mái làm hỏng rồi làm lại, không ảnh hưởng đến máy của bạn. Sau khi kết nối, hãy chọn một nhiệm vụ (ví dụ “clone：拿一份回家”, mang một bản về nhà bằng clone), rồi làm theo thẻ nhiệm vụ từng bước một; muốn rời đi, bấm “中斷連線” (Ngắt kết nối) ở giữa phía trên. Mỗi lần vào là một chiếc máy hoàn toàn mới; nếu tải lại trang hoặc rời đi, tiến độ lần này sẽ không được giữ lại.">這不是影片，而是一台在瀏覽器裡開啟的「遠端電腦」，和 Week 3 是同一台，換成這週的任務，有 Mac 和 Windows 兩種，選你平常用的那一種。外觀和操作都像真的電腦，但只是練習用的，弄壞了隨時重來，不會動到你自己的電腦。連線後先選一個任務（例如「clone：拿一份回家」），再照著任務卡一步一步做；要離開時，按畫面上方中間的「中斷連線」。每次進入都是一台全新的電腦；重新整理或離開後，這次的進度不會留下。</p>
+      <p class="lab-note" data-i18n
+        data-zh-hans="练习环境的画面是繁体中文；需要用鼠标和键盘操作，建议用电脑的浏览器打开，手机的屏幕太小。"
+        data-en="The practice environment is shown in Traditional Chinese. It needs a mouse and keyboard, so open it in a browser on a computer; a phone screen is too small."
+        data-vi="Giao diện của môi trường luyện tập là tiếng Trung phồn thể. Cần dùng chuột và bàn phím nên hãy mở bằng trình duyệt trên máy tính; màn hình điện thoại quá nhỏ.">練習環境的畫面是繁體中文；需要用滑鼠和鍵盤操作，建議用電腦的瀏覽器開啟，手機的螢幕太小。</p>
+
+      <ol class="points">
+        <li><p data-i18n
+          data-zh-hans="<strong>内置浏览器的四个任务：打开、看、改、查。</strong>请 Codex 打开浏览器（它会卡住一次，继续请它修好就好）、用手机宽度检查你的网站并只修乱版的地方、用 Annotate 框起来说一句话让它改、看公开网页并整理到 <code>notes.md</code> 附上网址。网站真的画在面板里，改的也是真的文件。"
+          data-en="<strong>Four built-in browser missions: open, look, edit, look up.</strong> Ask Codex to open the browser (it gets stuck once; just ask it to fix that), check your site at phone width and fix only the broken layout, frame a spot with Annotate and say what to change, and read a public page and summarise it in <code>notes.md</code> with the address. The site really renders in the panel, and the changes go into real files."
+          data-vi="<strong>Bốn nhiệm vụ trình duyệt tích hợp: mở, xem, sửa, tra.</strong> Nhờ Codex mở trình duyệt (nó sẽ bị kẹt một lần, cứ nhờ nó sửa), kiểm tra trang web ở độ rộng điện thoại và chỉ sửa chỗ vỡ bố cục, khoanh một chỗ bằng Annotate và nói muốn sửa gì, rồi xem một trang công khai và tóm tắt vào <code>notes.md</code> kèm địa chỉ. Trang web thật sự hiện trong bảng và các thay đổi ghi vào tệp thật."><strong>內建瀏覽器的四個任務：打開、看、改、查。</strong>請 Codex 打開瀏覽器（它會卡住一次，繼續請它修好就好）、用手機寬度檢查你的網站並只修跑版的地方、用 Annotate 框起來說一句話讓它改、看公開網頁並整理到 <code>notes.md</code> 附上網址。網站真的畫在面板裡，改的也是真的檔案。</p></li>
+        <li><p data-i18n
+          data-zh-hans="<strong>GitHub 的三个任务：clone、add＋commit＋push、pull。</strong>在 GitHub 网页复制仓库网址、拿一份回家；改一行、存成版本、送上云端，再到网页上看到新的版本；最后在网页上改一行，回来 <code>git pull</code>。Windows 版用 PowerShell 和 Edge。"
+          data-en="<strong>Three GitHub missions: clone, add + commit + push, pull.</strong> Copy the repository address on the GitHub page and take a copy home; change a line, save it as a version, send it to the cloud and see the new version on the page; then change a line on the page and come back to <code>git pull</code>. The Windows version uses PowerShell and Edge."
+          data-vi="<strong>Ba nhiệm vụ GitHub: clone, add + commit + push, pull.</strong> Sao chép địa chỉ kho trên trang GitHub và mang một bản về nhà; sửa một dòng, lưu thành phiên bản, gửi lên đám mây rồi xem phiên bản mới trên trang; cuối cùng sửa một dòng trên trang và quay lại <code>git pull</code>. Bản Windows dùng PowerShell và Edge."><strong>GitHub 的三個任務：clone、add＋commit＋push、pull。</strong>在 GitHub 網頁複製倉庫網址、拿一份回家；改一行、存成版本、送上雲端，再到網頁上看到新的版本；最後在網頁上改一行，回來 <code>git pull</code>。Windows 版用 PowerShell 和 Edge。</p></li>
+        <li><p data-i18n
+          data-zh-hans="<strong>Mermaid：在 Code 里边写边看图。</strong>打开 <code>ARCHITECTURE.md</code> 的预览，换方向、加方块、加菱形、在箭头上写字；故意打错一个全角符号，看错误信息怎么说。"
+          data-en="<strong>Mermaid: write and watch the diagram in Code.</strong> Open the preview of <code>ARCHITECTURE.md</code>, change the direction, add boxes and a diamond, write on an arrow; type one full-width symbol on purpose and see what the error says."
+          data-vi="<strong>Mermaid: vừa viết vừa xem sơ đồ trong Code.</strong> Mở bản xem trước của <code>ARCHITECTURE.md</code>, đổi hướng, thêm hộp, thêm hình thoi, ghi chữ trên mũi tên; cố ý gõ sai một ký hiệu toàn chiều rộng để xem thông báo lỗi nói gì."><strong>Mermaid：在 Code 裡邊寫邊看圖。</strong>打開 <code>ARCHITECTURE.md</code> 的預覽，換方向、加方塊、加菱形、在箭頭上寫字；故意打錯一個全形符號，看錯誤訊息怎麼說。</p></li>
+        <li><p data-i18n
+          data-zh-hans="<strong>作业三个任务：把上面全部串起来。</strong>建仓库、clone、搬文件、删掉个人资料再 push；画判断、确认 GitHub 上画得出图；用手机宽度检查网站、照清单检查，最后复制仓库网址。真正的作业要贴到课程 Discord 的交作业区。卡住时点任务卡上的“提示”。"
+          data-en="<strong>Three homework missions: put it all together.</strong> Create the repository, clone it, move the files, remove personal data and push; add a decision to the diagram and check that GitHub draws it; check the site at phone width, go through the checklist, and copy the repository address. The real homework goes into the course Discord submission channel. If you get stuck, click “提示” (Hint) on the task card."
+          data-vi="<strong>Ba nhiệm vụ bài tập: ghép tất cả lại.</strong> Tạo kho, clone, chuyển tệp, xóa thông tin cá nhân rồi push; thêm nhánh rẽ vào sơ đồ và kiểm tra GitHub vẽ được; kiểm tra trang ở độ rộng điện thoại, đối chiếu danh sách, cuối cùng sao chép địa chỉ kho. Bài tập thật nộp vào kênh nộp bài trên Discord của khóa học. Khi bị kẹt, bấm “提示” (Gợi ý) trên thẻ nhiệm vụ."><strong>作業三個任務：把上面全部串起來。</strong>建倉庫、clone、搬檔案、刪掉個人資料再 push；畫判斷、確認 GitHub 上畫得出圖；用手機寬度檢查網站、照清單檢查，最後複製倉庫網址。真正的作業要貼到課程 Discord 的交作業區。卡住時按任務卡上的「提示」。</p></li>
+      </ol>
+    </section>
+
     <nav class="pager" id="pager" data-week="4" aria-label="其他週次" data-ui-attr="aria-label:pager.label"></nav>
   </main>
 

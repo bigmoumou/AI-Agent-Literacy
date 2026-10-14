@@ -62,7 +62,19 @@
     ];
   }
 
+  /* Week 4 (and later weeks) add their own starting files without touching the Week 3 tree: a module registers
+     LAB.seed.extend(function (root, h) {...}) while its script loads; build() runs the extenders on the finished tree,
+     so LAB.seed.tree / nodeAt / restore (and therefore api.ensureSeed) all know the extra files. h = {T, D, F, BIN}. */
+  var extenders = [];
+
   function build() {
+    var root = buildBase();
+    for (var i = 0; i < extenders.length; i++) {
+      try { extenders[i](root, { T: T, D: D, F: F, BIN: BIN }); } catch (e) { console.error('[seed] extender failed', e); }
+    }
+    return root;
+  }
+  function buildBase() {
     // the 10 standard folders nobody touched: all created in the same minute when the account was made (win-facts §4.3)
     var stub = function () { return D('2026-09-07 11:42', {}); };
     return D('2026-09-01 08:00', {
@@ -137,6 +149,7 @@
   }
 
   LAB.seed = {
+    extend: function (fn) { if (typeof fn === 'function') extenders.push(fn); },
     /* the picture behind a fake photo: file name or internal path (plus the byte size, when the caller has it) -> 'img/photos/xxx.jpg' relative to
        the page, or null. Name first (a moved copy keeps its name); then the size, which a renamed copy keeps ("lake-view - 複製.jpg"). A path that
        starts with / is looked up in the VFS for its size when no size is given. */

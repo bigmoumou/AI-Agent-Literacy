@@ -23,7 +23,7 @@
 <noscript><style>#lab-connect { display: none !important; }</style></noscript>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>練習用的 Mac｜學習分析工具</title>
-<meta name="description" content="在瀏覽器裡練習 Week 3：一台練習用的 Mac，可以操作終端機、Finder，並把資料夾拖進 Codex。這是教學模擬，不是真的 Mac。">
+<meta name="description" content="在瀏覽器裡練習每週的操作：一台練習用的 Mac，可以操作終端機、Finder、Codex、Safari 和 Code。這是教學模擬，不是真的 Mac。">
 <meta name="robots" content="noindex">
 <meta name="author" content="JUNHAO CHEN">
 <meta name="copyright" content="© 2026 JUNHAO CHEN">
@@ -42,6 +42,12 @@
 <link rel="stylesheet" href="css/codex.css">
 <link rel="stylesheet" href="css/editors.css">
 <link rel="stylesheet" href="css/sysapps.css">
+<script>
+  // Week 4（網址有 ?week=4）才載入的樣式；Week 3 一個位元組都不會多載（製作/lab-week4/SPEC.md §5.1）
+  if (/[?&]week=4(&|$)/.test(location.search) || /[?&]mission=w4-/.test(location.search)) {
+    ['w4-code', 'w4-github', 'w4-cxbrowser'].forEach(function (n) { document.write('<link rel="stylesheet" href=\x27css/' + n + '.css\x27>'); });
+  }
+</script>
 <!-- 多語系要比其他程式先載入（不要 defer）；練習版只有繁體中文，boot.js 會把 <html lang> 鎖回 zh-Hant -->
 <script src="../../assets/i18n-strings.js"></script>
 <script src="../../assets/i18n.js"></script>
@@ -112,6 +118,15 @@
 <script src="js/sysapps.js"></script>
 <script src="js/remote.js"></script>
 <script src="js/missions-week3.js"></script>
+<script>
+  // Week 4 的模組（LAB.week 由 lab.js 讀 ?week=）。順序固定：seed4 → markdown → mermaid → web → museum → github → github-pages → gitremote → cxbrowser → intents4 → 各組任務
+  if (window.LAB && LAB.week === 4) {
+    ['seed4', 'markdown', 'mermaid', 'web', 'museum', 'github', 'github-pages', 'gitremote', 'cxbrowser', 'intents4',
+      'missions-browser', 'missions-github', 'missions-mermaid', 'missions-hw'].forEach(function (n) {
+      document.write('<script src=\x27js/w4/' + n + '.js\x27><\/script>');
+    });
+  }
+</script>
 <script src="js/boot.js"></script>
 </body>
 </html>

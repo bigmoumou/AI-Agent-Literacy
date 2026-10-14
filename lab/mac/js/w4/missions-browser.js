@@ -1,0 +1,445 @@
+/* missions-browser.js — Week 4 missions 1–4: the built-in browser of Codex (Week 4 videos 01 and 02). Loaded only for ?week=4.
+   SPEC §4.1–4.4 (with the owner's decisions of 2026-10-14: no Adjust step, and the stuck step says "errors are normal, keep asking
+   the AI"). Data only: it calls LAB.missions.register and uses the mission api (DESIGN §5.1) plus the events of SPEC §6.
+   Every sentence the student reads is Traditional Chinese (Taiwan usage); file names stay English. */
+(function (LAB) {
+  'use strict';
+  if (!LAB.missions) return;
+
+  var W4 = LAB.w4 = LAB.w4 || {};
+  var DESKTOP = '/Users/an/Desktop';
+  var FM = W4.FM || (DESKTOP + '/Firenze-Museums');
+  var SITE = FM + '/site';
+  var HTML = SITE + '/index.html';
+  var CSS = SITE + '/style.css';
+  var NOTES = FM + '/notes.md';
+
+  var GROUP = '內建瀏覽器（影片 01、02）';
+  var TAG_V1 = 'Week 4 影片 01';
+  var TAG_V2 = 'Week 4 影片 02';
+
+  /* ------------------------------------------------------------------ helpers */
+  function same(api, a, b) { try { return !!api.same(a, b); } catch (e) { return false; } }
+  function isNullish(v) { return v === null || v === undefined; }
+  function cxb(api) { return api.cxb || LAB.cxbrowser; }
+
+  function ensureBase4(api) {
+    api.ensureSeed(DESKTOP);
+    api.ensureSeed(FM);
+    api.ensureSeed(FM + '/AGENTS.md');
+    api.ensureSeed(FM + '/ARCHITECTURE.md');
+    api.ensureSeed(FM + '/data');
+    api.ensureSeed(SITE);
+    api.ensureSeed(HTML);
+    api.ensureSeed(CSS);
+  }
+  /* the web page with the layout problem comes back (a student who changed it, or Codex's fix from an earlier mission, is undone) */
+  function freshSite(api) {
+    api.ensureSeed(SITE, { overwrite: true });
+  }
+  function projectList(api) {
+    try { var st = api.codex && api.codex.state ? api.codex.state() : null; return st && st.projects ? st.projects : []; } catch (e) { return []; }
+  }
+  function hasProject(api, path) { return projectList(api).some(function (p) { return same(api, p.path, path); }); }
+  /* Firenze-Museums is a trusted Codex project (select: the project's chat is the open one, so a comment sent from the panel goes into it) */
+  function ensureProject(api, select) {
+    if (!api.codex || !api.codex.addProject || !api.exists(FM)) return;
+    try {
+      if (!hasProject(api, FM) || select) api.codex.addProject(FM, { trust: true, select: !!select });
+    } catch (e) { /* ignore */ }
+  }
+  function resetBrowser(api) {
+    var b = cxb(api);
+    try { if (b && b.reset) b.reset(); } catch (e) { /* ignore */ }
+  }
+  var NOT_IN_PROJECT = '這個對話不在 Firenze-Museums 底下（輸入框上方沒有「Firenze-Museums」標籤），所以它找不到專案裡的網站。點 Codex 左邊的 Firenze-Museums，在專案底下再試一次。';
+  function replyIs(ids) {
+    return function (d) { return !!d && ids.indexOf(d.intent) >= 0; };
+  }
+  function codexWrote(api, path) {
+    return !!api.seen('fs:change', function (d) { return d.by === 'codex' && same(api, d.path, path); });
+  }
+
+  /* ------------------------------------------------------------------ cue targets (DESIGN §19.4): only READ the page */
+  function dock(app) { return '[data-lab=dock-item][data-app=' + app + ']'; }
+  function liveWins(appId) {
+    var l = [];
+    try { l = LAB.wm.byApp(appId).filter(function (w) { return !w.minimized; }); } catch (e) { l = []; }
+    return l;
+  }
+  function seeable(el) {
+    if (!el || !el.getBoundingClientRect) return false;
+    var r = el.getBoundingClientRect();
+    if (r.width < 2 || r.height < 2) return false;
+    var t = null;
+    try { t = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); } catch (e) { t = null; }
+    return !!t && (t === el || el.contains(t));
+  }
+  function byPath(root, lab, path) {
+    if (!root) return null;
+    if (path === null || path === undefined) return root.querySelector('[data-lab="' + lab + '"]');
+    var want = String(path).toLowerCase();
+    var list = root.querySelectorAll('[data-lab="' + lab + '"]');
+    for (var i = 0; i < list.length; i++) {
+      var p = list[i].getAttribute('data-path');
+      if (p && p.toLowerCase() === want) return list[i];
+    }
+    return null;
+  }
+  function inWins(appId, lab, path) {
+    return function () {
+      var l = liveWins(appId), first = null, i, el;
+      for (i = l.length - 1; i >= 0; i--) {
+        el = byPath(l[i].el, lab, path);
+        if (!el) continue;
+        if (seeable(el)) return el;
+        if (!first) first = el;
+      }
+      return first;
+    };
+  }
+  function chain() {
+    var parts = [].slice.call(arguments);
+    return function (api) {
+      var fallback = null;
+      for (var i = 0; i < parts.length; i++) {
+        var part = parts[i], el = null;
+        try { el = typeof part === 'function' ? part(api) : document.querySelector(part); } catch (e) { el = null; }
+        if (!el) continue;
+        if (seeable(el)) return el;
+        if (!fallback) fallback = el;
+      }
+      return fallback;
+    };
+  }
+  function fdItem(p) { return inWins('finder', 'fd-item', p); }
+  function fdSide(p) { return inWins('finder', 'fd-sidebar-item', p); }
+  function finderWalk(paths, side) {
+    return chain.apply(null, paths.map(fdItem).concat([fdSide(side || DESKTOP), dock('finder')]));
+  }
+  var cxComposer = inWins('codex', 'cx-composer');
+  var cxProject = inWins('codex', 'cx-project', FM);
+  var T_COMPOSER = chain(cxComposer, cxProject, dock('codex'));
+  var T_PROJECT = chain(cxProject, dock('codex'));
+  var T_ANNOTATE = chain('[data-lab=cxb-annotate]', dock('codex'));
+  var T_PHONE = chain('[data-lab=cxb-viewport-btn][data-mode=phone]', dock('codex'));
+  var T_DESKTOP = chain('[data-lab=cxb-viewport-btn][data-mode=desktop]', dock('codex'));
+  var T_SAFARI_ADDR = chain('[data-lab=sf-address]', dock('safari'));
+
+  /* ================================================================== 1 · 打開內建瀏覽器 */
+  LAB.missions.register({
+    id: 'w4-01-open',
+    week: 4, order: 1,
+    group: GROUP,
+    tag: TAG_V1,
+    title: '打開內建瀏覽器',
+    minutes: 6,
+    resetsFiles: true,
+    needs: [FM],
+    intro: 'Codex 自己帶了一個瀏覽器。你和 Codex 在對話旁邊看同一個網頁，它可以幫你開網頁、點按鈕、打字。這個任務先把它叫出來，再看看它卡住的時候要怎麼辦：不一定每次都順利，遇到錯誤很正常。',
+    prepare: function (api) {
+      ensureBase4(api);
+      freshSite(api);
+      ensureProject(api, false);
+      resetBrowser(api);
+      cxb(api).armStuck(true);                 // only this mission makes the first request for site/index.html get stuck
+    },
+    steps: [
+      {
+        id: 's1',
+        text: '點 Dock 上的「Codex」，再點左邊側邊欄的 Firenze-Museums，在專案底下開始對話。',
+        hint: '輸入框上方要看到「Firenze-Museums」這個標籤，代表這個對話在專案裡（Week 3 學過）。',
+        answer: '點一下 Dock 上的「Codex」，再點側邊欄的 Firenze-Museums。',
+        target: T_PROJECT,
+        check: function (ev, api) {
+          return !!api.seen('codex:select-project', function (d) { return same(api, d.path, FM); });
+        }
+      },
+      {
+        id: 's2',
+        text: '請 Codex 打開內建瀏覽器：點「複製」，貼進輸入框，再按 Return（Windows 鍵盤是 Enter）。[[打開內建瀏覽器，並隨意搜尋做測試]]',
+        hint: '這就是影片 01 示範的那一句。送出之後，Codex 視窗右邊會多出一個瀏覽器面板，由 Codex 幫你操作網頁。',
+        answer: '把那句貼到輸入框，按 Return。',
+        target: T_COMPOSER,
+        check: function (ev, api) {
+          return !!(api.seen('codex:reply', replyIs(['browser_open'])) && api.seen('cxbrowser:open'));
+        },
+        trap: function (ev, api) {
+          if (!ev || ev.name !== 'codex:reply' || !ev.data) return null;
+          if (ev.data.intent !== 'browser_open') return '這一步要請它打開內建瀏覽器：把上面那句話原樣貼進輸入框（句子裡要有「內建瀏覽器」和「打開」）。';
+          return null;
+        }
+      },
+      {
+        id: 's3',
+        text: '接著請它打開你專案裡的網站：[[請用內建瀏覽器打開 site/index.html]]',
+        hint: 'site/index.html 是 Week 3 做的展示網站。這一步它多半會卡住，這是故意安排的，跟影片 01 一樣：不一定每次都順利，遇到錯誤很正常。',
+        answer: '貼上那句，按 Return。',
+        target: T_COMPOSER,
+        check: function (ev, api) {
+          return !!(api.seen('codex:reply', replyIs(['browser_stuck'])) && api.seen('cxbrowser:stuck'));
+        },
+        trap: function (ev, api) {
+          if (!ev || ev.name !== 'codex:reply' || !ev.data) return null;
+          var d = ev.data;
+          if ((d.intent === 'browser_stuck' || d.intent === 'browser_open_site') && isNullish(d.projectPath)) return NOT_IN_PROJECT;
+          return null;
+        }
+      },
+      {
+        id: 's4',
+        text: '它說卡在哪裡了？遇到錯誤不用怕，繼續請 AI 幫忙就好：回它一句話，請它自己想辦法修好，再繼續。',
+        hint: '想一想：如果是你，會怎麼回它？不用自己修，也不用看懂那個檔名；把問題交還給它，請它修好之後繼續剛剛的事。',
+        answer: '貼上這句，按 Return：[[請幫我修復無法開啟瀏覽器的問題，修好之後繼續打開 site/index.html]]',
+        target: T_COMPOSER,
+        check: function (ev, api) {
+          return !!(api.seen('codex:reply', replyIs(['browser_fix'])) &&
+            api.seen('cxbrowser:open', function (d) { return d.kind === 'file' && /\/site\/index\.html$/i.test(String(d.url || '')); }));
+        },
+        trap: function (ev, api) {
+          if (!ev || ev.name !== 'codex:reply' || !ev.data) return null;
+          if (ev.data.intent === 'browser_stuck') return null;            // the reply that just finished step 3
+          if (ev.data.intent !== 'browser_fix') return '它還卡在同一個地方。請它自己修好，再繼續剛剛的事。';
+          return null;
+        }
+      },
+      {
+        id: 's5',
+        text: '看右邊的網頁：這是你專案裡的 site/index.html。到 Finder 找到它在哪裡。',
+        hint: '瀏覽器網址列寫的就是這個檔案的位置。專案資料夾在桌面：桌面 › Firenze-Museums › site。',
+        answer: 'Finder › 桌面 › Firenze-Museums › site。',
+        target: finderWalk([SITE, FM]),
+        check: function (ev, api) {
+          return !!api.seen('finder:navigate', function (d) { return same(api, d.path, SITE); });
+        }
+      }
+    ],
+    outro: 'Codex 自己帶了瀏覽器，可以直接幫你開網頁。卡住時它會說卡在哪裡，你只要請它自己修好，再繼續；遇到錯誤很正常，繼續請 AI 幫忙就好。內建瀏覽器用的設定檔和你平常的瀏覽器分開，不會共用你的分頁和登入。'
+  });
+
+  /* ================================================================== 2 · 看：用手機的寬度檢查網站 */
+  LAB.missions.register({
+    id: 'w4-02-look',
+    week: 4, order: 2,
+    group: GROUP,
+    tag: TAG_V2,
+    title: '看：用手機的寬度檢查網站',
+    minutes: 7,
+    resetsFiles: true,
+    needs: [FM],
+    intro: '做好的網站，在手機上常常會跑版：字超出卡片、東西擠在一起。請 Codex 用內建瀏覽器，用手機的寬度幫你看一遍，有問題再請它修。',
+    prepare: function (api) {
+      ensureBase4(api);
+      freshSite(api);
+      ensureProject(api, false);
+      resetBrowser(api);
+    },
+    steps: [
+      {
+        id: 's1',
+        text: '在 Codex 點 Firenze-Museums，請它用手機的寬度檢查網站，但先不要改：[[請用內建瀏覽器打開 site/index.html，用手機的寬度看一遍，告訴我哪裡跑版，先不要改]]',
+        hint: '手機寬度大約是 390 像素。Codex 會自己打開網頁、切換寬度，再告訴你它看到什麼。',
+        answer: '貼上那句，按 Return。',
+        target: T_COMPOSER,
+        check: function (ev, api) {
+          return !!(api.seen('codex:reply', replyIs(['browser_check_mobile', 'browser_fix_layout'])) &&
+            api.seen('cxbrowser:measure', function (d) { return d.mode === 'phone' && d.overflow > 0 && d.by === 'codex'; }));
+        },
+        trap: function (ev, api) {
+          if (!ev || ev.name !== 'codex:reply' || !ev.data) return null;
+          var d = ev.data;
+          if (isNullish(d.projectPath) && /^browser_/.test(d.intent)) return NOT_IN_PROJECT;
+          if (d.intent === 'browser_open_site' || d.intent === 'browser_open') return '它只打開了網頁，沒有用手機的寬度看。這一步要請它用手機的寬度（句子裡有「手機」）看一遍。';
+          return null;
+        }
+      },
+      {
+        id: 's2',
+        text: '看右邊手機寬度的畫面和 Codex 的回報，再請它修：[[只修跑版的地方，修好之後再看一次確認]]',
+        hint: '跑版就是字超出卡片、東西擠在一起、要左右捲動才看得到。請它只修這些，其他設計不要動。',
+        answer: '貼上那句，按 Return。',
+        target: T_COMPOSER,
+        replay: 'mission',
+        check: function (ev, api) {
+          return !!(api.seen('codex:reply', replyIs(['browser_fix_layout', 'browser_check_mobile'])) &&
+            api.seen('cxbrowser:measure', function (d) { return d.mode === 'phone' && d.overflow === 0 && d.by === 'codex'; }) &&
+            codexWrote(api, CSS));
+        },
+        trap: function (ev, api) {
+          if (!ev || ev.name !== 'codex:reply' || !ev.data) return null;
+          if (isNullish(ev.data.projectPath) && /^browser_/.test(ev.data.intent)) return NOT_IN_PROJECT;
+          return null;
+        }
+      },
+      {
+        id: 's3',
+        text: '打開 site/style.css，看 Codex 到底改了什麼。',
+        hint: 'Codex 通常會在檔案最後面加一段只給小螢幕用的設定（`@media`）。用 Code（影片裡的 VS Code）或文字編輯打開都可以。',
+        answer: 'Finder › 桌面 › Firenze-Museums › site › 點兩下 style.css。',
+        target: finderWalk([CSS, SITE, FM]),
+        check: function (ev, api) {
+          return !!api.seen('editor:open', function (d) { return same(api, d.path, CSS); });
+        }
+      },
+      {
+        id: 's4',
+        optional: true,
+        text: '自己再看一次：按瀏覽器面板上的「Desktop」，切回電腦的寬度，確認電腦上的樣子沒有被改壞。',
+        hint: '修手機的時候，不能把電腦上原本好好的樣子改壞。（這個寬度按鈕是練習版加的。）',
+        answer: '點瀏覽器面板上的「Desktop」。',
+        target: T_DESKTOP,
+        check: function (ev, api) {
+          return !!api.seen('cxbrowser:viewport', function (d) { return d.mode === 'desktop' && d.by === 'user'; });
+        }
+      }
+    ],
+    outro: 'Codex 會自己打開網頁、換成手機寬度、發現問題、修好，再看一次確認。你的工作是看它改了什麼：只改跑版的地方，其他不動。'
+  });
+
+  /* ================================================================== 3 · 改：框起來，用說的就好 */
+  LAB.missions.register({
+    id: 'w4-03-edit',
+    week: 4, order: 3,
+    group: GROUP,
+    tag: TAG_V2,
+    title: '改：框起來，用說的就好',
+    minutes: 6,
+    resetsFiles: true,
+    needs: [FM],
+    intro: '不會寫程式也能改設計：在網頁上框出想改的地方，用一句話說明，Codex 就照著改。這個任務練習瀏覽器面板上的 Annotate（標註）。瀏覽器已經幫你打開了。',
+    prepare: function (api) {
+      ensureBase4(api);
+      freshSite(api);
+      resetBrowser(api);
+      ensureProject(api, true);                // the Firenze-Museums chat is the open one
+      cxb(api).open({ target: HTML, by: 'system' });
+    },
+    steps: [
+      {
+        id: 's1',
+        text: '按瀏覽器面板工具列上的「Annotate」，進入標註模式。',
+        hint: '進入之後，滑鼠移到網頁上會出現一個框，表示可以選這個地方。',
+        answer: '點一下工具列上的「Annotate」。',
+        target: T_ANNOTATE,
+        check: function (ev, api) {
+          return !!api.seen('cxbrowser:annotate-mode', function (d) { return d.on === true; });
+        }
+      },
+      {
+        id: 's2',
+        text: '點一下網頁最上面的大標題。',
+        hint: '點一個元素，或是拖出一個範圍都可以。選好之後旁邊會出現留言框。',
+        answer: '點一下「佛羅倫斯美術館」那行大字。',
+        check: function (ev, api) {
+          return !!api.seen('cxbrowser:annotate-select');
+        },
+        trap: function (ev, api) {
+          if (!ev || ev.name !== 'cxbrowser:annotate-select' || !ev.data) return null;
+          return null;
+        }
+      },
+      {
+        id: 's3',
+        text: '在留言框裡寫一句話，按 Send：[[標題字太小，改大一點]]',
+        hint: '留言框裡寫你想要的樣子，例如「字太小」「這兩張卡片靠太近」。你選的那個元素會跟著留言一起交給 Codex，所以不用解釋是哪一個。',
+        answer: '把那句貼到留言框，按 Send。',
+        target: chain('[data-lab=cxb-comment-input]', '[data-lab=cxb-annotate]'),
+        check: function (ev, api) {
+          return !!(api.seen('codex:reply', replyIs(['annotate_edit'])) && codexWrote(api, CSS));
+        },
+        trap: function (ev, api) {
+          if (ev && ev.name === 'cxbrowser:annotate-select' && ev.data && ev.data.tag !== 'h1') {
+            return '你選的是「' + (ev.data.text || ev.data.selector || '').slice(0, 24) + '」（' + ev.data.selector + '），沒關係，下一步的留言會改這個地方。想改標題的話，再點一下最上面的大標題。';
+          }
+          if (ev && ev.name === 'codex:reply' && ev.data && ev.data.intent === 'annotate_edit' && !codexWrote(api, CSS)) {
+            return 'Codex 還不確定你想怎麼改。留言寫得更具體一點，例如「標題字太小，改大一點」，再框一次、按 Send。';
+          }
+          return null;
+        }
+      },
+      {
+        id: 's4',
+        text: '看右邊的網頁：標題變大了嗎？再打開 site/style.css，找到 h1 那一段，看 Codex 改了什麼。',
+        hint: '它只改你框起來的那一個地方，其他地方沒有動。',
+        answer: '點兩下 site/style.css（Finder 或 Code），找 `h1`。',
+        target: finderWalk([CSS, SITE, FM]),
+        check: function (ev, api) {
+          return !!api.seen('editor:open', function (d) { return same(api, d.path, CSS); });
+        }
+      }
+    ],
+    outro: 'Annotate：點元素、寫留言、送出，Codex 就知道你指的是哪裡。如果想先試試看再決定，內建瀏覽器還有 Adjust 可以先預覽，不滿意再取消。'
+  });
+
+  /* ================================================================== 4 · 查：整理公開網頁，附上網址 */
+  LAB.missions.register({
+    id: 'w4-04-lookup',
+    week: 4, order: 4,
+    group: GROUP,
+    tag: TAG_V2,
+    title: '查：整理公開網頁，附上網址',
+    minutes: 6,
+    resetsFiles: true,
+    needs: [FM],
+    intro: 'Codex 可以幫你看公開網頁：開頁面、點分頁、往下捲、讀完整理成筆記。網頁上寫的不一定可靠，所以一定要附來源。練習版的網頁是一間虛構的美術館。',
+    prepare: function (api) {
+      ensureBase4(api);
+      ensureProject(api, false);
+      api.remove(NOTES);
+      resetBrowser(api);
+    },
+    steps: [
+      {
+        id: 's1',
+        text: '在 Firenze-Museums 的對話裡，請 Codex 去看這間美術館的官網，把開放時間和票價整理到 notes.md，並附上網址：[[請用內建瀏覽器打開 https://museo-esempio.example，點 Visit 分頁，把開放時間和票價整理到 notes.md，並附上網址]]',
+        hint: 'Codex 會自己開網頁、點分頁、往下捲、讀內容。練習版的網站是虛構的，資料都是假的。',
+        answer: '貼上那句，按 Return。',
+        target: T_COMPOSER,
+        check: function (ev, api) {
+          return !!(api.seen('codex:reply', replyIs(['browser_lookup'])) && api.exists(NOTES));
+        },
+        trap: function (ev, api) {
+          if (!ev || ev.name !== 'codex:reply' || !ev.data) return null;
+          var d = ev.data;
+          if (d.intent === 'browser_lookup' && !api.exists(NOTES)) return '這個對話不在 Firenze-Museums 底下，或網頁打不開，所以沒有寫出 notes.md。點 Codex 左邊的 Firenze-Museums，在專案底下再試一次。';
+          return null;
+        }
+      },
+      {
+        id: 's2',
+        text: '打開 notes.md，看 Codex 整理了什麼：每一條資料有沒有附上網址？',
+        hint: '查來的資料要附來源，之後才查得到它從哪裡來。',
+        answer: 'Finder › 桌面 › Firenze-Museums › 點兩下 notes.md。',
+        target: finderWalk([NOTES, FM]),
+        check: function (ev, api) {
+          return !!api.seen('editor:open', function (d) { return same(api, d.path, NOTES); });
+        }
+      },
+      {
+        id: 's3',
+        text: '網頁上寫的不一定可靠，自己點開來源看一次：把 notes.md 裡的網址複製起來，貼到 Safari 的網址列，按 Return。',
+        hint: 'Safari 在 Dock 上，圖示是指南針，網址列在視窗最上面。Codex 整理得再好，也要自己看一次原始網頁。',
+        answer: 'Safari 網址列貼上 `https://museo-esempio.example/visit`，Return。',
+        target: chain(T_SAFARI_ADDR, dock('safari')),
+        check: function (ev, api) {
+          return !!api.seen('web:visit', function (d) {
+            return d.host === 'museo-esempio.example' && /^\/visit/.test(String(d.path || '')) && d.via === 'safari';
+          });
+        }
+      },
+      {
+        id: 's4',
+        text: '看看網頁最下面寫的最後更新日期，請 Codex 把它補進筆記：[[請在 notes.md 補上這個網頁最後更新的日期]]',
+        hint: '資料可能已經過時，所以日期也要記下來。',
+        answer: '回到 Codex，貼上那句，按 Return。',
+        target: T_COMPOSER,
+        check: function (ev, api) {
+          if (!api.seen('codex:reply', replyIs(['notes_update']))) return false;
+          var t = api.read(NOTES);
+          return !!(t && t.indexOf('2025') >= 0);
+        }
+      }
+    ],
+    outro: '查資料的三件事：讓 Codex 去讀、請它附上網址、自己點開來源看一次。需要用你已經登入的網頁（例如學校系統）時，內建瀏覽器幫不上忙，要改用瀏覽器擴充功能。'
+  });
+})(window.LAB);

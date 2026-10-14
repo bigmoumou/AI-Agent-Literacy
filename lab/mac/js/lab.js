@@ -3,6 +3,26 @@ window.LAB = window.LAB || {};
 (function (LAB) {
   'use strict';
 
+  /* ------------------------------------------------------------------ week (Week 4 spec §5.1)
+     ?week=4 (or ?mission=w4-…) selects the Week 4 missions; anything else is Week 3, exactly as before. It is read here, at script
+     evaluation time, because missions register themselves while the scripts load (before boot.js reads the other flags). The
+     parameter stays in the address, so a reload is still Week 4. */
+  var WEEK_INFO = {
+    3: { week: 3, label: 'Week 3', url: '../../weeks/week03/', back: '../../weeks/week03/#lab-mac' },
+    4: { week: 4, label: 'Week 4', url: '../../weeks/week04/', back: '../../weeks/week04/#lab-mac' }
+  };
+  function pickWeek() {
+    var q = '';
+    try { q = String(window.location.search || ''); } catch (e) { q = ''; }
+    var m = /[?&]week=(\d+)(?:&|$)/.exec(q);
+    if (m && WEEK_INFO[+m[1]]) return +m[1];
+    if (/[?&]mission=w4-/.test(q)) return 4;
+    return 3;
+  }
+  LAB.week = pickWeek();
+  LAB.weekInfo = WEEK_INFO;
+  LAB.weekLabel = function () { return WEEK_INFO[LAB.week].label; };
+
   /* ------------------------------------------------------------------ util */
   var uidCounters = Object.create(null);
 

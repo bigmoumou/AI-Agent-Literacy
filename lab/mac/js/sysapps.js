@@ -834,7 +834,7 @@
       strip);
   }
   function remindersWidget() {
-    var items = ['交 Week 3 作業', '把 Project 資料夾整理好', '預習 Week 4 的內容'];
+    var items = LAB.week === 4 ? ['交 Week 4 作業', '把作業放上 GitHub', '預習 Week 5 的內容'] : ['交 Week 3 作業', '把 Project 資料夾整理好', '預習 Week 4 的內容'];
     var box = h('div', { class: 'sy-tile sy-nc-w sy-nc-rem', dataset: { lab: 'nc-reminders' } });
     var count = h('span', { class: 'sy-rem-n' });
     box.appendChild(h('div', { class: 'sy-rem-head' }, h('span', { class: 'sy-rem-t' }, '提醒事項'), count));
@@ -1936,6 +1936,8 @@
     }
     var m = /^[a-z][a-z0-9+.\-]*:\/\/(?:[^@\/?#]*@)?([^\/?#:]*)(?::\d+)?([^?#]*)/i.exec(url) || [];
     var host = (m[1] || '').toLowerCase().replace(/^www\./, '');
+    // Week 4: an address that LAB.web has a page for (github.com, the museum site) is drawn by LAB.web; without LAB.web nothing changes
+    if (LAB.web && LAB.web.has(url)) return { kind: 'web', url: url, host: host, path: m[2] || '' };
     var kind = host === 'example.com' || host === 'example.org' || host === 'example.net' ? 'example' : 'offline';
     return { kind: kind, url: url, host: host, path: m[2] || '' };
   }
@@ -1973,6 +1975,7 @@
     function titleFor(p) {
       if (p.kind === 'start') return '起始頁面';
       if (p.kind === 'example') return 'Example Domain';
+      if (p.kind === 'web') return state.wifi ? (LAB.web.titleFor(p.url) || p.host) : '未連接網際網路';
       if (p.kind === 'search') return p.query;
       return state.wifi ? '練習版瀏覽器' : '未連接網際網路';
     }
@@ -1996,6 +1999,10 @@
         return h('div', { class: 'sy-sf-off', dataset: { lab: 'sf-offline', kind: 'nonet' } }, h('h1', null, '您未連接網際網路'),
           h('p', null, 'Safari 無法開啟這個頁面，因為這台 Mac 沒有連接網際網路。'),
           h('p', null, link('打開 Wi-Fi 設定', 'about:wifi')));
+      }
+      if (p.kind === 'web') {
+        var webNode = LAB.web.build(p.url, { via: 'safari', winId: win ? win.id : null, navigate: navigate, reload: function () { loadBar(); render(); } });
+        if (webNode) return webNode;
       }
       if (p.kind === 'example') {
         return h('div', { class: 'sy-ex', dataset: { lab: 'sf-example' } }, h('div', null, h('h1', null, 'Example Domain'),
@@ -2024,7 +2031,7 @@
       page.scrollTop = 0;
       page.classList.toggle('is-grey', t.p.kind === 'example' && state.wifi);
       addr.value = sfDisplay(t.p);
-      lockIc.hidden = !(t.p.kind === 'example' || (t.p.kind === 'offline' && /^https:/i.test(t.p.url)));
+      lockIc.hidden = !(t.p.kind === 'example' || ((t.p.kind === 'offline' || t.p.kind === 'web') && /^https:/i.test(t.p.url)));
       back.disabled = t.hi <= 0; fwd.disabled = t.hi >= t.hist.length - 1;
       t.title = titleFor(t.p);
       win.setTitle(t.title);
@@ -2076,7 +2083,7 @@
     fwd.addEventListener('click', function () { go(1); });
     reload.addEventListener('click', function () { loadBar(); render(); });
     plus.addEventListener('click', function () { newTab(''); });
-    share.addEventListener('click', function () { var t = T(); if (t.p.url) { LAB.clipboard.setText(t.p.url); toastLab('已拷貝網址'); } else toastLab('這一頁沒有網址可以分享'); });
+    share.addEventListener('click', function () { var t = T(); if (t.p.url) { LAB.clipboard.setText(t.p.url); toastLab('已拷貝網址'); LAB.bus.emit('safari:share', { url: t.p.url }); } else toastLab('這一頁沒有網址可以分享'); });
     addr.addEventListener('focus', function () {
       var t = T();
       addr.value = t.p.kind === 'search' ? t.p.query : t.p.url;
@@ -2169,7 +2176,7 @@
       ], [
         { t: 'h1', x: '每週進度' }, { t: 'rule' },
         { t: 'kv', k: 'Week 1', x: '課程介紹與工具準備' }, { t: 'kv', k: 'Week 2', x: '資料與檔案：資料夾和 CSV' }, { t: 'kv', k: 'Week 3', x: '終端機、Finder 與 Codex' },
-        { t: 'kv', k: 'Week 4', x: '資料清理' }, { t: 'kv', k: 'Week 5', x: '描述統計' }, { t: 'kv', k: 'Week 6', x: '資料視覺化' },
+        { t: 'kv', k: 'Week 4', x: LAB.week === 4 ? 'Codex 內建瀏覽器、GitHub 與 Mermaid' : '資料清理' }, { t: 'kv', k: 'Week 5', x: '描述統計' }, { t: 'kv', k: 'Week 6', x: '資料視覺化' },
         { t: 'kv', k: 'Week 7', x: '期中專案報告' }, { t: 'kv', k: 'Week 8', x: '學習歷程資料的分析' },
         { t: 'small', x: '以上為練習版的假資料，與真正的課程進度無關。' }
       ]];

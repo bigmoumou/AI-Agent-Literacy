@@ -1,9 +1,9 @@
 # 練習用的 Mac（lab/mac）
 
-這是「學習分析工具」課程的練習環境：一台在瀏覽器裡執行的**模擬 Mac**，讓學生練習每週的內容（Week 3：終端機、Finder，把資料夾拖進 Codex 並和它對話）。
+這是「學習分析工具」課程的練習環境：一台在瀏覽器裡執行的**模擬 Mac**，讓學生練習每週的內容（Week 3：終端機、Finder，把資料夾拖進 Codex 並和它對話；Week 4：Codex 的內建瀏覽器、GitHub、Mermaid 和作業）。每一週用同一台電腦，只是任務不同：網址不加參數是 Week 3，加 `?week=4` 是 Week 4。
 它不是影片，是真的可以操作的假系統；沒有後端，全部在前端執行，**什麼都不會留到下一次**：每次進入（包括重新整理）都是一台全新的電腦，檔案、終端機歷史、Codex 對話和任務進度都從起始狀態開始。
 
-macOS 與 Finder 是 Apple Inc. 的商標，Codex 是 OpenAI 的商標。這個練習是獨立的教學模擬，與兩家公司都沒有關係。
+macOS 與 Finder 是 Apple Inc. 的商標，Codex 是 OpenAI 的商標，GitHub 是 GitHub, Inc. 的商標，Mermaid 是一個開放原始碼專案的名稱。這個練習是獨立的教學模擬，與這些公司和專案都沒有關係。Week 4 裡的 GitHub 頁面、Codex 的瀏覽器面板和美術館網站都是這裡自己畫的，沒有使用任何官方圖檔或標誌；美術館和網址（`museo-esempio.example`）是虛構的。
 
 ## 外觀與素材
 
@@ -30,7 +30,8 @@ python -m http.server 8810
 | `?intro=0` | 不跳出任務的「開始任務」頁和「任務完成」單（選單裡點一個任務就直接開始）；連線後第一次的選單還是會出現 |
 | `?sound=0` | 關掉提示音（步驟完成、任務完成的玻璃鈴聲；任務卡下面的「聲音」連結也能關，只在這次造訪有效） |
 | `?connect=0` | 跳過約 2.5 秒的連線畫面 |
-| `?mission=<id>` | 直接開始那個任務（一次性） |
+| `?week=4` | 選 Week 4：只載入 Week 4 的程式（`js/w4/`、`css/w4-*.css`），任務選單只有 Week 4 的 11 個任務，左上角連結是「← Week 4」。只有 `3` 和 `4` 有效，其他值都當 Week 3。網址上的 `week` 會一直留著（重新整理還是 Week 4） |
+| `?mission=<id>` | 直接開始那個任務（一次性）；`?mission=w4-…` 不用再加 `?week=4` |
 | `?now=2026-10-04T10:12:00` | 把時鐘的起點移到那個時間（之後照常走） |
 | `?debug=1` | 開 `LAB.debug`，在 console 記錄事件，檢查視窗關掉後有沒有留下監聽器 |
 | `?perf=low\|high` | 強制低效能模式（關掉 `backdrop-filter` 等）或一般模式 |
@@ -40,6 +41,7 @@ python -m http.server 8810
 - `index.html`：頁面骨架（假的 Mac 畫面佔滿整頁，任務卡是浮在左上角的液態玻璃卡片）。
 - `css/`：`base`（變數、版面）、`shell`（選單列、Dock、桌面、Spotlight）、`window`（視窗外框）、`mission`（液態玻璃任務卡、任務單），以及各程式自己的 CSS。
 - `js/`：全部掛在一個全域 `window.LAB` 底下，不用 ES module，也不用建置。`lab.js`（工具、事件匯流排）、`store.js`（只存在記憶體裡的狀態，不寫入瀏覽器）、`vfs.js` + `seed.js`（假檔案系統）、`wm.js`（視窗）、`apps.js`、`menu.js`、`dnd.js`（拖放）、`desktop.js`（桌面、Dock、Spotlight）、`missions.js`（任務引擎與任務卡）、`remote.js`（上方中間的「中斷連線」膠囊：離開遠端連線、回到上一頁）、`boot.js`。
+- `js/w4/`（只在 `?week=4` 時載入，載入順序寫在 `index.html`）：`seed4`（Week 4 的起始檔案：桌面上的 Firenze-Museums）、`markdown`、`mermaid`（Markdown 與流程圖的算圖，Code 的預覽和 GitHub 頁面都用）、`web`、`museum`（假的公開網頁：虛構美術館）、`github`、`github-pages`（假的 GitHub：倉庫模型和 Safari 裡的頁面）、`gitremote`（終端機的 git clone／push／pull）、`cxbrowser`、`intents4`（Codex 的內建瀏覽器和 Week 4 的回覆）、`missions-*`（11 個任務）。
 - 標成 `[PORTABLE]` 的檔案與 Mac 外觀無關，之後做 Windows 版時可以直接共用。
 
 設計規格見 `DESIGN.md`。

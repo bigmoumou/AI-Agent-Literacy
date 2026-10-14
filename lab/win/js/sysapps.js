@@ -1858,7 +1858,7 @@
   var EDGE_PDF = {
     'syllabus.pdf': { title: '學習分析工具　課程大綱', sub: '國立臺灣師範大學　2026 年秋季班',
       pages: [[['h', '課程簡介'], ['p', '這門課帶大家用電腦把學習留下來的資料整理起來、看出意思。不需要寫程式的背景，從資料夾、終端機一路練到請 Codex 幫忙整理報告。'], ['h', '每週進度'],
-        ['li', 'Week 1　什麼是學習分析'], ['li', 'Week 2　資料長什麼樣子：欄位、列、缺漏值'], ['li', 'Week 3　終端機入門：ls、cd、mv、tar'], ['li', 'Week 4　把成績表整理乾淨'], ['li', 'Week 5　請 Codex 幫忙畫圖']],
+        ['li', 'Week 1　什麼是學習分析'], ['li', 'Week 2　資料長什麼樣子：欄位、列、缺漏值'], ['li', 'Week 3　終端機入門：ls、cd、mv、tar'], ['li', LAB.week === 4 ? 'Week 4　Codex 內建瀏覽器、GitHub 與 Mermaid' : 'Week 4　把成績表整理乾淨'], ['li', 'Week 5　請 Codex 幫忙畫圖']],
         [['h', '評分方式'], ['li', '課堂練習　40%'], ['li', '期中作業　30%'], ['li', '期末小專題　30%'], ['h', '注意事項'], ['p', '課堂使用的資料都是假資料。作業請存在自己的資料夾，並依課堂說明命名。']]] },
     'resume.pdf': { title: '個人履歷（範例）', sub: 'an',
       pages: [[['h', '基本資料'], ['p', '姓名：an　　聯絡信箱：an@example.com'], ['h', '學歷'], ['li', '國立臺灣師範大學　學習分析課程　修課中'], ['h', '技能'], ['li', '資料整理（Excel、CSV）'], ['li', '終端機基本操作']]] },
@@ -1882,6 +1882,8 @@
     var m = /^[a-z][a-z0-9+.-]*:\/\/([^\/?#:]+)/i.exec(url);
     var host = m ? m[1].toLowerCase() : '';
     var bare = host.replace(/^www\./, '');
+    // Week 4: an address that LAB.web has a page for (github.com, the museum site) is drawn by LAB.web; without LAB.web nothing changes
+    if (LAB.web && LAB.web.has(url)) return { kind: 'web', url: url, host: host };
     if (/^(example\.com|example\.org|example\.net)$/.test(bare)) return { kind: 'example', url: url.replace(/^http:/i, 'https:') + (/^[a-z]+:\/\/[^\/]+$/i.test(url) ? '/' : ''), host: host };
     return { kind: 'offline', url: url + (/^[a-z]+:\/\/[^\/]+$/i.test(url) ? '/' : ''), host: host };
   }
@@ -1935,6 +1937,7 @@
       if (p.kind === 'newtab') return '新索引標籤';
       if (p.kind === 'example') return 'Example Domain';
       if (p.kind === 'pdf') return LAB.vfs.basename(p.path);
+      if (p.kind === 'web') return LAB.web.titleFor(p.url) || p.host;
       return p.host || '沒有網際網路';
     }
     function paintTabs() {
@@ -1964,7 +1967,7 @@
       paintTabs();
       addr.value = p.kind === 'newtab' ? '' : (p.kind === 'pdf' ? p.url : p.url);
       addr.placeholder = '搜尋或輸入網址';
-      lockIco.style.display = p.kind === 'example' ? '' : 'none';
+      lockIco.style.display = p.kind === 'example' || (p.kind === 'web' && /^https:/i.test(p.url)) ? '' : 'none';
       lockIco.parentNode.classList.toggle('is-insecure', false);
       back.disabled = t.idx <= 0; fwd.disabled = t.idx >= t.hist.length - 1;
       win.setTitle(titleOf(p) + ' - Microsoft Edge');
@@ -1974,7 +1977,10 @@
       if (p.kind === 'newtab') view.appendChild(pageNewTab());
       else if (p.kind === 'example') view.appendChild(pageExample());
       else if (p.kind === 'pdf') view.appendChild(pagePdf(p.path));
-      else view.appendChild(pageOffline(p));
+      else if (p.kind === 'web') {
+        var webNode = LAB.web.build(p.url, { via: 'edge', winId: win.id, navigate: function (u) { var tt = cur(); if (tt) navigate(tt, u); }, reload: function () { var tt = cur(); if (tt) navigate(tt, tt.page, false); } });
+        view.appendChild(webNode || pageOffline(p));
+      } else view.appendChild(pageOffline(p));
       view.scrollTop = 0;
     }
 
@@ -2053,6 +2059,8 @@
 
     /* ---- address bar and buttons ---- */
     addr.addEventListener('focus', function () { setTimeout(function () { addr.select(); }, 0); });
+    // copying the address (Ctrl+C with the address selected, or the right-click menu) is the way to share a link on Windows
+    addr.addEventListener('copy', function () { var t = cur(); if (t && t.page && t.page.url) LAB.bus.emit('safari:share', { url: t.page.url, via: 'edge' }); });
     addr.addEventListener('keydown', function (e) {
       e.stopPropagation();
       if (LAB.ui.isImeEnter(e)) return;
