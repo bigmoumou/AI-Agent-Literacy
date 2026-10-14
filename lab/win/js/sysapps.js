@@ -1877,7 +1877,12 @@
     }
     if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(raw)) {
       if (/^[^\s\/]+\.[a-z]{2,}(\/\S*)?$/i.test(raw) || /^localhost(:\d+)?(\/\S*)?$/i.test(raw)) url = 'https://' + raw;
-      else return { kind: 'offline', url: 'https://www.bing.com/search?q=' + encodeURIComponent(raw), host: 'www.bing.com' };
+      else {
+        // a whole line pasted from notes.md (「來源：https://…（查詢日期：…）」, what a student gets by selecting the line): the practice browser reads the address out of it
+        var em = /https?:\/\/[^\s（）()「」『』<>，。、]+/i.exec(raw);
+        if (!em) return { kind: 'offline', url: 'https://www.bing.com/search?q=' + encodeURIComponent(raw), host: 'www.bing.com' };
+        url = em[0].replace(/[.,;:!?]+$/, '');
+      }
     }
     var m = /^[a-z][a-z0-9+.-]*:\/\/([^\/?#:]+)/i.exec(url);
     var host = m ? m[1].toLowerCase() : '';

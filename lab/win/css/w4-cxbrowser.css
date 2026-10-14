@@ -97,6 +97,8 @@
 /* ---------------------------------------------------------------- Annotate */
 .cxb-shield { position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 4; pointer-events: none; touch-action: none; }
 .cxb-shield.is-on { pointer-events: auto; cursor: crosshair; }
+.cxb-cuebox { position: absolute; pointer-events: none; visibility: hidden; box-sizing: border-box; }
+.cxb-cuebox[hidden] { display: none; }
 .cxb-hover, .cxb-sel, .cxb-drag { position: absolute; z-index: 5; pointer-events: none; box-sizing: border-box; border-radius: 2px; }
 .cxb-hover[hidden], .cxb-sel[hidden], .cxb-drag[hidden] { display: none; }
 .cxb-hover { border: 1.5px solid #3b82f6; background: rgba(59, 130, 246, .13); }

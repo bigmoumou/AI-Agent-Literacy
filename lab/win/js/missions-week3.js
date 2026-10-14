@@ -223,6 +223,7 @@
   /* the hit-test of the element's centre: true when the element itself (or something inside it) is what the pointer would meet */
   function seeable(el) {
     if (!el || !el.getBoundingClientRect) return false;
+    if (LAB.missions && LAB.missions.seeable) return LAB.missions.seeable(el);       // the engine's version looks at the visible part (a button half under the edge of a window still counts)
     var r = el.getBoundingClientRect();
     if (r.width < 2 || r.height < 2) return false;
     var t = null;
@@ -267,7 +268,8 @@
         try { el = typeof part === 'function' ? part(api) : document.querySelector(part); } catch (e) { el = null; }
         if (!el) continue;
         if ((typeof part === 'function' && part.trusted) || seeable(el)) return el;
-        if (!fallback) fallback = el;
+        if (LAB.missions && LAB.missions.scrolledOut && LAB.missions.scrolledOut(el)) return el;       // below the fold of its own window: the cue scrolls it into view
+        if (!fallback && el.getBoundingClientRect && el.getBoundingClientRect().width > 0) fallback = el;       // a hidden element (a closed dialog's button) is no fallback
       }
       return fallback;
     };
@@ -275,9 +277,32 @@
   var fdItem = function (p) { return inWins('finder', 'fd-item', p); };
   var fdSide = function (p) { return inWins('finder', 'fd-sidebar-item', p); };
   var fdSeg = function (p) { return inWins('finder', 'fd-pathbar-seg', p); };
-  /* walking to a folder in File Explorer: the deepest of `paths` that is on screen, else the navigation-pane item `side`, else File Explorer on the taskbar */
-  function finderWalk(paths, side) {
-    return chain.apply(null, paths.map(fdItem).concat([fdSide(side || DESKTOP), dock('finder')]));
+  /* walking to a folder in File Explorer: `lead` (parts such as the desktop icon) when really visible, then the deepest of `paths` that is on screen (a
+     path, or a function that finds an element), else the navigation-pane item `side`, else File Explorer on the taskbar. An item that is there but
+     covered: in the FRONT Explorer window (another window, say Notepad or Codex, lies over it) the taskbar button brings Explorer forward (the
+     navigation-pane item would send the student back up the folders); in an OLDER Explorer window behind, the taskbar button only raises the
+     front one, so the walk goes on with the shallower items and ends at the front window's navigation pane (cue audit 2026-10-14). The button is
+     not offered while that Explorer is the focused window: on Windows the button of the front window minimises it. */
+  function finderWalk(paths, side, lead) {
+    var items = paths.map(function (p) { return typeof p === 'function' ? p : fdItem(p); }), rest = chain(fdSide(side || DESKTOP), dock('finder'));
+    return function (api) {
+      var i, el, l = liveWins('finder'), top = l.length ? l[l.length - 1] : null, fw = null;
+      try { fw = LAB.wm.focused(); } catch (e) { fw = null; }
+      for (i = 0; lead && i < lead.length; i++) {
+        el = null;
+        try { el = typeof lead[i] === 'function' ? lead[i](api) : document.querySelector(lead[i]); } catch (e1) { el = null; }
+        if (el && seeable(el)) return el;
+      }
+      for (i = 0; i < items.length; i++) {
+        el = null;
+        try { el = items[i](api); } catch (e2) { el = null; }
+        if (!el) continue;
+        if (seeable(el)) return el;
+        if (LAB.missions && LAB.missions.scrolledOut && LAB.missions.scrolledOut(el)) return el;
+        if (top && top.el.contains(el) && !(fw && fw.id === top.id)) return document.querySelector(dock('finder'));
+      }
+      return rest(api);
+    };
   }
   /* typing in the Terminal: with the window already focused the student is typing (the target is the hidden input, which the
      cue leaves alone); otherwise the whole screen is the thing to click. No Terminal window: the taskbar button. */
@@ -287,9 +312,9 @@
     var w = l[l.length - 1];
     var screen = w.el.querySelector('[data-lab=term-screen]');
     if (!seeable(screen)) return null;
-    var f = LAB.wm.focused();
-    if (f && f.id === w.id) return w.el.querySelector('[data-lab=term-input]');
-    return screen;
+    var f = LAB.wm.focused(), inp = w.el.querySelector('[data-lab=term-input]');
+    if (f && f.id === w.id && inp && document.activeElement === inp) return inp;       // the keyboard is in the Terminal: typing needs no pointing at
+    return screen;                                                                        // else one click on it first (the card's buttons take the keyboard)
   });
   var T_TERM = chain(termShown, dock('terminal'));
 
@@ -304,6 +329,16 @@
     try { c = api.codex.activeChat(); } catch (e) { c = null; }
     return c && !isNullish(c.projectPath) && same(api, c.projectPath, PROJECT) ? cxComposer() : cxProject();
   }, dock('codex'));
+  /* "open a new chat, then ask in it": the `first` target (the + or New chat) until the right chat is open, then the composer */
+  function chatThenComposer(isReady, first) {
+    return chain(function (api) {
+      var c = null;
+      try { c = api.codex.activeChat(); } catch (e) { c = null; }
+      return c && isReady(c, api) ? cxComposer() : null;
+    }, first);
+  }
+  /* the name box of a new desktop folder, while it waits for the name */
+  function desktopRenameBox() { return document.querySelector('#lab-desktop [data-lab=desktop-rename]'); }
 
   /* the first step of every Terminal mission */
   function openTerminalStep() {
@@ -350,7 +385,7 @@
         text: '在檔案總管左邊的' + PANE + '點「桌面」。',
         hint: PANE + '在視窗左邊，找到寫著「桌面」的那一列。',
         answer: '點' + PANE + '的「桌面」。',
-        target: chain(fdSide(DESKTOP), dock('finder')),
+        target: finderWalk([fdSide(DESKTOP)]),
         check: function (ev, api) {
           return !!(api.seen('finder:navigate', function (d) { return same(api, d.path, DESKTOP); }) || api.finderAt(DESKTOP));
         }
@@ -360,7 +395,7 @@
         text: '在桌面上點兩下 Project 資料夾，打開它。',
         hint: '要連續點兩下，點一下只是選取。桌面的 Project 圖示在螢幕左上角（資源回收筒的下面），也可以在檔案總管視窗裡點兩下。',
         answer: '點兩下 Project。',
-        target: chain(desktopIcon(PROJECT), fdItem(PROJECT), fdSide(DESKTOP), dock('finder')),
+        target: finderWalk([PROJECT], DESKTOP, [desktopIcon(PROJECT)]),
         check: function (ev, api) {
           return !!(api.seen('finder:navigate', function (d) { return same(api, d.path, PROJECT); }) || api.finderAt(PROJECT));
         }
@@ -369,8 +404,8 @@
         id: 's4',
         text: '看視窗上方的網址列，再點其中的「桌面」，回到上一層。',
         hint: '網址列從左到右，就是這個資料夾的完整位置：本機 › 本機磁碟 (C:) › 使用者 › an › 桌面 › Project，也就是 `C:\\Users\\an\\Desktop\\Project`。',
-        answer: '點網址列的「桌面」（或' + PANE + '的「桌面」，或左上角的「向上」↑、「上一頁」←）。',
-        target: chain(fdSeg(DESKTOP), fdSide(DESKTOP), dock('finder')),
+        answer: '點網址列的「桌面」（或' + PANE + '的「桌面」，或左上角的「向上」↑、「返回」←）。',
+        target: finderWalk([fdSeg(DESKTOP)]),
         check: function (ev, api) {
           // any natural way back to the Desktop counts (address bar, navigation pane, back, up, typing the address…)
           if (api.seen('finder:navigate', function (d) { return same(api, d.path, DESKTOP); })) return true;
@@ -384,6 +419,9 @@
         text: '在桌面空白處按右鍵，選「新增」→「資料夾」，命名為「Practice」，按 Enter。',
         hint: '如果找不到空白處，先把檔案總管視窗拖開或最小化。新增後名字會變成可以直接輸入的狀態；輸入法先切到英文（按一下 Shift，右下角的「中」變成「英」）再打 Practice。',
         answer: '右鍵 → 新增 → 資料夾 → 輸入 Practice → Enter。',
+        // the right-click on bare desktop has nothing to point at; once the menu is open the ring walks 新增 › 資料夾, then rings the name box
+        menuPath: ['新增', '資料夾'],
+        target: desktopRenameBox,
         check: function (ev, api) {
           return !!(api.exists(DESKTOP + '/Practice') && api.vfs.isDir(DESKTOP + '/Practice'));      // case-insensitive, like Windows
         },
@@ -513,7 +551,7 @@
         id: 's2',
         text: '輸入 `cd Desktop`，按 Enter，走進中庭。提示字元會變成 `PS C:\\Users\\an\\Desktop>`。',
         hint: 'cd 是走路，後面接要去的資料夾名字。你在哪裡，提示字元的路徑會告訴你；要從社區（提示字元是 ' + P_HOME + '）出發，才找得到 Desktop。',
-        answer: '輸入：`cd Desktop`。提示字元的路徑多了 \\Desktop。',
+        answer: '輸入：`cd Desktop`。提示字元的路徑多了 \\Desktop。（人不在社區的話，先輸入 `cd ~`，再 `cd Desktop`。）',
         replay: 'mission',
         target: T_TERM,
         check: function (ev, api) {
@@ -624,7 +662,7 @@
         id: 's2',
         text: '走到管理室：輸入 `cd Downloads`，按 Enter，再輸入 `ls`，看到 week3.zip。',
         hint: 'cd 後面接資料夾名字，ls 看一圈。下載在終端機裡叫 Downloads（管理室）。提示字元不是 ' + P_HOME + ' 的話，找不到 Downloads，改用 `cd ~\\Downloads`。',
-        answer: '`cd Downloads`，Enter；`ls`，Enter。會看到 syllabus.pdf 和 week3.zip。',
+        answer: '`cd Downloads`，Enter；`ls`，Enter。會看到 syllabus.pdf 和 week3.zip。（人不在社區的話，輸入 `cd ~\\Downloads`，Enter；再 `ls`，Enter。）',
         replay: 'mission',
         target: T_TERM,
         check: function (ev, api) {
@@ -812,7 +850,7 @@
     map: MAP,
     resetsFiles: true,
     needs: [PROJECT],
-    intro: '影片 01「四個窗口看同一個資料夾」那一幕用到兩個指令：mkdir 新增資料夾，explorer 用檔案總管打開。',
+    intro: '影片 01「四個視窗看同一個資料夾」那一幕用到兩個指令：mkdir 新增資料夾，explorer 用檔案總管打開。',
     prepare: function (api) {
       ensureBase(api);
       api.remove(PROJECT + '/figures');
@@ -898,7 +936,14 @@
         text: '把桌面上的 Project 資料夾，拖進 Codex 左邊的側邊欄。',
         hint: '按住 Project 圖示不放，拖到 Codex 左邊那一欄，看到側邊欄亮起藍框再放開。放開後桌面上的 Project 還在，這是正常的：只是告訴 Codex 它在哪裡。如果 Codex 蓋住了桌面圖示，先把視窗往右拖開一點，或從檔案總管視窗裡拖。',
         answer: 'Project 圖示 → 按住拖 → 放進 Codex 側邊欄。（也可以：檔案總管對 Project 按右鍵 → 開啟檔案 → Codex。）',
-        target: chain(desktopIcon(PROJECT), fdItem(PROJECT)),
+        // a Codex window that lies over the desktop icon (a small screen, or a window the student moved): its title bar is what to drag aside first (the hint says so)
+        target: chain(desktopIcon(PROJECT), fdItem(PROJECT), function () {
+          var ic = desktopIcon(PROJECT)();
+          if (!ic) return null;
+          var rc = ic.getBoundingClientRect(), top = document.elementFromPoint(rc.left + rc.width / 2, rc.top + rc.height / 2), l = liveWins('codex'), i;
+          for (i = l.length - 1; i >= 0; i--) if (top && l[i].el.contains(top)) return l[i].el.querySelector('.lab-win-bar');
+          return null;
+        }),
         check: function (ev, api) {
           return !!(
             api.seen('codex:trust-prompt', function (d) { return same(api, d.path, PROJECT); }) ||
@@ -933,7 +978,7 @@
         text: '到檔案總管看看它在電腦裡的真實位置：打開桌面的 Project，看視窗上方的網址列。',
         hint: '本機 › 本機磁碟 (C:) › 使用者 › an › 桌面 › Project 就是它真實的位置，也就是 `C:\\Users\\an\\Desktop\\Project`。',
         answer: '點兩下桌面上的 Project 資料夾。',
-        target: chain(desktopIcon(PROJECT), fdItem(PROJECT), fdSide(DESKTOP), dock('finder')),
+        target: finderWalk([PROJECT], DESKTOP, [desktopIcon(PROJECT)]),
         check: function (ev, api) {
           return !!api.seen('finder:navigate', function (d) { return same(api, d.path, PROJECT); });
         }
@@ -975,7 +1020,7 @@
         text: '請 Codex 寫報告：點「複製」，貼進輸入框，再按 Enter。[[幫我寫一份報告到 output/report.md]]',
         hint: '點「複製」，再點 Codex 的輸入框，按 Ctrl+V 貼上。等它出現 Created output/report.md 就是做完了。',
         answer: '把「幫我寫一份報告到 output/report.md」貼到輸入框，按 Enter。',
-        target: chain(cxComposer, cxProject, dock('codex')),
+        target: T_PROJECT_CHAT,                    // the composer only while the open chat is the Project's, else the Project row first
         check: function (ev, api) {
           return !!api.seen('codex:reply', function (d) { return d.intent === 'write_report' && same(api, d.projectPath, PROJECT); });
         },
@@ -1021,7 +1066,8 @@
         hint: '資料夾可以拖到 VS Code 的視窗或工作列圖示上，也可以在檔案總管用右鍵的「開啟檔案」選 Visual Studio Code（不是 Codex）。',
         answer: '檔案總管對 Project 按右鍵 → 開啟檔案 → Visual Studio Code。（也可以在終端機的 Project 裡輸入 `code .`。）',
         replay: 'mission',
-        target: chain(fdItem(PROJECT), desktopIcon(PROJECT), fdSide(DESKTOP), dock('finder')),
+        menuPath: ['開啟檔案', 'Visual Studio Code'],
+        target: finderWalk([PROJECT, desktopIcon(PROJECT)]),
         check: function (ev, api) {
           return !!api.seen('code:folder', function (d) { return same(api, d.path, PROJECT); });
         }
@@ -1114,13 +1160,14 @@
       },
       {
         id: 's5',
-        text: '改在專案底下重做：點側邊欄的 Project，再把同一句話貼進輸入框（複製過的話，直接貼）。',
+        text: '改在專案底下重做：點側邊欄的 Project，點「複製」，貼進輸入框，再按 Enter。[[幫我寫一份報告到 output/report.md]]',
         hint: '這次輸入框上方會有 Project 標籤，檔案會寫進 Project 底下的 output。',
         answer: '點 Project → 輸入「幫我寫一份報告到 output/report.md」→ Enter。',
         target: T_PROJECT_CHAT,
         check: function (ev, api) {
           return !!api.seen('codex:reply', function (d) { return d.intent === 'write_report' && same(api, d.projectPath, PROJECT); });
-        }
+        },
+        trap: orphanReplyTrap('write_report')      // the open chat is still the New chat of step 2: the sentence sent from there does not count
       },
       {
         id: 's6',
@@ -1208,7 +1255,8 @@
         hint: '把滑鼠移到 Project 那一列，右邊會出現「+」；一定要開新對話，不要接著剛剛那個。新對話的短期記憶是空的，但 AGENTS.md 每次都會帶入。',
         answer: '點 Project 那一列右邊的 +，輸入「你目前遵守哪些規則？」，Enter。',
         replay: 'mission',
-        target: chain(cxPlus, cxProject, dock('codex')),
+        // the + (or the Project row) until the new chat under Project is open, then the composer
+        target: chatThenComposer(function (c, api) { return !isNullish(c.projectPath) && same(api, c.projectPath, PROJECT) && c.id !== api.state.agentsChat; }, chain(cxPlus, cxProject, dock('codex'))),
         check: function (ev, api) {
           return !!api.seen('codex:reply', function (d) {
             return d.intent === 'ask_rules' && same(api, d.projectPath, PROJECT) && d.chatId !== api.state.agentsChat;
@@ -1228,7 +1276,7 @@
         text: '對照看看：按 New chat（沒有專案），問同一句話。',
         hint: '這個對話看不到專案裡的 AGENTS.md。',
         answer: '點最上面的 New chat，輸入「你目前遵守哪些規則？」，Enter。',
-        target: chain(cxNew, dock('codex')),
+        target: chatThenComposer(function (c) { return isNullish(c.projectPath); }, chain(cxNew, dock('codex'))),
         check: function (ev, api) {
           return !!api.seen('codex:reply', function (d) { return d.intent === 'ask_rules' && isNullish(d.projectPath); });
         }

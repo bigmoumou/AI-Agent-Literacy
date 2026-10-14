@@ -69,6 +69,7 @@
   }
   function seeable(el) {
     if (!el || !el.getBoundingClientRect) return false;
+    if (LAB.missions && LAB.missions.seeable) return LAB.missions.seeable(el);       // the engine's version looks at the visible part (a button half under the edge of a window still counts)
     var r = el.getBoundingClientRect();
     if (r.width < 2 || r.height < 2) return false;
     var t = null;
@@ -98,6 +99,7 @@
       return first;
     };
   }
+  function trusted(fn) { fn.trusted = true; return fn; }      // the function already checked that its element is visible
   function chain() {
     var parts = [].slice.call(arguments);
     return function (api) {
@@ -106,20 +108,67 @@
         var part = parts[i], el = null;
         try { el = typeof part === 'function' ? part(api) : document.querySelector(part); } catch (e) { el = null; }
         if (!el) continue;
-        if (seeable(el)) return el;
-        if (!fallback) fallback = el;
+        if ((typeof part === 'function' && part.trusted) || seeable(el)) return el;
+        if (LAB.missions && LAB.missions.scrolledOut && LAB.missions.scrolledOut(el)) return el;       // below the fold of its own window: the cue scrolls it into view
+        if (!fallback && el.getBoundingClientRect && el.getBoundingClientRect().width > 0) fallback = el;       // a hidden element (a closed dialog's button) is no fallback
       }
       return fallback;
     };
   }
   function fdItem(p) { return inWins('finder', 'fd-item', p); }
   function fdSide(p) { return inWins('finder', 'fd-sidebar-item', p); }
-  function finderWalk(paths, side) {
-    return chain.apply(null, paths.map(fdItem).concat([fdSide(side || DESKTOP), dock('finder')]));
+  /* walking to a folder in File Explorer: `lead` (parts such as the desktop icon) when really visible, then the deepest of `paths` that is on screen (a
+     path, or a function that finds an element), else the navigation-pane item `side`, else File Explorer on the taskbar. An item that is there but
+     covered: in the FRONT Explorer window (another window, say Notepad or Codex, lies over it) the taskbar button brings Explorer forward (the
+     navigation-pane item would send the student back up the folders); in an OLDER Explorer window behind, the taskbar button only raises the
+     front one, so the walk goes on with the shallower items and ends at the front window's navigation pane (cue audit 2026-10-14). The button is
+     not offered while that Explorer is the focused window: on Windows the button of the front window minimises it. */
+  function finderWalk(paths, side, lead) {
+    var items = paths.map(function (p) { return typeof p === 'function' ? p : fdItem(p); }), rest = chain(fdSide(side || DESKTOP), dock('finder'));
+    return function (api) {
+      var i, el, l = liveWins('finder'), top = l.length ? l[l.length - 1] : null, fw = null;
+      try { fw = LAB.wm.focused(); } catch (e) { fw = null; }
+      for (i = 0; lead && i < lead.length; i++) {
+        el = null;
+        try { el = typeof lead[i] === 'function' ? lead[i](api) : document.querySelector(lead[i]); } catch (e1) { el = null; }
+        if (el && seeable(el)) return el;
+      }
+      for (i = 0; i < items.length; i++) {
+        el = null;
+        try { el = items[i](api); } catch (e2) { el = null; }
+        if (!el) continue;
+        if (seeable(el)) return el;
+        if (LAB.missions && LAB.missions.scrolledOut && LAB.missions.scrolledOut(el)) return el;
+        if (top && top.el.contains(el) && !(fw && fw.id === top.id)) return document.querySelector(dock('finder'));
+      }
+      return rest(api);
+    };
   }
   var cxComposer = inWins('codex', 'cx-composer');
   var cxProject = inWins('codex', 'cx-project', FM);
-  var T_COMPOSER = chain(cxComposer, cxProject, dock('codex'));
+  /* a sentence for Codex: the composer once the Firenze-Museums chat is the open one, the project's row before that (a step that says
+     「在 Firenze-Museums 的對話裡」 must not send the student to the composer of a chat outside the project) */
+  var T_COMPOSER = chain(function (api) {
+    var c = null;
+    try { c = api.codex.activeChat(); } catch (e) { c = null; }
+    return c && !isNullish(c.projectPath) && same(api, c.projectPath, FM) ? cxComposer() : cxProject();
+  }, dock('codex'));
+  function liveField(lab) { return document.querySelector('[data-lab=' + lab + ']'); }
+  /* nothing to point at while Codex is answering the comment that was just sent: the student waits (the ring must not jump back to Annotate) */
+  function whileIdle(target) {
+    return function (api) {
+      try { if (api.codex && api.codex.isBusy && api.codex.isBusy()) return null; } catch (e) { /* ignore */ }
+      return target(api);
+    };
+  }
+  /* Annotate: the heading of the page (a box over it, see cxbrowser.js) while nothing is chosen, else the Annotate button */
+  var T_PAGE_H1 = chain(trusted(function () { return LAB.cxbrowser && LAB.cxbrowser.cueTarget ? LAB.cxbrowser.cueTarget('h1') : null; }), '[data-lab=cxb-annotate]', dock('codex'));       // the box lies over the page, under Annotate's shield: the engine's own hit test accepts that
+  /* the comment card: its text box until there is a sentence in it, then Send */
+  var T_COMMENT = chain(function () {
+    var ta = liveField('cxb-comment-input'), send = liveField('cxb-comment-send');
+    if (!ta) return null;
+    return send && !send.disabled && String(ta.value || '').trim() ? send : ta;
+  }, '[data-lab=cxb-annotate]', dock('codex'));
   var T_PROJECT = chain(cxProject, dock('codex'));
   var T_ANNOTATE = chain('[data-lab=cxb-annotate]', dock('codex'));
   var T_PHONE = chain('[data-lab=cxb-viewport-btn][data-mode=phone]', dock('codex'));
@@ -331,6 +380,7 @@
         text: '點一下網頁最上面的大標題。',
         hint: '點一個元素，或是拖出一個範圍都可以。選好之後旁邊會出現留言框。',
         answer: '點一下「佛羅倫斯美術館」那行大字。',
+        target: T_PAGE_H1,
         check: function (ev, api) {
           return !!api.seen('cxbrowser:annotate-select');
         },
@@ -344,7 +394,7 @@
         text: '在留言框裡寫一句話，按 Send：[[標題字太小，改大一點]]',
         hint: '留言框裡寫你想要的樣子，例如「字太小」「這兩張卡片靠太近」。你選的那個元素會跟著留言一起交給 Codex，所以不用解釋是哪一個。',
         answer: '把那句貼到留言框，按 Send。',
-        target: chain('[data-lab=cxb-comment-input]', '[data-lab=cxb-annotate]'),
+        target: whileIdle(T_COMMENT),
         check: function (ev, api) {
           return !!(api.seen('codex:reply', replyIs(['annotate_edit'])) && codexWrote(api, CSS));
         },

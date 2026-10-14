@@ -14,11 +14,22 @@
   var G_HW = '作業（影片 03）';
   var TAG = 'Week 4 作業';
   var MAP = 'GitHub 雲端倉庫 ⇄ 你電腦上的倉庫資料夾 · clone 拿一份回家 · add＋commit 存一個版本（只在你的電腦）· push 送上雲 · pull 拿回最新';
-  var T_TERM = K.chain(K.inWins('terminal', 'term-input'), K.inWins('terminal', 'term-screen'), K.dock('terminal'));
+  var T_TERM = K.T_TERM;      // typing in a focused Terminal needs no pointing at (the same logic as Week 3 and the GitHub missions)
   // Edge is not pinned to the practice taskbar: with no Edge window the cue walks to Edge in the Start menu, then to the Start button
   var EDGE_OPEN = ['[data-lab=start-item][data-app=edge]', '[data-lab=start-button]'];
   var edAddress = K.inWins('edge', 'ed-address');
   var T_EDGE = K.chain.apply(null, [edAddress, K.dock('edge')].concat(EDGE_OPEN));
+  /* reloading only means something while Edge already shows a page of the repository that a reload counts for (its front page, a folder, a file or the
+     commits); on its start page or any other page (a commit, the editor) the address has to be typed */
+  function showsRepo() {
+    var l = K.liveWins('edge'), i, p;
+    for (i = l.length - 1; i >= 0; i--) {
+      p = l[i].el.querySelector('[data-lab=gh-page]');
+      if (p) return /^(repo|tree|file|commits)$/.test(p.getAttribute('data-view') || '');
+    }
+    return false;
+  }
+  var T_EDGE_RELOAD = K.chain.apply(null, [function () { return showsRepo() ? K.inWins('edge', 'ed-reload')() : null; }, edAddress, K.dock('edge')].concat(EDGE_OPEN));
   var NAME = 'An', EMAIL = 'an@example.com';
 
   function same(api, a, b) { return K.same(api, a, b); }
@@ -53,7 +64,22 @@
   }
   /* close the panel, forget its history and any stuck script left by mission 1 */
   function dropBrowser() { try { if (LAB.cxbrowser && LAB.cxbrowser.reset) LAB.cxbrowser.reset(); } catch (e) { /* ignore */ } }
+  /* a Terminal still standing in a clone of an earlier mission (a folder this mission removes) goes back to ~: the steps say `cd Desktop` */
+  function leaveClone() {
+    try {
+      var map = LAB.terminal && LAB.terminal.instances;
+      if (!map) return;
+      map.forEach(function (inst) {
+        var s = inst && inst.session, m = s && s.cwd ? /^\/Users\/an\/Desktop\/(firenze-museums[^\/]*)/i.exec(s.cwd) : null;
+        if (m && !/^firenze-museums$/i.test(m[1])) s.cwd = W4.HOME || '/Users/an';
+      });
+    } catch (e) { /* no Terminal yet */ }
+  }
+  /* the Visual Studio Code window of an earlier mission (a folder that is gone, tabs that are out of date, the file list folded away for the preview) must not be the
+     one that opens the new folder */
+  function closeCode() { try { LAB.apps.quit('code', { force: true }); } catch (e) { /* none */ } }
   function removeClones(api) {
+    leaveClone();
     api.remove(HW);
     try { LAB.vfs.list(W4.DESKTOP).forEach(function (s) { if (/^firenze-museums/i.test(s.name) && !/^firenze-museums$/i.test(s.name)) api.remove(s.path); }); } catch (e) { /* ignore */ }
   }
@@ -121,6 +147,65 @@
     return K.chain(K.inWins(app, 'gh-new-repo'), K.inWins(app, 'gh-plus'), fallback)();
   }
 
+  /* nothing to point at while Codex is answering the comment that was just sent: the student waits (the ring must not jump back to Annotate) */
+  function whileIdle(target) {
+    return function (api) {
+      try { if (api.codex && api.codex.isBusy && api.codex.isBusy()) return null; } catch (e) { /* ignore */ }
+      return target(api);
+    };
+  }
+  /* the width buttons of the browser panel (the same as in the Mac lab): Codex has already been looking at the phone width, so when the panel is at
+     that width the panel's Reload counts (the check takes it); at the desktop width the Phone button is the one */
+  function widthCue() {
+    var mode = null;
+    try { mode = LAB.cxbrowser.state().mode; } catch (e) { mode = null; }
+    return document.querySelector(mode === 'phone' ? '[data-lab=cxb-reload]' : '[data-lab=cxb-viewport-btn][data-mode=phone]');
+  }
+  /* a text box of the comment card of Annotate: its input until there is a sentence in it, then Send */
+  function commentTarget() {
+    var ta = document.querySelector('[data-lab=cxb-comment-input]'), send = document.querySelector('[data-lab=cxb-comment-send]');
+    if (!ta) return null;
+    return send && !send.disabled && String(ta.value || '').trim() ? send : ta;
+  }
+  /* 作業 ① 第 4 步：下一個還有學號、電話的檔案，先打開它（編輯器開著就指向文字框，否則指向檔案總管裡的它） */
+  function personalCue(api) {
+    var d = cloneDir(api);
+    if (!d) return null;
+    var files = ['/AGENTS.md', '/site/index.html'].map(function (p) { return d + p; }).filter(function (f) { return api.exists(f) && personal(api.read(f)); });
+    if (!files.length) return null;
+    var f = files[0], dir = f.slice(0, f.lastIndexOf('/'));
+    var ed = K.editorOf(f)();
+    if (ed && K.seeable(ed)) return ed;
+    // the file (or its folder) in an Explorer window that the Notepad of the file just fixed covers: finderWalk brings Explorer forward (the taskbar
+    // button) instead of sending the student back to the beginning of the walk
+    return K.finderWalk([f, dir, d], W4.DESKTOP)(api);
+  }
+  /* the browser sentences of homework 3 sent from a chat that is not firenze-museums-hw (New chat, say) never reach the project */
+  var NOT_IN_HW = '這個對話不在 firenze-museums-hw 底下（輸入框上方沒有「firenze-museums-hw」標籤），所以它找不到專案裡的網站。點 Codex 左邊的 firenze-museums-hw，在專案底下再試一次。';
+  function hwChatTrap(ev, api) {
+    if (!ev || ev.name !== 'codex:reply' || !ev.data) return null;
+    var d = ev.data;
+    return /^(browser_|annotate_)/.test(String(d.intent || '')) && !(d.projectPath && same(api, d.projectPath, HW)) ? NOT_IN_HW : null;
+  }
+  /* git said 「not a git repository」: the student is not inside the clone */
+  function notRepoTrap(ev, api) {
+    var c = ev && api.termCmd(ev, function (x) { return isGit(x) && x.status === 128 && /not a git repository/.test(x.out || ''); });
+    return c ? '這裡不是倉庫：先 `cd ~\\Desktop\\firenze-museums-hw` 走進 clone 的資料夾（PS 後面那串路徑最後要是 firenze-museums-hw），再輸入。' : null;
+  }
+  /* 作業 ② 第 1 步：VS Code 開著這個檔案時，預覽還沒開就指向預覽按鈕，開了就指向文字框；還沒開檔案就一路帶到檔案 */
+  function archCue(path, folder) {
+    var walk = K.finderWalk([folder, K.desktopIcon(folder)], W4.DESKTOP, [K.inWins('code', 'cd-explorer-row', path)]);
+    return function (api) {
+      var ed = K.inWins('code', 'cd-editor', path)();
+      if (ed && ed.getBoundingClientRect().width > 0) {
+        var pb = K.inWins('code', 'cd-preview-btn')();
+        if (pb && pb.getAttribute('aria-pressed') !== 'true') return pb;
+        return ed;
+      }
+      return walk(api);
+    };
+  }
+
   var VIDEO_NAME = '（影片裡的示範帳號是 xiaoan-demo，這裡是 an；真正做作業時，換成你自己的帳號。）';
 
   /* ================================================================== 9 · 作業 ①：放上 GitHub */
@@ -140,6 +225,7 @@
       K.ensureBase4(api);
       api.ensureSeed(FM, { overwrite: true });
       removeClones(api);
+      closeCode();
       dropBrowser();
     },
     steps: [
@@ -167,7 +253,13 @@
         hint: '和 clone 任務一樣：先走到想放的地方，再 git clone 加網址（Ctrl+V 貼上）。clone 會新增一個和倉庫同名的資料夾。',
         answer: '`cd ~\\Desktop`，Enter；`git clone https://github.com/an/firenze-museums-hw.git`，Enter。（倉庫換了名字，網址跟著換。）',
         replay: 'mission',
-        target: T_TERM,
+        // the step starts with copying the URL (Code button › the copy button), then the Terminal
+        target: function (api) {
+          var key = repoKey(api);
+          var copied = !!key && api.seen('github:copy-url', function (x) { return x.repo === key; }, { since: 'mission' });
+          if (copied) return T_TERM(api);
+          return K.chain(K.inWins('edge', 'gh-copy-url'), K.inWins('edge', 'gh-code-button'), T_TERM)(api);
+        },
         check: function (ev, api) { return !!cloneDir(api); },
         trap: function (ev, api) {
           var key = repoKey(api);
@@ -200,9 +292,10 @@
       {
         id: 's4',
         text: 'push 之前先檢查：Public 的倉庫誰都看得到，不要放學號、電話這些個人資料。找出來刪掉，再存檔。',
-        hint: '專案裡有兩個地方寫了學號和電話。可以用 `Get-ChildItem -Recurse | Select-String 學號` 在整個資料夾找，再用記事本或 Visual Studio Code 把那一行刪掉、存檔。',
+        hint: '專案裡有兩個地方寫了學號和電話。可以用 `Get-ChildItem -Recurse | Select-String 學號` 在整個資料夾找，再用記事本或 Visual Studio Code 把那一行刪掉、存檔。「學號」兩個字要用中文輸入法打（按一下 Shift，右下角變成「中」），打完再切回「英」。',
         answer: '刪掉 AGENTS.md 和 site/index.html 裡寫著學號和電話的那兩行（`Get-ChildItem -Recurse | Select-String 學號` 會告訴你在哪裡），Ctrl+S。',
         replay: 'mission',
+        target: personalCue,
         check: function (ev, api) {
           var d = cloneDir(api);
           return !!d && api.exists(d + '/site/index.html') && !anyPersonal(api, d);
@@ -211,8 +304,8 @@
       {
         id: 's5',
         text: '在 clone 的資料夾裡，把整個專案存成一個版本並送上去：`git add .`、`git commit -m "放上 Week 3 的美術館專案"`、`git push`。',
-        hint: 'add 選檔案（. 代表全部）、commit 存一個版本、push 送上雲端。引號裡的說明要寫清楚這次做了什麼。',
-        answer: '`git add .`，Enter；`git commit -m "放上 Week 3 的美術館專案"`，Enter；`git push`，Enter。',
+        hint: '要先走進 clone 的資料夾（PS 後面那串路徑最後要是 firenze-museums-hw）。add 選檔案（. 代表全部）、commit 存一個版本、push 送上雲端。引號裡的說明要寫清楚這次做了什麼。',
+        answer: '`cd ~\\Desktop\\firenze-museums-hw`，Enter；`git add .`，Enter；`git commit -m "放上 Week 3 的美術館專案"`，Enter；`git push`，Enter。',
         replay: 'mission',
         target: T_TERM,
         check: function (ev, api) {
@@ -223,6 +316,8 @@
         },
         trap: function (ev, api) {
           var key = repoKey(api);
+          var nr = notRepoTrap(ev, api);
+          if (nr) return nr;
           if (ev && ev.name === 'github:push' && key && ev.data && ev.data.repo === key && treeHasPersonal(remoteTree(key))) {
             return '剛剛送上去的檔案裡還有學號或電話。刪掉之後，再 add、commit、push 一次。';
           }
@@ -235,9 +330,9 @@
         id: 's6',
         text: '回 Edge 重新整理倉庫頁面，確認檔案都在上面。',
         hint: '應該看到 AGENTS.md、ARCHITECTURE.md、data、site 和 README.md。',
-        answer: '重新載入倉庫頁面。',
+        answer: '重新整理倉庫頁面。',
         replay: 'mission',
-        target: T_EDGE,
+        target: T_EDGE_RELOAD,
         check: function (ev, api) {
           var key = repoKey(api);
           if (!key || !remoteTree(key)['site/index.html']) return false;
@@ -266,6 +361,7 @@
     intro: '接續作業：專案已經在 GitHub 上了（倉庫有兩個版本）。這個任務在 ARCHITECTURE.md 加上判斷，送上 GitHub，再確認圖在網頁上畫得出來。' + VIDEO_NAME,
     prepare: function (api) {
       pushedState(api, 2);
+      closeCode();
       dropBrowser();
     },
     steps: [
@@ -275,7 +371,8 @@
         hint: '菱形用 { }，箭頭上寫字用 -->|字|，例如 B --> G{資料完整嗎？}、G -->|否| A。括號和箭頭都要用半形。預覽按鈕在標籤列右邊。',
         answer: '例：`B --> G{資料完整嗎？}`、`G -->|是| C`、`G -->|否| A`，Ctrl+S。',
         replay: 'mission',
-        target: K.chain(K.inWins('code', 'cd-preview-btn'), K.inWins('code', 'cd-explorer-row', HW_ARCH), K.fdItem(HW), K.desktopIcon(HW), K.dock('finder')),
+        menuPath: ['開啟檔案', 'Visual Studio Code'],
+        target: archCue(HW_ARCH, HW),
         check: function (ev, api) {
           var ast = K.fileAst(api, HW_ARCH);
           return !!(ast && ast.ok !== false && K.hasDiamond(ast) && K.hasLabeledFromDiamond(ast));
@@ -295,6 +392,8 @@
           return !!(blocks.length && K.hasDiamond(blocks[0].ast) && K.hasLabeledFromDiamond(blocks[0].ast));
         },
         trap: function (ev, api) {
+          var nr = notRepoTrap(ev, api);
+          if (nr) return nr;
           var c = api.termCmd(ev, function (x) { return isGit(x, 'push') && x.status === 0 && /Everything up-to-date/.test(x.out || ''); });
           if (c) return '沒有東西可以送：先存檔、add、commit，再 push。';
           return null;
@@ -306,7 +405,7 @@
         hint: '在倉庫頁點 ARCHITECTURE.md；GitHub 會把 mermaid 區塊畫成圖。圖沒有出來的話，回頭檢查括號和箭頭是不是半形。',
         answer: 'Edge › github.com/an/firenze-museums-hw › ARCHITECTURE.md。',
         replay: 'mission',
-        target: K.chain(K.inWins('edge', 'gh-file-row', 'ARCHITECTURE.md'), T_EDGE),
+        target: K.chain(K.ghFileLink('ARCHITECTURE.md'), T_EDGE),
         check: function (ev, api) {
           return !!api.seen('github:view', function (x) { return x.repo === REPO && x.view === 'file' && /ARCHITECTURE\.md$/.test(x.path || '') && x.mermaid === 'ok'; });
         }
@@ -329,6 +428,7 @@
     intro: '作業的最後：請 Codex 用內建瀏覽器檢查網站在手機上有沒有跑版，自己再看一次，存成版本送上去；最後照老師的清單檢查，複製要交的網址。' + VIDEO_NAME,
     prepare: function (api) {
       pushedState(api, 3);
+      closeCode();
       dropBrowser();
     },
     steps: [
@@ -338,7 +438,7 @@
         hint: '手機寬度大約是 390 像素。Codex 會自己打開網頁、換寬度、截圖、修好、再看一次。輸入框上方要看到 firenze-museums-hw 這個標籤。',
         answer: '貼上那句，按 Enter。',
         replay: 'mission',
-        target: K.chain(K.cxComposer, K.cxProject(HW), K.dock('codex')),
+        target: K.projectComposer(HW),
         check: function (ev, api) {
           var m = api.seen('cxbrowser:measure', function (x) { return x.mode === 'phone' && x.overflow === 0 && x.by === 'codex' && /firenze-museums-hw/.test(x.url || ''); });
           var edited = api.seen('fs:change', function (x) { return x.by === 'codex' && same(api, x.path, HW_CSS); });
@@ -346,7 +446,8 @@
           // and the composer (and the Annotate card's Send) is not ready yet
           var replied = api.seen('codex:reply', function (x) { return (x.intent === 'browser_check_mobile' || x.intent === 'browser_fix_layout') && x.projectPath && same(api, x.projectPath, HW); });
           return !!(m && edited && replied);
-        }
+        },
+        trap: hwChatTrap
       },
       {
         id: 's2',
@@ -354,17 +455,19 @@
         hint: '按瀏覽器面板上的 Annotate，點一個元素，在留言框寫一句話，按 Send。',
         answer: 'Annotate › 點標題 › 貼上留言 › Send。',
         replay: 'mission',
-        target: K.chain(K.inWins('codex', 'cxb-annotate'), K.cxComposer, K.dock('codex')),
+        // the comment card (box, then Send) › the heading of the page while Annotate is on › the Annotate button
+        target: whileIdle(K.chain(commentTarget, K.trusted(function () { return LAB.cxbrowser && LAB.cxbrowser.cueTarget ? LAB.cxbrowser.cueTarget('h1') : null; }), K.inWins('codex', 'cxb-annotate'), K.dock('codex'))),
         check: function (ev, api) {
           return !!api.seen('codex:reply', function (x) { return x.intent === 'annotate_edit' && x.projectPath && same(api, x.projectPath, HW); });
-        }
+        },
+        trap: hwChatTrap
       },
       {
         id: 's3',
         text: 'Codex 說修好了，你也自己再看一次：用瀏覽器面板的寬度按鈕切到手機寬度，確認沒有東西超出畫面。',
-        hint: '自己確認，不要只相信它的回報。（這顆寬度按鈕是練習版加的；已經是手機寬度的話，切到桌面再切回來，或按重新載入。）',
-        answer: '點瀏覽器面板上的寬度按鈕，切到手機寬度。',
-        target: K.inWins('codex', 'cxb-viewport'),
+        hint: '自己確認，不要只相信它的回報。（這顆寬度按鈕是練習版加的；Codex 剛剛已經是用手機寬度看，所以按瀏覽器面板上的 Reload（重新整理），或切到 Desktop 再切回 Phone。）',
+        answer: '點瀏覽器面板上的寬度按鈕，切到手機寬度（已經是手機寬度的話，按 Reload）。',
+        target: K.chain(widthCue, K.dock('codex')),
         check: function (ev, api) {
           var v = api.seen('cxbrowser:viewport', function (x) { return x.mode === 'phone' && x.by === 'user'; }) ||
             api.seen('cxbrowser:measure', function (x) { return x.mode === 'phone' && x.by === 'user' && x.overflow === 0; });
@@ -387,6 +490,8 @@
           return !!css && css !== W4.files.SITE_CSS;
         },
         trap: function (ev, api) {
+          var nr = notRepoTrap(ev, api);
+          if (nr) return nr;
           var c = api.termCmd(ev, function (x) { return isGit(x, 'push') && x.status === 0 && /Everything up-to-date/.test(x.out || ''); });
           if (c) return '沒有東西可以送：Codex 改的檔案還沒 add、commit。先 `git add .`，再 `git commit -m "說明"`，最後 push。';
           return null;
@@ -408,9 +513,17 @@
         text: '複製倉庫網址：這就是要交的東西。（真正的作業要貼到課程 Discord 的交作業區，這裡不用貼。）',
         hint: '網址的形式是 github.com/你的帳號/倉庫名。點 Edge 的網址列，按 Ctrl+C 複製；或用倉庫頁上的 Code 按鈕也可以。',
         answer: '點 Edge 的網址列，Ctrl+C；或 Code › HTTPS 旁邊的拷貝。',
-        target: K.chain(K.inWins('edge', 'gh-copy-url'), K.inWins('edge', 'gh-code-button'), T_EDGE),
+        // the repository's own page is the one whose address counts (not commits or a file): the copy button, the Code button, the repository name (back to its page), else the address bar
+        target: K.chain(K.inWins('edge', 'gh-copy-url'), K.inWins('edge', 'gh-code-button'), K.inWins('edge', 'gh-repo-title'), T_EDGE),
         check: function (ev, api) {
           return !!api.seen('github:copy-url', function (x) { return x.repo === REPO; });
+        },
+        trap: function (ev) {
+          // Ctrl+C on the address bar of a page of the repository (commits, a file …): that address is the page's, not the repository's
+          if (ev && ev.name === 'safari:share' && ev.data && ev.data.url && !/^https?:\/\/github\.com\/[^\/]+\/[^\/]+\/?$/i.test(String(ev.data.url))) {
+            return '複製的是「這一頁」的網址，不是倉庫的網址。點頁面上方的倉庫名稱回到倉庫首頁（網址是 github.com/an/firenze-museums-hw），再複製一次。';
+          }
+          return null;
         }
       }
     ],

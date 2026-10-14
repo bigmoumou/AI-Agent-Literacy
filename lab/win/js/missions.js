@@ -11,6 +11,7 @@
   var queue = [];
   var draining = false;
   var nudge = { stepId: null, text: '' };
+  var nudgeClear = false;                    // set by evaluate(): the step's trap answered '' (its complaint is settled), so the quiet line goes away
   var peek = null;                           // {id, text}: short "step done, next is ..." bubble next to the closed drawer strip
   var peekSeq = 0, peekTimer = null;
   var outroPending = false;                  // a mission just finished: scroll the card down to the outro and the next-mission button
@@ -284,6 +285,7 @@
     if (ev && step.trap) {
       try { t = withCtx(m, r, step, function () { return step.trap(ev, api); }); } catch (e) { t = null; }
       if (t) return String(t);
+      if (t === '') nudgeClear = true;          // a trap that answers with an empty string says its earlier complaint is settled (the diagram draws now): the line goes away
     }
     var run = LAB.bus.find('term:run', null, start);
     if (run && run.data) {
@@ -331,6 +333,7 @@
     if (!r.startedAt) return;
     var ev = { name: item.name, data: item.data };
     var before = firstUndone(m, r);
+    nudgeClear = false;
     var progressed = tryAdvance(m, r, ev);
     var idx = firstUndone(m, r);
     if (progressed && idx >= 0) setPeek('第 ' + idx + ' 步完成。下一步：' + plain(m.steps[idx].text));
@@ -342,7 +345,7 @@
       var stepId = m.steps[idx].id;
       if (t && ev.name === 'term:run') nudgeShut = '';
       if (t) { if (nudge.text !== t || nudge.stepId !== stepId) { nudge = { stepId: stepId, text: t, needs: fromNeeds }; announce(t); } }
-      else if (ev.name === 'term:run' || nudge.stepId !== stepId || nudge.needs) nudge = { stepId: stepId, text: '' };
+      else if (ev.name === 'term:run' || nudge.stepId !== stepId || nudge.needs || nudgeClear) nudge = { stepId: stepId, text: '' };
     } else nudge = { stepId: null, text: '' };
     if (before !== idx || true) render();
   }
@@ -1343,12 +1346,39 @@
     if (sheet || firstPending || document.hidden) return true;
     return !!(rail && rail.classList.contains('is-dragging'));
   }
+  /* A step that makes the student pick from a context menu (right-click › 開啟檔案 › Visual Studio Code) names the words in
+     `menuPath: ['開啟檔案', 'Visual Studio Code']`. While such a menu is open the ring walks down it: at the deepest open level, the
+     row that starts with the word of that level (a submenu opens one level deeper). Without an open menu, or with a menu that has
+     none of the words, the step's own `target` points as before (the thing to right-click). */
+  /* the word must be the whole label or be followed by something that is not a letter, so 「Code」 never lands on 「Codex」 */
+  function menuWord(tx, word) { return tx === word || (tx.indexOf(word) === 0 && !/[A-Za-z0-9]/.test(tx.charAt(word.length))); }
+  function menuTarget(step) {
+    var path = step && step.menuPath;
+    if (!path || !path.length) return null;
+    var menus = document.querySelectorAll('.lab-menu');
+    for (var k = menus.length - 1; k >= 0; k--) {
+      if (k >= path.length) continue;
+      var rows = menus[k].querySelectorAll('[data-lab=menu-item]');
+      for (var j = 0; j < rows.length; j++) {
+        if (rows[j].classList.contains('is-disabled')) continue;
+        var lb = rows[j].querySelector('.lab-mi-label');
+        var tx = ((lb ? lb.textContent : rows[j].textContent) || '').replace(/\s+/g, ' ').trim();
+        if (menuWord(tx, path[k])) {
+          var rc = rows[j].getBoundingClientRect();
+          return rc.width > 0 && rc.height > 0 ? { el: rows[j], label: 'menu-item' } : null;
+        }
+      }
+    }
+    return null;
+  }
   /* the current step's target element, or null */
   function stepTarget() {
     var m = missions.current();
     var r = m && data.missions[m.id];
     if (!m || !r || !r.startedAt || r.doneAt) return null;
     var i = firstUndone(m, r);
+    var mt = i >= 0 ? menuTarget(m.steps[i]) : null;
+    if (mt) return mt;
     var t = i >= 0 ? m.steps[i].target : null;
     if (!t) return null;
     var list = Array.isArray(t) ? t : [t], out = null;
@@ -1360,7 +1390,7 @@
       } catch (e) { el = null; }
       if (el && el.nodeType === 1) {
         var rc = el.getBoundingClientRect();
-        if (rc.width > 0 && rc.height > 0) out = { el: el, label: label };
+        if (rc.width > 0 && rc.height > 0) out = { el: el, label: label, sid: m.steps[i].id };
       }
     }
     return out;
@@ -1375,12 +1405,94 @@
     var top = document.elementFromPoint((l + r2) / 2, (t + b) / 2);
     return !!top && (el === top || el.contains(top) || top.contains(el));
   }
+  /* The part of a pointed-at element that can really be seen: its box cut by every ancestor that clips (overflow other than visible), so
+     a button that sticks out of a scrolled page, a list or a small window is still pointed at by its visible edge (instead of no cue at all). */
+  function visibleRect(el, rc) {
+    var l = rc.left, t = rc.top, r = rc.right, b = rc.bottom, a = el.parentNode;
+    while (a && a.nodeType === 1 && a !== document.body && a !== document.documentElement) {
+      var cs = null;
+      try { cs = window.getComputedStyle(a); } catch (e) { cs = null; }
+      if (cs && (cs.overflowX !== 'visible' || cs.overflowY !== 'visible')) {
+        var ar = a.getBoundingClientRect();
+        if (cs.overflowX !== 'visible') { l = Math.max(l, ar.left); r = Math.min(r, ar.right); }
+        if (cs.overflowY !== 'visible') { t = Math.max(t, ar.top); b = Math.min(b, ar.bottom); }
+      }
+      a = a.parentNode;
+    }
+    if (r - l < 2 || b - t < 2) return null;
+    return { left: l, top: t, right: r, bottom: b, width: r - l, height: b - t };
+  }
+  /* A target that is there but scrolled out of its page, list or window (nothing of it can be seen): bring it into view once, by scrolling the
+     scrollable boxes it sits in (never beyond its window), so the ring has something to circle. Done once per target: the student may scroll away. */
+  var revealedKey = '';
+  function revealInScrollers(el, key) {
+    if (revealedKey === key) return false;
+    revealedKey = key;
+    var moved = false, a = el.parentNode;
+    while (a && a.nodeType === 1 && a !== document.body && !(a.classList && a.classList.contains('lab-win'))) {
+      if (a.scrollHeight > a.clientHeight + 2) {
+        var cs = null;
+        try { cs = window.getComputedStyle(a); } catch (e) { cs = null; }
+        if (cs && /(auto|scroll)/.test(cs.overflowY)) {
+          var ar = a.getBoundingClientRect(), er = el.getBoundingClientRect();
+          if (er.bottom > ar.bottom) { a.scrollTop += er.bottom - ar.bottom + 16; moved = true; }
+          else if (er.top < ar.top) { a.scrollTop -= ar.top - er.top + 16; moved = true; }
+        }
+      }
+      a = a.parentNode;
+    }
+    return moved;
+  }
+  /* an element that is clipped away (completely, or all but a sliver: under 60 % of it shows) by a scrollable box of its own window, and scrolling that
+     box would bring it in (a row or a button at or below the fold of a small window): the mission files' chains take it as the target (the cue then
+     scrolls it into view once) instead of falling back to a lesser candidate such as a sidebar item or the address bar (cue audit 2026-10-14, small
+     windows: a file row with 4 px showing was neither "seeable" nor "gone", so the cue went to the address bar) */
+  missions.scrolledOut = function (el) {
+    if (!el || !el.getBoundingClientRect) return false;
+    var full = el.getBoundingClientRect();
+    if (full.width < 2 || full.height < 2) return false;
+    var vis = visibleRect(el, full);
+    if (vis && vis.height >= full.height * 0.6 && vis.width >= full.width * 0.6) return false;
+    var a = el.parentNode;
+    while (a && a.nodeType === 1 && a !== document.body && !(a.classList && a.classList.contains('lab-win'))) {
+      if (a.scrollHeight > a.clientHeight + 2) {
+        var cs = null;
+        try { cs = window.getComputedStyle(a); } catch (e) { cs = null; }
+        if (cs && /(auto|scroll)/.test(cs.overflowY)) {
+          var ar = a.getBoundingClientRect();
+          if (full.bottom > ar.bottom + 1 || full.top < ar.top - 1) return true;
+        }
+      }
+      a = a.parentNode;
+    }
+    return false;
+  };
+  /* what the mission files call `seeable`: the middle of the visible part of the element is the element itself (not a window, a menu or the card over it) */
+  missions.seeable = function (el) {
+    if (!el || !el.getBoundingClientRect) return false;
+    var full = el.getBoundingClientRect();
+    function hit(rc) {
+      if (!rc || rc.width < 2 || rc.height < 2) return false;
+      var t = null;
+      try { t = document.elementFromPoint(rc.left + rc.width / 2, rc.top + rc.height / 2); } catch (e) { t = null; }
+      return !!t && (t === el || el.contains(t));
+    }
+    return hit(visibleRect(el, full)) || hit(full);         // the full box too: an absolutely placed element that no overflow box of its parents really clips
+  };
   /* typing into the Terminal that already has the focus needs no pointing at */
   function termTyping(el) {
     var inp = el.closest ? el.closest('[data-lab="term-input"]') : null;
     if (!inp) return false;
     var win = inp.closest('.lab-win'), f = LAB.wm && LAB.wm.focused && LAB.wm.focused();
-    return !!(win && f && f.el === win);
+    // the keyboard must really be in the Terminal: after 「提示」 or 「複製」 on the card the window is still the focused one, but typing goes to the card's button
+    return !!(win && f && f.el === win && document.activeElement === inp);
+  }
+  /* the pointed-at box is a big editor (VS Code, Notepad, GitHub's edit box) that already has the keyboard: the student is typing, and a ring
+     around the whole editor would only be in the way (like the Terminal above). The ring comes back when the focus leaves it before the
+     step is done. Small fields (the Codex composer, an address bar, a rename box) keep their ring. */
+  function fieldFocused(el) {
+    var a = document.activeElement;
+    return !!(a && a === el && el.matches && el.matches('[data-lab=cd-editor],[data-lab=te-text],[data-lab=gh-edit-text]'));
   }
   function drawRing(el, rc, label) {
     var scr = document.getElementById('lab-screen');
@@ -1414,8 +1526,14 @@
     if (dockEl && cueDock !== dockEl) { dockEl.classList.add('lab-dock-attn'); cueDock = dockEl; }
     var ring = false;
     if (want && !dockEl) {
-      var rc = want.el.getBoundingClientRect();
-      if (cueVisible(want.el, rc) && !termTyping(want.el)) { ring = true; drawRing(want.el, rc, want.label); }
+      var full = want.el.getBoundingClientRect();
+      var rc = visibleRect(want.el, full);
+      if (!(rc && cueVisible(want.el, rc)) && cueVisible(want.el, full)) rc = full;       // an absolutely placed element that no overflow box of its parents really clips
+      if (!rc || missions.scrolledOut(want.el)) {
+        var cm = missions.current();
+        if (revealInScrollers(want.el, (cm ? cm.id : '') + '/' + (want.sid || '') + '/' + want.label + ':' + (want.el.getAttribute('data-path') || '') + ':' + (want.el.id || ''))) { cueSoon(); }
+      }
+      if (rc && cueVisible(want.el, rc) && !termTyping(want.el) && !fieldFocused(want.el)) { ring = true; drawRing(want.el, rc, want.label); }
     }
     if (!ring && cueEl && !cueEl.hidden) { cueEl.hidden = true; cueRect = ''; }
     // follow the element only while there is one to follow: bus events, window moves, scrolling and this light check every 400 ms

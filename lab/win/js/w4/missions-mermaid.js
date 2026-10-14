@@ -22,6 +22,7 @@
   }
   function seeable(el) {
     if (!el || !el.getBoundingClientRect) return false;
+    if (LAB.missions && LAB.missions.seeable) return LAB.missions.seeable(el);       // the engine's version looks at the visible part (a button half under the edge of a window still counts)
     var r = el.getBoundingClientRect();
     if (r.width < 2 || r.height < 2) return false;
     var t = null;
@@ -54,6 +55,7 @@
   function desktopIcon(path) {
     return function () { return byPath(document.getElementById('lab-desktop'), 'desktop-icon', path); };
   }
+  function trusted(fn) { fn.trusted = true; return fn; }      // the function already checked that its element is visible
   function chain() {
     var parts = [].slice.call(arguments);
     return function (api) {
@@ -62,19 +64,84 @@
         var part = parts[i], el = null;
         try { el = typeof part === 'function' ? part(api) : document.querySelector(part); } catch (e) { el = null; }
         if (!el) continue;
-        if (seeable(el)) return el;
-        if (!fallback) fallback = el;
+        if ((typeof part === 'function' && part.trusted) || seeable(el)) return el;
+        if (LAB.missions && LAB.missions.scrolledOut && LAB.missions.scrolledOut(el)) return el;       // below the fold of its own window: the cue scrolls it into view
+        if (!fallback && el.getBoundingClientRect && el.getBoundingClientRect().width > 0) fallback = el;       // a hidden element (a closed dialog's button) is no fallback
       }
       return fallback;
     };
   }
+  /* typing in the Terminal: with the window already focused the student is typing (the target is the hidden input, which the cue leaves
+     alone); otherwise the whole screen is the thing to click. No Terminal window: the taskbar button. */
+  var termShown = trusted(function () {
+    var l = liveWins('terminal');
+    if (!l.length) return null;
+    var w = l[l.length - 1], screen = w.el.querySelector('[data-lab=term-screen]');
+    if (!seeable(screen)) return null;
+    var f = LAB.wm.focused(), inp = w.el.querySelector('[data-lab=term-input]');
+    if (f && f.id === w.id && inp && document.activeElement === inp) return inp;       // the keyboard is in the Terminal: typing needs no pointing at
+    return screen;                                                                        // else one click on it first (the card's buttons take the keyboard)
+  });
+  /* the text of a file in an editor window (Notepad: te-text, VS Code: cd-editor); the cue leaves it alone while it has the keyboard */
+  function editorOf(path) {
+    return function () {
+      var want = String(path).toLowerCase(), i, l, el;
+      l = liveWins('code');
+      for (i = l.length - 1; i >= 0; i--) { el = byPath(l[i].el, 'cd-editor', path); if (el && el.getBoundingClientRect().width > 0) return el; }
+      l = liveWins('textedit');
+      for (i = l.length - 1; i >= 0; i--) {
+        var st = l[i].state || {};
+        if (st.path && String(st.path).toLowerCase() === want) { el = l[i].el.querySelector('[data-lab=te-text]'); if (el) return el; }
+      }
+      return null;
+    };
+  }
+  /* a file row of the practice GitHub: the name link inside it (the middle of the row is the commit message, another link) */
+  function ghFileLink(path) {
+    return function () {
+      var row = inWins('edge', 'gh-file-row', path)();
+      return row ? (row.querySelector('.gh-rname') || row) : null;
+    };
+  }
   var fdItem = function (p) { return inWins('finder', 'fd-item', p); };
   var fdSide = function (p) { return inWins('finder', 'fd-sidebar-item', p); };
-  function finderWalk(paths, side) {
-    return chain.apply(null, paths.map(fdItem).concat([fdSide(side || W4.DESKTOP || '/Users/an/Desktop'), dock('finder')]));
+  /* walking to a folder in File Explorer: `lead` (parts such as the desktop icon) when really visible, then the deepest of `paths` that is on screen (a
+     path, or a function that finds an element), else the navigation-pane item `side`, else File Explorer on the taskbar. An item that is there but
+     covered: in the FRONT Explorer window (another window, say Notepad or Codex, lies over it) the taskbar button brings Explorer forward (the
+     navigation-pane item would send the student back up the folders); in an OLDER Explorer window behind, the taskbar button only raises the
+     front one, so the walk goes on with the shallower items and ends at the front window's navigation pane (cue audit 2026-10-14). The button is
+     not offered while that Explorer is the focused window: on Windows the button of the front window minimises it. */
+  function finderWalk(paths, side, lead) {
+    var items = paths.map(function (p) { return typeof p === 'function' ? p : fdItem(p); }), rest = chain(fdSide(side || W4.DESKTOP || '/Users/an/Desktop'), dock('finder'));
+    return function (api) {
+      var i, el, l = liveWins('finder'), top = l.length ? l[l.length - 1] : null, fw = null;
+      try { fw = LAB.wm.focused(); } catch (e) { fw = null; }
+      for (i = 0; lead && i < lead.length; i++) {
+        el = null;
+        try { el = typeof lead[i] === 'function' ? lead[i](api) : document.querySelector(lead[i]); } catch (e1) { el = null; }
+        if (el && seeable(el)) return el;
+      }
+      for (i = 0; i < items.length; i++) {
+        el = null;
+        try { el = items[i](api); } catch (e2) { el = null; }
+        if (!el) continue;
+        if (seeable(el)) return el;
+        if (LAB.missions && LAB.missions.scrolledOut && LAB.missions.scrolledOut(el)) return el;
+        if (top && top.el.contains(el) && !(fw && fw.id === top.id)) return document.querySelector(dock('finder'));
+      }
+      return rest(api);
+    };
   }
   var cxComposer = inWins('codex', 'cx-composer');
   var cxProject = function (p) { return inWins('codex', 'cx-project', p); };
+  /* a sentence for Codex in a project's chat: the composer once that project's chat is open, the project's row before that */
+  function projectComposer(projectPath) {
+    return chain(function (api) {
+      var c = null;
+      try { c = api.codex.activeChat(); } catch (e) { c = null; }
+      return c && c.projectPath && same(api, c.projectPath, projectPath) ? cxComposer() : cxProject(projectPath)();
+    }, dock('codex'));
+  }
 
   /* the first diagram of a Markdown file, parsed (null when the file or the diagram is missing) */
   function fileAst(api, path) {
@@ -110,6 +177,8 @@
   /* one quiet line for the usual reasons a diagram does not come out */
   function mermaidTrap(path) {
     return function (ev) {
+      // the diagram draws again: '' = the earlier 「預覽出不來」 line goes away (null = nothing to say)
+      if (ev && ev.name === 'mermaid:render' && ev.data && ev.data.ok && renderOf(ev.data, path || ARCH)) return '';
       if (!ev || ev.name !== 'mermaid:render' || !ev.data || ev.data.ok || !renderOf(ev.data, path || ARCH)) return null;
       var er = ev.data.error || {};
       if (er.kind === 'fullwidth') return '預覽出不來：有符號打成全形了（例如 ［ ］、－－＞、｜）。括號、箭頭、| 都要用半形，輸入法切到英文（按一下 Shift）再打。';
@@ -130,6 +199,7 @@
 
   W4.kit = {
     same: same, dock: dock, liveWins: liveWins, seeable: seeable, byPath: byPath, inWins: inWins, desktopIcon: desktopIcon, chain: chain,
+    projectComposer: projectComposer, trusted: trusted, termShown: termShown, T_TERM: chain(termShown, dock('terminal')), editorOf: editorOf, ghFileLink: ghFileLink,
     fdItem: fdItem, fdSide: fdSide, finderWalk: finderWalk, cxComposer: cxComposer, cxProject: cxProject,
     fileAst: fileAst, diamonds: diamonds, hasDiamond: hasDiamond, hasLabeledFromDiamond: hasLabeledFromDiamond, hasNewBoxAfterF: hasNewBoxAfterF,
     mermaidTrap: mermaidTrap, ensureBase4: ensureBase4, renderOf: renderOf, ARCH: ARCH
@@ -149,6 +219,7 @@
     intro: 'Mermaid 用幾行字畫流程圖。放在 .md 檔裡，用三個反引號加 mermaid 把圖包起來；作業的 ARCHITECTURE.md 就是這樣。',
     prepare: function (api) {
       ensureBase4(api);
+      try { LAB.apps.quit('code', { force: true }); } catch (e) { /* none */ }           // a Code window of an earlier mission (another folder, old tabs) must not be the one that opens this folder
       api.ensureSeed(ARCH, { overwrite: true });          // the diagram as the Week 3 homework left it
     },
     steps: [
@@ -158,7 +229,8 @@
         hint: '在檔案總管對 Firenze-Museums 按右鍵 › 開啟檔案 › Visual Studio Code。預覽按鈕在標籤列的右邊，滑鼠移上去會寫 Open Preview to the Side。預覽太擠的話，按 Ctrl+B 收起左邊的檔案列表。',
         answer: '檔案總管 › 桌面 › Firenze-Museums › 右鍵 › 開啟檔案 › Visual Studio Code；點 ARCHITECTURE.md；按右上角的預覽按鈕（或 Ctrl+Shift+V）。',
         replay: 'mission',
-        target: chain(inWins('code', 'cd-preview-btn'), inWins('code', 'cd-explorer-row', ARCH), fdItem(FM), desktopIcon(FM), fdSide(W4.DESKTOP || '/Users/an/Desktop'), dock('finder')),
+        menuPath: ['開啟檔案', 'Visual Studio Code'],
+        target: finderWalk([FM, desktopIcon(FM)], W4.DESKTOP, [inWins('code', 'cd-preview-btn'), inWins('code', 'cd-explorer-row', ARCH)]),
         check: function (ev, api) {
           var opened = api.seen('editor:open', function (d) { return d.appId === 'code' && same(api, d.path, ARCH); });
           var prev = api.seen('code:preview', function (d) { return d.on && same(api, d.path, ARCH); });
@@ -172,6 +244,7 @@
         hint: 'TD 是 Top Down，由上往下；LR 是 Left to Right，由左往右。改完預覽會自己更新。',
         answer: '`flowchart TD`',
         replay: 'mission',
+        target: editorOf(ARCH),
         check: function (ev, api) {
           return !!api.seen('mermaid:render', function (d) { return d.ok && d.dir === 'TB' && renderOf(d, ARCH); });
         },
@@ -183,6 +256,7 @@
         hint: '`A[文字]` 的 A 是代號，[ ] 裡是方塊上的字，--> 是箭頭。F 已經有了，同一個代號寫第二次，就是接回同一個方塊。括號和箭頭都要用半形。',
         answer: '新增一行（前面空四格）：`    F --> H[交作業]`',
         replay: 'mission',
+        target: editorOf(ARCH),
         check: function (ev, api) {
           return !!api.seen('mermaid:render', function (d) { return d.ok && renderOf(d, ARCH) && hasNewBoxAfterF(d.ast); });
         },
@@ -194,6 +268,7 @@
         hint: '菱形用大括號 { }，圓角用小括號 ( )。把 B 接到新的代號 G，G 再接到 C。',
         answer: '`B --> G{資料完整嗎？}` 和 `G --> C`（原來的 `B --> C` 可以刪掉）',
         replay: 'mission',
+        target: editorOf(ARCH),
         check: function (ev, api) {
           return !!api.seen('mermaid:render', function (d) { return d.ok && renderOf(d, ARCH) && hasDiamond(d.ast); });
         },
@@ -205,6 +280,7 @@
         hint: '箭頭上寫字：`-->|字|`。「否」接回前面的代號 A，圖會自己繞回去。',
         answer: '`G -->|是| C` 和 `G -->|否| A`',
         replay: 'mission',
+        target: editorOf(ARCH),
         check: function (ev, api) {
           return !!api.seen('mermaid:render', function (d) { return d.ok && renderOf(d, ARCH) && hasLabeledFromDiamond(d.ast); });
         },
@@ -216,6 +292,7 @@
         hint: '存好之後，這個檔案才能 commit、push 到 GitHub；GitHub 也會用同樣的字把圖畫出來。',
         answer: 'Ctrl+S',
         replay: 'mission',
+        target: editorOf(ARCH),
         // decided by what is on the disk: the saved file holds the new box, the diamond and the labelled arrow, and it parses
         check: function (ev, api) {
           var ast = fileAst(api, ARCH);
@@ -225,7 +302,7 @@
           var t = mermaidTrap(ARCH)(ev, api);
           if (t) return t;
           if (ev && ev.name === 'editor:save' && ev.data && same(api, ev.data.path, ARCH)) return '存好了，但檔案裡還缺東西：要有接在 F 後面的新方塊、一個菱形，和菱形出來有字的箭頭。看看預覽。';
-          return null;
+          return t;
         }
       },
       {
@@ -234,6 +311,7 @@
         text: '故意弄壞一次：把某一行的 `[` 改成全形的 `［`，看看預覽怎麼說，再改回來。',
         hint: '圖出不來最常見的原因：括號沒關，或是打成全形。錯誤訊息會說第幾行；問題常在前一行。看不懂英文沒關係，整段貼給 Codex 修。',
         answer: '把 `[` 改成 `［`，看預覽的錯誤，再改回 `[`。',
+        target: editorOf(ARCH),
         check: function (ev, api) {
           if (ev && ev.name === 'mermaid:render' && ev.data && renderOf(ev.data, ARCH)) {
             if (!ev.data.ok) api.state.brokeOnce = true;
@@ -248,7 +326,7 @@
         text: '圖出不來、或不會寫的時候，請 Codex 幫你：[[請把「收集資料、檢查資料、整理成表格、做成網站」的流程畫成 Mermaid，加進 ARCHITECTURE.md]]',
         hint: '在 Firenze-Museums 專案的對話裡問。Codex 會把整段圖寫進檔案，你可以在 Code 的預覽看到結果。',
         answer: '在 Codex 貼上那句，按 Enter。',
-        target: chain(cxComposer, cxProject(FM), dock('codex')),
+        target: projectComposer(FM),
         check: function (ev, api) {
           return !!api.seen('codex:reply', function (d) { return d.intent === 'write_mermaid'; });
         }

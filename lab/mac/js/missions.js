@@ -1445,13 +1445,16 @@
     }
     return moved;
   }
-  /* an element that is clipped away completely by a scrollable box of its own window, and scrolling that box would bring it in (a button or
-     a row below the fold of a small Safari or Code window): the mission files' chains take it as the target (the cue then scrolls it into
-     view once) instead of falling back to a lesser candidate such as the address bar (cue audit 2026-10-14, 1024×640) */
+  /* an element that is clipped away (completely, or all but a sliver: under 60 % of it shows) by a scrollable box of its own window, and
+     scrolling that box would bring it in (a button or a row at or below the fold of a small Safari or Code window): the mission files' chains
+     take it as the target (the cue then scrolls it into view once) instead of falling back to a lesser candidate such as the address bar
+     (cue audit 2026-10-14, 1024×640; the Windows audit found a file row with 4 px showing, neither "seeable" nor "gone") */
   missions.scrolledOut = function (el) {
     if (!el || !el.getBoundingClientRect) return false;
     var full = el.getBoundingClientRect();
-    if (full.width < 2 || full.height < 2 || visibleRect(el, full)) return false;
+    if (full.width < 2 || full.height < 2) return false;
+    var vis = visibleRect(el, full);
+    if (vis && vis.height >= full.height * 0.6 && vis.width >= full.width * 0.6) return false;
     var a = el.parentNode;
     while (a && a.nodeType === 1 && a !== document.body && !(a.classList && a.classList.contains('lab-win'))) {
       if (a.scrollHeight > a.clientHeight + 2) {
@@ -1526,7 +1529,7 @@
       var full = want.el.getBoundingClientRect();
       var rc = visibleRect(want.el, full);
       if (!(rc && cueVisible(want.el, rc)) && cueVisible(want.el, full)) rc = full;       // an absolutely placed element that no overflow box of its parents really clips
-      if (!rc) {
+      if (!rc || missions.scrolledOut(want.el)) {
         var cm = missions.current();
         if (revealInScrollers(want.el, (cm ? cm.id : '') + '/' + (want.sid || '') + '/' + want.label + ':' + (want.el.getAttribute('data-path') || '') + ':' + (want.el.id || ''))) { cueSoon(); }
       }

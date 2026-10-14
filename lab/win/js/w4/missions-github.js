@@ -60,7 +60,7 @@
       if (!map) return;
       map.forEach(function (inst) {
         var s = inst && inst.session;
-        if (s && s.cwd && under(s.cwd, HW)) { s.cwd = DESKTOP; }
+        if (s && s.cwd && under(s.cwd, HW)) { s.cwd = '/Users/an'; }                // ~, not the Desktop: the first step says `cd Desktop`
       });
     } catch (e) { /* no Terminal yet */ }
   }
@@ -96,6 +96,7 @@
   }
   function seeable(el) {
     if (!el || !el.getBoundingClientRect) return false;
+    if (LAB.missions && LAB.missions.seeable) return LAB.missions.seeable(el);       // the engine's version looks at the visible part (a button half under the edge of a window still counts)
     var r = el.getBoundingClientRect();
     if (r.width < 2 || r.height < 2) return false;
     var t = null;
@@ -134,22 +135,67 @@
         try { el = typeof part === 'function' ? part(api) : document.querySelector(part); } catch (e) { el = null; }
         if (!el) continue;
         if ((typeof part === 'function' && part.trusted) || seeable(el)) return el;
-        if (!fallback) fallback = el;
+        if (LAB.missions && LAB.missions.scrolledOut && LAB.missions.scrolledOut(el)) return el;       // below the fold of its own window: the cue scrolls it into view
+        if (!fallback && el.getBoundingClientRect && el.getBoundingClientRect().width > 0) fallback = el;       // a hidden element (a closed dialog's button) is no fallback
       }
       return fallback;
     };
   }
+  /* the text of a file open in Notepad (the cue leaves it alone while it has the keyboard) */
+  function teTextOf(path) {
+    return function () {
+      var l = liveWins('textedit'), want = String(path).toLowerCase();
+      for (var i = l.length - 1; i >= 0; i--) {
+        var st = l[i].state || {};
+        if (st.path && String(st.path).toLowerCase() === want) { var t = l[i].el.querySelector('[data-lab=te-text]'); if (t) return t; }
+      }
+      return null;
+    };
+  }
+  /* a file row of the practice GitHub: the name link inside it (the middle of the row is the commit message, another link) */
+  function ghFileLink(path) {
+    return function () {
+      var row = inWins('edge', 'gh-file-row', path)();
+      return row ? (row.querySelector('.gh-rname') || row) : null;
+    };
+  }
   var fdItem = function (p) { return inWins('finder', 'fd-item', p); };
   var fdSide = function (p) { return inWins('finder', 'fd-sidebar-item', p); };
-  function finderWalk(paths, side) { return chain.apply(null, paths.map(fdItem).concat([fdSide(side || DESKTOP), dock('finder')])); }
+  /* walking to a folder in File Explorer: `lead` (parts such as the desktop icon) when really visible, then the deepest of `paths` that is on screen (a
+     path, or a function that finds an element), else the navigation-pane item `side`, else File Explorer on the taskbar. An item that is there but
+     covered: in the FRONT Explorer window (another window, say Notepad or Codex, lies over it) the taskbar button brings Explorer forward (the
+     navigation-pane item would send the student back up the folders); in an OLDER Explorer window behind, the taskbar button only raises the
+     front one, so the walk goes on with the shallower items and ends at the front window's navigation pane (cue audit 2026-10-14). The button is
+     not offered while that Explorer is the focused window: on Windows the button of the front window minimises it. */
+  function finderWalk(paths, side, lead) {
+    var items = paths.map(function (p) { return typeof p === 'function' ? p : fdItem(p); }), rest = chain(fdSide(side || DESKTOP), dock('finder'));
+    return function (api) {
+      var i, el, l = liveWins('finder'), top = l.length ? l[l.length - 1] : null, fw = null;
+      try { fw = LAB.wm.focused(); } catch (e) { fw = null; }
+      for (i = 0; lead && i < lead.length; i++) {
+        el = null;
+        try { el = typeof lead[i] === 'function' ? lead[i](api) : document.querySelector(lead[i]); } catch (e1) { el = null; }
+        if (el && seeable(el)) return el;
+      }
+      for (i = 0; i < items.length; i++) {
+        el = null;
+        try { el = items[i](api); } catch (e2) { el = null; }
+        if (!el) continue;
+        if (seeable(el)) return el;
+        if (LAB.missions && LAB.missions.scrolledOut && LAB.missions.scrolledOut(el)) return el;
+        if (top && top.el.contains(el) && !(fw && fw.id === top.id)) return document.querySelector(dock('finder'));
+      }
+      return rest(api);
+    };
+  }
   var termShown = trusted(function () {
     var l = liveWins('terminal');
     if (!l.length) return null;
     var w = l[l.length - 1], screen = w.el.querySelector('[data-lab=term-screen]');
     if (!seeable(screen)) return null;
-    var f = LAB.wm.focused();
-    if (f && f.id === w.id) return w.el.querySelector('[data-lab=term-input]');
-    return screen;
+    var f = LAB.wm.focused(), inp = w.el.querySelector('[data-lab=term-input]');
+    if (f && f.id === w.id && inp && document.activeElement === inp) return inp;       // the keyboard is in the Terminal: typing needs no pointing at
+    return screen;                                                                        // else one click on it first (the card's buttons take the keyboard)
   });
   var T_TERM = chain(termShown, dock('terminal'));
   /* Edge is not pinned to the practice taskbar: with no Edge window the cue walks to Edge in the Start menu, then to the Start button */
@@ -157,7 +203,17 @@
   var inEdge = function (lab, path) { return inWins('edge', lab, path); };
   var edAddress = inEdge('ed-address');
   var T_EDGE = chain.apply(null, [edAddress, dock('edge')].concat(EDGE_OPEN));
-  var T_EDGE_RELOAD = chain.apply(null, [inEdge('ed-reload'), edAddress, dock('edge')].concat(EDGE_OPEN));
+  /* reloading only means something while Edge already shows a page of the repository that a reload counts for (its front page, a folder, a file or the
+     commits); on its start page or any other page (a commit, the editor) the address has to be typed */
+  function showsRepo() {
+    var l = liveWins('edge'), i, p;
+    for (i = l.length - 1; i >= 0; i--) {
+      p = l[i].el.querySelector('[data-lab=gh-page]');
+      if (p) return /^(repo|tree|file|commits)$/.test(p.getAttribute('data-view') || '');
+    }
+    return false;
+  }
+  var T_EDGE_RELOAD = chain.apply(null, [function () { return showsRepo() ? inEdge('ed-reload')() : null; }, edAddress, dock('edge')].concat(EDGE_OPEN));
   var T_CODE = chain.apply(null, [inEdge('gh-copy-url'), inEdge('gh-code-button'), edAddress, dock('edge')].concat(EDGE_OPEN));
 
   /* ------------------------------------------------------------------ traps (one quiet line for a known beginner mistake) */
@@ -308,7 +364,9 @@
         text: '用記事本打開桌面上 `firenze-museums-hw` 裡的 README.md，在最後面加一行自己的說明，按 Ctrl+S 存檔。',
         hint: '在檔案總管打開桌面的 firenze-museums-hw，對 README.md 按右鍵 › 開啟檔案 › 記事本。存檔之後標題前面的星號（*）就會消失。',
         answer: '檔案總管 › 桌面 › firenze-museums-hw › README.md › 右鍵 › 開啟檔案 › 記事本；加一行字；Ctrl+S。',
-        target: finderWalk([HW + '/README.md', HW], DESKTOP),
+        // Explorer › right-click README.md › 開啟檔案 › 記事本 (the ring walks down the menu), then the Notepad text (until the student has it)
+        menuPath: ['開啟檔案', '記事本'],
+        target: chain(teTextOf(HW + '/README.md'), finderWalk([HW + '/README.md', HW], DESKTOP)),
         check: function (ev, api) { var t = api.read(HW + '/README.md'); return t !== null && t !== README0; },
         trap: function (ev, api) {
           if (ev && ev.name === 'editor:save' && ev.data && same(api, ev.data.path, HW + '/README.md') && api.read(HW + '/README.md') === README0) return '存檔了，但內容沒有變：在最後面加一行字，再按 Ctrl+S。';
@@ -377,7 +435,7 @@
           if (!c) return null;
           if (/Author identity unknown/.test(c.out)) return IDENTITY;
           if (/no changes added to commit|nothing to commit|nothing added to commit/.test(c.out)) return '沒有選好的檔案。先 `git add README.md`。';
-          if (/要加訊息/.test(c.out)) return 'commit 要加一句說明：`git commit -m "你的說明"`，引號用半形。';
+          if (/要加訊息|Aborting commit due to empty commit message/.test(c.out)) return 'commit 要加一句說明：`git commit -m "你的說明"`，引號用半形。';
           return null;
         })
       },
@@ -401,7 +459,7 @@
         id: 's7',
         text: '到 Edge 重新整理倉庫頁面（`github.com/an/firenze-museums-hw`），看看新的版本在不在上面。',
         hint: 'commit 只存在你自己的電腦，網頁上還看不到，commits 的數字沒有變。',
-        answer: 'Edge 網址列輸入 github.com/an/firenze-museums-hw，或按網址列左邊的重新載入。',
+        answer: 'Edge 網址列輸入 github.com/an/firenze-museums-hw，或按網址列左邊的重新整理。',
         target: T_EDGE_RELOAD,
         check: function (ev, api) { return !!api.seen('github:view', repoViews); }
       },
@@ -420,7 +478,7 @@
         id: 's9',
         text: '再到 Edge 重新整理：你寫的說明出現在最上面。',
         hint: '頁面上方那一行是最新的版本，點「commits」可以看到所有版本和它們的說明。',
-        answer: '重新載入倉庫頁面。',
+        answer: '重新整理倉庫頁面。',
         replay: 'mission',
         target: T_EDGE_RELOAD,
         check: function (ev, api) {
@@ -453,7 +511,7 @@
         text: '假裝你在另一台電腦：到 Edge 打開 `github.com/an/firenze-museums-hw`，點 README.md，再點右上角的鉛筆圖示（Edit this file），把內容改一行。',
         hint: '這等於另一台電腦（或同學）改了雲端的檔案；你桌面上的檔案還是舊的。網址列輸入網址後按 Enter。',
         answer: 'Edge › 倉庫頁 › README.md › 鉛筆圖示 › 改一行字。',
-        target: chain.apply(null, [inEdge('gh-edit'), inEdge('gh-file-row', 'README.md'), edAddress, dock('edge')].concat(EDGE_OPEN)),
+        target: chain.apply(null, [inEdge('gh-edit'), ghFileLink('README.md'), edAddress, dock('edge')].concat(EDGE_OPEN)),
         check: function (ev, api) { return !!api.seen('github:edit-open', function (d) { return d.repo === REPO && d.path === 'README.md'; }); }
       },
       {
