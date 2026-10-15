@@ -528,7 +528,7 @@
       sel: new Set(), anchor: null, filter: '', scope: 'mac', chain: [], expanded: new Set(),
       showHidden: false, showPath: true, showStatus: true,
       renaming: null, order: [], rendered: false, sheet: null,
-      pendingSel: opts.select ? opts.select.slice() : null, topCount: 0, lastDirSig: ''
+      pendingSel: opts.select ? opts.select.slice() : null, topCount: 0, lastDirSig: '', silentSel: false
     };
     var items = new Map();            // path -> rec
     var win = null;
@@ -637,7 +637,9 @@
         else if (em === 'gallery') updateGallery();
         else if (barFollowsSel()) updatePathbar();
       }
-      if (!same && !o.silent) LAB.bus.emit('finder:select', { winId: win ? win.id : null, paths: orderedSel() });
+      // a selection the program made (a new folder, a rename) is silent; the next deliberate click on it still counts as a click by the student
+      if (o.silent) S.silentSel = true;
+      else if (!same || o.force) { S.silentSel = false; LAB.bus.emit('finder:select', { winId: win ? win.id : null, paths: orderedSel() }); }
     }
     function selectRange(toPath) {
       var a = S.order.indexOf(S.anchor), b = S.order.indexOf(toPath);
@@ -900,7 +902,7 @@
         },
         onClickSelect: function (e) {
           if (e.shiftKey || e.metaKey || e.ctrlKey) return;
-          setSel([rec.st.path]);
+          setSel([rec.st.path], { force: S.silentSel });
         }
       }));
       el.addEventListener('dblclick', function (e) {
