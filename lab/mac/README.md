@@ -3,13 +3,13 @@
 這是「學習分析工具」課程的練習環境：一台在瀏覽器裡執行的**模擬 Mac**，讓學生練習每週的內容（Week 3：終端機、Finder，把資料夾拖進 Codex 並和它對話；Week 4：Codex 的內建瀏覽器、GitHub、Mermaid 和作業）。每一週用同一台電腦，只是任務不同：網址不加參數是 Week 3，加 `?week=4` 是 Week 4。
 它不是影片，是真的可以操作的假系統；沒有後端，全部在前端執行，**什麼都不會留到下一次**：每次進入（包括重新整理）都是一台全新的電腦，檔案、終端機歷史、Codex 對話和任務進度都從起始狀態開始。
 
-macOS 與 Finder 是 Apple Inc. 的商標，Codex 是 OpenAI 的商標，GitHub 是 GitHub, Inc. 的商標，Mermaid 是一個開放原始碼專案的名稱。這個練習是獨立的教學模擬，與這些公司和專案都沒有關係。Week 4 裡的 GitHub 頁面、Codex 的瀏覽器面板和美術館網站都是這裡自己畫的，沒有使用任何官方圖檔或標誌；美術館和網址（`museo-esempio.example`）是虛構的。
+macOS 與 Finder 是 Apple Inc. 的商標，Codex 是 OpenAI 的商標，Google Chrome 是 Google LLC 的商標，Claude 是 Anthropic 的商標，Visual Studio Code 是 Microsoft 的商標，GitHub 是 GitHub, Inc. 的商標，Mermaid 是一個開放原始碼專案的名稱。這個練習是獨立的教學模擬，與這些公司和專案都沒有關係。Week 4 裡的 GitHub 頁面、Codex 的瀏覽器面板和美術館網站都是這裡自己畫的，沒有使用任何官方圖檔或標誌；美術館和網址（`museo-esempio.example`）是虛構的。
 
 ## 外觀與素材
 
 - 桌布是 `img/wallpaper.jpg`，用 CSS `background-size: cover` 鋪滿：「Lake Tahoe, United States (Unsplash).jpg」，Clara Marie 攝，CC0，取自 Wikimedia Commons（`https://commons.wikimedia.org/wiki/File:Lake_Tahoe,_United_States_(Unsplash).jpg`）。「關於這個練習」視窗也有同樣的署名。圖檔載入失敗時，會露出 CSS 畫的藍色漸層，不會變成黑畫面。
 - 外觀對照站主自己的 Mac 截圖：選單列透明、白字、最左邊是自己畫的蘋果形圖示（不是 Apple 的圖檔），右邊是輸入法 `注`、Wi-Fi、搜尋、控制中心與日期時間；終端機視窗是白色標題列加深藍灰色內容區；視窗圓角、紅黃綠按鈕的大小與間距照 macOS Tahoe 的樣子。
-- 所有圖示（Dock、桌面、選單列）都是自己畫的 SVG，只是看起來像，沒有使用 Apple、Microsoft 或 OpenAI 的圖檔。
+- 所有圖示（Dock、桌面、選單列）都是自己畫的 SVG，沒有使用 Apple、Google、Microsoft、OpenAI 或 Anthropic 的圖檔。Dock 的內容、順序和圖示照站主實驗室 Mac Studio（macOS 26）的 Dock 重畫（2026-10-15）；練習電腦裡沒有的 App（提醒事項、備忘錄、App Store、Chrome、Claude）點了會說明真的 Mac 上才打得開。
 
 ## 怎麼開
 

@@ -1573,7 +1573,7 @@
     var found = null;
     if (!LAB.apps) return null;
     LAB.apps.all().forEach(function (def) {
-      if (found || def.id === 'about') return;
+      if (found || def.id === 'about' || def.stub) return;   // the Dock-only apps of round 7 (Chrome, Notes, …) stay 「沒有安裝」 for `open -a`
       var names = [def.id, def.title, def.en].concat(def.aliases || []);
       for (var i = 0; i < names.length; i++) {
         if (names[i] && String(names[i]).toLowerCase() === want) { found = def.id; return; }

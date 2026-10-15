@@ -86,20 +86,21 @@
 
 /* ----------------------------------------------------------------- Dock
    Tahoe-style light frosted bar. Proportions follow the real Dock (icon : gap : bar height = 1 : .33 : 1.5):
-   58 px tile (the art leaves ~5% margin, so about 54 px is visible), 14 px gap, 16 px side padding, 28 px radius. */
+   58 px tile (the art leaves ~12% margin, so about 51 px is visible), 8 px gap (round 7: with the squircle margins the art-to-art space is then ~15 px = 0.3 of an icon, as on the teacher's real
+   Dock; the old 14 px gap made 16 icons shrink the whole Dock), 16 px side padding, 28 px radius. */
 #lab-dock { display: flex; justify-content: center; }
 .lab-dock-bar {
   pointer-events: auto;
-  display: flex; align-items: flex-end; gap: 14px;
+  display: flex; align-items: flex-end; gap: 12px;
   padding: 10px 16px 5px;
   border-radius: 28px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, .5), rgba(255, 255, 255, .32));
-  -webkit-backdrop-filter: blur(30px) saturate(1.8) brightness(1.12);
-  backdrop-filter: blur(30px) saturate(1.8) brightness(1.12);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .34), rgba(255, 255, 255, .2));   /* round 7: clearer glass, as on the teacher's real Dock */
+  -webkit-backdrop-filter: blur(22px) saturate(1.8) brightness(1.1);
+  backdrop-filter: blur(22px) saturate(1.8) brightness(1.1);
   border: 1px solid rgba(255, 255, 255, .5);
   box-shadow: 0 8px 26px rgba(0, 0, 0, .24), inset 0 1px 0 rgba(255, 255, 255, .45), inset 0 0 0 .5px rgba(255, 255, 255, .18);
 }
-.lab-dock-sec { display: flex; align-items: flex-end; gap: 14px; }
+.lab-dock-sec { display: flex; align-items: flex-end; gap: 8px; }
 .lab-dock-div { width: 1px; align-self: stretch; margin: 2px 0 6px; background: rgba(20, 30, 40, .34); }
 .lab-dock-item {
   position: relative;
@@ -126,7 +127,7 @@
 .lab-dock-item:hover .lab-dock-label, .lab-dock-item:focus-visible .lab-dock-label { opacity: 1; }
 .lab-dock-item.is-bounce .lab-dock-icon { animation: lab-bounce .24s ease-in-out 3; }
 @keyframes lab-bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-.lab-dock-mini { gap: 14px; }
+.lab-dock-mini { gap: 8px; }
 .lab-thumb-win { display: block; width: 50px; height: 36px; margin: 22px 4px 0; border-radius: 5px; background: #f4f4f4; box-shadow: inset 0 0 0 .5px rgba(0, 0, 0, .3), 0 2px 5px rgba(0, 0, 0, .25); overflow: hidden; transform-origin: 50% 100%; }
 .lab-thumb-bar { display: block; height: 7px; background: #dcdcdc; }
 .lab-thumb-line { display: block; height: 3px; margin: 4px 5px 0; border-radius: 2px; background: rgba(0, 0, 0, .14); }

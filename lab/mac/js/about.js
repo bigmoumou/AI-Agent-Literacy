@@ -6,8 +6,8 @@
   var h = LAB.util.h;
 
   var TRADEMARK = LAB.week === 4
-    ? 'macOS 與 Finder 是 Apple Inc. 的商標，Codex 是 OpenAI 的商標，GitHub 是 GitHub, Inc. 的商標，Mermaid 是一個開放原始碼專案的名稱。這個練習是獨立的教學模擬，與這些公司和專案都沒有關係。'
-    : 'macOS 與 Finder 是 Apple Inc. 的商標，Codex 是 OpenAI 的商標。這個練習是獨立的教學模擬，與兩家公司都沒有關係。';
+    ? 'macOS 與 Finder 是 Apple Inc. 的商標，Codex 是 OpenAI 的商標，Google Chrome 是 Google LLC 的商標，Claude 是 Anthropic 的商標，Visual Studio Code 是 Microsoft 的商標，GitHub 是 GitHub, Inc. 的商標，Mermaid 是一個開放原始碼專案的名稱。這個練習是獨立的教學模擬，與這些公司和專案都沒有關係。'
+    : 'macOS 與 Finder 是 Apple Inc. 的商標，Codex 是 OpenAI 的商標，Google Chrome 是 Google LLC 的商標，Claude 是 Anthropic 的商標，Visual Studio Code 是 Microsoft 的商標。這個練習是獨立的教學模擬，與這些公司都沒有關係。';
   var WALLPAPER = '桌布照片：「Lake Tahoe, United States (Unsplash).jpg」，Clara Marie 攝，CC0（公眾領域貢獻宣告），取自 Wikimedia Commons。';
   var COPYRIGHT = 'Copyright © 2026 JUNHAO CHEN・程式碼 MIT・內容 CC BY-NC-SA 4.0';
   var RESET_TITLE = '要重設全部嗎？';
@@ -31,7 +31,7 @@
     ['⌘`', '切換到同一個程式的下一個視窗'],
     ['⌘N', '新視窗（Finder、終端機），或 Codex 的新對話'],
     ['Esc', '關閉選單、Spotlight、對話框、快速查看，或取消拖曳'],
-    ['Finder', '⌘A 全選　⌘[ ⌘] 上一頁、下一頁　⌘↑ 上層資料夾　⌘↓ 打開　⌘⇧N 新增資料夾　⌘⇧G 前往資料夾　⌘⇧H／D／O／A 前往 an／桌面／文件／應用程式　⌥⌘L 下載項目　⌘D 複製　⌘⌫ 移到垃圾桶　空白鍵 快速查看　Return 重新命名　⌘1／⌘2 圖示、列表'],
+    ['Finder', '⌘A 全選　⌘[ ⌘] 上一頁、下一頁　⌘↑ 上層資料夾　⌘↓ 打開　⌘⇧N 新增資料夾　⌘⇧G 前往資料夾　⌘⇧H／D／O／A 前往 an／桌面／文件／應用程式　⌥⌘L 下載項目　⌘D 複製　⌘⌫ 移到垃圾桶　空白鍵 快速查看　Return 重新命名　⌘1／⌘2 圖示、列表　⌥⌘P 顯示／隱藏路徑列　⌘/ 顯示／隱藏狀態列'],
     ['終端機', '⌘K 清除全部　⌘C 拷貝　⌘V 貼上　Ctrl+C 中斷　Ctrl+D 結束輸入　Ctrl+L 清畫面　Ctrl+W 或 Alt+Backspace 刪掉前一個字　Tab 補完　↑／↓ 翻看以前的指令'],
     ['文字編輯、Code', '⌘S 儲存']
   ];

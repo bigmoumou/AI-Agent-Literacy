@@ -78,8 +78,8 @@ html[data-appearance="dark"] .te-ql-sub { color: #a0a0a8; }
 html[data-appearance="dark"] .lab-ph { background: #1e1e20; color: #e2e2e4; }
 
 /* ------------------------------------------------------------------ Dock size and indicators (--dk is set by desktop.js) */
-#lab-dock .lab-dock-bar { gap: calc(14px * var(--dk, 1)); padding: calc(10px * var(--dk, 1)) calc(16px * var(--dk, 1)) calc(5px * var(--dk, 1)); border-radius: calc(28px * var(--dk, 1)); }
-#lab-dock .lab-dock-sec { gap: calc(14px * var(--dk, 1)); }
+#lab-dock .lab-dock-bar { gap: calc(12px * var(--dk, 1)); padding: calc(10px * var(--dk, 1)) calc(16px * var(--dk, 1)) calc(5px * var(--dk, 1)); border-radius: calc(28px * var(--dk, 1)); }
+#lab-dock .lab-dock-sec { gap: calc(8px * var(--dk, 1)); }
 #lab-dock .lab-dock-item { width: calc(58px * var(--dk, 1)); height: calc(68px * var(--dk, 1)); }
 #lab-dock .lab-dock-icon { width: calc(58px * var(--dk, 1)); height: calc(58px * var(--dk, 1)); }
 #lab-dock .lab-dock-div { margin: calc(2px * var(--dk, 1)) 0 calc(6px * var(--dk, 1)); }

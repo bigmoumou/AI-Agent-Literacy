@@ -1278,11 +1278,24 @@
   }
 
   /* ============================================================ Dock (§2.7) */
-  /* macOS 26 default order (Finder, the Apps grid, Safari, ...), then our apps, then 系統設定; Downloads and the Trash follow the divider.
-     The five apps the missions use (Finder, 終端機, Codex, Code, 文字編輯) can never be taken out of the Dock. */
-  var DOCK_ORDER = ['finder', 'launchpad', 'safari', 'terminal', 'codex', 'code', 'textedit', 'preview', 'calculator', 'activity', 'settings'];
+  /* Round 7 (teacher, 2026-10-15): the Dock is the one on the teacher's real Mac (macOS 26): Finder, the Apps grid, 提醒事項, 備忘錄, App Store,
+     系統設定, Google Chrome, Codex, Claude, 活動監視器, 終端機, Code; then the two apps the missions need and a real Dock would only have if the user
+     added them (Safari, 文字編輯); Downloads and the Trash follow the divider. 預覽程式 and 計算機 are not in the Dock any more (they are still in the
+     Apps grid, Spotlight and /Applications, and show up in the Dock while they run).
+     The apps the missions use (Finder, 終端機, Codex, Code, 文字編輯) can never be taken out of the Dock. */
+  var DOCK_ORDER = ['finder', 'launchpad', 'reminders', 'notes', 'appstore', 'settings', 'chrome', 'codex', 'claude', 'activity', 'terminal', 'code', 'safari', 'textedit', 'preview', 'calculator'];
   var DOCK_LOCKED = { finder: 1, terminal: 1, codex: 1, code: 1, textedit: 1, launchpad: 1 };
-  var dockOff = new Set();          // apps taken out of the Dock with 選項 › 保留在 Dock 中 (they stay while running)
+  var dockOff = new Set(['preview', 'calculator']);   // apps taken out of the Dock with 選項 › 保留在 Dock 中 (they stay while running)
+
+  /* The five apps of the real Dock that the practice Mac does not have: icon, name, Dock tooltip, a place in the Apps grid and Spotlight; opening
+     one only bounces the icon and says so (they are not windows). `stub` keeps the Terminal's `open -a` on its own 「沒有安裝」 message. */
+  [['reminders', '提醒事項', 'Reminders', ['reminders']], ['notes', '備忘錄', 'Notes', ['notes']], ['appstore', 'App Store', 'App Store', ['appstore', 'app store']],
+    ['chrome', 'Google Chrome', 'Google Chrome', ['chrome', 'google chrome']], ['claude', 'Claude', 'Claude', ['claude']]].forEach(function (a) {
+    LAB.apps.register(a[0], {
+      title: a[1], en: a[2], aliases: a[3], icon: 'app-' + a[0], dock: true, stub: true,
+      open: function () { LAB.ui.toast('練習電腦裡沒有安裝「' + a[1] + '」，真的 Mac 上才打得開。'); return null; }
+    });
+  });
   var loginItems = new Set();       // 選項 › 登入時打開 (a mark only)
   var APP_FILE = { codex: 'Codex.app', code: 'Code.app', textedit: '文字編輯.app', terminal: '終端機.app', safari: 'Safari.app', settings: '系統設定.app', calculator: '計算機.app', activity: '活動監視器.app', preview: '預覽程式.app' };
   var dockPrefs = { size: 1, magnify: true, mag: 1.35, dots: true };

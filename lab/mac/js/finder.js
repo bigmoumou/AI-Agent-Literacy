@@ -13,6 +13,21 @@
   var instances = new Map();          // winId -> inst
   var recentFolders = [];             // folders the student visited, newest first (前往 › 最近使用的檔案夾)
 
+  /* The two bars under the file list are ONE preference for every Finder window (macOS: 顯示方式 › 顯示路徑列 / 顯示狀態列, ⌥⌘P / ⌘/),
+     including the windows opened later. A fresh macOS shows neither (teacher, 2026-10-15, so Week 3 task 1 has a step that opens the path bar).
+     The page remembers the choice until it is reloaded, like everything else on this visit. A bar that is off has no segments in the DOM. */
+  var PREFS = { showPath: false, showStatus: false };
+  function setBar(key, on, evName) {
+    on = !!on;
+    if (PREFS[key] === on) return false;
+    PREFS[key] = on;
+    instances.forEach(function (inst) { inst.updateChrome(); });
+    LAB.bus.emit(evName, { on: on });
+    return true;
+  }
+  function setPathbar(on) { return setBar('showPath', on, 'finder:pathbar'); }
+  function setStatusbar(on) { return setBar('showStatus', on, 'finder:statusbar'); }
+
   /* ------------------------------------------------------------ own glyphs (original art) */
   function glyph(inner) { return '<svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' + inner + '</g></svg>'; }
   LAB.icons.add('fd-airdrop', glyph('<circle cx="12" cy="12.5" r="1.3" fill="currentColor"/><path d="M8.6 9a4.8 4.8 0 0 1 6.8 0M6 6.4a8.4 8.4 0 0 1 12 0M9.6 16.8l2.4-3 2.4 3z"/>'));
@@ -526,7 +541,7 @@
       path: startPath, hist: [startPath], hi: 0,
       mode: 'icon', sort: { key: 'name', dir: 1 }, sortTouched: false,
       sel: new Set(), anchor: null, filter: '', scope: 'mac', chain: [], expanded: new Set(),
-      showHidden: false, showPath: true, showStatus: true,
+      showHidden: false,
       renaming: null, order: [], rendered: false, sheet: null,
       pendingSel: opts.select ? opts.select.slice() : null, topCount: 0, lastDirSig: '', silentSel: false
     };
@@ -1252,6 +1267,7 @@
       pathTargets = [];
       pathEl.textContent = '';
       pathEl.classList.remove('is-clipped');
+      if (!PREFS.showPath) { barSig = null; return; }        // off (the macOS default): nothing is built, so nothing can be pointed at or clicked
       var segs = segsFor(barPath());
       barSig = segs.map(function (s) { return s.path; }).join('|');
       segs.forEach(function (sg, i) {
@@ -1275,11 +1291,14 @@
       if (pathEl.scrollWidth > pathEl.clientWidth + 1) pathEl.classList.add('is-clipped');
     }
     function updatePathbar() {
+      if (!PREFS.showPath) return;
       var segs = segsFor(barPath());
       var sig = segs.map(function (s) { return s.path; }).join('|');
       if (sig !== barSig) buildPathbar();
     }
     function updateChrome() {
+      root.classList.toggle('no-path', !PREFS.showPath);       // first: the segments are measured (is-clipped) once the bar is really shown
+      root.classList.toggle('no-status', !PREFS.showStatus);
       buildPathbar();
       backBtn.disabled = S.hi <= 0;
       fwdBtn.disabled = S.hi >= S.hist.length - 1;
@@ -1293,8 +1312,6 @@
         b[0].classList.toggle('is-on', S.mode === b[1]);
         b[0].setAttribute('aria-pressed', S.mode === b[1] ? 'true' : 'false');
       });
-      root.classList.toggle('no-path', !S.showPath);
-      root.classList.toggle('no-status', !S.showStatus);
       updateDynamicChrome();
       updateScope();
     }
@@ -1970,8 +1987,8 @@
       copyPathText: copyPathText, realDir: realDir, items: items, scrollEl: scrollEl, searchInput: searchInput,
       curDir: curDir, clearSearch: clearSearch, updateChrome: updateChrome, info: infoSel, compress: compressSel, setSortKey: setSortKey, searching: searching,
       toggleHidden: function () { S.showHidden = !S.showHidden; render(); },
-      togglePathbar: function () { S.showPath = !S.showPath; updateChrome(); },
-      toggleStatus: function () { S.showStatus = !S.showStatus; updateChrome(); }
+      togglePathbar: function () { setPathbar(!PREFS.showPath); },
+      toggleStatus: function () { setStatusbar(!PREFS.showStatus); }
     };
     instances.set(win.id, inst);
     win.own(function () {
@@ -2118,9 +2135,14 @@
       var S = inst.S;
       return {
         path: S.path, mode: S.mode, sel: inst.orderedSel(), order: S.order.slice(), hist: S.hist.slice(), hi: S.hi, filter: S.filter, showHidden: S.showHidden,
-        scope: S.scope, chain: S.chain.slice(), searching: inst.searching(), dir: inst.curDir()
+        scope: S.scope, chain: S.chain.slice(), searching: inst.searching(), dir: inst.curDir(),
+        showPath: PREFS.showPath, showStatus: PREFS.showStatus
       };
     },
+    /* the Finder-wide bar preferences (off on a fresh Mac): prefs() → {showPath, showStatus}; the setters send finder:pathbar / finder:statusbar {on} */
+    prefs: function () { return { showPath: PREFS.showPath, showStatus: PREFS.showStatus }; },
+    setPathbar: setPathbar,
+    setStatusbar: setStatusbar,
     /* round 5 */
     info: openInfoFor,                          // info(paths[]): one Info window per item (at most 5)
     compress: function (paths, win) { return compressPaths(win || null, paths); },
@@ -2154,6 +2176,10 @@
     },
     canOpen: function (st) { return st.type === 'dir' ? 10 : 0; }
   });
+
+  /* ⌥⌘P and ⌘/ belong to Finder as an app (they work with a window focused or with only the desktop clicked), not to one window */
+  LAB.keys.on('mod+alt+p', function () { setPathbar(!PREFS.showPath); }, { scope: 'finder' });
+  LAB.keys.on('mod+/', function () { setStatusbar(!PREFS.showStatus); }, { scope: 'finder' });
 
   /* ------------------------------------------------------------------- menus */
   function goTo(path, how) {
@@ -2206,8 +2232,9 @@
           ['name', '名稱'], ['kind', '種類'], ['date', '修改日期'], ['size', '大小'], ['tag', '標籤']
         ].map(function (k) { return { label: k[1], checked: function () { return has && inst.S.sort.key === k[0]; }, action: function () { inst.setSortKey(k[0]); } }; }) },
         { separator: true },
-        { label: '顯示路徑列', enabled: has, checked: has && inst.S.showPath, action: function () { inst.togglePathbar(); } },
-        { label: '顯示狀態列', enabled: has, checked: has && inst.S.showStatus, action: function () { inst.toggleStatus(); } }
+        // like macOS: no tick, the words flip (顯示 ↔ 隱藏). A preference of the whole Finder, so it works without a window too.
+        { label: PREFS.showPath ? '隱藏路徑列' : '顯示路徑列', shortcut: '⌥⌘P', action: function () { setPathbar(!PREFS.showPath); } },
+        { label: PREFS.showStatus ? '隱藏狀態列' : '顯示狀態列', shortcut: '⌘/', action: function () { setStatusbar(!PREFS.showStatus); } }
       ] },
       { label: '前往', items: [
         { label: '返回', shortcut: '⌘[', enabled: has && inst.S.hi > 0, action: function () { inst.goBack(); } },

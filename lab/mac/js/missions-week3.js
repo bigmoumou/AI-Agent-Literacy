@@ -202,6 +202,33 @@
       return rest(api);
     };
   }
+  /* The Finder path bar is OFF on a fresh Mac, like macOS (teacher, 2026-10-15): task 1 step s4p turns it on (顯示方式 › 顯示路徑列, ⌥⌘P), and every
+     cue that would point at the bar (fdSeg) first asks whether it is there. */
+  function pathBarOn() {
+    try { return !!(LAB.finder && LAB.finder.prefs && LAB.finder.prefs().showPath); } catch (e) { return false; }
+  }
+  /* a title of the menu bar (顯示方式), whatever app is in front: it is the bar of the front app, so callers only use it while that is Finder */
+  function menuBarTitle(label) {
+    return trusted(function () {
+      var list = document.querySelectorAll('#lab-menubar [data-lab=menu-title]');
+      for (var i = 0; i < list.length; i++) {
+        if ((list[i].textContent || '').replace(/\s+/g, '') === label) return list[i];
+      }
+      return null;
+    });
+  }
+  var mbView = menuBarTitle('顯示方式');
+  var finderWindow = function () { var l = liveWins('finder'); return l.length ? l[l.length - 1].el : null; };
+  /* opening the path bar: while Finder is not the app in front the menu bar belongs to another app (the Terminal has a 顯示方式 too), so the cue first
+     leads back to Finder: its window, else its Dock icon. With Finder in front the cue is 顯示方式 in the menu bar; once that menu is open the engine's
+     menuPath walks to the row 顯示路徑列. */
+  function openPathBarTarget(api) {
+    var front = '';
+    try { front = LAB.wm.frontmostApp(); } catch (e) { front = ''; }
+    if (front === 'finder') { var t = mbView(api); if (t) return t; }
+    return chain(finderWindow, dock('finder'))(api);
+  }
+
   /* typing in the Terminal: with the window already focused the student is typing (the target is the hidden input, which the
      cue leaves alone); otherwise the whole screen is the thing to click. No Terminal window: the Dock icon. */
   var termShown = trusted(function () {
@@ -292,11 +319,27 @@
         }
       },
       {
+        // the path bar is off on a fresh Mac (as in macOS); the step id s4p sits between s3 and s4 so the ids of the later steps do not change
+        id: 's4p',
+        text: '真的 Mac 預設看不到資料夾的完整位置。按螢幕最上面選單列的「顯示方式」，選「顯示路徑列」。',
+        hint: '先點一下 Finder 視窗，選單列左上才會寫 Finder，「顯示方式」就在它右邊幾格。快捷鍵是 ⌥⌘P。打開一次之後，每個 Finder 視窗都會有路徑列。',
+        answer: '選單列「顯示方式」→「顯示路徑列」。',
+        menuPath: ['顯示路徑列'],
+        target: openPathBarTarget,
+        check: function (ev, api) {
+          // already open (the student did it earlier, or by ⌥⌘P) counts: the step ticks itself
+          return !!(api.seen('finder:pathbar', function (d) { return !!(d && d.on); }) || pathBarOn());
+        }
+      },
+      {
         id: 's4',
-        text: '看視窗最下面的路徑列，再點其中的「桌面」，回到上一層。',
-        hint: '路徑列從左到右，就是這個資料夾的完整位置：Macintosh HD › 使用者 › an › 桌面 › Project，也就是 /Users/an/Desktop/Project。',
+        text: '看視窗最下面多出來的路徑列，點其中的「桌面」，回到上一層。',
+        hint: '路徑列從左到右，就是這個資料夾的完整位置：Macintosh HD › 使用者 › an › 桌面 › Project，也就是 /Users/an/Desktop/Project。看不到路徑列：選單列「顯示方式」→「顯示路徑列」。',
         answer: '點路徑列的「桌面」（或側邊欄的「桌面」，或左上角的返回鍵）。',
-        target: chain(fdSeg(DESKTOP), fdSide(DESKTOP), dock('finder')),
+        menuPath: ['顯示路徑列'],      // the bar was turned off again (or never opened): the cue walks to the row that opens it instead of pointing at a segment that is not there
+        target: function (api) {
+          return pathBarOn() ? chain(fdSeg(DESKTOP), fdSide(DESKTOP), dock('finder'))(api) : openPathBarTarget(api);
+        },
         check: function (ev, api) {
           // any natural way back to the Desktop counts (pathbar, sidebar, back, up, go-to…)
           if (api.seen('finder:navigate', function (d) { return same(api, d.path, DESKTOP); })) return true;
@@ -859,7 +902,7 @@
       {
         id: 's4',
         text: '到 Finder 看看它在電腦裡的真實位置：打開桌面的 Project，看視窗最下面的路徑列。',
-        hint: 'Macintosh HD › 使用者 › an › 桌面 › Project 就是它真實的位置，也就是 /Users/an/Desktop/Project。',
+        hint: 'Macintosh HD › 使用者 › an › 桌面 › Project 就是它真實的位置，也就是 /Users/an/Desktop/Project。看不到路徑列：選單列「顯示方式」→「顯示路徑列」。',
         answer: '點兩下桌面上的 Project 資料夾。',
         target: chain(desktopIcon(PROJECT), fdItem(PROJECT), fdSide(DESKTOP), dock('finder')),
         check: function (ev, api) {
@@ -912,7 +955,7 @@
       {
         id: 's3',
         text: '真實位置 = 專案資料夾 + output/report.md。到 Finder 找到它，看路徑列是不是這樣。',
-        hint: '先打開 Project，再往下找 output。路徑列會寫 Macintosh HD › 使用者 › an › 桌面 › Project › output。',
+        hint: '先打開 Project，再往下找 output。路徑列會寫 Macintosh HD › 使用者 › an › 桌面 › Project › output。看不到路徑列：選單列「顯示方式」→「顯示路徑列」。',
         answer: 'Finder → 桌面 → Project → output。',
         target: finderWalk([OUTPUT, PROJECT]),
         check: function (ev, api) {

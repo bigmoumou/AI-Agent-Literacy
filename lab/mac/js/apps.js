@@ -296,7 +296,7 @@
       var node = h('div', { class: 'lab-ph-about' },
         h('h2', null, '關於這個練習'),
         h('p', null, '這是練習用的模擬環境，不是真的 Mac，也不是真的 AI。'),
-        h('p', { class: 'lab-ph-note' }, 'macOS 與 Finder 是 Apple Inc. 的商標，Codex 是 OpenAI 的商標。這個練習是獨立的教學模擬，與兩家公司都沒有關係。'),
+        h('p', { class: 'lab-ph-note' }, 'macOS 與 Finder 是 Apple Inc. 的商標，Codex 是 OpenAI 的商標，Google Chrome 是 Google LLC 的商標，Claude 是 Anthropic 的商標，Visual Studio Code 是 Microsoft 的商標。這個練習是獨立的教學模擬，與這些公司都沒有關係。'),
         h('p', { class: 'lab-ph-note' }, 'Copyright © 2026 JUNHAO CHEN・程式碼 MIT・內容 CC BY-NC-SA 4.0'));
       var win = LAB.wm.open({ appId: 'about', title: '關於這個練習', width: 520, height: 400, bar: 'plain', content: h('div', { class: 'lab-ph' }, node), singleton: 'about', minW: 360, minH: 260 });
       return win;
