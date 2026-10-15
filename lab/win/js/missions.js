@@ -1494,13 +1494,35 @@
     var a = document.activeElement;
     return !!(a && a === el && el.matches && el.matches('[data-lab=cd-editor],[data-lab=te-text],[data-lab=gh-edit-text]'));
   }
+  /* cue style prototypes for the teacher to compare (?cue=glow|focus|spot, 2026-10-15); without the parameter the ring is unchanged */
+  var CUE_STYLE = (function () { try { var m = /[?&]cue=(glow|focus|spot)(?![a-z])/.exec(window.location.search); return m ? m[1] : ''; } catch (e) { return ''; } })();
+  var cueIdent = '', cueGlideT = 0;
+  function dressCue(c) {
+    c.classList.add('lab-cue-x', 'lab-cue--' + CUE_STYLE);
+    if (CUE_STYLE === 'glow') c.appendChild(h('i', { class: 'lab-cue-glowwrap' }, h('i', { class: 'lab-cue-flow' })));
+    else if (CUE_STYLE === 'focus') ['tl', 'tr', 'br', 'bl'].forEach(function (k) { c.appendChild(h('i', { class: 'lab-cue-k', dataset: { k: k } })); });
+    else if (CUE_STYLE === 'spot') c.appendChild(h('i', { class: 'lab-cue-dim' }));
+  }
   function drawRing(el, rc, label) {
     var scr = document.getElementById('lab-screen');
     if (!cueEl) {
       cueEl = h('div', { class: 'lab-cue', 'aria-hidden': 'true', dataset: { lab: 'cue-ring' } }, h('i', { class: 'lab-cue-wave' }));
+      if (CUE_STYLE) dressCue(cueEl);
       cueEl.hidden = true;
       scr.appendChild(cueEl);
     } else if (cueEl.parentNode !== scr) scr.appendChild(cueEl);
+    if (CUE_STYLE) {
+      var ident = label + '|' + (el.getAttribute('data-path') || '') + '|' + (el.getAttribute('data-app') || '') + '|' + (el.id || '') + '|' + (el.childElementCount < 4 ? (el.textContent || '').slice(0, 40) : '');
+      if (ident !== cueIdent) {
+        if (cueIdent && !cueEl.hidden) {                           // a new target while the cue is on screen: glide over to it, so the eye follows
+          cueEl.classList.add('is-glide');
+          clearTimeout(cueGlideT);
+          cueGlideT = setTimeout(function () { cueEl.classList.remove('is-glide'); }, 480);
+        }
+        cueIdent = ident;
+        cueEl.classList.remove('is-new'); void cueEl.offsetWidth; cueEl.classList.add('is-new');
+      }
+    }
     var sr = scr.getBoundingClientRect(), pad = 6;                  // 4 px of air and the 2 px line
     var x = Math.round(rc.left - sr.left - pad), y = Math.round(rc.top - sr.top - pad);
     var w = Math.round(rc.width + pad * 2), hh = Math.round(rc.height + pad * 2);
@@ -1509,6 +1531,7 @@
       cueRect = key;
       cueEl.style.width = w + 'px'; cueEl.style.height = hh + 'px';
       cueEl.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
+      if (CUE_STYLE === 'focus') cueEl.style.setProperty('--k', Math.round(Math.max(9, Math.min(18, Math.min(w, hh) * 0.3))) + 'px');
       cueEl.style.setProperty('--cue-grow', (1 + Math.min(0.18, Math.max(0.04, 28 / Math.max(w, hh)))).toFixed(3));   // 1.18 for icons and rows; a big window spreads by about 28 px, not 18 %
       var br = 0;
       try { br = parseFloat(window.getComputedStyle(el).borderTopLeftRadius) || 0; } catch (e) { br = 0; }
