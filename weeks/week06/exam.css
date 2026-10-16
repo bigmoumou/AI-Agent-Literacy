@@ -113,6 +113,20 @@ body.is-diving .top { transition: opacity .4s ease; }
   .lap { width: min(68vw, 300px); }
 }
 
+/* 時間膨脹讀數：左上角，越接近事件視界越紅（--red 由 exam.js 設定 0–1） */
+.hud {
+  --red: 0;
+  position: fixed; left: max(20px, env(safe-area-inset-left)); top: max(18px, env(safe-area-inset-top)); z-index: 3; margin: 0;
+  display: grid; gap: .15rem; font-family: var(--font-mono); pointer-events: none;
+  color: color-mix(in srgb, #ffe6cc calc((1 - var(--red)) * 100%), #ff5a3c);
+  opacity: 0; transition: opacity .35s ease;
+}
+.hud.is-on { opacity: 1; }
+.hud-k { font-size: .7rem; letter-spacing: .28em; opacity: .75; }
+.hud-v { font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 700; letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+.hud-c { font-size: .85rem; letter-spacing: .08em; font-variant-numeric: tabular-nums; opacity: .85; }
+body.is-still .hud { display: none; }
+
 .skip {
   position: fixed; right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); z-index: 4;
   appearance: none; height: 2.3rem; padding: 0 1rem; border-radius: 999px; cursor: pointer; font: inherit; font-size: .85rem; font-weight: 700;

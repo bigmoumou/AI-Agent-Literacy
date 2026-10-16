@@ -466,7 +466,7 @@
   }
 
   // 考試週（Week 6 TEST）：底片本身也被撕開。封面圖（weeks/week06/poster.jpg）中間就是一道裂縫，
-  // 這裡讓裂縫一路延伸到上下的齒孔帶：裂縫裡是深空和一條藍色捲線，兩邊是白色的紙纖維邊和一點藍光。
+  // 這裡讓裂縫一路延伸到上下的齒孔帶：裂縫裡是深空，兩邊是白色的紙纖維邊和電漿般的亮光，中間打一道閃電。
   function tearFilm(g) {
     let seed = 7;
     const r = () => (seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0) / 4294967296;
@@ -490,21 +490,25 @@
       g.fillStyle = v; g.fillRect(cx - half - 60, y0, half * 2 + 120, y1 - y0);
       g.fillStyle = "rgba(210,228,255,.7)";
       for (let k = 0; k < 14; k++) g.fillRect(cx - half + r() * half * 2, y0 + r() * (y1 - y0), 1.4, 1.4);
-      g.strokeStyle = "rgba(84,180,255,.9)"; g.lineWidth = 2.6; g.lineCap = "round";
-      g.beginPath();
-      for (let k = 0; k <= 60; k++) {
-        const u = k / 60, a = u * Math.PI * 2 * ((y1 - y0) / 70);
-        const x = cx - 10 + Math.sin(u * 5) * 6 + 13 * Math.cos(a), y = y0 + u * (y1 - y0) - 13 * Math.sin(a);
-        if (k) g.lineTo(x, y); else g.moveTo(x, y);
-      }
-      g.stroke();
+      // 一道橫跨裂縫的閃電
+      const yb = y0 + (y1 - y0) * (0.35 + r() * 0.3), bolt = [[cx - half - 6, yb]];
+      for (let k = 1; k <= 9; k++) bolt.push([cx - half + (k / 9) * (half * 2 + 12), yb + (r() * 2 - 1) * 14]);
+      g.globalCompositeOperation = "lighter"; g.lineJoin = "round";
+      [[12, "150,110,255", 0.16], [5, "190,205,255", 0.4], [1.6, "255,255,255", 0.95]].forEach(([w, c, a]) => {
+        g.strokeStyle = `rgba(${c},${a})`; g.lineWidth = w;
+        g.beginPath(); bolt.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y))); g.stroke();
+      });
+      g.globalCompositeOperation = "source-over";
       g.restore();
       // 兩邊撕開的底片：藍光、白色纖維邊
       [L, R].forEach((E) => {
         const line = () => { g.beginPath(); E.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y))); g.stroke(); };
         g.lineJoin = "round";
-        g.strokeStyle = "rgba(80,170,255,.32)"; g.lineWidth = 9; line();
-        g.strokeStyle = "rgba(238,234,226,.92)"; g.lineWidth = 2.4; line();
+        g.globalCompositeOperation = "lighter";
+        g.strokeStyle = "rgba(130,90,255,.22)"; g.lineWidth = 14; line();
+        g.strokeStyle = "rgba(200,210,255,.3)"; g.lineWidth = 5; line();
+        g.globalCompositeOperation = "source-over";
+        g.strokeStyle = "rgba(240,236,228,.95)"; g.lineWidth = 2.4; line();
       });
     });
   }

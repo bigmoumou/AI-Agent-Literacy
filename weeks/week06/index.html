@@ -32,8 +32,8 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23f6efdc'/%3E%3Cpath d='M9.5 24v-5M16 24v-9M22.5 24V8' stroke='%238a5400' stroke-width='4.2'/%3E%3C/svg%3E">
 </head>
 <!-- Week 6 只有考試。整頁是一個場景（assets/rift.js 畫在 #rift）：
-     1. 入口：Mac 和 Windows 的桌面從中間撕開，裂縫裡是藍色的捲線，中間寫 TEST。
-     2. 按「進入考場」：裂縫整個撕開，掉進黑洞（時空網格、吸積盤），穿過去之後是深空。
+     1. 入口：Mac 和 Windows 的桌面從中間撕開，裂縫深處有一個小黑洞，邊緣冒電漿光、兩邊之間打閃電，中間寫 TEST。
+     2. 按「進入考場」：裂縫整個撕開，兩半被黑洞拉長吞掉；時空井浮出來、鏡頭往下掉（時間膨脹、重力紅移），穿過去之後是深空。
      3. 選一台電腦（Mac／Windows），連線。
      4. 遠端桌面從兩邊合上來把裂縫封起來，就進到遠端電腦（iframe，lab/mac 或 lab/win）。
      流程和計時在 exam.js。系統設定「減少動態效果」時，只用淡入淡出。 -->
@@ -70,9 +70,9 @@
         data-en="Enter the test"
         data-vi="Vào phòng thi">進入考場</span><span class="arrow" aria-hidden="true">→</span></button>
       <p class="gate-note" data-i18n
-        data-zh-hans="设计预览：现在连到的是练习电脑，考试模式还在准备。"
-        data-en="Design preview: this connects to the practice computer for now; the test mode is still being built."
-        data-vi="Bản xem trước thiết kế: hiện đang kết nối tới máy luyện tập; chế độ thi vẫn đang được chuẩn bị.">設計預覽：現在連到的是練習電腦，考試模式還在準備。</p>
+        data-zh-hans="考试还没开始：现在进去是练习用的远程电脑。"
+        data-en="The test has not started yet: for now you will enter the practice remote computer."
+        data-vi="Bài kiểm tra chưa bắt đầu: hiện tại bạn sẽ vào máy tính từ xa dùng để luyện tập.">考試還沒開始：現在進去是練習用的遠端電腦。</p>
     </section>
 
     <!-- 選電腦 -->
@@ -101,6 +101,9 @@
     <a href="../../" data-ui="nav.home">回到課程首頁</a>
   </footer>
 </div>
+
+<!-- 往黑洞掉的時候：時間膨脹的讀數（越靠近事件視界，時鐘走得越慢） -->
+<p class="hud" id="hud" aria-hidden="true"><span class="hud-k">TIME DILATION</span><span class="hud-v" id="hudRate">×1.000</span><span class="hud-c" id="hudClock">T+ 00:00.000</span></p>
 
 <button class="skip" id="skip" type="button" hidden><span data-i18n data-zh-hans="略过" data-en="Skip" data-vi="Bỏ qua">略過</span></button>
 
