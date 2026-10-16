@@ -55,10 +55,12 @@
   function appNameMenu(appId) {
     var name = appName(appId);
     var finder = appId === 'finder';
+    var def = LAB.apps.get(appId);
+    var settings = def && typeof def.settings === 'function' ? def.settings : null;     // an app with its own settings page (Week 5: Codex)
     return [
       { label: '關於 ' + name, action: function () { LAB.apps.launch('about', { tab: 'about' }); } },
       { separator: true },
-      { label: '設定⋯', enabled: false },
+      settings ? { label: '設定⋯', shortcut: '⌘,', action: function () { settings(); } } : { label: '設定⋯', enabled: false },
       { separator: true },
       { label: '隱藏 ' + name, shortcut: '⌘H', action: function () { LAB.wm.hideApp(appId); } },
       { label: '隱藏其他', enabled: false },

@@ -1597,3 +1597,43 @@ The teacher's direction is "the same as a real Mac" (the students go on to use r
 - **Week 3 task 1 step s4** (§5.3): text, hint and answer say 按兩下; the check is unchanged (any `finder:navigate` back to the Desktop).
 - **Tests that click a path-bar folder once to open it** must double-click it now (Playwright `dblclick()`); a single click leaves the window where it was. `css/finder.css` has the one rule for the lit segment.
 
+## 28. Week 5 (2026-10-16): verification, models, the context window, homework preparation
+
+Owner (teacher, through the helper's letters): the same Mac with Week 5's missions. Spec: `SPEC-w5.md` (the A part, approved 2026-10-16 with the owner's decisions: practice project 「銀杏散步地圖」, two ❌ in mission 1's report, the wrong first download address in mission 3, clone instead of `git init` in mission 5, models GPT-6 Luna / GPT-6.1 Sol plus GPT-6 Mini, stand-in homework files). **The three traps of the Week 5 homework never appear in the practice** (no grade data, no "how to compute", no personal-data step): the homework files in the practice are one-sentence stand-ins and Codex answers any grade question with `w5_hw_refuse`.
+
+### 28.1 Loading (`?week=5`)
+- `LAB.weekInfo[5]` (js/lab.js; a week missing from `WEEK_INFO` would keep its missions in every week, §23.1), `?mission=w5-…` also selects Week 5.
+- index.html: css `w4-code`, `w4-github`, `w4-cxbrowser`, `w5-codex`, `w5-web`; scripts `js/w4/{markdown, mermaid, web, github, github-pages, gitremote, cxbrowser}` (the platform only: not seed4, museum, intents4 or Week 4's missions) then `js/w5/{seed5, opendata, codex5, intents5, missions-verify, missions-context, missions-hw}`.
+- Week texts: about.js (`LAB.week >= 4` for the trademark line and the `git` row; a Week 5 sentence), sysapps.js (Reminders and the syllabus); the rail, the remote bar and the Apple menu follow `LAB.weekInfo`.
+
+### 28.2 Starting files (js/w5/seed5.js)
+- `~/Desktop/ginkgo-walk/`: `AGENTS.md` (three rules), `site/index.html` (a CSS map with 12 `<a class="spot">` markers linking to photos), `site/style.css` (28 px markers; nothing sticks out at 390 px), `site/photos/` (12 binary photos, `ginkgo-07.JPG` in upper case while index.html says `ginkgo-07.jpg`), `data/` (empty). The Week 3 `Project` and `week3.zip` are removed from Week 5's tree.
+- `~/Downloads/week5-hw/`: `grades.csv` and `評分說明.md`, one sentence each (stand-ins).
+- `LAB.w5.restore(api, 'base'|'verified')`: mission 1 starts from `base`; missions 2–4 from `verified` (VERIFY.md with the student's item 4, the AGENTS.md line, 44 px markers, lower-case photo names, the 「全部景點」 list).
+
+### 28.3 Codex additions (js/w5/codex5.js, css/w5-codex.css; hooks `LAB.codex.ext` in codex.js, all inert in Weeks 3 and 4)
+- **Hooks in codex.js**: `ext.stepNode`, `decorateMessage`, `pendingSlot`, `syncComposer`, `sidebarFoot`, `replyDelay`, `richTables`, `linkUrl`, plus `ext.chat / active / chats / notify / selectChat / addChat` for extensions; `ctx.meta` (merged into `codex:reply`); `msg.intent` on stored answers. menu.js: an app whose definition has `settings()` gets an enabled 「設定⋯ ⌘,」 in its app menu.
+- **Model menu** (`cx-model`, items `cx-model-item[data-model=sol|luna|mini]`): per chat (`chat.model`); a new chat takes the model chosen last; switching in a chat that has messages makes the next answer 2.2 s slower (no usage numbers are shown). Events `codex:model-menu {chatId, open}`, `codex:model {chatId, model, from, turns, projectPath, same?}` (picking the model a new chat already shows counts as choosing it).
+- **Settings** (`cx-settings` at the bottom of the sidebar, the app menu 設定⋯, ⌘,): a page over the window (`cx-settings-page`; `cx-settings-back`); General has **Show context window usage** (`cx-setting-context`, off by default). Event `codex:setting {key:'contextUsage', on, by}`, `codex:settings {open}`.
+- **Context ring** (`cx-context-ring`, tip `cx-context-tip` 「Context window: N% used」, hover 400 ms → `codex:context-peek {chatId, pct}`). Made-up usage: a new chat starts at 3 %, every answer adds 2 + length/400, a search 6, a download 4; seeded chats carry their own value.
+- **AGENTS.md snapshot**: on a chat's first message Codex reads AGENTS.md and the .md files it names (`Read …` rows) into `chat.agents`; later edits reach new chats only. Week 5 intents read `ctx.agents`.
+- **Automatic compaction**: a chat at 90 % or more is compacted before the next answer: the first activity row is 「Context automatically compacted」, `chat.ctxPct` → 35, `chat.facts` (decisions made in the chat only) is emptied; event `codex:compact {chatId, before, after}`.
+- **Activity rows** (`cx-activity[data-kind=search|run|compact]`, `ctx.activity(kind, verb, rest, detail, apply)`): a row with details opens on a click (`codex:activity-open {chatId, kind, label}`).
+- **Allow / Deny** (`ctx.approve({cmd, host, path}) → Promise<'allow'|'deny'>`): a card under 「Working…」 (`cx-approve`, `cx-approve-cmd` with the host in bold, `cx-approve-allow`, `cx-approve-deny`); events `codex:approval-prompt`, `codex:approval {chatId, cmd, host, path, decision}`.
+- **Answers**: Markdown tables (`cx-table`), web addresses as links (`cx-link`, opened in Safari), a copy button under every answer (`cx-copy[data-intent]`, `codex:copy {chatId, intent}`).
+- All English words of these screens are in `STRINGS` at the top of codex5.js (to be matched against the teacher's screenshots of the real app).
+
+### 28.4 Codex's Week 5 answers (js/w5/intents5.js, priorities 108–120)
+`w5_hw_refuse` (any grade question; inside the homework project also reports and analyses), `w5_handoff_resume` (a pasted summary), `w5_handoff`, `w5_skeletons` (AGENTS.md + VERIFY.md with headings only, never overwritten), `w5_verify_draft` (the five-item draft, item 4 vague on purpose; only in ginkgo-walk), `w5_verify_fix`, `w5_verify_run`, `w5_feature` (the list, then `verifyRun` when the chat's AGENTS.md snapshot names VERIFY.md), `w5_distance` (unit and start from the snapshot, else from `chat.facts`, else km from 北門行道樹), `w5_search`, `w5_download` (first the mirror address, after a Deny the official one when the student names it), `w5_open_site`, `w5_project_path`, and `w5_fallback` (−0.5, above Week 3's). `verifyRun` reads VERIFY.md from the disk and checks every item it understands (count of `.spot`, overflow at 390 px with `cxbrowser.measure`, photo names case-sensitively, marker size with `cxbrowser.probe`, "on a real phone" → ⚠️, anything vague or unknown → ⚠️ with the reason); `codex:reply` carries `verify:{ran, pass, fail, cannot, rows}`, `distance`, `correct`, `download`, `model`.
+
+### 28.5 The five missions (SPEC-w5 §1–§5)
+
+| order | id | group | title | steps | min |
+|---|---|---|---|---|---|
+| 1 | `w5-01-verify` | 驗證清單（影片 01） | 怎樣才算做好：寫 VERIFY.md | 7 | 10 |
+| 2 | `w5-02-model` | 模型與 context window（影片 02、補充 1、補充 2） | 開工前選好模型 | 6 (s4 optional) | 7 |
+| 3 | `w5-03-activity` | 同上 | 按下 Enter 之後：看活動紀錄 | 6 (s6 optional) | 8 |
+| 4 | `w5-04-compact` | 同上 | 對話滿了：重要的事寫進檔案 | 5 | 7 |
+| 5 | `w5-hw-prep` | 作業準備（影片 03） | 作業前的準備：專案要有這四樣 | 7 | 10 |
+
+`LAB.w5.kit` (missions-verify.js) holds the cue helpers (Week 4's, plus `composerIn`, `composerOfChat`, `newChatIn`, `editFlow`) and the prepares' helpers (`resetCodex`, `gwProject`, `seedChat`). Wrong routes with their quiet lines: the feature asked in the old chat (no verification), a model switched mid-chat, Allow on the mirror, a new chat before the decisions are written (SPEC-w5 §10). Tests: `walk_w5.py`, `wrong_w5.py`, `shots_w5.py` (helper's machine, attached to the reply of letter `w5-lab-mac`).

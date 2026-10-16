@@ -834,7 +834,8 @@
       strip);
   }
   function remindersWidget() {
-    var items = LAB.week === 4 ? ['交 Week 4 作業', '把作業放上 GitHub', '預習 Week 5 的內容'] : ['交 Week 3 作業', '把 Project 資料夾整理好', '預習 Week 4 的內容'];
+    var items = LAB.week === 5 ? ['交 Week 5 作業', '寫好 AGENTS.md 和 VERIFY.md', '預習 Week 6 的內容']
+      : LAB.week === 4 ? ['交 Week 4 作業', '把作業放上 GitHub', '預習 Week 5 的內容'] : ['交 Week 3 作業', '把 Project 資料夾整理好', '預習 Week 4 的內容'];
     var box = h('div', { class: 'sy-tile sy-nc-w sy-nc-rem', dataset: { lab: 'nc-reminders' } });
     var count = h('span', { class: 'sy-rem-n' });
     box.appendChild(h('div', { class: 'sy-rem-head' }, h('span', { class: 'sy-rem-t' }, '提醒事項'), count));
@@ -2182,7 +2183,7 @@
       ], [
         { t: 'h1', x: '每週進度' }, { t: 'rule' },
         { t: 'kv', k: 'Week 1', x: '課程介紹與工具準備' }, { t: 'kv', k: 'Week 2', x: '資料與檔案：資料夾和 CSV' }, { t: 'kv', k: 'Week 3', x: '終端機、Finder 與 Codex' },
-        { t: 'kv', k: 'Week 4', x: LAB.week === 4 ? 'Codex 內建瀏覽器、GitHub 與 Mermaid' : '資料清理' }, { t: 'kv', k: 'Week 5', x: '描述統計' }, { t: 'kv', k: 'Week 6', x: '資料視覺化' },
+        { t: 'kv', k: 'Week 4', x: LAB.week >= 4 ? 'Codex 內建瀏覽器、GitHub 與 Mermaid' : '資料清理' }, { t: 'kv', k: 'Week 5', x: LAB.week === 5 ? '讓 Codex 做對：驗證與 context window' : '描述統計' }, { t: 'kv', k: 'Week 6', x: '資料視覺化' },
         { t: 'kv', k: 'Week 7', x: '期中專案報告' }, { t: 'kv', k: 'Week 8', x: '學習歷程資料的分析' },
         { t: 'small', x: '以上為練習版的假資料，與真正的課程進度無關。' }
       ]];

@@ -47,6 +47,10 @@
   if (/[?&]week=4(&|$)/.test(location.search) || /[?&]mission=w4-/.test(location.search)) {
     ['w4-code', 'w4-github', 'w4-cxbrowser'].forEach(function (n) { document.write('<link rel="stylesheet" href=\x27css/' + n + '.css\x27>'); });
   }
+  // Week 5（?week=5）：Week 4 的 GitHub、內建瀏覽器樣式，加上 Week 5 自己的 Codex 和公開資料網站（SPEC-w5 §7）
+  if (/[?&]week=5(&|$)/.test(location.search) || /[?&]mission=w5-/.test(location.search)) {
+    ['w4-code', 'w4-github', 'w4-cxbrowser', 'w5-codex', 'w5-web'].forEach(function (n) { document.write('<link rel="stylesheet" href=\x27css/' + n + '.css\x27>'); });
+  }
 </script>
 <!-- 多語系要比其他程式先載入（不要 defer）；練習版只有繁體中文，boot.js 會把 <html lang> 鎖回 zh-Hant -->
 <script src="../../assets/i18n-strings.js"></script>
@@ -124,6 +128,15 @@
     ['seed4', 'markdown', 'mermaid', 'web', 'museum', 'github', 'github-pages', 'gitremote', 'cxbrowser', 'intents4',
       'missions-browser', 'missions-github', 'missions-mermaid', 'missions-hw'].forEach(function (n) {
       document.write('<script src=\x27js/w4/' + n + '.js\x27><\/script>');
+    });
+  }
+  // Week 5：Week 4 的平台模組（不含 Week 4 的起始檔案、美術館網站、回覆和任務），再接 Week 5 自己的。順序固定（SPEC-w5 §7）
+  if (window.LAB && LAB.week === 5) {
+    ['markdown', 'mermaid', 'web', 'github', 'github-pages', 'gitremote', 'cxbrowser'].forEach(function (n) {
+      document.write('<script src=\x27js/w4/' + n + '.js\x27><\/script>');
+    });
+    ['seed5', 'opendata', 'codex5', 'intents5', 'missions-verify', 'missions-context', 'missions-hw'].forEach(function (n) {
+      document.write('<script src=\x27js/w5/' + n + '.js\x27><\/script>');
     });
   }
 </script>

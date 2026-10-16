@@ -308,7 +308,8 @@
       },
       step: function (t, apply) { actions.push({ type: 'step', text: String(t), apply: typeof apply === 'function' ? apply : undefined }); },
       say: function (t) { texts.push(String(t)); },
-      annotation: extra && extra.annotation ? extra.annotation : null
+      annotation: extra && extra.annotation ? extra.annotation : null,
+      meta: {}                     // extra fields for codex:reply (Week 5: model, verify, …); empty in Weeks 3 and 4
     };
     // later weeks (Week 4: the built-in browser) hang their own helpers on ctx; with no extension registered nothing happens here
     api.ctxExtensions.forEach(function (fn) { try { fn(ctx, { chat: chat, project: project }); } catch (e) { console.error('[codex] ctx extension failed', e); } });
@@ -338,7 +339,9 @@
       if (full.length > MAX_TEXT) full = full.slice(0, MAX_TEXT);
       var interval = Math.min(450, Math.floor(2700 / Math.max(1, steps.length)));
       T(chat, 300, function () { chat.pending.status = 'working'; notify('pending'); });
-      var t = 700;
+      var extraWait = 0;
+      if (api.ext.replyDelay) { try { extraWait = Math.max(0, Math.min(8000, +api.ext.replyDelay(chat) || 0)); } catch (e) { extraWait = 0; } }
+      var t = 700 + extraWait;
       steps.forEach(function (a, i) {
         T(chat, t + i * interval, function () {
           var s = { text: a.text, done: false };
@@ -374,14 +377,17 @@
 
     function finish(full) {
       var elapsed = Math.max(2, Math.round((LAB.clock.ms() - started) / 1000));
-      var msg = { role: 'assistant', text: full, steps: chat.pending.steps.map(function (s) { return s.text; }), files: rec.files.slice(), elapsed: elapsed };
+      var msg = { role: 'assistant', text: full, steps: chat.pending.steps.map(function (s) { return s.text; }), files: rec.files.slice(), elapsed: elapsed, intent: intent.id };
       chat.messages.push(msg);
       chat.pending = null;
       chat.busy = false;
       if (M.activeId !== chat.id) chat.unread = true;
       notify('all');
       dirty();
-      emit('codex:reply', { chatId: chat.id, projectPath: chat.projectPath, intent: intent.id, files: msg.files.slice(), text: full });
+      var payload = { chatId: chat.id, projectPath: chat.projectPath, intent: intent.id, files: msg.files.slice(), text: full };
+      var meta = rec.ctx.meta || {};
+      Object.keys(meta).forEach(function (k) { if (!(k in payload)) payload[k] = meta[k]; });
+      emit('codex:reply', payload);
       notify('focus-if-idle');
     }
 
@@ -796,6 +802,39 @@
   /* Week 4 hooks (DESIGN §23): a right-hand panel next to the chat (the built-in browser) and helpers an intent can use.
      Nothing in here does anything until a Week 4 module registers an extension or a panel, so Week 3 is unchanged. */
   api.ctxExtensions = [];
+  /* Week 5 hooks (DESIGN §28): all of them are null/false until js/w5/codex5.js sets them, so Weeks 3 and 4 draw and behave as before.
+       stepNode(text, done) → Element|null       a step line of its own (the activity rows that open)
+       decorateMessage(box, msg)                  after an answer is drawn (the copy button)
+       pendingSlot(chat, pending) → Element|null  under "Working…" of an answer in progress (the Allow / Deny card)
+       syncComposer(view, chat)                   after the main area is drawn (model menu, context ring; view.metaEl is the model label)
+       sidebarFoot(view) → Element|null           the last thing in the sidebar (Settings)
+       replyDelay(chat) → ms                      extra wait before the first step line (a model that has to read the whole chat again)
+       richTables, linkUrl(url)                   Markdown tables in answers; web addresses in answers become links that call linkUrl */
+  api.ext = {
+    stepNode: null, decorateMessage: null, pendingSlot: null, syncComposer: null, sidebarFoot: null, replyDelay: null, richTables: false, linkUrl: null,
+    chat: function (id) { return findChat(id); },                       // the live chat object (for extensions only)
+    active: function () { return activeChat(); },
+    chats: function () { return M.chats.slice(); },
+    notify: function (kind) { notify(kind || 'all'); },
+    selectChat: function (id) { uiSelectChat(id); },
+    /* a finished chat made by a mission prepare: {title, projectPath, messages:[{role,text,steps?}], fields:{…}, select} → id */
+    addChat: function (o) {
+      o = o || {};
+      var c = mkChat(o.projectPath ? vfs.canon(o.projectPath) : null, false);
+      c.title = cleanStr(o.title, 120) || 'New chat';
+      c.messages = (o.messages || []).map(function (m) {
+        var x = { role: m.role === 'user' ? 'user' : 'assistant', text: String(m.text || '') };
+        if (x.role === 'assistant') { x.steps = (m.steps || []).slice(); x.files = []; if (m.elapsed) x.elapsed = m.elapsed; }
+        return x;
+      });
+      if (o.fields) Object.keys(o.fields).forEach(function (k) { c[k] = o.fields[k]; });
+      M.chats.push(c);
+      if (o.select) setActive(c.id);
+      notify('all');
+      dirty();
+      return c.id;
+    }
+  };
   var panelDefs = {};
   api.panels = {
     /* def = {mount(host, win, ctl) -> disposeFn|undefined, wantWidth?: 1120, wantHeight?: 690} */
@@ -912,7 +951,24 @@
 
   /* ---- markdown-lite: `code`, newlines, "- " bullets, ``` blocks, absolute paths in mono; DOM nodes only (§0.5) ---- */
   var PATH_RE = /\/(?:Users|Applications|Library|System|private|tmp|var)\/[^\s,;，。、：；！？）)」』"'`<>]+/g;
+  var URL_RE = /https?:\/\/[^\s,;，。、：；！？（）()「」『』"'`<>|]+/g;
+  /* Week 5 (api.ext.linkUrl): a web address in an answer is a link; without the hook the text is drawn exactly as before */
   function plainWithPaths(parent, s) {
+    if (!api.ext.linkUrl) { pathsInto(parent, s); return; }
+    var last = 0, m;
+    URL_RE.lastIndex = 0;
+    while ((m = URL_RE.exec(s))) {
+      var u = m[0].replace(/[.]+$/, '');
+      if (m.index > last) pathsInto(parent, s.slice(last, m.index));
+      (function (url) {
+        parent.appendChild(h('a', { class: 'cx-link', href: '#', dataset: { lab: 'cx-link', url: url },
+          on: { click: function (e) { e.preventDefault(); try { api.ext.linkUrl(url); } catch (err) { console.error('[codex] link failed', err); } } } }, url));
+      })(u);
+      last = m.index + u.length;
+    }
+    if (last < s.length) pathsInto(parent, s.slice(last));
+  }
+  function pathsInto(parent, s) {
     var last = 0, m;
     PATH_RE.lastIndex = 0;
     while ((m = PATH_RE.exec(s))) {
@@ -943,11 +999,26 @@
       if (i % 2 === 1) parent.appendChild(h('code', null, part)); else boldInto(parent, part);
     });
   }
+  /* Week 5 (api.ext.richTables): a run of `| a | b |` lines is a table (the second line `|---|---|` is its rule) */
+  function tableInto(el, rows) {
+    var cells = rows.map(function (r) { return r.replace(/^\s*\|/, '').replace(/\|\s*$/, '').split('|').map(function (x) { return x.trim(); }); });
+    var body = cells.filter(function (c, i) { return !(i === 1 && c.every(function (x) { return /^:?-{2,}:?$/.test(x); })); });
+    var t = h('table', { class: 'cx-table', dataset: { lab: 'cx-table' } });
+    body.forEach(function (c, i) {
+      var tr = h('tr');
+      c.forEach(function (x) { var td = h(i === 0 ? 'th' : 'td'); inlineInto(td, x); tr.appendChild(td); });
+      t.appendChild(tr);
+    });
+    el.appendChild(h('div', { class: 'cx-table-wrap' }, t));
+  }
   function richInto(el, text) {
     el.textContent = '';
     var lines = String(text).split('\n');
-    var fence = null;
+    var fence = null, table = null;
+    function flushTable() { if (table) { tableInto(el, table); table = null; } }
     lines.forEach(function (ln) {
+      if (fence === null && api.ext.richTables && /^\s*\|.*\|\s*$/.test(ln)) { (table = table || []).push(ln); return; }
+      flushTable();
       if (/^```/.test(ln)) {
         if (fence === null) { fence = []; return; }
         el.appendChild(h('div', { class: 'cx-pre' }, fence.join('\n')));
@@ -962,6 +1033,7 @@
       else inlineInto(d, ln);
       el.appendChild(d);
     });
+    flushTable();
     if (fence !== null) el.appendChild(h('div', { class: 'cx-pre' }, fence.join('\n')));
   }
 
@@ -993,7 +1065,8 @@
     var statusEl = h('div', { class: 'cx-status', dataset: { lab: 'cx-status' }, title: 'Working…' },
       h('span', null, 'Working'), h('span', { class: 'cx-dots', 'aria-hidden': 'true' }, h('span', null, '.'), h('span', null, '.'), h('span', null, '.')));
     var ptextEl = h('div', { class: 'cx-text' });
-    var pendingEl = h('div', { class: 'cx-msg cx-asst cx-pending', hidden: true }, stepsEl, statusEl, ptextEl);
+    var slotEl = h('div', { class: 'cx-slot' });            // Week 5: the Allow / Deny card of a command that needs the network (api.ext.pendingSlot)
+    var pendingEl = h('div', { class: 'cx-msg cx-asst cx-pending', hidden: true }, stepsEl, statusEl, slotEl, ptextEl);
     bodyEl.appendChild(emptyEl); bodyEl.appendChild(msgsEl); bodyEl.appendChild(pendingEl);
 
     var chipsEl = h('div', { class: 'cx-chips', dataset: { lab: 'cx-chips' } });
@@ -1096,6 +1169,7 @@
       });
       sideEl.appendChild(h('div', { class: 'cx-sec' }, 'Recents'));
       orphans().forEach(function (c) { sideEl.appendChild(chatRow(c, false)); });
+      if (api.ext.sidebarFoot) { var foot = null; try { foot = api.ext.sidebarFoot(view); } catch (e) { foot = null; } if (foot) sideEl.appendChild(foot); }
       sideEl.scrollTop = st;
       if (fk) {
         var again = sideEl.querySelector('[data-key="' + fk.replace(/(["\\])/g, '\\$1') + '"]');
@@ -1105,6 +1179,7 @@
 
     /* ---------- main area ---------- */
     function stepNode(text, done) {
+      if (api.ext.stepNode) { var own = null; try { own = api.ext.stepNode(text, done); } catch (e) { own = null; } if (own) return own; }
       var m = /^(\S+)\s+([\s\S]*)$/.exec(text);
       var label = m ? [h('span', { class: 'cx-sv' }, m[1]), ' ', h('span', { class: 'cx-sf' }, m[2])] : text;
       return h('div', { class: 'cx-step' + (done ? ' is-done' : '') }, h('span', { class: 'cx-chk' }, icon('check', 13)), h('span', { class: 'cx-sl' }, label));
@@ -1131,6 +1206,7 @@
         });
         box.appendChild(fold);
       }
+      if (api.ext.decorateMessage) { try { api.ext.decorateMessage(box, m); } catch (e) { console.error('[codex] decorateMessage failed', e); } }
       return box;
     }
     function nearBottom() { return bodyEl.scrollHeight - bodyEl.scrollTop - bodyEl.clientHeight < 90; }
@@ -1138,13 +1214,16 @@
 
     function syncPending() {
       var c = activeChat(), p = c && c.pending;
-      if (!p) { pendingEl.hidden = true; stepsEl.textContent = ''; ptextEl.textContent = ''; textShown = ''; pendingChatId = null; return; }
+      if (!p) { pendingEl.hidden = true; stepsEl.textContent = ''; ptextEl.textContent = ''; slotEl.textContent = ''; textShown = ''; pendingChatId = null; return; }
       var near = nearBottom() || pendingChatId !== c.id;
-      if (pendingChatId !== c.id) { stepsEl.textContent = ''; ptextEl.textContent = ''; textShown = ''; pendingChatId = c.id; }
+      if (pendingChatId !== c.id) { stepsEl.textContent = ''; ptextEl.textContent = ''; slotEl.textContent = ''; textShown = ''; pendingChatId = c.id; }
       pendingEl.hidden = false;
       while (stepsEl.children.length < p.steps.length) stepsEl.appendChild(stepNode(p.steps[stepsEl.children.length].text, false));
       for (var i = 0; i < p.steps.length; i++) stepsEl.children[i].classList.toggle('is-done', !!p.steps[i].done);
       statusEl.hidden = !(p.status === 'working' && !p.text);
+      var slot = null;
+      if (api.ext.pendingSlot) { try { slot = api.ext.pendingSlot(c, p); } catch (e) { slot = null; } }
+      if (slotEl.firstChild !== slot) { slotEl.textContent = ''; if (slot) slotEl.appendChild(slot); }
       ptextEl.hidden = !p.text;
       if (p.text !== textShown) { richInto(ptextEl, p.text); textShown = p.text; }
       if (near) toBottom();
@@ -1197,6 +1276,7 @@
       compEl.classList.toggle('is-busy', !!c.busy);
       if (wasDisabled && !c.busy) setTimeout(focusComposer, 0);
       autosize(); updateSend();
+      if (api.ext.syncComposer) { try { api.ext.syncComposer(view, c); } catch (e) { console.error('[codex] syncComposer failed', e); } }
     }
 
     /* ---------- Trust modal (§4.4.2) ---------- */
@@ -1329,7 +1409,7 @@
     win.own(win.on('resize', function () { autosize(); }));
     win.own(function () { M.pendingTrust = null; if (curView === view) curView = null; });   // closing the window drops an unanswered prompt silently
 
-    view.win = win; view.ta = ta; view.focusComposer = focusComposer; view.panelEl = panelEl;
+    view.win = win; view.ta = ta; view.focusComposer = focusComposer; view.panelEl = panelEl; view.metaEl = meta; view.root = root; view.compRow = compEl.lastChild;
     curView = view;
     ensureActive();
     renderSidebar();
