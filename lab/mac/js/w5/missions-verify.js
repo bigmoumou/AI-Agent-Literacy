@@ -250,7 +250,7 @@
       {
         id: 's2',
         text: '第 4 條「標記要點得到」檢查不了。打開 `VERIFY.md`，把它改成有數字、檢查得了的一條，存檔。',
-        hint: '好的驗證寫清楚：看什麼、怎麼看、應該看到什麼；有數字就寫數字。「點得到」要多大才算？手指大約要 44 px。在 Finder 點兩下 VERIFY.md 就會用文字編輯打開。',
+        hint: '好的驗證寫清楚：看什麼、怎麼看、應該看到什麼；有數字就寫數字。「點得到」要多大才算？手指大約要 44 px。在 Finder 按兩下 VERIFY.md 就會用文字編輯打開。',
         answer: '打開 ginkgo-walk 的 `VERIFY.md`，把第 4 條換成 [[4. 寬 390 px 時，每個標記至少 44 px。]]，按 Command+S（Windows 鍵盤是 Ctrl+S）。',
         target: editFlow(VERIFY, GW),
         check: function (ev, api) { var r = markerItem(api); return !r.missing && !r.vague && r.px >= 40; },

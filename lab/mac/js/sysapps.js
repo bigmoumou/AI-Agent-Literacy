@@ -2295,7 +2295,7 @@
     title: '預覽程式', en: 'Preview', aliases: ['preview', 'pdf', 'image', 'photo', '圖片', '相片', '照片'], icon: 'app-preview', dock: true,
     open: function (args) {
       if (args && args.path) return openPreview(args.path);
-      toastLab('把 PDF 或圖片拖到這裡，或在 Finder 裡點兩下就能用預覽程式打開');
+      toastLab('把 PDF 或圖片拖到這裡，或在 Finder 裡按兩下就能用預覽程式打開');
       return null;
     },
     canHandle: function (path) { return !!pvKind(path); },

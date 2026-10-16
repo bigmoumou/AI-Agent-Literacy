@@ -263,7 +263,7 @@
       {
         id: 's4',
         text: 'push 之前先檢查：Public 的倉庫誰都看得到，不要放學號、電話這些個人資料。找出來刪掉，再存檔。',
-        hint: '專案裡有兩個地方寫了學號和電話。可以用 `grep -rn 學號 .` 在整個資料夾找，再用文字編輯或 Code 把那一行刪掉、存檔。在 Finder 點兩下 AGENTS.md 就會用文字編輯打開；index.html 點兩下只會預覽，要改請按右鍵 › 打開方式 › 文字編輯。「學號」兩個字要用中文輸入法打，打完再切回英文（ABC）。',
+        hint: '專案裡有兩個地方寫了學號和電話。可以用 `grep -rn 學號 .` 在整個資料夾找，再用文字編輯或 Code 把那一行刪掉、存檔。在 Finder 按兩下 AGENTS.md 就會用文字編輯打開；index.html 按兩下只會預覽，要改請按右鍵 › 打開方式 › 文字編輯。「學號」兩個字要用中文輸入法打，打完再切回英文（ABC）。',
         answer: '刪掉 AGENTS.md 和 site/index.html 裡寫著學號和電話的那兩行（`grep -rn 學號 .` 會告訴你在哪裡），Command+S。（index.html：Finder 對它按右鍵 › 打開方式 › 文字編輯。）',
         replay: 'mission',
         menuPath: ['打開方式', '文字編輯'],      // index.html opens as a preview on a double click: right-click it, 打開方式, 文字編輯

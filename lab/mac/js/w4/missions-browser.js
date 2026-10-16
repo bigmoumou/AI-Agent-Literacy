@@ -313,7 +313,7 @@
         id: 's3',
         text: '打開 site/style.css，看 Codex 到底改了什麼。',
         hint: 'Codex 通常會在檔案最後面加一段只給小螢幕用的設定（`@media`）。用 Code（影片裡的 VS Code）或文字編輯打開都可以。',
-        answer: 'Finder › 桌面 › Firenze-Museums › site › 點兩下 style.css。',
+        answer: 'Finder › 桌面 › Firenze-Museums › site › 按兩下 style.css。',
         target: finderWalk([CSS, SITE, FM]),
         check: function (ev, api) {
           return !!api.seen('editor:open', function (d) { return same(api, d.path, CSS); });
@@ -400,7 +400,7 @@
         id: 's4',
         text: '看右邊的網頁：標題變大了嗎？再打開 site/style.css，找到 h1 那一段，看 Codex 改了什麼。',
         hint: '它只改你框起來的那一個地方，其他地方沒有動。',
-        answer: '點兩下 site/style.css（Finder 或 Code），找 `h1`。',
+        answer: '按兩下 site/style.css（Finder 或 Code），找 `h1`。',
         target: finderWalk([CSS, SITE, FM]),
         check: function (ev, api) {
           return !!api.seen('editor:open', function (d) { return same(api, d.path, CSS); });
@@ -448,7 +448,7 @@
         id: 's2',
         text: '打開 notes.md，看 Codex 整理了什麼：每一條資料有沒有附上網址？',
         hint: '查來的資料要附來源，之後才查得到它從哪裡來。',
-        answer: 'Finder › 桌面 › Firenze-Museums › 點兩下 notes.md。',
+        answer: 'Finder › 桌面 › Firenze-Museums › 按兩下 notes.md。',
         target: finderWalk([NOTES, FM]),
         check: function (ev, api) {
           return !!api.seen('editor:open', function (d) { return same(api, d.path, NOTES); });

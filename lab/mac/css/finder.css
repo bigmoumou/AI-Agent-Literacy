@@ -387,6 +387,9 @@ html[data-perf="low"] .fd-sidebar { background: #f2f2f3; -webkit-backdrop-filter
   width: var(--fd-side-w); margin: var(--fd-inset) 0 var(--fd-inset) var(--fd-inset); padding: 44px 8px 10px; border-right: 0; border-radius: 17px;
   background: linear-gradient(180deg, rgba(244, 246, 248, .97), rgba(246, 247, 248, .97));
   box-shadow: inset 0 0 0 .5px rgba(255, 255, 255, .95), 0 0 0 .5px rgba(0, 0, 0, .07), 0 3px 12px rgba(0, 0, 0, .06);
+  /* lab-fixes-r3: the top 44 px of the panel is under the traffic lights. When the keyboard (Tab / Shift+Tab) moves to an item the browser
+     scrolls it into view; without this, an item reached going up stopped just inside the panel's top edge, half under the red / yellow / green buttons */
+  scroll-padding-top: 44px; scroll-padding-bottom: 10px;
 }
 .lab-win[data-app="finder"] .fd-side-sec { padding: 12px 10px 4px; font-size: 11px; font-weight: 600; color: #8e8e93; }
 .lab-win[data-app="finder"] .fd-side-item { height: 30px; gap: 10px; padding: 0 10px; margin-bottom: 1px; border-radius: 9px; font-size: 14px; color: #1d1d1f; }
