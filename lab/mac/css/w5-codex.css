@@ -33,6 +33,7 @@
 .cx-ring-tip {
   position: absolute; right: -6px; bottom: calc(100% + 8px); z-index: 4; padding: 5px 9px; border-radius: 8px; white-space: nowrap;
   background: #3a3a3a; color: #f0f0f0; font-size: 12px; box-shadow: 0 6px 18px rgba(0, 0, 0, .45);
+  pointer-events: none;            /* it lies over the message box: the cue (elementFromPoint) must still see the box under it */
 }
 .cx-ring-tip[hidden] { display: none; }
 
