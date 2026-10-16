@@ -32,9 +32,10 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23f6efdc'/%3E%3Cpath d='M9.5 24v-5M16 24v-9M22.5 24V8' stroke='%238a5400' stroke-width='4.2'/%3E%3C/svg%3E">
 </head>
 <!-- Week 6 只有考試，一進來就直接掉進去（流程和計時在 exam.js）：
-     1. 撕開的 Mac／Windows 螢幕劈啪作響，裂縫裡長出黑洞，螢幕被重力扭曲、碎成玻璃片無重力漂浮，
-        再被吸回中心扭成光環；鏡頭衝向黑洞（時間膨脹、重力紅移、重力波、畫面撕裂），越過事件視界全黑。
-        黑洞是 WebGL 逐像素光線追蹤（assets/blackhole.js，畫在 #bh），螢幕和碎片是 2D（assets/rift.js）。
+     1. 首頁膠捲那一格的圖（老師的概念圖，assets/exam-art.js）蓋滿螢幕，沿著裂縫撕開，裂縫裡長出黑洞，
+        裂痕爬滿、碎成玻璃片無重力漂浮，再被吸回中心扭成光環；鏡頭衝向黑洞（時間膨脹、重力紅移、重力波、畫面撕裂），
+        越過事件視界全黑。黑洞是 WebGL 逐像素光線追蹤（assets/blackhole.js，畫在 #bh），撕開的那張圖在 #rift，
+        裂痕和碎片是 2D（assets/rift.js）。
      2. 深空裡選一台電腦（Mac／Windows），連線（#rift）。
      3. 遠端桌面從兩邊合上來把裂縫封起來，就進到遠端電腦（iframe，lab/mac 或 lab/win）。
      沒有 WebGL2 時用 2D 版；系統設定「減少動態效果」時直接到選電腦。 -->
@@ -105,6 +106,7 @@
 <button class="skip" id="skip" type="button" hidden><span data-i18n data-zh-hans="略过" data-en="Skip" data-vi="Bỏ qua">略過</span></button>
 
 <script src="../../assets/rift.js"></script>
+<script src="../../assets/exam-art.js"></script>
 <script src="../../assets/blackhole.js"></script>
 <script src="exam.js"></script>
 </body>

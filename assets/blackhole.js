@@ -22,7 +22,7 @@ in vec2 vUv; out vec4 o;
 uniform vec2 uRes; uniform float uT;
 uniform vec3 uCam, uFwd, uRight, uUp; uniform float uTan;
 uniform float uM, uDisk, uStars;
-uniform sampler2D uScene; uniform float uSceneOn, uSceneZ; uniform vec2 uSceneHalf;
+uniform sampler2D uScene; uniform float uSceneOn, uSceneZ, uWrap; uniform vec2 uSceneHalf;
 float h1(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float h3(vec3 p) { return fract(sin(dot(p, vec3(127.1, 311.7, 74.7))) * 43758.5453); }
 float vn(vec2 p) {
@@ -65,6 +65,7 @@ void main() {
     if (!sceneHit && p.z < uSceneZ && np.z >= uSceneZ) {
       vec3 hp = mix(p, np, (uSceneZ - p.z) / (np.z - p.z));
       vec2 uv = hp.xy / uSceneHalf * 0.5 + 0.5;
+      if (uWrap > 0.5) uv = 1.0 - abs(1.0 - mod(uv, 2.0));   // 鏡射回畫面裡（Week 6 一開始撕開時，透鏡邊緣也是那張圖）
       if (uv.x > 0.0 && uv.x < 1.0 && uv.y > 0.0 && uv.y < 1.0) scene = texture(uScene, uv);
       sceneHit = true;
     }
@@ -105,7 +106,7 @@ void main() {
 precision highp float;
 in vec2 vUv; out vec4 o;
 uniform sampler2D uImg; uniform vec2 uRes; uniform float uT;
-uniform float uChroma, uGlitch, uWave, uWaveT0, uQuad, uRed, uDark, uFlash, uGrain, uGlow, uZoom, uStreak;
+uniform float uChroma, uGlitch, uWave, uWaveT0, uQuad, uRed, uDark, uFlash, uGrain, uGlow, uZoom, uStreak, uTone;
 float hh(float n) { return fract(sin(n) * 43758.5453); }
 void main() {
   float asp = uRes.x / uRes.y;
@@ -148,9 +149,11 @@ void main() {
   }
   c += gl * 0.07 * uGlow;
   c += abs(w) * vec3(0.55, 0.65, 1.0) * 0.12;
+  vec3 raw = c;
   c = vec3(1.0) - exp(-c * 1.45);          // 色調對應：亮的吸積盤不會整片過曝
   float l2 = dot(c, vec3(0.3, 0.59, 0.11));
   c = mix(vec3(l2), c, 1.18);              // 色彩飽和一點
+  c = mix(raw, c, uTone);                  // uTone 0：原色（Week 6 一開始那張圖要和疊在上面的 2D 一模一樣）
   float lum = dot(c, vec3(0.3, 0.59, 0.11));
   c = mix(c, vec3(lum * 1.35, lum * 0.42, lum * 0.22), uRed);
   c *= 1.0 - 0.32 * dot(p, p);
@@ -236,7 +239,7 @@ void main() {
     gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
   };
   /* s：{ t, M, disk, stars, camZ, incl, tanFov, sceneOn, sceneZ, sceneHalf:[x,y],
-          chroma, glitch, wave, waveT0, quad, red, dark, flash, grain, glow } */
+          chroma, glitch, wave, waveT0, quad, red, dark, flash, grain, glow, zoom, streak, tone（0 不做色調對應） } */
   BlackHole.prototype.render = function (s, frameMs) {
     const gl = this.gl;
     // 太慢就降低光線追蹤的解析度，很快就提高一點
@@ -262,6 +265,7 @@ void main() {
     gl.uniform3fv(u.uFwd, fwd); gl.uniform3fv(u.uRight, right); gl.uniform3fv(u.uUp, up);
     gl.uniform1f(u.uTan, s.tanFov);
     gl.uniform1f(u.uM, s.M); gl.uniform1f(u.uDisk, s.disk); gl.uniform1f(u.uStars, s.stars);
+    gl.uniform1f(u.uWrap, s.wrap ? 1 : 0);
     gl.uniform1f(u.uSceneOn, s.sceneOn); gl.uniform1f(u.uSceneZ, s.sceneZ); gl.uniform2f(u.uSceneHalf, s.sceneHalf[0], s.sceneHalf[1]);
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.sceneTex); gl.uniform1i(u.uScene, 0);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -278,6 +282,7 @@ void main() {
     gl.uniform1f(u.uRed, s.red); gl.uniform1f(u.uDark, s.dark); gl.uniform1f(u.uFlash, s.flash);
     gl.uniform1f(u.uGrain, s.grain); gl.uniform1f(u.uGlow, s.glow);
     gl.uniform1f(u.uZoom, s.zoom || 0); gl.uniform1f(u.uStreak, s.streak == null ? 0.6 : s.streak);
+    gl.uniform1f(u.uTone, s.tone == null ? 1 : s.tone);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     gl.bindVertexArray(null);
   };

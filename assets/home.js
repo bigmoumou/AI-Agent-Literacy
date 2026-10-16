@@ -474,27 +474,8 @@
     g.textAlign = "left";
   }
 
-  // 考試週（Week 6 TEST）：整格就是老師的概念圖（weeks/week06/frame.jpg），已經拉成這張貼圖的座標
-  // （製作/week06/design/build-frame.py 產生）。畫面區照圓角框裁，裂縫衝出上下齒孔帶的部分照 EXAM_CUT 的外框裁
-  // （每個多邊形是 x,y,x,y…，貼圖座標）。
-  const EXAM_ART = "weeks/week06/frame.jpg", EXAM_FX = "weeks/week06/frame-fx.jpg";
-  const EXAM_CUT = [[379.5,-1,631,-1,631.3,7,628.9,10,632.5,14,633.5,17,636,19.1,640,17.5,645,18.3,648.3,15,647.9,12,650,10.5,655,14.3,658,12.9,659,13.5,662,16.3,664,16.7,667.4,19,673.3,25,672.4,27,670,27.7,667,30.6,665,34.4,664,35.1,660,32.7,651.4,41,647.6,43,642.7,49,642,51.4,638,53.5,631.7,61,631.7,62,634.3,65,635.1,69,633.9,71,634.3,76,631.9,79,632.9,84,638,89.5,643,93.3,648,92.9,650,94.1,655,90.7,658.4,91,659.5,95,658.5,99,658.5,109,655.9,113,658.1,116,658,117,662,118,658,122.5,653,123.5,509,123.5,506,122.9,504,123.5,424,123.5,419,122.3,415,118,420.6,117,419,116.6,416.9,114,417.7,110,420.3,107,420.3,103,412.9,91,415.3,88,415.3,84,411.7,77,407.3,64,402,58.7,400,59.1,398.7,58,402.3,52,402.3,50,397.3,34,392.7,24,392.3,21,389,17.7,382,15.3,377.7,12,377.7,9,379.5,6],
-    [397.6,645,405,644.7,410,650,406,651,402.7,658,402.3,664,397,667.1,395.7,666,395.3,661,393.9,659,397.3,655,397,651,393,650],
-    [417.6,645,609,644.7,614,650,610,651,610.7,653,614.3,657,615,659.4,628,671.5,634,672.5,635.3,674,634.7,677,638.5,682,645.3,688,644.4,690,641,690.7,637.9,694,638.7,701,640.3,703,640.3,705,638,707.3,635,706.7,632,709.6,631.7,711,635,714.1,638,711.7,640,712.1,643,710.7,648,714.6,655.1,726,653.9,728,654.3,730,652.7,732,652.5,738,654.3,741,654.7,745,657.1,748,654.7,751,657.3,757,655.7,760,655.5,769,398,769,397.3,765,394.9,763,401.3,756,401.7,750,409.3,741,411.3,734,412.5,728,412.5,696,416.3,691,415.7,681,419.3,676,420.5,670,427,664.5,428.5,662,428.3,660,425.4,657,419,654.3,416.9,652,417,651,413,650]];
+  // 考試週（Week 6 TEST）：整格就是老師的概念圖，圖和動畫在 assets/exam-art.js（Week 6 一開始的撕裂畫面也用它）
   let examArt = null;
-  function drawExam(g, art) {
-    g.save();
-    rr(g, IMG.x, IMG.y, IMG.w, IMG.h, 10);
-    g.clip();
-    g.drawImage(art, 0, 0, TEX_W, TEX_H);
-    g.restore();
-    g.save();
-    g.beginPath();
-    EXAM_CUT.forEach((p) => { g.moveTo(p[0], p[1]); for (let k = 2; k < p.length; k += 2) g.lineTo(p[k], p[k + 1]); g.closePath(); });
-    g.clip();
-    g.drawImage(art, 0, 0, TEX_W, TEX_H);
-    g.restore();
-  }
 
   // 所有畫格共用同一張 2D canvas：畫好、上傳到顯示卡，再畫下一格
   const scratch = document.createElement("canvas");
@@ -506,7 +487,7 @@
     const draw = (withImage) => {
       sg.setTransform(s, 0, 0, s, 0, 0);
       drawFilm(sg, f);
-      if (withImage && img && img === examArt) { drawExam(sg, img); return; }
+      if (withImage && img && examArt && img === examArt.artCv) { examArt.drawStatic(sg); return; }
       sg.save();
       rr(sg, IMG.x, IMG.y, IMG.w, IMG.h, 10);
       sg.clip();
@@ -858,61 +839,23 @@
   canvas.addEventListener("webglcontextlost", (e) => { e.preventDefault(); fallback(); });
 
   /* ======================================================================
-     考試週（Week 6 TEST）：那一格就是老師的概念圖，圖裡的電流會動——一段一段忽明忽暗、
-     偶爾一道亮光沿著裂縫竄過去，每隔幾秒整道裂縫先暗一下、再猛地一亮（攝影棚跟著閃一下）。
-     做法：frame-fx.jpg 是裂縫附近那一塊的「電流熄掉時的顏色」和「電流的程度 m」（半解析度）。
-     每一格先畫原圖，再用一張很小的亮度場（每 32 像素一格，放大時自動平滑）決定每個地方：
-       熄掉多少：熄掉時的顏色 × m × 熄掉的程度，蓋上去；加亮多少：原圖 × m × 加亮的程度，疊加；
-       再把加亮的那層縮小、放大當光暈。
+     考試週（Week 6 TEST）：那一格就是老師的概念圖，圖裡的東西會動（assets/exam-art.js）：
+     電流一段段忽明忽暗、亮光沿著裂縫竄過去、一叢電流偶爾落雷般白熱（連打兩下）；
+     裂縫裡的星雲被照亮、星星一顆顆閃；一道反光由上往下掠過玻璃；
+     每 4–7 秒整道裂縫先暗一下、再猛地一亮，光暈漫開，攝影棚跟著閃一下。
      只有那一格在畫面上、分頁看得到、沒有設定「減少動態效果」時才動（最多每秒 30 次）。
      ====================================================================== */
   const examI = frames.findIndex((f) => f.kind === "ready" && f.w.exam);
-  const FX = { x: 248, y: 0, w: 664, h: 768, cell: 32 };   // 電流都在這一塊裡（和 build-frame.py 一致）
   let examFx = null, examLast = 0, flashEl = null;
   function setupExam() {
     if (examI < 0 || reduceMotion || !examArtP) return;
-    Promise.all([examArtP, loadImage(root() + EXAM_FX)]).then(([art, fx]) => {
-      if (!art || !fx || fellBack || examFx) return;
-      try { examFx = buildExamFx(art, fx); } catch (e) { return; }   // 用 file:// 直接開時讀不到像素，就不動
+    examArtP.then((art) => (art ? art.loadFx() : false)).then((ok) => {
+      if (!ok || fellBack || examFx) return;
       flashEl = document.createElement("div"); flashEl.className = "exam-flash"; flashEl.setAttribute("aria-hidden", "true");
       document.body.append(flashEl);
+      examFx = { film: null };
       wake();
     });
-  }
-  function buildExamFx(art, fx) {
-    const { x: bx, y: by, w: bw, h: bh, cell } = FX;
-    const mk = (w, h) => { const c = document.createElement("canvas"); c.width = w; c.height = h; return c; };
-    const half = (sx) => {                     // frame-fx.jpg 的左半（熄掉的顏色）或右半（m），放大回原尺寸
-      const g = mk(bw, bh).getContext("2d");
-      g.drawImage(fx, sx, 0, fx.width / 2, fx.height, 0, 0, bw, bh);
-      return g.getImageData(0, 0, bw, bh);
-    };
-    const off = half(0), m = half(fx.width / 2);
-    const lit = mk(bw, bh), lg = lit.getContext("2d");
-    lg.drawImage(art, bx, by, bw, bh, 0, 0, bw, bh);
-    const litD = lg.getImageData(0, 0, bw, bh);
-    const seeds = [];                          // 竄過去的亮光從電流很亮的地方出發
-    for (let p = 0, q = 0; p < m.data.length; p += 4, q++) {
-      const k = Math.max(0, m.data[p + 1] - 6) * (255 / 249);   // 去掉 JPEG 的雜訊
-      litD.data[p + 3] = k; off.data[p + 3] = k;
-      if (k > 200 && (q & 63) === 0) seeds.push([q % bw, (q / bw) | 0]);
-    }
-    lg.putImageData(litD, 0, 0);
-    const offC = mk(bw, bh); offC.getContext("2d").putImageData(off, 0, 0);
-    const gw = Math.ceil(bw / cell), gh = Math.ceil(bh / cell);
-    const fDim = mk(gw, gh), fAdd = mk(gw, gh), tmp = mk(bw, bh);
-    const glow = mk(Math.round(bw / 8), Math.round(bh / 8)), gg = glow.getContext("2d");
-    gg.imageSmoothingQuality = "high";
-    const litGlow = mk(glow.width, glow.height), lgg = litGlow.getContext("2d");
-    lgg.imageSmoothingQuality = "high"; lgg.drawImage(lit, 0, 0, glow.width, glow.height);
-    const ph = new Float32Array(gw * gh * 2);
-    for (let k = 0; k < ph.length; k++) ph[k] = Math.random() * 6.283;
-    return {
-      base: null, lit, off: offC, litGlow, tmp, tg: tmp.getContext("2d"), glow, gg,
-      fDim, fAdd, dimG: fDim.getContext("2d"), addG: fAdd.getContext("2d"),
-      dimD: new ImageData(gw, gh), addD: new ImageData(gw, gh), gw, gh, ph, seeds,
-      bolts: [], nextBolt: 0, nextSurge: 0, surgeT: -9, flashed: true,
-    };
   }
   function examVisible() {
     let a = (examI - pos) * TH;
@@ -920,69 +863,20 @@
     return Math.abs(a) < 1.25;
   }
   function examStep(now) {
-    const X = examFx, t = now / 1000, cell = FX.cell;
-    if (!X.base) {                             // 片基、齒孔、概念圖只畫一次，之後每格從這張開始
-      const c = paintFrame(frames[examI], examArt);
-      X.base = document.createElement("canvas");
-      X.base.width = c.width; X.base.height = c.height;
-      X.base.getContext("2d").drawImage(c, 0, 0);
+    const s = TS_MAIN, w = Math.round(TEX_W * s), h = Math.round(TEX_H * s);
+    if (!examFx.film) {                        // 片基、齒孔、邊緣字只畫一次
+      const c = document.createElement("canvas"); c.width = w; c.height = h;
+      const g = c.getContext("2d"); g.setTransform(s, 0, 0, s, 0, 0); drawFilm(g, frames[examI]);
+      examFx.film = c;
     }
-    // 每隔 4–7 秒整道裂縫先暗一下（像在蓄電），再猛地一亮、慢慢退
-    if (!X.nextSurge) X.nextSurge = t + 1.6;
-    if (t > X.nextSurge) { X.surgeT = t + 0.16; X.nextSurge = t + 4 + Math.random() * 3; X.flashed = false; }
-    const sa = t - X.surgeT;
-    const surge = sa < 0 ? (sa > -0.16 ? -0.4 : 0) : 1.1 * Math.exp(-sa / 0.36);
-    if (sa >= 0 && !X.flashed) { X.flashed = true; if (current() === examI) flash(); }
-    // 一道亮光沿著裂縫竄過去（每秒兩三次）
-    if (t > X.nextBolt && X.seeds.length) {
-      const s = X.seeds[(Math.random() * X.seeds.length) | 0];
-      X.bolts.push({ x: s[0], y: s[1], t0: t, vy: (Math.random() < 0.5 ? -1 : 1) * (360 + Math.random() * 420), r: 30 + Math.random() * 26, a: 0.7 + Math.random() * 0.6 });
-      X.nextBolt = t + 0.2 + Math.random() * 0.5;
-    }
-    X.bolts = X.bolts.filter((b) => t - b.t0 < 0.55);
-    const { gw, gh, ph, dimD, addD } = X, n = gw * gh;
-    for (let j = 0; j < gh; j++) {
-      for (let i = 0; i < gw; i++) {
-        const k = j * gw + i, cx = (i + 0.5) * cell, cy = (j + 0.5) * cell;
-        // 平常和概念圖一樣亮（1），沿著裂縫上下流動的明暗，加上每一小段自己的快速閃爍
-        let lv = 1.02 + 0.22 * Math.sin(cy * 0.021 - t * 2.4 + ph[k] * 0.35) * Math.sin(cy * 0.009 + t * 1.3 + (cx > 330 ? 2 : 0))
-          + 0.12 * Math.sin(t * (8 + (k % 7)) + ph[n + k]) + (Math.random() - 0.5) * 0.12;
-        for (const b of X.bolts) {
-          const age = t - b.t0, dx = cx - b.x, dy = cy - (b.y + b.vy * age);
-          lv += b.a * Math.exp(-age / 0.14) * Math.exp(-(dx * dx + dy * dy) / (2 * b.r * b.r));
-        }
-        lv += surge;
-        dimD.data[k * 4 + 3] = Math.min(0.8, Math.max(0, 1 - lv)) * 255;
-        addD.data[k * 4 + 3] = Math.min(1, Math.max(0, lv - 1)) * 255;
-      }
-    }
-    X.dimG.putImageData(dimD, 0, 0);
-    X.addG.putImageData(addD, 0, 0);
-    retex(tex[examI], examPaint(Math.max(0, surge)));
-  }
-  function examPaint(boom) {
-    const X = examFx, { x: bx, y: by, w: bw, h: bh, cell } = FX, s = TS_MAIN, tg = X.tg;
-    const fw = X.gw * cell, fh = X.gh * cell;
-    if (scratch.width !== X.base.width || scratch.height !== X.base.height) { scratch.width = X.base.width; scratch.height = X.base.height; }
+    if (examArt.step(now / 1000) && current() === examI) flash();
+    if (scratch.width !== w || scratch.height !== h) { scratch.width = w; scratch.height = h; }
     sg.setTransform(1, 0, 0, 1, 0, 0);
-    sg.globalCompositeOperation = "copy";
-    sg.drawImage(X.base, 0, 0);
-    sg.setTransform(s, 0, 0, s, 0, 0);
-    // 熄掉：熄掉時的顏色 × m × 這一區熄掉的程度，蓋上去
-    tg.globalCompositeOperation = "copy"; tg.drawImage(X.off, 0, 0);
-    tg.globalCompositeOperation = "destination-in"; tg.drawImage(X.fDim, 0, 0, fw, fh);
-    sg.globalCompositeOperation = "source-over"; sg.drawImage(X.tmp, bx, by);
-    // 加亮：原圖 × m × 這一區加亮的程度，疊加
-    tg.globalCompositeOperation = "copy"; tg.drawImage(X.lit, 0, 0);
-    tg.globalCompositeOperation = "destination-in"; tg.drawImage(X.fAdd, 0, 0, fw, fh);
-    sg.globalCompositeOperation = "lighter"; sg.drawImage(X.tmp, bx, by);
-    // 光暈：加亮的那層縮小再放大；整道裂縫猛亮時，整條電流再多一層
-    X.gg.globalCompositeOperation = "copy"; X.gg.drawImage(X.tmp, 0, 0, X.glow.width, X.glow.height);
-    sg.globalAlpha = 0.9; sg.drawImage(X.glow, bx, by, bw, bh);
-    if (boom > 0.02) { sg.globalAlpha = Math.min(1, boom * 0.55); sg.drawImage(X.litGlow, bx, by, bw, bh); }
-    sg.globalAlpha = 1;
+    sg.globalCompositeOperation = "copy"; sg.drawImage(examFx.film, 0, 0);
     sg.globalCompositeOperation = "source-over";
-    return scratch;
+    sg.setTransform(s, 0, 0, s, 0, 0);
+    examArt.paint(sg);
+    retex(tex[examI], scratch);
   }
   function flash() {
     if (!flashEl) return;
@@ -1107,7 +1001,11 @@
   frames.forEach((f, i) => {
     if (f.kind !== "ready") return;
     if (f.w.exam) {
-      examArtP = loadImage(root() + EXAM_ART).then((img) => { if (img) { examArt = img; gotImage(i, img); } return img; });
+      examArtP = (window.ExamArt ? window.ExamArt.load(root() + "weeks/week06/") : Promise.resolve(null)).then((art) => {
+        if (art) { examArt = art; gotImage(i, art.artCv); }
+        else if (f.w.thumb) loadImage(root() + f.w.thumb).then((img) => gotImage(i, img));
+        return art;
+      });
       return;
     }
     const first = f.w.thumb || f.w.still;

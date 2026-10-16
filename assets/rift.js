@@ -8,7 +8,8 @@
    - 裂縫：兩半畫面（紙纖維白邊、色差邊、往裂縫被拉扯的殘影）；裂縫邊緣有電漿般的亮光，兩邊之間不時打出閃電；
      兩半上的灰塵被吸進裂縫。往下掉時兩半會被拉長、旋轉、縮小，一起被黑洞吞掉。
    - 越接近事件視界，畫面往紅色偏移（重力紅移），最後全黑。
-   mode "halves"：兩半畫在 canvas 上（首頁封面、Week 6 入口）。
+   mode "halves"：兩半畫在 canvas 上（要先 setPlate 給底圖）。Week 6 一開始那張撕開的圖改用 assets/exam-art.js
+   （老師的概念圖），這裡只負責深空、黑洞、裂痕（drawCracks）、碎成玻璃片（shatter）、選電腦和合上的畫面。
    mode "reveal"：只畫裂縫裡面，外面透明，底下的遠端電腦（iframe）露出來；裂縫合起來就進到遠端桌面。
    用法見 weeks/week06/exam.js。
    ========================================================================== */
@@ -578,25 +579,53 @@
       if (onBorder(a) && onBorder(b)) return;
       if (a[0] < b[0] || (a[0] === b[0] && a[1] < b[1])) edges.push([a, b]);
     }));
-    this.crackEdges = edges;
+    // 裂痕不是完美的直線：分幾小段、每段稍微偏一點（像玻璃真的裂開）；兩端還是落在碎片的角上
+    const rj = rng(this.seed + 53);
+    this.crackEdges = edges.map(([a, b]) => {
+      const L = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1, n = Math.max(3, Math.round(L / 36));
+      const nx = -(b[1] - a[1]) / L, ny = (b[0] - a[0]) / L, path = [a];
+      for (let i = 1; i < n; i++) {
+        const t = i / n, j = (rj() * 2 - 1) * Math.min(L * 0.03, 10);
+        path.push([a[0] + (b[0] - a[0]) * t + nx * j, a[1] + (b[1] - a[1]) * t + ny * j]);
+      }
+      path.push(b);
+      return { a, b, path };
+    });
   };
-  Rift.prototype.drawCracks = function (g, st) {
+  // mode：疊法（預設 lighter；Week 6 開場用 source-atop，只畫在撕開的兩半上，還多一道陰影，像玻璃有厚度）
+  Rift.prototype.drawCracks = function (g, st, mode) {
     if (st.cracks <= 0.001) return;
     if (!this.crackEdges) this.prepareShards(16);
-    const W = this.W, front = st.cracks * W * 0.62;
+    const W = this.W, front = st.cracks * W * 0.62, S = Math.max(0.6, this.S), solid = mode && mode !== "lighter";
     g.save();
-    g.globalCompositeOperation = "lighter"; g.lineCap = "round";
-    for (const [a, b] of this.crackEdges) {
-      const da = Math.abs(a[0] - W / 2), db = Math.abs(b[0] - W / 2);
-      const n = da <= db ? a : b, f = da <= db ? b : a, dn = Math.min(da, db), df = Math.max(da, db);
+    g.globalCompositeOperation = mode || "lighter"; g.lineCap = "round"; g.lineJoin = "round";
+    const tips = [];
+    for (const e of this.crackEdges) {
+      const da = Math.abs(e.a[0] - W / 2), db = Math.abs(e.b[0] - W / 2), dn = Math.min(da, db), df = Math.max(da, db);
       if (front <= dn) continue;
       const k = clamp((front - dn) / ((df - dn) || 1), 0, 1);
-      const x = n[0] + (f[0] - n[0]) * k, y = n[1] + (f[1] - n[1]) * k;
-      const fl = st.still ? 1 : 0.75 + 0.25 * Math.random();
-      [[9, "150,120,255", 0.14], [3.2, "205,215,255", 0.4], [1.2, "255,255,255", 0.95]].forEach(([w, c, al]) => {
-        g.strokeStyle = `rgba(${c},${al * fl})`; g.lineWidth = w;
-        g.beginPath(); g.moveTo(n[0], n[1]); g.lineTo(x, y); g.stroke();
+      const P = da <= db ? e.path : e.path.slice().reverse();      // 從靠近裂縫的那一端往外裂
+      let total = 0;
+      for (let i = 1; i < P.length; i++) total += Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]);
+      const pts = [P[0]];
+      for (let i = 1, acc = 0, want = total * k; i < P.length; i++) {
+        const d = Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]);
+        if (acc + d >= want) { const f = (want - acc) / (d || 1); pts.push([P[i - 1][0] + (P[i][0] - P[i - 1][0]) * f, P[i - 1][1] + (P[i][1] - P[i - 1][1]) * f]); break; }
+        pts.push(P[i]); acc += d;
+      }
+      const line = () => { g.beginPath(); pts.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y))); g.stroke(); };
+      const fl = st.still ? 1 : 0.8 + 0.2 * Math.random();
+      if (solid) { g.save(); g.translate(1.2, 1.2); g.strokeStyle = "rgba(0,0,0,.4)"; g.lineWidth = 2.6 * S; line(); g.restore(); }
+      [[10 * S, "130,100,255", 0.13], [3.4 * S, "205,215,255", 0.4], [1.3 * S, "255,255,255", 0.95]].forEach(([w, c, al]) => {
+        g.strokeStyle = `rgba(${c},${al * fl})`; g.lineWidth = w; line();
       });
+      if (k < 1) tips.push(pts[pts.length - 1]);
+    }
+    // 正在裂開的尖端：一點火花
+    for (const [x, y] of tips) {
+      const r = 10 * S, gr = g.createRadialGradient(x, y, 0, x, y, r);
+      gr.addColorStop(0, "rgba(255,255,255,.95)"); gr.addColorStop(0.35, "rgba(190,180,255,.5)"); gr.addColorStop(1, "rgba(120,90,255,0)");
+      g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2);
     }
     g.restore();
   };
@@ -609,7 +638,7 @@
     this.snap = c;
     const st = this.state;
     st.shardsOn = true; st.shatterT = t; st.cracks = 0;
-    for (const [a, b] of this.crackEdges || []) this.spawnAt((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, 3, "spark");
+    for (const { a, b } of this.crackEdges || []) this.spawnAt((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, 3, "spark");
   };
   Rift.prototype.drawShards = function (g, st) {
     if (!this.snap) return;
@@ -649,10 +678,9 @@
     }
   };
 
-  /* ---------- 玻璃＋電流風格（st.style = "glass"：首頁那一格、Week 6 一開始的畫面） ----------
-     照老師給的概念圖：裂縫兩邊像打碎的玻璃——一片片透明碎片沿著邊緣翹起、也在裂縫裡外漂；
-     邊緣往外爬出一叢叢會閃的電流裂紋；裂縫裡是很密的星空。
-     不會動的部分（星空、電流網、每片碎片的樣子）建一次存起來，每一格只貼上去、調亮度和位置，很省。 */
+  /* ---------- 遠端畫面的小裂縫（weeks/week06/exam.js 的 scars）借用的碎片和電流 ----------
+     shardSprite：一片水晶碎片（深色半透明本體、斜面、白亮邊、星芒），畫一次存成小圖。
+     branch：一叢會分叉的電流（紫光、藍白、白芯三層）。 */
   function shardSprite(r, R, plate, px, py, pk, k) {
     const n = 3 + Math.floor(r() * 3), stretch = 0.45 + r() * 0.75, rot0 = r() * TAU, pts = [];
     for (let i = 0; i < n; i++) {
@@ -717,101 +745,6 @@
     g.strokeStyle = "rgba(125,110,255,.42)"; g.lineWidth = w * 3; line();
     g.strokeStyle = "rgba(205,215,255,.95)"; g.lineWidth = w; line();
   }
-  Rift.prototype.buildGlass = function (st) {
-    const W = this.W, H = this.H, S = this.S, k = this.dpr, r = rng(this.seed + 77);
-    const mk = () => {
-      const c = document.createElement("canvas");
-      c.width = Math.max(1, Math.round(W * k)); c.height = Math.max(1, Math.round(H * k));
-      const g = c.getContext("2d"); g.setTransform(k, 0, 0, k, 0, 0); return [c, g];
-    };
-    // 星空：裂縫附近很密，亮的星有光暈和十字光
-    const [sc, sg] = mk();
-    sg.globalCompositeOperation = "lighter";
-    for (let i = 0; i < 9; i++) {                                         // 裂縫裡的紫藍雲氣
-      const x = W / 2 + (r() * 2 - 1) * Math.max(st.gap, 120 * S) * 0.35, y = r() * H, rad = (80 + r() * 160) * S * 1.4;
-      const nb = sg.createRadialGradient(x, y, 0, x, y, rad);
-      nb.addColorStop(0, r() < 0.5 ? "rgba(110,60,220,.22)" : "rgba(50,90,230,.2)"); nb.addColorStop(1, "rgba(40,30,120,0)");
-      sg.fillStyle = nb; sg.fillRect(x - rad, y - rad, rad * 2, rad * 2);
-    }
-    for (let i = 0; i < 700; i++) {
-      const x = W / 2 + (r() * 2 - 1) * Math.max(st.gap, 120 * S) * 0.75, y = r() * H, s = (0.45 + Math.pow(r(), 4) * 2.3) * Math.max(0.7, S * 1.5);
-      sg.fillStyle = `rgba(${r() < 0.2 ? "255,215,190" : "215,225,255"},${0.35 + r() * 0.6})`;
-      sg.beginPath(); sg.arc(x, y, s, 0, TAU); sg.fill();
-      if (s > 2 * Math.max(0.7, S * 1.5) * 0.8 && r() < 0.55) {
-        const gl = sg.createRadialGradient(x, y, 0, x, y, s * 6);
-        gl.addColorStop(0, "rgba(200,190,255,.35)"); gl.addColorStop(1, "rgba(200,190,255,0)");
-        sg.fillStyle = gl; sg.fillRect(x - s * 6, y - s * 6, s * 12, s * 12);
-        sg.strokeStyle = "rgba(230,235,255,.35)"; sg.lineWidth = 0.6;
-        sg.beginPath(); sg.moveTo(x - s * 5, y); sg.lineTo(x + s * 5, y); sg.moveTo(x, y - s * 5); sg.lineTo(x, y + s * 5); sg.stroke();
-      }
-    }
-    // 電流網：兩組輪流閃；左右分開畫，裂縫變寬時各自跟著邊移動，不用重畫
-    const nets = [0, 1].map((li) => [-1, 1].map((side) => {
-      const [c, g] = mk(), rr = rng(this.seed + 100 + li * 31 + (side > 0 ? 7 : 0));
-      g.globalCompositeOperation = "lighter"; g.lineCap = "round"; g.lineJoin = "round";
-      for (let i = 0; i < 6; i++) {
-        // 大多往外伸一小段；有些貼著邊上下爬
-        const y = (0.04 + rr() * 0.92) * H, x = this.edgeAt(y, side, st.gap) + side * 2;
-        const along = rr() < 0.3, out = side > 0 ? 0 : Math.PI;
-        const ang = along ? (rr() < 0.5 ? -1 : 1) * Math.PI / 2 + side * 0.25 : out + (rr() * 2 - 1) * 0.8;
-        branch(g, rr, x, y, ang, (along ? 0.06 + rr() * 0.08 : 0.05 + rr() * 0.1) * W, Math.max(0.9, 2 * S), 0);
-      }
-      // 細細的玻璃裂紋（白、不發光）
-      g.globalCompositeOperation = "source-over";
-      g.strokeStyle = "rgba(240,242,255,.5)"; g.lineWidth = Math.max(0.6, 0.9 * S);
-      for (let i = 0; i < 7; i++) {
-        const y = (0.04 + rr() * 0.92) * H;
-        let x = this.edgeAt(y, side, st.gap), yy = y, a = (side > 0 ? 0 : Math.PI) + (rr() * 2 - 1) * 1.0;
-        g.beginPath(); g.moveTo(x, yy);
-        const L = (0.04 + rr() * 0.12) * W;
-        for (let k2 = 0; k2 < 4; k2++) { a += (rr() * 2 - 1) * 0.35; x += Math.cos(a) * L / 4; yy += Math.sin(a) * L / 4; g.lineTo(x, yy); }
-        g.stroke();
-      }
-      return c;
-    }));
-    // 碎片：一半貼在裂縫邊上翹起（微微晃），一半在裂縫裡外漂（無重力）
-    const shards = [], pk = this.plate ? this.plate.width / W : 1, sk = Math.max(1, k);
-    for (let i = 0; i < 24; i++) {
-      const side = r() < 0.5 ? -1 : 1, y = (0.03 + r() * 0.94) * H, stuck = i < 13;
-      const dx = stuck ? side * r() * 26 * S : 0, xr = stuck ? 0 : (r() * 2 - 1) * (0.5 + r() * 0.9);
-      const x0 = stuck ? this.edgeAt(y, side, st.gap) + dx : W / 2 + xr * st.gap;
-      const R = (stuck ? 30 + r() * 80 : 9 + r() * 30) * S * 1.6;
-      shards.push({ spr: shardSprite(r, R, this.plate, x0, y, pk, sk), y, side, stuck, dx, xr, rot: (r() * 2 - 1) * 0.6,
-        vr: (r() * 2 - 1) * (stuck ? 0 : 0.35), vy: stuck ? 0 : ((r() * 2 - 1) * 12 - 4) * S, vxr: stuck ? 0 : (r() * 2 - 1) * 0.06, ph: r() * TAU });
-    }
-    this.glass = { stars: sc, nets, shards, gap: st.gap, W, H, sprite: (i) => shards[i % shards.length].spr };
-  };
-  Rift.prototype.drawGlassStars = function (g, st) {
-    if (!this.glass || this.glass.W !== this.W) this.buildGlass(st);
-    g.save(); g.globalCompositeOperation = "lighter"; g.globalAlpha = st.still ? 1 : 0.85 + 0.15 * Math.sin(st.t * 3.3);
-    g.drawImage(this.glass.stars, 0, 0, this.W, this.H); g.restore();
-  };
-  Rift.prototype.drawGlass = function (g, st, dt) {
-    if (!this.glass || this.glass.W !== this.W) this.buildGlass(st);
-    const G = this.glass, W = this.W, H = this.H, t = st.t, shift = (st.gap - G.gap) / 2;
-    const flick = (sp, ph) => st.still ? 0.85 : 0.3 + 0.7 * Math.max(0, Math.sin(t * sp + ph + Math.sin(t * 1.7 + ph) * 2)) * (0.7 + 0.3 * Math.random());
-    const boost = st.boltBoost || 1;
-    g.save();
-    g.globalCompositeOperation = "lighter";
-    [[0, flick(7.3, 0)], [1, flick(5.1, 1.7)]].forEach(([li, f]) => {
-      g.globalAlpha = Math.min(1, f * boost);
-      g.drawImage(G.nets[li][0], -shift, 0, W, H);
-      g.drawImage(G.nets[li][1], shift, 0, W, H);
-    });
-    g.restore();
-    for (const s of G.shards) {
-      if (!st.still && !s.stuck) {
-        s.y += s.vy * dt; s.xr += s.vxr * dt; s.rot += s.vr * dt;
-        if (s.y < -80 || s.y > H + 80 || Math.abs(s.xr) > 2.2) { s.xr = (Math.random() * 2 - 1) * 0.4; s.y = Math.random() * H; }
-      }
-      const x = s.stuck ? this.edgeAt(s.y, s.side, st.gap) + s.dx : W / 2 + s.xr * st.gap;
-      const wob = s.stuck && !st.still ? Math.sin(t * 1.1 + s.ph) * 0.05 : 0;
-      g.save(); g.translate(x, s.y); g.rotate(s.rot + wob);
-      g.drawImage(s.spr.c, -s.spr.size / 2, -s.spr.size / 2, s.spr.size, s.spr.size);
-      g.restore();
-    }
-  };
-
   Rift.prototype.draw = function () {
     const st = this.state, g = this.g, W = this.W, H = this.H;
     const dt = this.lastT == null ? 0 : clamp(st.t - this.lastT, 0, 0.1);
@@ -830,7 +763,6 @@
       g.save();
       if (st.mode === "reveal" || (st.gap < W * 1.3 && st.pull <= 0)) this.clipGap(g, st.gap + (st.mode === "reveal" ? 0 : 2));
       this.drawSpace(g, st);
-      if (st.style === "glass") this.drawGlassStars(g, st);
       this.drawWell(g, st);
       this.drawHole(g, st);
       g.restore();
@@ -838,7 +770,6 @@
     if (open && st.dust > 0 && !st.still) this.spawnDust(Math.random() < st.dust * dt * 30 ? 1 : 0);
     if (halvesOn) { this.drawHalf(g, st, -1); this.drawHalf(g, st, 1); }
     if (open && st.pull <= 0) { this.drawPlasma(g, st); this.drawArcs(g, st, dt); }
-    if (st.style === "glass" && halvesOn && st.pull <= 0) this.drawGlass(g, st, dt);
     this.drawCracks(g, st);
     if (!st.still) this.drawBits(g, st, dt);
     // 重力紅移、全黑、閃光

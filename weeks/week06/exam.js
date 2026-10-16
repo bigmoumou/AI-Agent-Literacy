@@ -1,12 +1,12 @@
 /* Week 6（TEST）：一進來就直接掉進去（沒有入口那一關）。
-   1. 碎裂（WebGL，assets/blackhole.js）：撕開的螢幕劈啪作響，裂縫裡長出一個黑洞，螢幕被重力扭曲、裂痕爬滿、碎成玻璃片，
-      碎片無重力漂浮、翻轉，接著被吸回中心、扭成光環；鏡頭往黑洞衝，時間膨脹、重力紅移、重力波、畫面撕裂，越過事件視界全黑。
-      螢幕和碎片由 2D canvas 畫（assets/rift.js 的 scene），當作黑洞後面的那張畫面傳給 WebGL。
-   2. 選電腦（2D，#rift）：深空裡浮出兩台筆電；選了之後星光衝向它。
-   3. 進到遠端桌面：遠端桌面從兩邊合上，把裂縫封起來（iframe：lab/mac 或 lab/win）。
-   沒有 WebGL2 時用 2D 版的撕開＋黑洞；系統設定「減少動態效果」時直接到選電腦，只用淡入淡出。
-   ?still=1、?still=plate：看第六版的 2D 撕裂畫面和底圖（首頁那一格、poster.jpg、thumb.jpg 已改用老師的概念圖，
-   由 製作/week06/design/build-frame.py 產生）。
+   1. 撕開（0–1 秒）：首頁膠捲那一格的圖（老師的概念圖，assets/exam-art.js，電流一樣會動）蓋滿螢幕，
+      沿著裂縫中線往兩邊撕開，中間露出 WebGL 的星空和正在長大的黑洞（圖裡畫好的小黑洞淡掉）；裂痕爬滿。
+      這一段畫在清楚的 2D（#rift，疊在 WebGL 上面），同時縮小一份給 WebGL 當黑洞後面的那張畫面。
+   2. 碎裂、掉進黑洞（WebGL，assets/blackhole.js）：1.0 秒碎成玻璃片（從那張畫面剪），碎片無重力漂浮、翻轉，
+      接著被吸回中心、扭成光環；鏡頭往黑洞衝，時間膨脹、重力紅移、重力波、畫面撕裂，越過事件視界全黑。
+   3. 選電腦（2D，#rift）：深空裡浮出兩台筆電；選了之後星光衝向它。
+   4. 進到遠端桌面：遠端桌面從兩邊合上，把裂縫封起來（iframe：lab/mac 或 lab/win）。
+   沒有 WebGL2 時用 2D 版：同一張圖撕開、往外拉走，露出 2D 的黑洞；系統設定「減少動態效果」時直接到選電腦。
    ?debug=1：examSeek("dive", 秒) 跳到某一刻。 */
 (function () {
   "use strict";
@@ -21,7 +21,6 @@
   const bump = (u, a, b) => { const m = (a + b) / 2; return u < a || u > b ? 0 : u < m ? (u - a) / (m - a) : (b - u) / (b - m); };
 
   const params = new URLSearchParams(location.search);
-  const STILL = params.get("still");                       // "1"（首頁封面）或 "plate"（只有底圖）
   const reduce = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   const LANG = (window.I18N && window.I18N.lang) || "zh-Hant";
   const STR = {
@@ -47,79 +46,62 @@
   const scene = new window.Rift(sceneCv, { seed: 6 });        // 看不到的 2D：撕開、碎掉的螢幕，給黑洞當背景
   const ss = scene.state;
   let bh = null;
-  if (!reduce && !STILL && window.BlackHole) { try { bh = new window.BlackHole(bhCanvas); } catch (e) { bh = null; } }
+  if (!reduce && window.BlackHole) { try { bh = new window.BlackHole(bhCanvas); } catch (e) { bh = null; } }
   const pick = $("#pick"), status = $("#pickStatus"), skipBtn = $("#skip"), frame = $("#remote");
   const hud = $("#hud"), hudRate = $("#hudRate"), hudClock = $("#hudClock");
-  let W = 1, H = 1, g0 = 120;
+  let W = 1, H = 1;
   const Z0 = 12, SCENE_Z = 8, TAN = 0.5;                     // 黑洞的鏡頭：起點距離、背後畫面的位置、視角
-
-  if (STILL) body.classList.add("is-still");
 
   function size() {
     W = window.innerWidth; H = window.innerHeight;
     const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-    rift.resize(W, H, STILL ? 1 : dpr);
+    rift.resize(W, H, dpr);
     scene.resize(W, H, Math.min(1, 1280 / W));
     if (bh) bh.resize(W, H, Math.min(dpr, 1.25));
-    g0 = clamp(W * 0.15, 90, 270);
   }
 
-  /* ---------- 兩半畫面：左邊 Mac 桌面、右邊 Windows 桌面，正好沿著裂縫分開；中間 TEST ---------- */
-  const imgs = {};
-  const load = (src) => new Promise((r) => { const im = new Image(); im.onload = () => r(im); im.onerror = () => r(null); im.src = src; });
-  function cover(g, im, x, y, w, h) {
-    if (!im) return;
-    const s = Math.max(w / im.naturalWidth, h / im.naturalHeight);
-    const dw = im.naturalWidth * s, dh = im.naturalHeight * s;
-    g.drawImage(im, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
+  /* ---------- 開場那張圖：和首頁膠捲那一格同一張（assets/exam-art.js），畫面區蓋滿螢幕 ---------- */
+  let art = null, secondSurge = false;
+  function cover(zoom) {
+    const I = art.img, s = Math.max(W / I.w, H / I.h) * zoom;
+    return { s, x: W / 2 - (I.x + I.w / 2) * s, y: H / 2 - (I.y + I.h / 2) * s };
   }
-  function plate(g, W, H) {
-    g.fillStyle = "#0b0d12";
-    g.fillRect(0, 0, W, H);
-    cover(g, imgs.mac, -W * 0.1, -H * 0.06, W * 0.72, H * 1.1);   // 往上推一點，把截圖最上面的遠端連線列推出畫面
-    g.save();
-    rift.clipHalf(g, 1, 0);
-    g.fillStyle = "#0b0d12"; g.fillRect(0, 0, W, H);
-    cover(g, imgs.win, W * 0.38, -H * 0.06, W * 0.72, H * 1.1);
-    g.restore();
-    // 變暗、褪色，像訊號很差的遠端畫面
-    g.fillStyle = "rgba(3,6,14,.58)"; g.fillRect(0, 0, W, H);
-    g.globalCompositeOperation = "saturation";
-    g.fillStyle = "rgba(128,128,128,.6)"; g.fillRect(0, 0, W, H);
-    g.globalCompositeOperation = "source-over";
-    const tint = g.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, Math.max(W, H) * 0.55);
-    tint.addColorStop(0, "rgba(40,110,230,.22)"); tint.addColorStop(1, "rgba(40,110,230,0)");
-    g.fillStyle = tint; g.fillRect(0, 0, W, H);
-    g.fillStyle = "rgba(0,0,0,.2)";
-    for (let y = 0; y < H; y += 3) g.fillRect(0, y, W, 1);           // 掃描線
-    const vig = g.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.3, W / 2, H / 2, Math.hypot(W, H) * 0.6);
-    vig.addColorStop(0, "rgba(0,0,0,0)"); vig.addColorStop(1, "rgba(0,0,0,.6)");
-    g.fillStyle = vig; g.fillRect(0, 0, W, H);
-    // TEST：紅、青兩色錯開一點（訊號不穩的色差），中間白字，兩條橫切片錯位
-    const fs = Math.min(W * 0.22, H * 0.27);
-    g.font = `900 ${fs}px "Noto Sans TC", "Microsoft JhengHei", "PingFang TC", sans-serif`;
-    if ("letterSpacing" in g) g.letterSpacing = `${(fs * 0.05).toFixed(1)}px`;
-    g.textAlign = "center";
-    g.textBaseline = "alphabetic";
-    const ty = H * (W / H < 0.9 ? 0.36 : 0.4) + fs * 0.36, d = Math.max(2, fs * 0.012);
-    g.globalCompositeOperation = "screen";
-    g.fillStyle = "rgba(255,50,70,.35)"; g.fillText("TEST", W / 2 - d * 0.6, ty);
-    g.fillStyle = "rgba(40,200,255,.4)"; g.fillText("TEST", W / 2 + d * 0.6, ty);
-    g.globalCompositeOperation = "source-over";
-    g.shadowColor = "rgba(0,0,0,.45)"; g.shadowBlur = fs * 0.08; g.shadowOffsetY = fs * 0.02;
-    g.fillStyle = "#f6f4ef"; g.fillText("TEST", W / 2, ty);
-    g.shadowColor = "transparent"; g.shadowBlur = 0; g.shadowOffsetY = 0;
-    if ("letterSpacing" in g) g.letterSpacing = "0px";
-    if (STILL === "1") {
-      g.font = `700 ${Math.round(H * 0.024)}px "JetBrains Mono", Consolas, monospace`;
-      g.fillStyle = "rgba(190,215,255,.75)";
-      const half = stillGap() / 2;      // 兩半會各往外移半個裂縫寬，字要先往內放
-      g.textAlign = "left"; g.fillText("NO HINTS · ONLY MISSIONS", W * 0.035 + half, H * 0.9);
-      g.textAlign = "right"; g.fillText("MAC / WINDOWS", W * 0.965 - half, H * 0.9);
+  // 撕開的距離（每邊幾個貼圖像素）：0.16 秒猛亮那一下先被扯開一點，接著慢慢拉開，後半段劈啪抖動
+  const splitAt = (u, t) => 36 * out(seg(u, 0.16, 0.95)) + 5 * bump(u, 0.16, 0.42) + Math.sin(t * 57) * 0.9 * seg(u, 0.35, 0.95);
+  function drawOpening(t, u) {
+    const g = rift.g, k = rift.dpr;
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    g.clearRect(0, 0, canvas.width, canvas.height);
+    if (art) {
+      if (u > 0.44 && !secondSurge) { secondSurge = true; art.surge(t + 0.16); }   // 裂痕開始爬的時候再猛亮一次
+      const c = cover(1 + 0.035 * inOut(seg(u, 0, 1)));                         // 鏡頭慢慢往裂縫推近一點
+      g.setTransform(k * c.s, 0, 0, k * c.s, k * c.x, k * c.y);
+      art.step(t, { energy: 1 + 1.8 * seg(u, 0.15, 0.95), auto: false });
+      const split = splitAt(u, t);
+      art.paint(g, { split, hole: seg(u, 0.1, 0.32) });
+      // 裂痕只畫在撕開的兩半上，而且避開裂縫裡的深空（太空不會裂）
+      g.save();
+      g.beginPath(); g.rect(-4000, -4000, 8000, 8000); art.gapPath(g, split); g.clip("evenodd");
+      g.setTransform(k, 0, 0, k, 0, 0);
+      scene.drawCracks(g, ss, "source-atop");
+      g.restore();
+      art.drawUnder(g);                                  // 兩半底下墊著圖裡延伸的深空（裂縫張開也還是同一片星空）
+    }
+    g.setTransform(k, 0, 0, k, 0, 0);
+    const sg = scene.g;                                  // 縮小一份給 WebGL 當黑洞後面的那張（碎開時也從它剪）
+    sg.setTransform(1, 0, 0, 1, 0, 0);
+    sg.clearRect(0, 0, sceneCv.width, sceneCv.height);
+    sg.drawImage(canvas, 0, 0, sceneCv.width, sceneCv.height);
+    // 黑洞那裡開一扇柔邊的圓窗，露出 WebGL 真的重力透鏡（星空、裂縫邊被扭彎）；窗跟著黑洞長大
+    if (bh && bs.M > 0.004) {
+      const shadow = (2.6 * bs.M) / (bs.camZ * TAN) * (H / 2), r = 8 + shadow * 3.4;
+      const gr = g.createRadialGradient(W / 2, H / 2, r * 0.4, W / 2, H / 2, r);
+      gr.addColorStop(0, "rgba(0,0,0,1)"); gr.addColorStop(1, "rgba(0,0,0,0)");
+      g.globalCompositeOperation = "destination-out";
+      g.fillStyle = gr; g.fillRect(W / 2 - r, H / 2 - r, r * 2, r * 2);
+      g.globalCompositeOperation = "source-over";
     }
   }
-
-  const stillGap = () => clamp(W * 0.17, 90, 330);
   const gateHole = () => Math.min(W, H) * 0.03;
 
   /* ---------- 狀態 ---------- */
@@ -146,24 +128,8 @@
   }
 
   /* ---------- 1. 碎裂、掉進黑洞（WebGL） ---------- */
-  let lastBurst = 0;
   function setDive(t, dt) {
     const u = t - T0;
-    // 螢幕（2D，畫在 scene 上）：先劈啪作響、裂痕爬滿，1.0 秒碎開，之後碎片無重力漂浮，2.4 秒起被吸回中心
-    if (!shattered) {
-      ss.mode = "halves"; ss.noSpace = true; ss.pull = 0; ss.hole = 0; ss.lens = 0; ss.style = "glass"; ss.boltBoost = 1 + seg(u, 0.3, 0.95);
-      ss.gap = g0 * (1 + 0.5 * out(seg(u, 0, 0.9))) + Math.sin(t * 31) * 3 * seg(u, 0.3, 0.9);
-      ss.arcRate = 5 + 10 * seg(u, 0, 0.9); ss.plasma = 1.3 + 0.8 * seg(u, 0.4, 0.95); ss.dust = 2.5; ss.leak = 1.4;
-      ss.cracks = seg(u, 0.5, 0.98);
-      if (t - lastBurst > 0.22 && Math.random() < 0.5) { ss.glitchSeed++; lastBurst = t; }
-      ss.glitch = t - lastBurst < 0.08 ? 1 : 0;
-      if (u >= 1.0) { scene.shatter(t); shattered = true; bs.flash = 0.75; bs.waveT0 = t; }
-    } else {
-      ss.pullIn = seg(u, 1.9, 3.0);
-    }
-    ss.t = t;
-    scene.draw();
-    bh.setScene(sceneCv);
     // 黑洞：在裂縫裡長出來、變大；碎開後吸積盤亮起、鏡頭往前衝、慢慢傾斜看到盤面
     bs.t = t;
     bs.M = 0.18 * out(seg(u, 0.1, 0.95)) + 0.72 * inOut(seg(u, 0.85, 1.9));
@@ -171,15 +137,28 @@
     bs.camZ = lerp(Z0, 7, inOut(seg(u, 1.1, 2.55))) - 5.7 * inn(seg(u, 2.45, 3.45));
     bs.incl = 0.13 * inOut(seg(u, 1.0, 2.5)) + 0.012 * Math.sin(t * 37) * seg(u, 0.6, 1.1) * (1 - seg(u, 1.1, 1.5));
     bs.chroma = 0.12 + 0.25 * seg(u, 1.0, 2.4) + 1.1 * seg(u, 2.6, 3.4);
-    bs.glitch = (u < 1.15 ? ss.glitch * 0.8 + bump(u, 0.95, 1.2) : 0) + 0.8 * bump(u, 2.95, 3.35) + (Math.random() < 0.02 ? 0.6 : 0);
+    bs.glitch = bump(u, 0.95, 1.2) + 0.8 * bump(u, 2.95, 3.35) + (u > 1 && Math.random() < 0.02 ? 0.6 : 0);
     if (u > 1.85 && bs.waveT0 < T0 + 1.8) bs.waveT0 = t;          // 第二道重力波
     bs.wave = 1;
     bs.quad = 0.5 * seg(u, 1.0, 1.4) * (1 - seg(u, 2.6, 2.95));
     bs.red = seg(u, 2.75, 3.4) * 0.9;
     bs.dark = seg(u, 3.2, 3.55);
     bs.zoom = inn(seg(u, 2.4, 3.4));                              // 往裡面掉：放射狀的速度模糊
-    bs.streak = 0.6 + 0.6 * seg(u, 1.4, 2.6);                     // 亮的地方拉出橫向的光條
+    // 碎開之前：WebGL 只在黑洞那扇圓窗裡看得到，不做色調對應、光暈、光條、顆粒，和疊在上面的 2D 一模一樣
+    const post = seg(u, 0.95, 1.3);
+    bs.tone = post; bs.glow = post; bs.grain = 0.04 * post;
+    bs.wrap = shattered ? 0 : 1;                                   // 撕開時被彎得很厲害的光線也打回那張圖上（不露出 WebGL 自己的天空）
+    bs.streak = (0.6 + 0.6 * seg(u, 1.4, 2.6)) * post;            // 亮的地方拉出橫向的光條
     bs.flash = Math.max(0, bs.flash - dt * 2.2);
+    // 0–1 秒：撕開（2D，清楚），裂痕 0.5 秒起爬滿；1.0 秒碎成玻璃片，換成 WebGL（白閃蓋住切換），之後碎片無重力漂浮，1.9 秒起被吸回中心
+    ss.t = t;
+    if (!shattered) {
+      ss.cracks = seg(u, 0.5, 0.98);
+      drawOpening(t, u);
+      if (u >= 1.0) { scene.shatter(t); shattered = true; bs.flash = 0.75; bs.waveT0 = t; canvas.style.display = "none"; }
+    }
+    if (shattered) { ss.pullIn = seg(u, 1.9, 3.0); scene.draw(); }
+    bh.setScene(sceneCv);
     bh.render(bs, seeking ? 0 : dt * 1000);
     // 時間膨脹：越靠近事件視界，時鐘走得越慢
     const rate = Math.sqrt(clamp(1 - inn(seg(u, 1.1, 3.45)), 0, 1));
@@ -193,13 +172,13 @@
   function setFall(t, dt) {
     const u = t - T0;
     base();
+    st.mode = "space";                                   // 不畫 rift.js 自己的兩半（撕開的是上面那張圖）
     if (!burst) { burst = true; rift.spawn(90, true); }
-    st.gap = lerp(g0, W * 0.62, 0.2 * out(seg(u, 0, 0.14)) + 0.8 * inOut(seg(u, 0.22, 0.85)));
+    st.gap = lerp(0, W * 0.62, 0.2 * out(seg(u, 0, 0.14)) + 0.8 * inOut(seg(u, 0.22, 0.85)));
     const amp = 7 * Math.pow(1 - seg(u, 0, 0.8), 2);
     st.shakeX = amp * Math.sin(t * 83); st.shakeY = amp * 0.6 * Math.cos(t * 71);
     st.glitch = u < 0.24 ? 1 : 0; if (u < 0.05) st.glitchSeed = 7;
-    st.arcRate = u < 0.7 ? 9 : 0;
-    st.leak = 1 + bump(u, 0, 0.6); st.plasma = 1 + bump(u, 0, 0.7);
+    st.arcRate = 0; st.plasma = 0;                       // 邊緣交給那張圖自己的電流
     st.pull = Math.pow(seg(u, 0.5, 1.9), 1.5);
     const R0 = gateHole(), R1 = Math.min(W, H) * 0.1;
     st.hole = 1; st.lens = 1;
@@ -217,6 +196,14 @@
     if (u > 0.4) skipBtn.hidden = false;
     if (u >= 2.95) toPick(1);
     rift.draw();
+    if (art && u < 1.4) {                               // 那張圖撕成兩半往外拉走、淡掉
+      const g = rift.g, k = rift.dpr, c = cover(1);
+      g.setTransform(k * c.s, 0, 0, k * c.s, k * c.x, k * c.y);
+      art.step(t, { energy: 2, auto: false });
+      g.globalAlpha = 1 - seg(u, 0.8, 1.4);
+      art.paint(g, { split: st.gap / 2 / c.s, hole: 1 });
+      g.globalAlpha = 1;
+    }
   }
 
   /* ---------- 2. 選電腦、連線（2D） ---------- */
@@ -608,16 +595,24 @@
     size();
     if (body.classList.contains("in-remote") && !escaped) { sizeScar(); makeScars(); if (reduce) drawScars(0, 0); }
     bs.sceneHalf = [(SCENE_Z + Z0) * TAN * (W / H), (SCENE_Z + Z0) * TAN];
-    if (reduce || STILL) rift.draw();
+    if (reduce) rift.draw();
   });
 
   /* ---------- 檢查用：?debug=1 時 examSeek("dive", 秒) ---------- */
   if (params.get("debug") === "1") {
+    window.examArt = () => art;
+    // 逐格錄影用：停掉自動播放，每叫一次往前走 1/30 秒（examSeek("dive", 0) 之後一格一格叫）
+    window.examFrame = () => {
+      cancelAnimationFrame(raf); raf = 0;
+      prev = now; seeking = true; tick((now + 1 / 30) * 1000); seeking = false;
+      cancelAnimationFrame(raf); raf = 0;
+      return phase;
+    };
     window.examSeek = (ph, u) => {
       cancelAnimationFrame(raf); raf = 0;
       if (ph === "dive") {
         phase = "dive"; T0 = 1000; shattered = false; ss.shardsOn = false; ss.pullIn = 0; scene.bits = []; clock = 0;
-        bhCanvas.style.display = ""; canvas.style.display = "none";
+        bhCanvas.style.display = ""; canvas.style.display = ""; secondSurge = false; if (art) art.surge(1000.16);
         seeking = true;
         for (let k = 0; k <= Math.round(u * 30); k++) { now = 1000 + k / 30; st.t = now; setDive(now, 1 / 30); if (phase !== "dive") break; }
         seeking = false;
@@ -629,41 +624,15 @@
   /* ---------- 開始 ---------- */
   size();
   bs.sceneHalf = [(SCENE_Z + Z0) * TAN * (W / H), (SCENE_Z + Z0) * TAN];
-  window.ready = false;
-  const fontsOk = document.fonts && document.fonts.load
-    ? Promise.race([
-      Promise.all([
-        document.fonts.load('900 200px "Noto Sans TC"', "TEST"),
-        document.fonts.load('700 20px "JetBrains Mono"', "NO HINTS · ONLY MISSIONS MAC / WINDOWS"),
-      ]).catch(() => {}),
-      new Promise((r) => setTimeout(r, 2500)),
-    ])
-    : Promise.resolve();
-  Promise.all([load("../week04/lab/screen-mac.jpg"), load("../week04/lab/screen-win.jpg"), fontsOk]).then(([mac, win]) => {
-    imgs.mac = mac; imgs.win = win;
-    rift.setPlate(plate); scene.setPlate(plate);
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { rift.setPlate(plate); scene.setPlate(plate); });
-    if (STILL) {
-      base(); st.gap = stillGap(); st.hole = 1; st.holeR = gateHole(); st.lens = 1; st.still = true; st.style = "glass";
-      if (STILL === "plate") { st.gap = 0; st.plasma = 0; st.hole = 0; st.lens = 0; }
-      window.render = (t) => {
-        st.t = t;
-        if (STILL === "plate") { const g = rift.g; g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, canvas.width, canvas.height); g.drawImage(rift.plate, 0, 0); }
-        else rift.draw();
-      };
-      window.render(7.3);
-      window.ready = true;
-      return;
-    }
-    window.ready = true;
+  const artP = window.ExamArt ? window.ExamArt.load("") : Promise.resolve(null);
+  artP.then((a) => (a && !reduce ? Promise.all([a.loadFx(), a.loadSpace()]).then(([ok]) => { if (ok) a.patchLayers(); return a; }) : a)).then((a) => {
+    art = a;
     body.classList.add("is-diving");
     if (reduce) { toPick(0); setPick(0); return; }
-    if (bh) {
-      phase = "dive"; bhCanvas.style.display = ""; canvas.style.display = "none";
-      ss.gap = g0; scene.buildGlass(ss);          // 玻璃碎片和電流網先建好，不要卡在第一格
-    }
-    else phase = "fall";
+    phase = bh ? "dive" : "fall";
+    if (bh) bhCanvas.style.display = "";
     T0 = performance.now() / 1000;
+    if (art) art.surge(T0 + 0.16);                       // 一開始：先暗一下，再落雷般猛亮
     run();
   });
 })();

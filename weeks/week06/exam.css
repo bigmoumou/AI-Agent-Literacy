@@ -111,7 +111,6 @@ body.in-remote .page { display: none; }
 .hud-k { font-size: .7rem; letter-spacing: .28em; opacity: .75; }
 .hud-v { font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 700; letter-spacing: .02em; font-variant-numeric: tabular-nums; }
 .hud-c { font-size: .85rem; letter-spacing: .08em; font-variant-numeric: tabular-nums; opacity: .85; }
-body.is-still .hud { display: none; }
 
 .skip {
   position: fixed; right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); z-index: 4;
@@ -196,9 +195,6 @@ body.warn-on:not(.warn-short):not(.warn-safe) .warn-vig { animation: warn-pulse4
   .warn-band::before, .warn-band::after { animation: none; }
   body.warn-on .warn-vig { animation: none; }
 }
-
-/* 首頁封面用的靜止畫面（?still=1）：只留場景 */
-body.is-still .page, body.is-still .skip { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
   .pick.is-in .lap { animation: none; }
