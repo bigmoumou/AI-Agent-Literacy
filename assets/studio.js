@@ -9,7 +9,7 @@
      版面或主題改變時，先把機頭在幾十個角度的樣子各畫一次，存成一張小圖集，
      再用一張只有機頭大小的 2D 小畫布輪流貼上去（相鄰兩張交叉淡化）。轉動時 WebGL 完全不用重畫，
      停住的時候小畫布也不畫，等下一個動作再醒來。
-   - 偶爾有一顆道具球從膠捲下方的地板滾過去（第一次在 20～30 秒後，之後每 60～120 秒）：
+   - 偶爾有一顆道具球從膠捲下方的地板慢慢滾過去（第一次在進首頁 10 秒後，之後每顆滾完 30 秒再來一顆）：
      球畫在一張跟著球移動的 2D 小畫布上，從道具後面經過時用一張事先畫好的遮罩擋住。
    - 其他會動的部分（燈的光暈、霧、光裡的灰塵）是 CSS 圖層，只用 transform／opacity。
      減少動態時全部靜止，攝影機停在看著膠捲的角度。
@@ -870,7 +870,7 @@
       ready = true;
       if (proj) build(cssW / cssH < 0.8);
       dirty = true;
-      scheduleBall(20 + Math.random() * 10);        // 第一顆球：進首頁 20～30 秒後
+      scheduleBall(Math.max(1, 10 - performance.now() / 1000));   // 第一顆球：進首頁（開始載入）10 秒後
       if (opts.onReady) opts.onReady();
     }
     const poll = () => { if (pending.every(compiled)) finish(); else setTimeout(poll, 16); };
@@ -1225,11 +1225,11 @@
     }
     mon.addEventListener("load", placeMon);
 
-    /* ---------- 道具球：偶爾有一顆皮球從膠捲下方的地板滾過去 ----------
+    /* ---------- 道具球：偶爾有一顆深灰色、有螢光黃綠接縫線的球從膠捲下方的地板慢慢滾過去 ----------
        球畫在一張跟著球移動的 2D 小畫布上（用 transform 移動），主畫布完全不重畫。
        球從道具後面經過時要被擋住：每次滾之前，先把「比球近的道具」畫成一張遮罩（只畫球經過的那一條），
        讀回 2D 畫布，每一格把遮罩蓋在球上挖掉。沒有球的時候只有一個計時器在等下一次。 */
-    const BALL_R = 0.16;                          // 直徑 30 公分左右的橡膠皮球
+    const BALL_R = 0.16;                          // 直徑 30 公分左右的霧面橡膠球
     const ballEl = document.createElement("canvas");
     ballEl.className = "studio-ball";
     ballEl.setAttribute("aria-hidden", "true");
@@ -1238,11 +1238,16 @@
     const mc = maskCv.getContext("2d");
     let ballMask = null, maskDirty = true, maskSync = null, maskTimer = 0;
     let roll = null, ballRaf = 0, ballTimer = 0, ballDue = 0, layoutGen = 0;
-    // 球的縫線：兩條互相垂直的大圓（球自己的座標，每條用圓面上兩個互相垂直的單位向量表示），和打氣孔的位置
-    const seam = (n) => { const u = norm(cross(n, Math.abs(n[1]) < 0.9 ? [0, 1, 0] : [1, 0, 0])); return [u, cross(n, u)]; };
-    const SEAM_N = norm([0.35, 0.3, 1]);
-    const SEAMS = [seam(SEAM_N), seam(norm(cross(SEAM_N, [0.2, 1, 0])))];
-    const VALVE = norm([0.55, 0.55, 0.62]);
+    // 球的接縫：網球那種一條連續的彎曲線，剛好落在球面上（k = 0.25）。
+    // 先轉個角度，讓朝向觀眾的那一面看到接縫彎成 U 形的那一段（像網球）
+    const SEAM = [];
+    {
+      const k = 0.25, zk = 2 * Math.sqrt(k * (1 - k)), pre = chain(RX(0.35), RY(Math.PI / 2 + 0.25));
+      for (let i = 0; i <= 120; i++) {
+        const t = (i / 120) * Math.PI * 2;
+        SEAM.push(applyN(pre, [(1 - k) * Math.cos(t) + k * Math.cos(3 * t), (1 - k) * Math.sin(t) - k * Math.sin(3 * t), zk * Math.sin(2 * t)]));
+      }
+    }
 
     function scheduleBall(sec) {
       clearTimeout(ballTimer); ballTimer = 0;
@@ -1255,7 +1260,7 @@
       roll = null;
       cancelAnimationFrame(ballRaf); ballRaf = 0;
       ballEl.classList.remove("is-on");
-      if (again) scheduleBall(60 + Math.random() * 60);
+      if (again) scheduleBall(30);                // 滾完 30 秒後再來一顆
     }
     // 球的路線：膠捲下方那一條地板（比後面的道具近、比攝影機遠），從畫面一側外面滾到另一側外面
     function ballPath() {
@@ -1273,13 +1278,13 @@
       ballTimer = 0; ballDue = 0;
       if (!ready || !proj || !scene || paused || roll) { scheduleBall(30); return; }
       const path = ballPath();
-      if (!path) { scheduleBall(60 + Math.random() * 60); return; }
+      if (!path) { scheduleBall(30); return; }
       const gen = layoutGen;
       makeMask(path, () => {
         if (paused || gen !== layoutGen) { scheduleBall(5); return; }   // 等遮罩的時候版面變了：晚一點重來
-        const T = narrow ? 5 : 7;                 // 滾過整個畫面的時間；越滾越慢，出去時剩一半的速度
-        const L = Math.abs(path.x1 - path.x0), v0 = L / (0.75 * T);
-        roll = Object.assign(path, { t0: performance.now(), T, v0, decel: (v0 * 0.5) / T });
+        const T = narrow ? 8.5 : 12;              // 慢慢滾過整個畫面的時間；越滾越慢，出去時剩不到一半的速度
+        const L = Math.abs(path.x1 - path.x0), v0 = L / (0.725 * T);
+        roll = Object.assign(path, { t0: performance.now(), T, v0, decel: (v0 * 0.55) / T });
         const dpr = pxW / cssW, cw = path.rPx * 2.6 + 6, ch = path.rPx * 2.75 + 6;
         roll.cw = cw; roll.ch = ch; roll.dpr = dpr;
         ballEl.width = Math.round(cw * dpr); ballEl.height = Math.round(ch * dpr);
@@ -1347,7 +1352,7 @@
       drawBall(roll.x0 + roll.dir * s, -roll.dir * s / BALL_R);
       ballRaf = requestAnimationFrame(ballStep);
     }
-    // 畫球：明暗固定跟著燈（左上方的頂燈），縫線和打氣孔跟著球轉；底下一圈柔邊的影子；最後用遮罩挖掉被道具擋住的地方
+    // 畫球：明暗固定跟著燈（左上方的頂燈），螢光接縫線跟著球轉；底下一圈柔邊的影子；最後用遮罩挖掉被道具擋住的地方
     const rgb = (c) => "rgb(" + c.map((v) => Math.round(clamp(v, 0, 1) * 255)).join(",") + ")";
     function drawBall(xw, ang) {
       const r = roll, L = look();
@@ -1364,7 +1369,7 @@
       const d = Math.hypot(c[0] - cam[0], c[1] - cam[1], c[2] - cam[2]);
       const fog = clamp(1 - Math.exp(-d * L.fogK) + 0.1, 0, 0.92);
       const shade = (base, k) => base.map((v, i) => v * k * (1 - fog) + L.haze[i] * fog);
-      const base = [0.5, 0.17, 0.11];             // 磚紅色的橡膠
+      const base = [0.25, 0.29, 0.35];            // 深石墨藍灰的霧面橡膠（亮度中間的地方約 #2c333d）
       const R = r.rPx, cx = r.cw / 2, cy = R + 3;
       bc.setTransform(r.dpr, 0, 0, r.dpr, 0, 0);
       bc.globalCompositeOperation = "source-over";
@@ -1389,25 +1394,24 @@
       const ca = Math.cos(ang), sa = Math.sin(ang);
       const turn = (p) => [p[0] * ca - p[1] * sa, p[0] * sa + p[1] * ca, p[2]];
       const dot = (a2, b2) => a2[0] * b2[0] + a2[1] * b2[1] + a2[2] * b2[2];
-      bc.lineWidth = R * 0.07; bc.lineCap = "round";
-      bc.strokeStyle = rgb(shade(base, lightK * 0.22));
-      for (const [u, v] of SEAMS) {
-        let prev = null;
-        for (let i = 0; i <= 48; i++) {
-          const t = (i / 48) * Math.PI * 2, p = turn([u[0] * Math.cos(t) + v[0] * Math.sin(t), u[1] * Math.cos(t) + v[1] * Math.sin(t), u[2] * Math.cos(t) + v[2] * Math.sin(t)]);
-          const q = [cx + dot(p, rt) * R, cy - dot(p, up) * R, dot(p, e)];
-          if (prev && q[2] > 0 && prev[2] > 0) {
-            bc.globalAlpha = clamp(Math.min(q[2], prev[2]) / 0.3, 0, 1) * 0.85;
-            bc.beginPath(); bc.moveTo(prev[0], prev[1]); bc.lineTo(q[0], q[1]); bc.stroke();
-          }
-          prev = q;
+      // 螢光黃綠的接縫線：線本身亮、飽和（螢光顏料在暗處也很亮，霧也只蓋掉一部分），外面一圈很窄的淡光
+      const lineFog = fog * (dark ? 0.55 : 0.3), fl = dark ? 1.08 : 0.95;   // 淺色主題的霧很濃：線條少被蓋一點，才看得出是螢光
+      const fluo = [0.784, 0.941, 0.235].map((v, i) => clamp(v * fl * (0.8 + 0.3 * Math.min(1, lightK * 1.6)), 0, 1) * (1 - lineFog) + L.haze[i] * lineFog);
+      const pts = SEAM.map((p0) => { const p = turn(p0); return [cx + dot(p, rt) * R, cy - dot(p, up) * R, dot(p, e)]; });
+      const core = Math.max(1.2, R * 0.11);
+      bc.lineCap = "round"; bc.lineJoin = "round";
+      bc.strokeStyle = rgb(fluo);
+      for (const [w, a] of [[core + 3, 0.12], [core + 1.4, 0.22], [core, 1]]) {   // 由外而內：淡光兩層、線本身
+        bc.lineWidth = w;
+        // 正對觀眾的那幾段一起畫；靠近球邊緣的那幾段慢慢變淡（像轉到後面去）
+        bc.globalAlpha = a;
+        bc.beginPath();
+        for (let i = 1; i < pts.length; i++) if (pts[i][2] > 0.3 && pts[i - 1][2] > 0.3) { bc.moveTo(pts[i - 1][0], pts[i - 1][1]); bc.lineTo(pts[i][0], pts[i][1]); }
+        bc.stroke();
+        for (let i = 1; i < pts.length; i++) {
+          const z = Math.min(pts[i][2], pts[i - 1][2]);
+          if (z > 0 && z <= 0.3) { bc.globalAlpha = a * (z / 0.3); bc.beginPath(); bc.moveTo(pts[i - 1][0], pts[i - 1][1]); bc.lineTo(pts[i][0], pts[i][1]); bc.stroke(); }
         }
-      }
-      const vp = turn(VALVE);
-      if (dot(vp, e) > 0.15) {
-        bc.globalAlpha = clamp((dot(vp, e) - 0.15) / 0.3, 0, 1);
-        bc.fillStyle = rgb(shade([0.12, 0.1, 0.09], lightK));
-        bc.beginPath(); bc.arc(cx + dot(vp, rt) * R, cy - dot(vp, up) * R, R * 0.07, 0, Math.PI * 2); bc.fill();
       }
       bc.globalAlpha = 1;
       // 背光在上緣的一條暖色亮邊、左上方一小塊柔和的反光
@@ -1416,7 +1420,7 @@
       rim.addColorStop(1, "rgba(" + L.rimCol.map((v) => Math.round(clamp(v * (1 - fog), 0, 1) * 255)).join(",") + ",0.55)");
       bc.fillStyle = rim; bc.fillRect(cx - R, cy - R, R * 2, R * 2);
       const hi = bc.createRadialGradient(cx - R * 0.4, cy - R * 0.48, 0, cx - R * 0.4, cy - R * 0.48, R * 0.38);
-      hi.addColorStop(0, "rgba(255,240,220," + (0.32 * (1 - fog) * Math.min(1, lightK * 2)).toFixed(3) + ")");
+      hi.addColorStop(0, "rgba(235,240,250," + (0.22 * (1 - fog) * Math.min(1, lightK * 2)).toFixed(3) + ")");   // 霧面：反光很淡
       hi.addColorStop(1, "rgba(255,240,220,0)");
       bc.fillStyle = hi; bc.fillRect(cx - R, cy - R, R * 2, R * 2);
       bc.restore();
