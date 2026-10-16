@@ -728,7 +728,7 @@
     if (toExam) {
       document.body.classList.add("is-to-exam");
       examArt.surge(performance.now() / 1000 + 0.12);   // 一點下去：裂縫先暗一下、再猛亮
-      if (sound) { sound.unlock(); sound.zap(0.7, 0.25, 0.12); }
+      if (sound) { sound.unlock(); sound.zap(0.9, 0.3, 0.12); sound.crackle(0.9, 0.25, 0.12); }
     }
     setTimeout(() => { window.location.href = root() + f.w.href; }, reduceMotion ? 60 : toExam ? EXAM_LEAVE * 0.9 : 650);
   }
@@ -737,6 +737,7 @@
      在落雷最亮的那一刻交接，換頁時就看不出接縫。 */
   const EXAM_LEAVE = 1000;
   const seg01 = (v, a, b) => clamp((v - a) / (b - a), 0, 1);
+  const rnd01 = (a, b) => a + Math.random() * (b - a);
   let handoff = null;
   function examLeave(now) {
     const L = leaving, t = clamp((now - L.t0) / EXAM_LEAVE, 0, 1);
@@ -752,7 +753,11 @@
     const sk = seg01(t, 0, 0.7);
     suck = sk * sk * (3 - 2 * sk);                           // 一點下去，旁邊的畫格就開始被吸過去
     if (!L.surged && t > 0.55) { L.surged = true; examArt.surge(now / 1000 + 0.27); }   // 交接那一刻（0.82）落雷
-    if (sound && now - (L.crack || 0) > 60 + Math.random() * 90) { L.crack = now; sound.crackle(0.25 + 0.55 * e, 0.12); }   // 電流越來越密
+    if (sound) {                                                // 被吸進去：低吼越來越大、顫得越來越快，劈啪和「滋」越來越密
+      sound.growl(0.05 + 0.3 * Math.max(e, t), 7 + 20 * t, 0.06);
+      if (now - (L.crack || 0) > 22 + Math.random() * (80 - 55 * t)) { L.crack = now; sound.crackle(0.4 + 0.55 * t, 0.08 + 0.1 * t); }
+      if (now - (L.zapAt || 0) > 120 + Math.random() * (240 - 170 * t)) { L.zapAt = now; sound.zap(0.45 + 0.45 * t, rnd01(0.08, 0.2)); }
+    }
     const a = seg01(t, 0.78, 0.88);
     if (a > 0) drawHandoff(a);
   }
@@ -954,8 +959,9 @@
     examHeard = true;
     sound.level("drone", 0.13 * k, 0.6);
     sound.level("fizz", (0.035 + 0.16 * examArt.activity()) * k, 0.06);
-    if (strikes) sound.crackle(0.5, 0.2);
-    if (fired) sound.zap(0.9, 0.3);
+    if (strikes) sound.crackle(0.5 * k, 0.2);
+    if (fired && leaving && leaving.exam) { sound.zap(1.2, 0.5); sound.crackle(1.3, 0.45); }   // 交接那一刻：一記最大的電流爆裂
+    else if (fired) sound.zap(0.9, 0.3);
   }
   function flash() {
     if (!flashEl) return;

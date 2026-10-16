@@ -83,6 +83,9 @@
       g.setTransform(k * c.s, 0, 0, k * c.s, k * c.x, k * c.y);
       const fired = art.step(t, { energy: 1 + 1.8 * seg(u, 0.15, 0.95), auto: false });
       if (sound) {
+        const wild = 1 - out(seg(u, 0, 0.7));
+        sound.growl(0.32 * wild + 0.14 * seg(u, 0.55, 0.98), 9 + 16 * wild + 8 * seg(u, 0.55, 0.98), 0.06);
+        if (wild > 0.15 && Math.random() < 0.55) sound.crackle(0.35 + 0.6 * wild, 0.08);
         sound.level("drone", 0.09, 0.3);
         sound.level("fizz", 0.035 + 0.12 * art.activity(), 0.06);
         if (art.takeStrikes()) sound.crackle(0.6, 0.2);
@@ -168,7 +171,7 @@
     if (sound) {                                                   // 黑洞越大越隆隆；越過事件視界一片安靜
       const hush = 1 - seg(u, 3.1, 3.5);
       sound.level("rumble", (0.04 + 0.16 * bs.M) * hush, 0.25);
-      if (shattered) { sound.level("fizz", 0.015 * hush, 0.4); sound.level("drone", 0.07 * hush, 0.3); }
+      if (shattered) { sound.level("fizz", 0.015 * hush, 0.4); sound.level("drone", 0.07 * hush, 0.3); sound.growl(0, 0, 0.5); }
     }
     if (u >= 3.55) toPick(1);
   }
@@ -220,7 +223,7 @@
     canvas.style.display = "";
     pickDark = dark;
     emergeAt = now || performance.now() / 1000;
-    if (sound) { sound.level("rumble", 0, 0.6); sound.level("fizz", 0, 0.4); sound.level("drone", 0.05, 1.2); }
+    if (sound) { sound.level("rumble", 0, 0.6); sound.level("fizz", 0, 0.4); sound.level("drone", 0.05, 1.2); sound.growl(0, 0, 0.4); }
     body.classList.add("is-in-void");
     if (!pickShown) showPick();
   }

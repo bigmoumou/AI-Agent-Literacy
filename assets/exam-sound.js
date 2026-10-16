@@ -1,6 +1,7 @@
 /* Week 6（TEST）的音效：全部用 Web Audio 現場合成，沒有音檔。
    首頁（assets/home.js）：Week 6 那一格停在正中間時，低低的嗡鳴＋細碎的電流嘶嘶聲（跟著電流亮暗），
      落雷時劈啪作響、整道猛亮時「滋」一聲；點「進入考場」時電流越來越密。
+   被吸進去時（點「進入考場」到 Week 6 開頭）：失真的低吼被越來越快的顫音拉扯、劈啪和「滋」越來越密，交接那一刻一記最大的電流爆裂。
    Week 6（weeks/week06/exam.js）：撕開時劈啪、黑洞的超低頻隆隆跟著黑洞變大、碎開時玻璃清脆的叮叮聲、
      越過事件視界時一片安靜；遠端畫面的小裂縫亮起來時很小聲地劈啪。
    不用咻聲、上升的音效、撞擊聲（老師不喜歡）。
@@ -20,7 +21,9 @@
     try { ctx = new AC(); } catch (e) { ctx = null; return null; }
     master = ctx.createGain();
     master.gain.value = off || document.hidden ? 0 : VOL;
-    master.connect(ctx.destination);
+    const comp = ctx.createDynamicsCompressor();          // 聲音疊得很密時不破音，也更有衝擊感
+    comp.threshold.value = -12; comp.knee.value = 0; comp.ratio.value = 20; comp.attack.value = 0.0005; comp.release.value = 0.15;
+    master.connect(comp); comp.connect(ctx.destination);
     noise = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
     const d = noise.getChannelData(0);
     for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
@@ -36,7 +39,7 @@
   function makeBed() {
     if (bed || !init()) return bed;
     const g = () => { const n = ctx.createGain(); n.gain.value = 0; n.connect(master); return n; };
-    bed = { drone: g(), fizz: g(), rumble: g() };
+    bed = { drone: g(), fizz: g(), rumble: g(), growl: g() };
     const trem = ctx.createGain(); trem.gain.value = 1; trem.connect(bed.drone);
     const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 260; lp.Q.value = 0.8; lp.connect(trem);
     [[55, 0], [82.4, 4], [110.3, -3]].forEach(([f, det], i) => {
@@ -56,6 +59,20 @@
     loop([["lowpass", 110, 0.9]], bed.rumble);
     const sub = ctx.createOscillator(), sg = ctx.createGain();
     sub.type = "sine"; sub.frequency.value = 34; sg.gain.value = 0.7; sub.connect(sg); sg.connect(bed.rumble); sub.start();
+    // 低吼（被吸進去時）：鋸齒和方波過失真、低通，被顫音拉扯（顫得越快越激烈；音高不變，不是上升音效）
+    const shaper = ctx.createWaveShaper(), curve = new Float32Array(1024);
+    for (let i = 0; i < curve.length; i++) { const x = (i / (curve.length - 1)) * 2 - 1; curve[i] = (1 + 24) * x / (1 + 24 * Math.abs(x)); }
+    shaper.curve = curve; shaper.oversample = "2x";
+    const glp = ctx.createBiquadFilter(); glp.type = "lowpass"; glp.frequency.value = 900; glp.Q.value = 1.1;
+    const gtrem = ctx.createGain(); gtrem.gain.value = 0.8;
+    shaper.connect(glp); glp.connect(gtrem); gtrem.connect(bed.growl);
+    [["sawtooth", 41.2, 0.5], ["sawtooth", 55, 0.6], ["square", 110.6, 0.25]].forEach(([type, f, a]) => {
+      const o = ctx.createOscillator(), og = ctx.createGain(); o.type = type; o.frequency.value = f; o.detune.value = rnd(-6, 6); og.gain.value = a;
+      o.connect(og); og.connect(shaper); o.start();
+    });
+    const glfo = ctx.createOscillator(), glg = ctx.createGain();
+    glfo.type = "square"; glfo.frequency.value = 8; glg.gain.value = 0.55; glfo.connect(glg); glg.connect(gtrem.gain); glfo.start();
+    bed.growlRate = glfo.frequency;
     return bed;
   }
   // 調整持續聲音的大小（name：drone、fizz、rumble；smooth：幾秒內到）
@@ -63,7 +80,14 @@
     if (!ready() || !makeBed()) return;
     bed[name].gain.setTargetAtTime(Math.max(0, v), ctx.currentTime, Math.max(0.01, (smooth == null ? 0.2 : smooth) / 3));
   }
-  function quiet(smooth) { if (bed && ctx) ["drone", "fizz", "rumble"].forEach((k) => bed[k].gain.setTargetAtTime(0, ctx.currentTime, (smooth || 0.3) / 3)); }
+  function quiet(smooth) { if (bed && ctx) ["drone", "fizz", "rumble", "growl"].forEach((k) => bed[k].gain.setTargetAtTime(0, ctx.currentTime, (smooth || 0.3) / 3)); }
+  // 低吼：大小和顫音的快慢（每秒幾下）
+  function growl(v, rate, smooth) {
+    if (!ready() || !makeBed()) return;
+    const tc = Math.max(0.01, (smooth == null ? 0.1 : smooth) / 3);
+    bed.growl.gain.setTargetAtTime(Math.max(0, v), ctx.currentTime, tc);
+    if (rate) bed.growlRate.setTargetAtTime(rate, ctx.currentTime, tc);
+  }
 
   // 一陣劈啪：很多很短的雜訊脈衝（像電弧），strength 0..1，dur 秒
   function crackle(strength, dur, delay) {
@@ -138,7 +162,7 @@
   ["pointerdown", "keydown", "touchstart"].forEach((ev) => window.addEventListener(ev, () => { if (!off) unlock(); }, { capture: true, passive: true }));
 
   window.ExamSound = {
-    unlock, ready, level, quiet, crackle, zap, glass, bindButton,
+    unlock, ready, level, quiet, growl, crackle, zap, glass, bindButton,
     isOff: () => off,
     context: () => init(),
     output: () => (init() ? master : null),
