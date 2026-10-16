@@ -10,6 +10,7 @@
      沒有 JavaScript 時，各個 section 照原本的順序排下來。
    - 網址：#t=秒數 是目前（第一支）影片的那個時間；#NN-slug 選那一支；#NN-slug&t=秒數 選那一支並跳到那個時間。
    - 清單可以分組：<section class="unit unit-supp" id="sN-slug">（補充教材）放在這週影片後面，清單上寫「補充 N」；
+     <section class="unit unit-hw" id="hw-xxx" data-thumb="hw/thumb.jpg">（作業，可以沒有影片）放在補充教材後面，清單上寫「作業 N」；
      <section class="unit unit-lab" id="lab-xxx" data-thumb="lab/thumb.jpg">（課堂練習）放在補充教材後面，清單上寫「練習 N」，
      它不是影片（沒有 <video>）：清單用 data-thumb 的圖當縮圖，沒有長度和觀看進度，也不會被「下一支」自動打開。
      每一組的第一個項目前面有一行小標（手機橫排時是一小欄），標題裡的（…）不會被拆開。
@@ -188,6 +189,7 @@
   // 分組：class 對應清單上的小標（出現在這一組的第一個項目前面）。小標和項目編號的文字都跟著語言換
   const GROUPS = [
     { cls: "unit-supp", key: "reel.supp", zh: "補充教材" },
+    { cls: "unit-hw", key: "reel.hw", zh: "作業" },
     { cls: "unit-lab", key: "reel.lab", zh: "課堂練習" },
   ];
 
