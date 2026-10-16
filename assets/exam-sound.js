@@ -1,7 +1,7 @@
 /* Week 6（TEST）的音效。
    被吸進去、Week 6 開場、平常的隆隆是三個小 mp3（assets/exam-suck.mp3、exam-dive.mp3、exam-hum.mp3），
    由 製作/week06/design/sound/build-sound.py 把 Openverse 找到的 Freesound CC0 音效（Big Scary Portal Open、Big Scary Portal 2、
-   Wormhole、Black hole）剪輯、混成（來源見 NOTICE.md）；劈啪、「滋」、玻璃叮叮、電流嘶嘶用 Web Audio 現場合成。
+   Wormhole、Black hole）剪輯、混成（來源見 NOTICE.md）；劈啪、「滋」、電流嘶嘶用 Web Audio 現場合成（只有閃電和虛空兩種聲音；老師不要玻璃叮叮那種鈴鈴聲）。
    聲音的樣子參考 Rift Activation、Explosion From Another Dimension 這類「時空撕裂」音效的頻譜：
      - 主體是厚的低頻、中低頻顆粒雜訊，一直不規則地抖（不是乾淨的音調，乾淨的音調聽起來像馬達在嗡）；
      - 「被吸進去」是整片聲音從高頻往低處塌，最後只剩低沉的隆隆（和咻聲、上升音效相反）；
@@ -11,7 +11,7 @@
    被吸進去（點「進入考場」到換頁，suck）：整片聲音往低處塌、越來越大，左右收到正中間，交接那一刻被吞掉。
    Week 6 開場（weeks/week06/exam.js，dive）：一整段和畫面的時間軸對齊：猛亮時爆開再塌下去、碎開時一大陣爆開塌成低頻、
      被吞掉一下，被吸回中心時聲音跟著畫面上的時間膨脹一起變慢變低沉，越過事件視界一片安靜。
-     沒有 WebGL2 的 2D 版時間軸不一樣，那一段用程式合成（makeDive）。劈啪、「滋」、玻璃叮叮跟著畫面上的落雷現場播。
+     沒有 WebGL2 的 2D 版時間軸不一樣，那一段用程式合成（makeDive）。劈啪、「滋」跟著畫面上的落雷現場播。
    不用失真、方波顫音（會像破音），也不用咻聲、上升音效（老師不喜歡）。
    不卡畫面：
      - 音訊環境、所有聲音片段都在空檔先做好、音檔先解碼好（prepare、loadClip；解碼在背景執行緒），點下去時只開一個播放點；
@@ -81,7 +81,7 @@
   }
 
   /* ---------- 事先做好的聲音片段 ----------
-     劈啪（6 段）、「滋」（4 段）、玻璃叮叮（3 段）、一段 2 秒的雜訊（電流嘶嘶用）。音檔另外載（loadClip）。
+     劈啪（6 段）、「滋」（4 段）、一段 2 秒的雜訊（電流嘶嘶用）。音檔另外載（loadClip）。
      一段一段做（prepare 時分散在空檔，每段只花幾毫秒）；還沒做完就要出聲時當場做完 */
   const DENS = [18, 26, 34, 42, 52, 64];
   function poolStep() {
@@ -110,22 +110,11 @@
       }));
       return;
     }
-    if (P.glass.length < 3) {
-      P.glass.push(buf(0.7, (d) => {
-        for (let k = 0; k < 18; k++) {
-          const at = Math.floor(Math.pow(Math.random(), 1.6) * 0.42 * sr), f = rnd(2200, 7200), dec = rnd(0.04, 0.16), a = rnd(0.4, 1);
-          const n = Math.min(d.length - at, Math.floor(Math.min(dec * 3, 0.25) * sr)), w = 2 * Math.PI * f / sr;
-          for (let i = 0; i < n; i++) d[at + i] += Math.sin(w * i) * a * Math.exp(-i / (dec * sr)) * Math.min(1, i / 60);
-        }
-        let m = 0; for (let i = 0; i < d.length; i++) m = Math.max(m, Math.abs(d[i]));
-        for (let i = 0; i < d.length; i++) d[i] /= m || 1;
-      }));
-    }
   }
-  const poolsDone = () => pools && pools.noise && pools.crackles.length === DENS.length && pools.zaps.length === 4 && pools.glass.length === 3;
+  const poolsDone = () => pools && pools.noise && pools.crackles.length === DENS.length && pools.zaps.length === 4;
   function makePools() {
     if (!init()) return null;
-    if (!pools) pools = { noise: null, crackles: [], zaps: [], glass: [] };
+    if (!pools) pools = { noise: null, crackles: [], zaps: [] };
     while (!poolsDone()) poolStep();
     return pools;
   }
@@ -231,7 +220,7 @@
   // now：馬上全部做好（Week 6 頁面還在顯示靜止的那張圖時用，那時候沒有東西在動）
   function prepare(now) {
     if (!init()) return;
-    if (!pools) pools = { noise: null, crackles: [], zaps: [], glass: [] };
+    if (!pools) pools = { noise: null, crackles: [], zaps: [] };
     loadClip("hum"); if (!now) loadClip("suck");
     if (now) { makePools(); makeBed(); if (ctx.state === "suspended" && !off) ctx.resume().catch(() => {}); if (!busy()) nap(); return; }
     const later = (fn) => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: 400 }) : setTimeout(fn, 30));
@@ -315,16 +304,10 @@
     play(pick(pools.zaps), 0.32 * strength, 1300, 1.4, dur || 0.25, delay, rnd(0.92, 1.08));
     crackle(0.8 * strength, (dur || 0.25) * 0.9, delay);
   }
-  // 玻璃碎裂：一串清脆的叮叮聲
-  function glass(strength) {
-    if (!ok() || !makePools()) return;
-    play(pick(pools.glass), 0.22 * strength, 4200, 0.4, 0.7, 0, rnd(0.95, 1.05));
-    crackle(0.5 * strength, 0.12);
-  }
   // 被吸進去（首頁點「進入考場」那一下）
   function suck(strength) {
     if (!ok() || !clips.suck) return;
-    play(clips.suck, 0.8 * (strength == null ? 1 : strength), 0, 0, clips.suck.duration, 0, 1);
+    play(clips.suck, 1.0 * (strength == null ? 1 : strength), 0, 0, clips.suck.duration, 0, 1);
   }
   // Week 6 開場那一整段：dive 用音檔（還沒解碼好、或是 2D 版的 fall 就用合成的）；stopDive：提早停（跳過時，fade 秒內淡掉）
   function dive(kind) {
@@ -332,7 +315,7 @@
     const b = kind === "dive" && clips.dive ? clips.dive : makeDive(kind);
     if (!b) return;
     stopDive(0.05);
-    const p = play(b, b === clips.dive ? 1.0 : 0.6, 0, 0, b.duration, 0, 1);
+    const p = play(b, b === clips.dive ? 1.25 : 0.6, 0, 0, b.duration, 0, 1);
     if (p) { diveSrc = p.s; diveGain = p.g; }
   }
   function stopDive(fade) {
@@ -371,7 +354,7 @@
   ["pointerdown", "keydown", "touchstart"].forEach((ev) => window.addEventListener(ev, () => { if (!off && !activated) unlock(); }, { capture: true, passive: true }));
 
   window.ExamSound = {
-    prepare, makeDive, loadClip, unlock, ready, hold, level, quiet, crackle, zap, glass, suck, dive, stopDive, bindButton,
+    prepare, makeDive, loadClip, unlock, ready, hold, level, quiet, crackle, zap, suck, dive, stopDive, bindButton,
     isOff: () => off,
     context: () => init(),
     output: () => (init() ? master : null),

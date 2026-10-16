@@ -85,10 +85,10 @@
       const fired = art.step(t, { energy: 1 + 1.8 * seg(u, 0.15, 0.95), auto: false });
       if (sound && !warming) {                                 // 隆隆、爆開、往下塌是事先做好的一整段（開始時 sound.dive）；這裡只跟著電流
         const carry = 1 - out(seg(u, 0, 0.8));
-        if (carry > 0.2 && t - lastCrack > 0.09 + Math.random() * 0.08) { lastCrack = t; sound.crackle(0.22 + 0.25 * carry, 0.1); }
+        if (carry > 0.2 && t - lastCrack > 0.075 + Math.random() * 0.065) { lastCrack = t; sound.crackle(0.26 + 0.3 * carry, 0.1); }
         sound.level("fizz", 0.035 + 0.12 * art.activity(), 0.06);
-        if (art.takeStrikes()) sound.crackle(0.45, 0.2);
-        if (fired) sound.zap(0.7, 0.3);
+        if (art.takeStrikes()) sound.crackle(0.54, 0.2);
+        if (fired) sound.zap(0.84, 0.3);
       }
       const split = splitAt(u, t);
       art.paint(g, { split, hole: seg(u, 0.03, 0.2) });
@@ -157,7 +157,7 @@
     if (!shattered) {
       ss.cracks = seg(u, 0.5, 0.98);
       drawOpening(t, u);
-      if (u >= 1.0) { scene.shatter(t); shattered = true; bs.flash = 0.55; bs.waveT0 = t; if (sound) sound.glass(1); }
+      if (u >= 1.0) { scene.shatter(t); shattered = true; bs.flash = 0.55; bs.waveT0 = t; if (sound) sound.zap(0.8, 0.3); }   // 碎開：一聲電弧（不用玻璃叮叮）
     }
     if (shattered) { ss.pullIn = seg(u, 1.9, 3.0); scene.draw(); }
     bh.setScene(sceneCv);
@@ -218,7 +218,7 @@
     canvas.style.display = "";
     pickDark = dark;
     emergeAt = now || performance.now() / 1000;
-    if (sound) { sound.stopDive(0.4); sound.level("fizz", 0, 0.4); sound.level("drone", 0.16, 1.2); }
+    if (sound) { sound.stopDive(0.4); sound.level("fizz", 0, 0.4); sound.level("drone", 0.22, 1.2); }
     body.classList.add("is-in-void");
     if (!pickShown) showPick();
   }

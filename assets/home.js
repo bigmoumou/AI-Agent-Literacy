@@ -728,7 +728,7 @@
     if (toExam) {
       document.body.classList.add("is-to-exam");
       examArt.surge(performance.now() / 1000 + 0.12);   // 一點下去：裂縫先暗一下、再猛亮
-      if (sound) { sound.unlock(); sound.suck(); sound.zap(0.45, 0.22, 0.12); }   // 被吸進去（整片聲音往低處塌）＋裂縫猛亮時「滋」
+      if (sound) { sound.unlock(); sound.suck(); sound.zap(0.54, 0.22, 0.12); }   // 被吸進去（整片聲音往低處塌）＋裂縫猛亮時「滋」
     }
     setTimeout(() => { window.location.href = root() + f.w.href; }, reduceMotion ? 60 : toExam ? EXAM_LEAVE * 0.9 : 650);
   }
@@ -753,7 +753,7 @@
     suck = sk * sk * (3 - 2 * sk);                           // 一點下去，旁邊的畫格就開始被吸過去
     if (!L.surged && t > 0.55) { L.surged = true; examArt.surge(now / 1000 + 0.27); }   // 交接那一刻（0.82）落雷
     if (sound && t < 0.8) {                                     // 被吸進去（聲音本身在點下去時就開始播）：邊緣的電流劈啪越來越密
-      if (now - (L.crack || 0) > 90 + Math.random() * (130 - 70 * t)) { L.crack = now; sound.crackle(0.22 + 0.25 * t, 0.1); }
+      if (now - (L.crack || 0) > 75 + Math.random() * (110 - 60 * t)) { L.crack = now; sound.crackle(0.26 + 0.3 * t, 0.1); }
     }
     const a = seg01(t, 0.78, 0.88);
     if (a > 0) drawHandoff(a);
@@ -972,10 +972,10 @@
     const strikes = examArt.takeStrikes();
     if (!front) { if (examHeard) { sound.quiet(0.5); examHeard = false; } return; }
     examHeard = true;
-    sound.level("drone", leaving && leaving.exam ? 0 : 0.45, leaving ? 0.4 : 0.6);   // 被吸進去時隆隆讓給吸入的聲音
+    sound.level("drone", leaving && leaving.exam ? 0 : 0.6, leaving ? 0.4 : 0.6);   // 被吸進去時隆隆讓給吸入的聲音
     sound.level("fizz", (0.035 + 0.16 * examArt.activity()) * k, 0.06);
     if (strikes) sound.crackle(0.45, 0.2);
-    if (fired && leaving && leaving.exam) { sound.zap(0.5, 0.3); }    // 交接那一刻再「滋」一聲
+    if (fired && leaving && leaving.exam) { sound.zap(0.6, 0.3); }    // 交接那一刻再「滋」一聲
     else if (fired) sound.zap(0.9, 0.3);
   }
   function flash() {
