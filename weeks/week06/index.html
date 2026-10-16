@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<script>
+  // 課程網址已改成 Cloudflare Pages（GitHub Pages 在台灣太慢）：舊的 github.io 網址轉到同一頁，保留 #t= 等片段
+  if (location.hostname.endsWith("github.io")) {
+    location.replace("https://learning-analytics-tools.pages.dev" + (location.pathname.replace(/^\/Learning-Analytics-Tools(?=\/|$)/, "") || "/") + location.search + location.hash);
+  }
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title data-i18n
+  data-zh-hans="Week 6｜TEST"
+  data-en="Week 6 | TEST"
+  data-vi="Tuần 6 | TEST">Week 6｜TEST</title>
+<meta name="description" content="Week 6：考試。沒有提示，只有任務：選一台遠端電腦（Mac 或 Windows），靠自己完成指定的事。" data-i18n-attr="content"
+  data-zh-hans="Week 6：考试。没有提示，只有任务：选一台远程电脑（Mac 或 Windows），靠自己完成指定的事。"
+  data-en="Week 6: the test. No hints, only missions: pick a remote computer (Mac or Windows) and finish the assigned tasks on your own."
+  data-vi="Tuần 6: bài kiểm tra. Không có gợi ý, chỉ có nhiệm vụ: chọn một máy tính từ xa (Mac hoặc Windows) và tự hoàn thành những việc được giao.">
+<meta name="author" content="JUNHAO CHEN">
+<meta name="copyright" content="© 2026 JUNHAO CHEN">
+<meta name="theme-color" content="#04060c">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+<link rel="stylesheet" href="../../assets/week.css">
+<link rel="stylesheet" href="exam.css">
+<!-- 多語系要比其他程式先載入（不要 defer） -->
+<script src="../../assets/i18n-strings.js"></script>
+<script src="../../assets/i18n.js"></script>
+<script src="../../assets/course.js" defer></script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23f6efdc'/%3E%3Cpath d='M9.5 24v-5M16 24v-9M22.5 24V8' stroke='%238a5400' stroke-width='4.2'/%3E%3C/svg%3E">
+</head>
+<!-- Week 6 只有考試。整頁是一個場景（assets/rift.js 畫在 #rift）：
+     1. 入口：Mac 和 Windows 的桌面從中間撕開，裂縫裡是藍色的捲線，中間寫 TEST。
+     2. 按「進入考場」：裂縫整個撕開，掉進黑洞（時空網格、吸積盤），穿過去之後是深空。
+     3. 選一台電腦（Mac／Windows），連線。
+     4. 遠端桌面從兩邊合上來把裂縫封起來，就進到遠端電腦（iframe，lab/mac 或 lab/win）。
+     流程和計時在 exam.js。系統設定「減少動態效果」時，只用淡入淡出。 -->
+<body class="exam" data-root="../../">
+<canvas id="rift" aria-hidden="true"></canvas>
+<iframe id="remote" title="遠端電腦" hidden allow="fullscreen"></iframe>
+
+<div class="page">
+  <header class="top">
+    <a class="brand" href="../../">
+      <span class="brand-name">Learning Analytics Tools</span>
+      <span class="brand-sub" data-ui="brand.sub">NTNU・課程教材・Week 3 – 16</span>
+    </a>
+    <a class="pill nav-works" href="../../works/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H5a.5.5 0 0 1-.5-.5V5a.5.5 0 0 1 .5-.5zm9 0h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5h-5a.5.5 0 0 1-.5-.5V5a.5.5 0 0 1 .5-.5zm-9 9h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H5a.5.5 0 0 1-.5-.5v-5a.5.5 0 0 1 .5-.5zm9 0h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5h-5a.5.5 0 0 1-.5-.5v-5a.5.5 0 0 1 .5-.5z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span data-ui="nav.works">作品集</span></a>
+    <a class="pill icon-only nav-gh" href="https://github.com/bigmoumou/Learning-Analytics-Tools" aria-label="GitHub 原始碼" data-ui-attr="aria-label:home.github"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2.2a9.8 9.8 0 0 0-3.1 19.1c.5.1.7-.2.7-.5v-1.7c-2.7.6-3.3-1.3-3.3-1.3-.4-1.1-1.1-1.4-1.1-1.4-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.3-1.1.6-1.3-2.2-.2-4.5-1.1-4.5-4.9 0-1.1.4-2 1-2.7-.1-.2-.4-1.2.1-2.6 0 0 .8-.3 2.7 1a9.4 9.4 0 0 1 4.9 0c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.6.6.7 1 1.6 1 2.7 0 3.8-2.3 4.7-4.5 4.9.4.3.7.9.7 1.8v2.7c0 .3.2.6.7.5A9.8 9.8 0 0 0 12 2.2z"/></svg></a>
+    <button class="pill icon-only" id="themeBtn" type="button">深色</button>
+  </header>
+
+  <main class="stage">
+    <!-- 入口 -->
+    <section class="gate" id="gate" aria-labelledby="examTitle">
+      <h1 class="vh" id="examTitle">TEST</h1>
+      <p class="kicker"><span class="dot" aria-hidden="true"></span>WEEK 06・TEST</p>
+      <p class="gate-lede" data-i18n
+        data-zh-hans="没有提示，只有任务。"
+        data-en="No hints. Only missions."
+        data-vi="Không có gợi ý, chỉ có nhiệm vụ.">沒有提示，只有任務。</p>
+      <p class="gate-sub" data-i18n
+        data-zh-hans="选一台电脑（Mac 或 Windows），穿过裂缝连到远程桌面，靠自己完成任务卡上指定的事。"
+        data-en="Pick a computer (Mac or Windows), go through the rift to its remote desktop, and finish the tasks on the mission card on your own."
+        data-vi="Chọn một máy tính (Mac hoặc Windows), đi qua khe nứt để vào màn hình từ xa, và tự hoàn thành những việc ghi trên thẻ nhiệm vụ.">選一台電腦（Mac 或 Windows），穿過裂縫連到遠端桌面，靠自己完成任務卡上指定的事。</p>
+      <button class="gate-go" id="enter" type="button"><span data-i18n
+        data-zh-hans="进入考场"
+        data-en="Enter the test"
+        data-vi="Vào phòng thi">進入考場</span><span class="arrow" aria-hidden="true">→</span></button>
+      <p class="gate-note" data-i18n
+        data-zh-hans="设计预览：现在连到的是练习电脑，考试模式还在准备。"
+        data-en="Design preview: this connects to the practice computer for now; the test mode is still being built."
+        data-vi="Bản xem trước thiết kế: hiện đang kết nối tới máy luyện tập; chế độ thi vẫn đang được chuẩn bị.">設計預覽：現在連到的是練習電腦，考試模式還在準備。</p>
+    </section>
+
+    <!-- 選電腦 -->
+    <section class="pick" id="pick" hidden aria-labelledby="pickTitle">
+      <p class="pick-title" id="pickTitle" data-i18n
+        data-zh-hans="选一台电脑"
+        data-en="Pick a computer"
+        data-vi="Chọn một máy tính">選一台電腦</p>
+      <div class="pick-row">
+        <button class="pick-os" type="button" data-os="mac">
+          <span class="lap"><span class="lap-lid"><img src="../week04/lab/screen-mac.jpg" alt="" width="1440" height="900" decoding="async"></span><span class="lap-base"></span></span>
+          <span class="pick-name">Mac</span>
+        </button>
+        <button class="pick-os" type="button" data-os="win">
+          <span class="lap"><span class="lap-lid"><img src="../week04/lab/screen-win.jpg" alt="" width="1440" height="900" decoding="async"></span><span class="lap-base"></span></span>
+          <span class="pick-name">Windows</span>
+        </button>
+      </div>
+      <p class="pick-status" id="pickStatus" role="status" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span>Learning Analytics Tools Implementation Applications (NTNU)</span>
+    <span><span data-ui="footer.copyright">Copyright © 2026 JUNHAO CHEN・程式碼 MIT・內容 CC BY-NC-SA 4.0</span> <a class="foot-lic" href="https://github.com/bigmoumou/Learning-Analytics-Tools#授權" data-ui="footer.license" data-ui-attr="href:footer.licenseUrl">授權說明</a></span>
+    <a href="../../" data-ui="nav.home">回到課程首頁</a>
+  </footer>
+</div>
+
+<button class="skip" id="skip" type="button" hidden><span data-i18n data-zh-hans="略过" data-en="Skip" data-vi="Bỏ qua">略過</span></button>
+
+<script src="../../assets/rift.js"></script>
+<script src="exam.js"></script>
+</body>
+</html>

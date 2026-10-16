@@ -60,9 +60,10 @@
       };
     }
     if (f.kind === "ready") {
+      const test = !!f.w.exam;    // 考試週（Week 6）：寫 TEST、按鈕「進入考場」、舞台光變藍
       return {
-        kicker: tr("fmt.dot", { a: `WEEK ${pad(f.n)}`, b: tr("home.open") }), title: wf(f.w, "title"), metaHtml: lengths(f.w),
-        href: root() + f.w.href, cta: tr("home.enter", { n: f.n }), ready: true,
+        kicker: tr("fmt.dot", { a: `WEEK ${pad(f.n)}`, b: test ? "TEST" : tr("home.open") }), title: wf(f.w, "title"), metaHtml: lengths(f.w),
+        href: root() + f.w.href, cta: test ? tr("home.enterTest") : tr("home.enter", { n: f.n }), ready: true, test,
       };
     }
     const newest = frames[latest];
@@ -81,12 +82,14 @@
     shown = i;
     const d = describe(frames[i]);
     document.body.classList.toggle("spot-on", !!d.ready); // 舞台光：停在已開放的週次才亮（home.css 的 .spot）
+    document.body.classList.toggle("spot-test", !!d.test); // 考試週的光是冷藍色
     if (studio) studio.screen(thumbOf(i));                 // 攝影棚的監看螢幕跟著顯示這一週
     els.kicker.textContent = d.kicker;
     els.title.textContent = d.title;
     if (d.metaHtml) els.meta.innerHTML = d.metaHtml;
     else els.meta.textContent = d.meta;
     info.classList.toggle("is-ready", !!d.ready);
+    info.classList.toggle("is-test", !!d.test);
     els.cta.hidden = !d.href;
     if (d.href) { els.cta.href = d.href; els.ctaLabel.textContent = d.cta; }
     els.alt.hidden = !d.alt;
@@ -104,7 +107,7 @@
   scrub.innerHTML = frames.map((f, i) => {
     if (f.kind === "leader") return "";
     const label = f.kind === "ready" ? tr("fmt.colon", { a: weekName(f.n), b: wf(f.w, "title") }) : tr("pager.soon", { a: weekName(f.n) });
-    return `<li><button type="button" data-i="${i}" class="${f.kind === "ready" ? "is-ready" : ""}" aria-label="${esc(label)}">${pad(f.n)}</button></li>`;
+    return `<li><button type="button" data-i="${i}" class="${f.kind === "ready" ? (f.w.exam ? "is-ready is-test" : "is-ready") : ""}" aria-label="${esc(label)}">${pad(f.n)}</button></li>`;
   }).join("");
   const scrubButtons = Array.from(scrub.querySelectorAll("button"));
 
@@ -417,7 +420,7 @@
       g.drawImage(img, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
     }
     // 右上角「WEEK 03・已開放」（標題寫在畫面下方的介紹裡，這裡不重複；封面左上角是影片自己的標題）
-    const wk = `WEEK ${pad(f.n)}`, st = tr("home.open");
+    const wk = `WEEK ${pad(f.n)}`, st = f.w.exam ? "TEST" : tr("home.open");
     g.font = `700 22px ${MONO}`;
     const w1 = g.measureText(wk).width;
     g.font = `700 20px ${SANS}`;
@@ -425,7 +428,7 @@
     const pw = 58 + w1 + 22 + w2 + 22, px = x + w - 26 - pw;
     g.fillStyle = "rgba(10,10,10,.78)";
     rr(g, px, y + 24, pw, 46, 23); g.fill();
-    g.fillStyle = "#f0b545";
+    g.fillStyle = f.w.exam ? "#3aa0ff" : "#f0b545";
     g.beginPath(); g.arc(px + 24, y + 47, 7, 0, Math.PI * 2); g.fill();
     g.font = `700 22px ${MONO}`;
     g.fillText(wk, px + 44, y + 55);
@@ -462,6 +465,50 @@
     g.textAlign = "left";
   }
 
+  // 考試週（Week 6 TEST）：底片本身也被撕開。封面圖（weeks/week06/poster.jpg）中間就是一道裂縫，
+  // 這裡讓裂縫一路延伸到上下的齒孔帶：裂縫裡是深空和一條藍色捲線，兩邊是白色的紙纖維邊和一點藍光。
+  function tearFilm(g) {
+    let seed = 7;
+    const r = () => (seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0) / 4294967296;
+    const cx = TEX_W / 2, half = 80;
+    [[-4, IMG.y + 8], [IMG.y + IMG.h - 8, TEX_H + 4]].forEach(([y0, y1]) => {
+      const L = [], R = [];
+      for (let y = y0; ; y += 9 + r() * 13) {
+        const yy = Math.min(y, y1), end = yy >= y1;
+        const spike = r() < 0.32 ? (14 + r() * 26) : 0, side = r() < 0.5;
+        const jl = end || y === y0 ? 0 : (r() * 2 - 1) * 9, jr = end || y === y0 ? 0 : (r() * 2 - 1) * 9;
+        L.push([cx - half + jl - (side ? 0 : spike), yy]);
+        R.push([cx + half + jr + (side ? spike : 0), yy]);
+        if (end) break;
+      }
+      const path = () => { g.beginPath(); L.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y))); for (let i = R.length - 1; i >= 0; i--) g.lineTo(R[i][0], R[i][1]); g.closePath(); };
+      // 裂縫裡：深空
+      g.save();
+      path(); g.clip();
+      const v = g.createLinearGradient(cx - half, 0, cx + half, 0);
+      v.addColorStop(0, "#070b18"); v.addColorStop(0.5, "#101a3a"); v.addColorStop(1, "#070b18");
+      g.fillStyle = v; g.fillRect(cx - half - 60, y0, half * 2 + 120, y1 - y0);
+      g.fillStyle = "rgba(210,228,255,.7)";
+      for (let k = 0; k < 14; k++) g.fillRect(cx - half + r() * half * 2, y0 + r() * (y1 - y0), 1.4, 1.4);
+      g.strokeStyle = "rgba(84,180,255,.9)"; g.lineWidth = 2.6; g.lineCap = "round";
+      g.beginPath();
+      for (let k = 0; k <= 60; k++) {
+        const u = k / 60, a = u * Math.PI * 2 * ((y1 - y0) / 70);
+        const x = cx - 10 + Math.sin(u * 5) * 6 + 13 * Math.cos(a), y = y0 + u * (y1 - y0) - 13 * Math.sin(a);
+        if (k) g.lineTo(x, y); else g.moveTo(x, y);
+      }
+      g.stroke();
+      g.restore();
+      // 兩邊撕開的底片：藍光、白色纖維邊
+      [L, R].forEach((E) => {
+        const line = () => { g.beginPath(); E.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y))); g.stroke(); };
+        g.lineJoin = "round";
+        g.strokeStyle = "rgba(80,170,255,.32)"; g.lineWidth = 9; line();
+        g.strokeStyle = "rgba(238,234,226,.92)"; g.lineWidth = 2.4; line();
+      });
+    });
+  }
+
   // 所有畫格共用同一張 2D canvas：畫好、上傳到顯示卡，再畫下一格
   const scratch = document.createElement("canvas");
   const sg = scratch.getContext("2d");
@@ -479,6 +526,7 @@
       else if (f.kind === "ready") drawReady(sg, f, withImage ? img : null);
       else drawSoon(sg, f);
       sg.restore();
+      if (f.kind === "ready" && f.w.exam) tearFilm(sg);
     };
     draw(true);
     // 用 file:// 直接開的時候圖片會汙染 canvas，WebGL 不能用，改畫沒有圖片的版本

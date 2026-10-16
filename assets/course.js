@@ -100,6 +100,33 @@
         },
       },
     },
+    6: {
+      status: "ready",
+      exam: true,          // 考試週：首頁畫格右上角寫 TEST、按鈕寫「進入考場」、舞台光變藍（home.js、home.css）
+      title: "TEST",
+      summary: "沒有提示，只有任務：連到一台遠端電腦（Mac 或 Windows），靠自己完成指定的事。",
+      href: "weeks/week06/",
+      thumb: "weeks/week06/thumb.jpg",
+      still: "weeks/week06/poster.jpg",
+      meta: "考試・遠端電腦 Mac／Windows",
+      i18n: {
+        "zh-Hans": {
+          title: "TEST",
+          summary: "没有提示，只有任务：连到一台远程电脑（Mac 或 Windows），靠自己完成指定的事。",
+          meta: "考试・远程电脑 Mac／Windows",
+        },
+        en: {
+          title: "TEST",
+          summary: "No hints, only missions: connect to a remote computer (Mac or Windows) and finish the assigned tasks on your own.",
+          meta: "Test · remote computer, Mac / Windows",
+        },
+        vi: {
+          title: "TEST",
+          summary: "Không có gợi ý, chỉ có nhiệm vụ: kết nối tới một máy tính từ xa (Mac hoặc Windows) và tự hoàn thành những việc được giao.",
+          meta: "Bài kiểm tra · máy tính từ xa Mac / Windows",
+        },
+      },
+    },
   };
 
   window.COURSE = COURSE;

@@ -1,0 +1,130 @@
+/* Week 6（TEST）：整頁是一個場景，畫在 #rift（assets/rift.js），文字和按鈕疊在上面。
+   不管網站是淺色還是深色主題，這一頁都是深空，所以顏色直接寫死，不用主題變數。 */
+body.exam {
+  --void: #04060c;
+  --rift: #3aa0ff;
+  --txt: #f1efe9;
+  --txt-2: #c3cbe0;
+  --txt-3: #8a93a8;
+  background: var(--void);
+  color: var(--txt);
+  overflow: hidden;
+  height: 100svh;
+}
+#rift { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 1; }
+#remote { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100svh; border: 0; z-index: 0; background: #000; }
+body.exam .page { position: relative; z-index: 2; height: 100svh; min-height: 0; pointer-events: none; }
+body.exam .page > * { pointer-events: auto; }
+body.exam .page > main { flex: 1; display: flex; padding-bottom: 0; max-width: none; }
+
+/* 頂列：在深空上一律用淺色字 */
+body.exam .brand-name { color: var(--txt); }
+body.exam .brand-sub { color: var(--txt-3); }
+body.exam .pill { background: rgba(255, 255, 255, .06); border-color: rgba(255, 255, 255, .16); color: var(--txt); }
+body.exam .pill:hover { background: rgba(255, 255, 255, .12); }
+body.exam #themeBtn { display: none; }   /* 這一頁固定是深色，主題按鈕沒有作用；語言選單仍然插在它前面 */
+
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+
+/* ---------- 入口（左下角，和首頁的介紹同一個位置） ---------- */
+.gate {
+  align-self: flex-end; max-width: 34rem; padding: 0 0 clamp(1.2rem, 4vh, 2.6rem);
+  display: flex; flex-direction: column; align-items: flex-start; gap: .7rem;
+  transition: opacity .5s ease, transform .5s ease;
+}
+.gate::before {           /* 字後面一層往下變深的暗色，讓字在亮的螢幕截圖上也讀得清楚 */
+  content: ""; position: fixed; left: 0; right: 0; bottom: 0; height: 52vh; z-index: -1; pointer-events: none;
+  background: linear-gradient(to top, rgba(4, 6, 12, .92), rgba(4, 6, 12, .55) 45%, rgba(4, 6, 12, 0));
+}
+.gate .kicker { color: var(--txt-2); }
+.gate .kicker .dot { background: var(--rift); box-shadow: 0 0 0 4px rgba(58, 160, 255, .18); }
+.gate-lede { margin: 0; font-size: clamp(1.7rem, 3.4vw, 2.7rem); font-weight: 900; line-height: 1.15; letter-spacing: .01em; }
+.gate-sub { margin: 0; font-size: clamp(.95rem, 1.2vw, 1.05rem); line-height: 1.7; color: var(--txt-2); }
+.gate-go {
+  appearance: none; margin-top: .5rem; display: inline-flex; align-items: center; gap: .7rem;
+  height: 3.1rem; padding: 0 1.5rem; border-radius: 999px; cursor: pointer;
+  font: inherit; font-size: 1.05rem; font-weight: 700; color: #fff;
+  background: rgba(14, 32, 62, .7); border: 1px solid rgba(120, 185, 255, .55);
+  transition: background-color .25s ease, border-color .25s ease, transform .25s ease;
+}
+.gate-go .arrow { transition: transform .25s ease; }
+.gate-go:hover { background: rgba(38, 92, 170, .55); border-color: rgba(160, 210, 255, .9); }
+.gate-go:hover .arrow { transform: translateX(4px); }
+.gate-go:focus-visible { outline: 2px solid var(--rift); outline-offset: 4px; }
+.gate-note { margin: .2rem 0 0; font-size: .8rem; color: var(--txt-3); }
+
+body.exam .foot { color: var(--txt-3); font-size: .75rem; padding-bottom: max(10px, env(safe-area-inset-bottom)); transition: opacity .5s ease; }
+body.exam .foot a { color: var(--txt-2); }
+
+/* 掉進去之後，入口的字、頂列、頁尾都退場 */
+body.is-diving .top, body.is-diving .gate, body.is-diving .foot { opacity: 0; pointer-events: none; }
+body.is-diving .gate { transform: translateY(12px); }
+body.is-diving .top { transition: opacity .4s ease; }
+
+/* ---------- 選電腦 ---------- */
+.pick {
+  position: fixed; inset: 0; z-index: 3; display: grid; place-content: center; justify-items: center; gap: clamp(1rem, 3vh, 2rem);
+  padding: 2rem 1rem; transition: opacity .5s ease;
+}
+.pick[hidden] { display: none; }
+.pick-title { margin: 0; font-size: clamp(1.3rem, 2.2vw, 1.9rem); font-weight: 900; letter-spacing: .08em; color: var(--txt); opacity: 0; }
+.pick-row { display: flex; gap: clamp(1.5rem, 6vw, 6rem); align-items: flex-end; }
+.pick-os {
+  appearance: none; background: none; border: 0; padding: .4rem; cursor: pointer; color: var(--txt);
+  display: flex; flex-direction: column; align-items: center; gap: 1.1rem; font: inherit; opacity: 0;
+  transition: transform .45s cubic-bezier(.2, .7, .2, 1), opacity .45s ease, filter .45s ease;
+}
+.lap { display: block; width: clamp(220px, 27vw, 430px); }
+.lap-lid {
+  display: block; aspect-ratio: 16 / 10.4; padding: 2.4%; border-radius: 14px 14px 5px 5px;
+  background: #0a0b0f; border: 1px solid rgba(255, 255, 255, .16); overflow: hidden;
+}
+.lap-lid img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 4px; filter: brightness(.8) saturate(.9); transition: filter .35s ease; }
+.lap-base { display: block; height: clamp(8px, .8vw, 12px); width: 114%; margin-left: -7%; border-radius: 0 0 12px 12px; background: linear-gradient(#d8dce3, #8f949d); }
+.pick-os[data-os="win"] .lap-base { background: linear-gradient(#5a5e66, #2c2f35); }
+.pick-name { font-size: clamp(1.05rem, 1.6vw, 1.4rem); font-weight: 700; letter-spacing: .02em; }
+.pick-os:hover, .pick-os:focus-visible { transform: translateY(-8px); }
+.pick-os:hover .lap-lid img, .pick-os:focus-visible .lap-lid img { filter: brightness(1) saturate(1); }
+.pick-os:hover .lap-lid, .pick-os:focus-visible .lap-lid { border-color: rgba(120, 185, 255, .7); }
+.pick-os:focus-visible { outline: none; }
+.pick-os:focus-visible .pick-name { text-decoration: underline; text-underline-offset: .3em; }
+.pick-status { margin: 0; min-height: 1.6em; font-family: var(--font-mono); font-size: .9rem; letter-spacing: .06em; color: #9fc8ff; }
+
+/* 兩台筆電從深空裡慢慢凝聚出來 */
+.pick.is-in .pick-title { animation: pick-in .8s ease .1s both; }
+.pick.is-in .pick-os { animation: pick-in 1s cubic-bezier(.2, .7, .2, 1) both; }
+.pick.is-in .pick-os:nth-child(1) { animation-delay: .25s; }
+.pick.is-in .pick-os:nth-child(2) { animation-delay: .45s; }
+@keyframes pick-in {
+  from { opacity: 0; filter: blur(12px); transform: translateY(26px) scale(.95); }
+  to { opacity: 1; filter: blur(0); transform: none; }
+}
+.pick.is-in .pick-os { opacity: 1; }
+.pick.is-chosen .pick-os { animation: none; opacity: 1; }
+.pick.is-chosen .pick-os.is-off { opacity: .12; filter: blur(3px); transform: scale(.97); pointer-events: none; }
+.pick.is-chosen .pick-os.is-on { transform: scale(1.05); pointer-events: none; }
+.pick.is-chosen .pick-os.is-on .lap-lid { border-color: rgba(160, 210, 255, .9); }
+.pick.is-chosen .pick-os.is-on .lap-lid img { filter: brightness(1.05); }
+.pick.is-leaving { opacity: 0; pointer-events: none; transition: opacity .7s ease; }
+.pick.is-leaving .pick-os.is-on { transform: scale(1.5); filter: blur(4px); transition: transform .8s cubic-bezier(.5, 0, .75, 0), filter .8s ease; }   /* 選的那台往鏡頭衝過來，像是要鑽進螢幕 */
+
+@media (max-width: 640px) {
+  .pick-row { flex-direction: column; align-items: center; gap: 1.6rem; }
+  .lap { width: min(68vw, 300px); }
+}
+
+.skip {
+  position: fixed; right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); z-index: 4;
+  appearance: none; height: 2.3rem; padding: 0 1rem; border-radius: 999px; cursor: pointer; font: inherit; font-size: .85rem; font-weight: 700;
+  color: var(--txt-2); background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .18);
+}
+.skip:hover { color: #fff; background: rgba(255, 255, 255, .12); }
+.skip[hidden] { display: none; }
+
+/* 首頁封面用的靜止畫面（?still=1）：只留場景 */
+body.is-still .page, body.is-still .skip { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pick.is-in .pick-title, .pick.is-in .pick-os { animation: none; opacity: 1; }
+  .pick-os, .gate, .pick { transition: opacity .3s ease; }
+}
