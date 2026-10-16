@@ -176,6 +176,17 @@ body.no-film .studio-fx, .studio-fx.is-hidden { display: none !important; }
 body.is-loading .studio-fx, body.is-leaving .studio-fx { opacity: 0; }
 body.index-open .studio-fx { visibility: hidden; }
 .studio-fx span { position: absolute; display: block; }
+/* 攝影機的機頭：一張只有機頭大小的小畫布（assets/studio.js 只在機頭轉動時重畫它），兩種主題都有 */
+/* 監看螢幕上的畫面（.studio-mon）：目前那一週的縮圖，很暗、像監看畫面（studio.js 用 matrix3d 貼到螢幕的四個角） */
+.studio-cam, .studio-mon { position: fixed; left: 0; top: 0; z-index: 1; pointer-events: none; opacity: 0; transition: opacity .7s var(--ease); }
+.studio-cam.is-on { opacity: 1; }
+body.is-loading :is(.studio-cam, .studio-mon), body.is-leaving :is(.studio-cam, .studio-mon) { opacity: 0; transition-duration: .45s; }
+body.index-open :is(.studio-cam, .studio-mon), :is(.studio-cam, .studio-mon).is-hidden { visibility: hidden; }
+body.no-film :is(.studio-cam, .studio-mon) { display: none; }
+.studio-mon { width: 320px; height: 180px; transform-origin: 0 0; object-fit: cover; filter: brightness(.62) saturate(.85); }
+.studio-mon.is-on { opacity: .9; }
+:root[data-theme="light"] .studio-mon.is-on { opacity: .5; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .studio-mon.is-on { opacity: .5; } }
 /* 膠捲後面兩盞燈的光（.studio-back 在畫布後面，只從膠捲上下的空隙透出來） */
 .studio-back { z-index: -1; }
 .fx-lamp { width: calc(520px * var(--u)); height: calc(340px * var(--u)); margin: calc(-170px * var(--u)) 0 0 calc(-260px * var(--u)); border-radius: 50%; }
@@ -188,20 +199,6 @@ body.index-open .studio-fx { visibility: hidden; }
   left: var(--lampr-x); top: var(--lampr-y);
   background: radial-gradient(closest-side, rgba(255, 236, 205, .18), rgba(255, 225, 190, .06) 50%, transparent);
   animation: fx-breathe 11s ease-in-out -4s infinite alternate;
-}
-/* 攝影機側邊小螢幕的微光，像在播畫面 */
-.fx-screen {
-  left: var(--screen-x); top: var(--screen-y); width: calc(120px * var(--u)); height: calc(90px * var(--u));
-  margin: calc(-45px * var(--u)) 0 0 calc(-60px * var(--u));
-  background: radial-gradient(closest-side, rgba(150, 190, 220, .16), transparent);
-  animation: fx-flicker 7s steps(1, end) infinite;
-}
-/* 錄影指示燈 */
-.fx-tally {
-  left: var(--tally-x); top: var(--tally-y); width: calc(5px * var(--u)); height: calc(5px * var(--u));
-  margin: calc(-2.5px * var(--u)) 0 0 calc(-2.5px * var(--u)); border-radius: 50%;
-  background: #ff4a32; box-shadow: 0 0 calc(10px * var(--u)) calc(3px * var(--u)) rgba(255, 60, 40, .45);
-  animation: fx-tally 2.8s ease-in-out infinite;
 }
 /* 貼地的薄霧，很慢地左右飄 */
 .fx-haze { border-radius: 50%; background: radial-gradient(closest-side, rgba(220, 205, 180, .055), transparent); }
@@ -216,8 +213,6 @@ body.spot-on .fx-dust { opacity: 1; }
   animation: fx-float var(--d) linear var(--delay) infinite;
 }
 @keyframes fx-breathe { from { opacity: .75; } to { opacity: 1; } }
-@keyframes fx-flicker { 0% { opacity: .8; } 23% { opacity: .95; } 41% { opacity: .7; } 64% { opacity: 1; } 82% { opacity: .85; } }
-@keyframes fx-tally { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
 @keyframes fx-drift { from { transform: translateX(-3%); } to { transform: translateX(3%); } }
 @keyframes fx-float {
   0% { transform: translate(0, 0); opacity: 0; }

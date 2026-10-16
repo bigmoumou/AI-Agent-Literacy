@@ -3,7 +3,7 @@
    - 畫面：原生 WebGL2（不用任何函式庫）。每一格是一段圓柱曲面，
      貼上用 2D canvas 畫的畫格（齒孔、邊緣字、畫面）。
    - 效能：只有膠捲在動的時候才重畫，停住時完全不耗顯示卡；解析度最多 1.5 倍，
-     跑不動會自動降；畫格貼圖一張一張慢慢做，先做看得到的。
+     跑不動會自動降；畫格貼圖一張一張慢慢做，先做看得到的；攝影棚道具（studio.js）等開場的畫格出來之後才載入。
    - 操作：拖曳、滾輪、方向鍵、下方週次刻度；點已開放的畫格進入那一週。
    - 畫格內容來自 course.js 的 WEEKS：已開放的週次用 still 大圖，其他顯示「準備中」。
    - 瀏覽器不支援 WebGL2 時直接顯示「全部週次」清單。
@@ -81,6 +81,7 @@
     shown = i;
     const d = describe(frames[i]);
     document.body.classList.toggle("spot-on", !!d.ready); // 舞台光：停在已開放的週次才亮（home.css 的 .spot）
+    if (studio) studio.screen(thumbOf(i));                 // 攝影棚的監看螢幕跟著顯示這一週
     els.kicker.textContent = d.kicker;
     els.title.textContent = d.title;
     if (d.metaHtml) els.meta.innerHTML = d.metaHtml;
@@ -123,6 +124,7 @@
   const indexView = $("#indexView");
   let indexOpen = false;
   let film = null; // WebGL 準備好之後才有
+  let studio = null, studioT0 = 0; // 攝影棚道具（assets/studio.js），膠捲出現之後才建（見下面 startStudio）
 
   function setIndex(open, moveFocus) {
     indexOpen = open;
@@ -134,6 +136,7 @@
     viewBtn.setAttribute("aria-label", label);
     if (moveFocus) (open ? $("#indexTitle") : viewBtn).focus();
     if (film) { if (open) film.clearHover(); else film.wake(); }
+    if (studio) studio.hide(open);   // 清單蓋住舞台時，攝影機也停下來
   }
   viewBtn.addEventListener("click", () => setIndex(!indexOpen, true));
 
@@ -267,9 +270,26 @@
     fallback();
     return;
   }
-  // 攝影棚道具（assets/studio.js）：畫不出來就只是沒有道具，膠捲照常
-  let studio = null;
-  try { if (window.Studio) studio = window.Studio(gl, { floorY: FLOOR_Y }); } catch (e) { studio = null; }
+  // 攝影棚道具（assets/studio.js）：等開場的畫格做好、膠捲已經出現之後才載入和建立，再慢慢淡入；
+  // 這樣縮圖和膠捲先出來，道具不會拖慢開場。畫不出來就只是沒有道具，膠捲照常
+  const STUDIO_FADE = 700;
+  const thumbOf = (i) => (frames[i].kind === "ready" && frames[i].w.thumb ? root() + frames[i].w.thumb : null);
+  function startStudio() {
+    if (studio || fellBack || !window.Studio) return;
+    // 著色器在背景編譯，編好才開始淡入（onReady）
+    const onReady = () => { studioT0 = performance.now(); wake(); };
+    try { studio = window.Studio(gl, { floorY: FLOOR_Y, onReady }); } catch (e) { studio = null; return; }
+    studio.layout(proj, cam, vw, vh, canvas.width, canvas.height);
+    studio.screen(thumbOf(current()));
+    if (indexOpen) studio.hide(true);
+  }
+  function loadStudio() {
+    if (window.Studio) { idle(startStudio); return; }
+    const s = document.createElement("script");
+    s.src = root() + "assets/studio.js";
+    s.onload = () => idle(startStudio);
+    document.head.appendChild(s);
+  }
 
   /* ---------- 貼圖 ---------- */
   const aniso = gl.getExtension("EXT_texture_filter_anisotropic");
@@ -592,7 +612,8 @@
     gl.disable(gl.BLEND);
 
     // 膠捲後面的道具；進入某一週時（相機往前推）道具跟著淡出
-    const propAlpha = leaving ? 1 - clamp((performance.now() - leaving.t0) / 450, 0, 1) : 1;
+    const now = performance.now();
+    const propAlpha = (leaving ? 1 - clamp((now - leaving.t0) / 450, 0, 1) : 1) * clamp((now - studioT0) / STUDIO_FADE, 0, 1);
     if (studio) {
       studio.colors(col.fog, col.fog[0] + col.fog[1] + col.fog[2] < 1.2);
       studio.drawBack(propAlpha);
@@ -854,7 +875,7 @@
     draw();
     if (mouse && !drag && !leaving && Math.abs(target - pos) > 1e-3) setHover(pick(mouse.x, mouse.y), mouse.x, mouse.y);
 
-    const moving = pos !== target || vel !== 0 || hoverMoving || !!leaving || now < introUntil ||
+    const moving = pos !== target || vel !== 0 || hoverMoving || !!leaving || now < introUntil || (studioT0 > 0 && now - studioT0 < STUDIO_FADE) ||
       !near(col.fog[0], want.fog[0]) || !near(col.alpha, want.alpha);
 
     // 太慢就降解析度（只在連續動畫時量，睡醒的第一格不算）
@@ -929,6 +950,7 @@
         layout(); // 字型載入後文字高度可能改變，重新量一次
         introUntil = performance.now() + 2400;
         touch();
+        loadStudio();
       } else {
         wake();
       }
