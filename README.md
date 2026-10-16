@@ -32,6 +32,7 @@
 | | [補充 1 GitHub 入門](https://learning-analytics-tools.pages.dev/weeks/week04/#s1-github)・[補充 2 Mermaid 流程圖](https://learning-analytics-tools.pages.dev/weeks/week04/#s2-mermaid) | 3:42・4:10 |
 | Week 5 | [01 怎樣才算做好：驗證清單](https://learning-analytics-tools.pages.dev/weeks/week05/#01-verify-md) | 3:24 |
 | | [02 不要一直換模型](https://learning-analytics-tools.pages.dev/weeks/week05/#02-model-switch) | 1:30 |
+| | [03 作業：成績分析小報告](https://learning-analytics-tools.pages.dev/weeks/week05/#03-homework-grades) | 2:29 |
 | | [補充 1 按下 Enter 之後](https://learning-analytics-tools.pages.dev/weeks/week05/#s1-codex-loop)・[補充 2 對話滿了會怎樣](https://learning-analytics-tools.pages.dev/weeks/week05/#s2-context-full) | 3:44・2:35 |
 
 ## 怎麼做的

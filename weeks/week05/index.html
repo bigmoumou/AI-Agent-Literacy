@@ -156,10 +156,9 @@
       </ol>
     </section>
 
-    <!-- 作業：影片 03 還在做（學弟2），膠捲裡先放答案卡的圖（hw/card.jpg，製作/week05/hw/card/card.html 產生），清單用 data-thumb。
-         影片做好後把 <img class="still"> 換成 <video>，加上片段。資料在 files/week5-hw.zip（製作/week05/hw/make_data.py 產生）；
+    <!-- 作業影片 03（學弟2 做的，2026-10-16）。資料在 files/week5-hw.zip（製作/week05/hw/make_data.py 產生）；
          三個陷阱和答案只在 製作/week05/hw/private/，不要放進網站。 -->
-    <section class="unit" id="03-homework-grades" aria-labelledby="u03-title" data-thumb="hw/thumb.jpg">
+    <section class="unit" id="03-homework-grades" aria-labelledby="u03-title">
       <h2 class="unit-title" id="u03-title"><span class="unit-num" data-ui="video.n" data-n="03">影片 03</span><span data-i18n
         data-zh-hans="作业：成绩分析小报告"
         data-en="Homework: A Short Grade-Analysis Report"
@@ -167,15 +166,27 @@
 
       <div class="film">
         <div class="player">
-          <img class="still" src="hw/card.jpg" width="1600" height="900" alt="作業：成績分析小報告。答案卡五題：兩班人數、期末考平均、及格率、需要關心的同學、一張分布圖" decoding="async"
-            data-i18n-attr="alt" data-zh-hans="作业：成绩分析小报告。答案卡五题：两班人数、期末考平均、及格率、需要关心的同学、一张分布图" data-en="Homework: a short grade-analysis report. Five questions on the answer card: the size of each class, the final-exam average, the pass rate, the students who need attention, and one chart of the spread" data-vi="Bài tập: báo cáo ngắn phân tích điểm số. Năm câu trên thẻ đáp án: sĩ số mỗi lớp, điểm trung bình thi cuối kỳ, tỉ lệ đạt, sinh viên cần quan tâm, một biểu đồ phân bố">
+          <video controls preload="metadata" playsinline data-hls="video/03-homework-grades/hls/index.m3u8" poster="video/03-homework-grades/poster.jpg" width="1920" height="1080">
+            你的瀏覽器無法播放這支影片。
+          </video>
         </div>
       </div>
 
+      <ol class="chapters" aria-label="影片片段（點了直接跳到那一段）" data-ui-attr="aria-label:video.chapters">
+        <li><button type="button" data-t="0"><span class="k">00:00</span><span class="t" data-i18n data-zh-hans="开场" data-en="Opening" data-vi="Mở đầu">開場</span></button></li>
+        <li><button type="button" data-t="13"><span class="k">00:13</span><span class="t" data-i18n data-zh-hans="作业任务" data-en="The task" data-vi="Nhiệm vụ">作業任務</span></button></li>
+        <li><button type="button" data-t="29"><span class="k">00:29</span><span class="t" data-i18n data-zh-hans="项目要有这四样" data-en="Four things your project needs" data-vi="Bốn thứ dự án cần có">專案要有這四樣</span></button></li>
+        <li><button type="button" data-t="51"><span class="k">00:51</span><span class="t" data-i18n data-zh-hans="安静的错" data-en="The quiet mistake" data-vi="Lỗi lặng lẽ">安靜的錯</span></button></li>
+        <li><button type="button" data-t="85"><span class="k">01:25</span><span class="t" data-i18n data-zh-hans="先想清楚" data-en="Think it through first" data-vi="Nghĩ cho rõ trước">先想清楚</span></button></li>
+        <li><button type="button" data-t="105"><span class="k">01:45</span><span class="t" data-i18n data-zh-hans="怎么做比较好" data-en="Doing it well" data-vi="Làm sao cho tốt">怎麼做比較好</span></button></li>
+        <li><button type="button" data-t="125"><span class="k">02:05</span><span class="t" data-i18n data-zh-hans="交作业" data-en="Handing it in" data-vi="Nộp bài">交作業</span></button></li>
+        <li><button type="button" data-t="140"><span class="k">02:20</span><span class="t" data-i18n data-zh-hans="结尾" data-en="Ending" data-vi="Kết thúc">結尾</span></button></li>
+      </ol>
+
       <p class="hw-lead" data-i18n
-        data-zh-hans="这周你是助教：用 Codex 分析两个班的成绩，交一份<strong>成绩分析小报告</strong>。说明视频还在制作，先看下面的说明就能开始。"
-        data-en="This week you are the teaching assistant: use Codex to analyse two classes’ grades and hand in a <strong>short grade-analysis report</strong>. The video is still being made; the notes below are enough to get started."
-        data-vi="Tuần này bạn là trợ giảng: dùng Codex phân tích điểm của hai lớp và nộp một <strong>báo cáo ngắn phân tích điểm số</strong>. Video hướng dẫn vẫn đang làm; đọc phần dưới đây là có thể bắt đầu.">這週你是助教：用 Codex 分析兩個班的成績，交一份<strong>成績分析小報告</strong>。說明影片還在製作，先看下面的說明就可以開始。</p>
+        data-zh-hans="这周你是助教：用 Codex 分析两个班的成绩，交一份<strong>成绩分析小报告</strong>。"
+        data-en="This week you are the teaching assistant: use Codex to analyse two classes’ grades and hand in a <strong>short grade-analysis report</strong>."
+        data-vi="Tuần này bạn là trợ giảng: dùng Codex phân tích điểm của hai lớp và nộp một <strong>báo cáo ngắn phân tích điểm số</strong>.">這週你是助教：用 Codex 分析兩個班的成績，交一份<strong>成績分析小報告</strong>。</p>
 
       <ol class="points">
         <li><p data-i18n
