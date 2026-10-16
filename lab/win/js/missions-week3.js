@@ -392,9 +392,9 @@
       },
       {
         id: 's3',
-        text: '在桌面上點兩下 Project 資料夾，打開它。',
-        hint: '要連續點兩下，點一下只是選取。桌面的 Project 圖示在螢幕左上角（資源回收筒的下面），也可以在檔案總管視窗裡點兩下。',
-        answer: '點兩下 Project。',
+        text: '在桌面上按兩下 Project 資料夾，打開它。',
+        hint: '要連續按兩下，點一下只是選取。桌面的 Project 圖示在螢幕左上角（資源回收筒的下面），也可以在檔案總管視窗裡按兩下。',
+        answer: '按兩下 Project。',
         target: finderWalk([PROJECT], DESKTOP, [desktopIcon(PROJECT)]),
         check: function (ev, api) {
           return !!(api.seen('finder:navigate', function (d) { return same(api, d.path, PROJECT); }) || api.finderAt(PROJECT));
@@ -825,9 +825,9 @@
       },
       {
         id: 's5',
-        text: '用檔案總管打開 Project 裡的 week3，點兩下 README.md，看看裡面寫什麼。',
+        text: '用檔案總管打開 Project 裡的 week3，按兩下 README.md，看看裡面寫什麼。',
         hint: 'README.md 會用「記事本」打開。（真正的 Windows 預設會把 .zip、.md 的副檔名藏起來，只顯示 week3；練習版把副檔名都顯示出來，所以你看得到 week3.zip。）',
-        answer: '檔案總管 → 桌面 → Project → week3 → 點兩下 README.md。',
+        answer: '檔案總管 → 桌面 → Project → week3 → 按兩下 README.md。',
         // a student who opened README.md a moment before step 4 finished is still credited
         replay: 'mission',
         target: finderWalk([PROJECT + '/week3/README.md', PROJECT + '/week3', PROJECT]),
@@ -977,7 +977,7 @@
         id: 's4',
         text: '到檔案總管看看它在電腦裡的真實位置：打開桌面的 Project，看視窗上方的網址列。',
         hint: '本機 › 本機磁碟 (C:) › 使用者 › an › 桌面 › Project 就是它真實的位置，也就是 `C:\\Users\\an\\Desktop\\Project`。',
-        answer: '點兩下桌面上的 Project 資料夾。',
+        answer: '按兩下桌面上的 Project 資料夾。',
         target: finderWalk([PROJECT], DESKTOP, [desktopIcon(PROJECT)]),
         check: function (ev, api) {
           return !!api.seen('finder:navigate', function (d) { return same(api, d.path, PROJECT); });
@@ -1038,9 +1038,9 @@
       },
       {
         id: 's4',
-        text: '點兩下 report.md，用記事本讀它。',
+        text: '按兩下 report.md，用記事本讀它。',
         hint: '裡面有各班的平均分數，是 Codex 讀了 data 裡的 CSV 算出來的。',
-        answer: '在 output 資料夾裡點兩下 report.md。',
+        answer: '在 output 資料夾裡按兩下 report.md。',
         target: finderWalk([REPORT, OUTPUT, PROJECT]),
         check: function (ev, api) {
           return !!api.seen('editor:open', function (d) { return same(api, d.path, REPORT); });
@@ -1173,7 +1173,7 @@
         id: 's6',
         text: '到檔案總管打開 Project 裡的 output，看到 report.md：這次它在專案裡。',
         hint: '檔案總管 → 桌面 → Project → output。',
-        answer: '點兩下桌面的 Project，再點兩下 output。',
+        answer: '按兩下桌面的 Project，再按兩下 output。',
         target: finderWalk([OUTPUT, PROJECT]),
         check: function (ev, api) {
           return !!api.seen('finder:navigate', function (d) { return same(api, d.path, OUTPUT); });
@@ -1206,8 +1206,8 @@
       {
         id: 's1',
         text: '用記事本或 Visual Studio Code 打開 Project 裡的 AGENTS.md，看它現在有哪些規則。',
-        hint: '在檔案總管的 Project 裡，點兩下 AGENTS.md。',
-        answer: '檔案總管 → 桌面 → Project → 點兩下 AGENTS.md。',
+        hint: '在檔案總管的 Project 裡，按兩下 AGENTS.md。',
+        answer: '檔案總管 → 桌面 → Project → 按兩下 AGENTS.md。',
         target: finderWalk([AGENTS, PROJECT]),
         check: function (ev, api) {
           return !!api.seen('editor:open', function (d) { return same(api, d.path, AGENTS); });
@@ -1237,7 +1237,7 @@
         id: 's3',
         text: '回到 AGENTS.md 的視窗，看它是不是多了一行「- 圖表存到 figures/」。',
         hint: '視窗被 Codex 蓋住了：點工作列的「記事本」，或把 Codex 視窗拖開。記事本會自己更新，不用重開。',
-        answer: '點工作列的「記事本」（或在檔案總管再點兩下 AGENTS.md），最後一行是「- 圖表存到 figures/」。',
+        answer: '點工作列的「記事本」（或在檔案總管再按兩下 AGENTS.md），最後一行是「- 圖表存到 figures/」。',
         target: dock('textedit'),
         check: function (ev, api) {
           // only events after step 2: re-opening, or bringing the already-open window to the front

@@ -606,7 +606,7 @@
       ctl.push(link('釘住', 'pin', function () { LAB.layout.setRailMode('pinned'); }, { 'data-lab': 'rail-pin', title: '一直開著，點桌面時不收起' }));
     }
     // the title row is the handle for dragging the card (a double click puts it back in the top-right corner)
-    var head = h('div', { class: 'lab-rail-head', title: '按住拖曳可以移動任務卡；連點兩下回到右上角' },
+    var head = h('div', { class: 'lab-rail-head', title: '按住拖曳可以移動任務卡；按兩下回到右上角' },
       h('a', { class: 'lab-rail-link', href: (LAB.weekInfo && LAB.weekInfo[LAB.week] ? LAB.weekInfo[LAB.week].url : '../../weeks/week03/') }, '← ' + (LAB.weekLabel ? LAB.weekLabel() : 'Week 3')),
       h('span', { class: 'lab-rail-label' }, '練習用的電腦'),
       h('span', { class: 'lab-rail-ctl' }, ctl));

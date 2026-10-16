@@ -453,7 +453,7 @@
         return [
           { label: '新增索引標籤', shortcut: 'Ctrl+N', action: function () { newTab(); } },
           { label: '開新視窗', shortcut: 'Ctrl+Shift+N', action: function () { createWindow(null); } },
-          { label: '開啟…', shortcut: 'Ctrl+O', action: function () { toast('練習版沒有「開啟」對話方塊：請在檔案總管對檔案點兩下，用記事本開啟'); } },
+          { label: '開啟…', shortcut: 'Ctrl+O', action: function () { toast('練習版沒有「開啟」對話方塊：請在檔案總管對檔案按兩下，用記事本開啟'); } },
           { separator: true },
           { label: '儲存', shortcut: 'Ctrl+S', enabled: has, action: function () { save(); } },
           { label: '另存新檔…', shortcut: 'Ctrl+Shift+S', enabled: has, action: function () { saveAs(); } },

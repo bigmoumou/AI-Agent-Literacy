@@ -143,6 +143,24 @@
     }, dock('codex'));
   }
 
+  /* step 8: the sentence must go into the Firenze-Museums chat (lab-win-s8; the Mac's lab-fixes-r1). The mission starts with no such project in
+     Codex, and the cue went straight for the New chat box (projectComposer found no project row): sent from there, Codex wrote a new
+     C:\Users\an\Documents\ARCHITECTURE.md and the step ticked anyway. Now, in order: Codex closed → its taskbar button; the trust question is up →
+     Trust folder; Firenze-Museums is not a project yet → the Firenze-Museums folder (desktop, or a File Explorer window) to drag into Codex's
+     sidebar; then projectComposer (another chat open → the project row, else the composer) */
+  function isNullish(v) { return v === null || v === undefined; }
+  function fmIsProject(api) {
+    try { var st = api.codex && api.codex.state ? api.codex.state() : null; return ((st && st.projects) || []).some(function (p) { return same(api, p.path, FM); }); } catch (e) { return false; }
+  }
+  function T_FM_CHAT(api) {
+    if (!liveWins('codex').length) return null;                       // chain falls through to the taskbar button
+    var trust = document.querySelector('[data-lab=cx-modal-trust]');
+    if (trust && seeable(trust)) return trust;
+    if (!fmIsProject(api)) return chain(desktopIcon(FM), fdItem(FM))(api);
+    return projectComposer(FM)(api);
+  }
+  var NOT_IN_FM = '這個對話不在 Firenze-Museums 底下（輸入框上方沒有「Firenze-Museums」標籤），Codex 找不到專案裡的 ARCHITECTURE.md。先把桌面的 Firenze-Museums 拖進 Codex 左邊的側邊欄、按 Trust folder，在專案底下的對話再問一次。';
+
   /* the first diagram of a Markdown file, parsed (null when the file or the diagram is missing) */
   function fileAst(api, path) {
     var t = api.read(path);
@@ -324,11 +342,17 @@
         id: 's8',
         optional: true,
         text: '圖出不來、或不會寫的時候，請 Codex 幫你：[[請把「收集資料、檢查資料、整理成表格、做成網站」的流程畫成 Mermaid，加進 ARCHITECTURE.md]]',
-        hint: '在 Firenze-Museums 專案的對話裡問。Codex 會把整段圖寫進檔案，你可以在 Code 的預覽看到結果。',
-        answer: '在 Codex 貼上那句，按 Enter。',
-        target: projectComposer(FM),
+        hint: '要在 Firenze-Museums 專案的對話裡問（輸入框上方有「Firenze-Museums」標籤）。Codex 左邊還沒有這個專案的話，先把桌面上的 Firenze-Museums 拖進 Codex 左邊的側邊欄，按 Trust folder。Codex 會把整段圖寫進檔案，你可以在 Code 的預覽看到結果。',
+        answer: '把桌面的 Firenze-Museums 拖進 Codex 左邊、按 Trust folder（已經有就點左邊的 Firenze-Museums）；在它底下的對話貼上那句，按 Enter。',
+        target: chain(T_FM_CHAT, dock('codex')),
+        // only in the Firenze-Museums chat: from New chat Codex says it is not in a project and writes nothing
         check: function (ev, api) {
-          return !!api.seen('codex:reply', function (d) { return d.intent === 'write_mermaid'; });
+          return !!api.seen('codex:reply', function (d) { return d.intent === 'write_mermaid' && !isNullish(d.projectPath) && same(api, d.projectPath, FM); });
+        },
+        trap: function (ev, api) {
+          if (!ev || ev.name !== 'codex:reply' || !ev.data || ev.data.intent !== 'write_mermaid') return null;
+          if (!isNullish(ev.data.projectPath) && same(api, ev.data.projectPath, FM)) return null;
+          return NOT_IN_FM;
         }
       }
     ],
