@@ -130,6 +130,8 @@ body::after {
 .film::after { bottom: clamp(9px, 1.2vw, 14px); }
 .player { position: relative; aspect-ratio: 16 / 9; border-radius: 6px; overflow: hidden; background: #000; }
 .player video { display: block; width: 100%; height: 100%; background: #000; }
+/* 影片還在做的一支（例如作業）：膠捲裡先放一張圖 */
+.player img.still { display: block; width: 100%; height: 100%; object-fit: cover; }
 /* video.js 在影片載入失敗時加上的說明 */
 .video-error { position: absolute; left: 0; right: 0; bottom: 0; padding: .8rem 1rem; background: rgba(0, 0, 0, .78); color: #fff; font-size: .92rem; line-height: 1.6; }
 
