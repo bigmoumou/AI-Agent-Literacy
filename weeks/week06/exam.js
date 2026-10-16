@@ -1,7 +1,8 @@
 /* Week 6（TEST）：一進來就直接掉進去（沒有入口那一關）。
-   1. 撕開（0–1 秒）：首頁膠捲那一格的圖（老師的概念圖，assets/exam-art.js，電流一樣會動）蓋滿螢幕，
-      沿著裂縫中線往兩邊撕開，中間露出 WebGL 的星空和正在長大的黑洞（圖裡畫好的小黑洞淡掉）；裂痕爬滿。
-      這一段畫在清楚的 2D（#rift，疊在 WebGL 上面），同時縮小一份給 WebGL 當黑洞後面的那張畫面。
+   1. 被吸進去、撕開（0–1 秒）：首頁膠捲那一格的圖（老師的概念圖，assets/exam-art.js，電流一樣會動）鋪滿螢幕
+      （首頁點下去時鏡頭已經衝進那一格，最後一張就是這張，所以接得起來），沿著裂縫中線往兩邊撕開，
+      圖裡畫好的小黑洞淡掉，真的黑洞從裂縫裡長出來；整張圖交給 WebGL 當黑洞後面的那張畫面，
+      所以整張圖都會被重力彎曲；鏡頭從第一格就被往前吸，每次落雷打出一圈重力波，裂痕爬滿，最後往中心糊開。
    2. 碎裂、掉進黑洞（WebGL，assets/blackhole.js）：1.0 秒碎成玻璃片（從那張畫面剪），碎片無重力漂浮、翻轉，
       接著被吸回中心、扭成光環；鏡頭往黑洞衝，時間膨脹、重力紅移、重力波、畫面撕裂，越過事件視界全黑。
    3. 選電腦（2D，#rift）：深空裡浮出兩台筆電；選了之後星光衝向它。
@@ -68,17 +69,18 @@
   }
   // 撕開的距離（每邊幾個貼圖像素）：0.16 秒猛亮那一下先被扯開一點，接著慢慢拉開，後半段劈啪抖動
   const splitAt = (u, t) => 36 * out(seg(u, 0.16, 0.95)) + 5 * bump(u, 0.16, 0.42) + Math.sin(t * 57) * 0.9 * seg(u, 0.35, 0.95);
+  // 撕開的那張圖畫在 scene：給 WebGL 當黑洞後面的那張（整張被重力彎曲；碎開時也從它剪）
   function drawOpening(t, u) {
-    const g = rift.g, k = rift.dpr;
+    const g = scene.g, k = scene.dpr;
     g.setTransform(1, 0, 0, 1, 0, 0);
-    g.clearRect(0, 0, canvas.width, canvas.height);
+    g.clearRect(0, 0, sceneCv.width, sceneCv.height);
     if (art) {
-      if (u > 0.44 && !secondSurge) { secondSurge = true; art.surge(t + 0.16); }   // 裂痕開始爬的時候再猛亮一次
-      const c = cover(1 + 0.035 * inOut(seg(u, 0, 1)));                         // 鏡頭慢慢往裂縫推近一點
+      if (u > 0.44 && !secondSurge) { secondSurge = true; art.surge(t + 0.16); bs.waveT0 = t + 0.16; }   // 裂痕開始爬的時候再猛亮一次、再一圈重力波
+      const c = cover(1);
       g.setTransform(k * c.s, 0, 0, k * c.s, k * c.x, k * c.y);
       art.step(t, { energy: 1 + 1.8 * seg(u, 0.15, 0.95), auto: false });
       const split = splitAt(u, t);
-      art.paint(g, { split, hole: seg(u, 0.1, 0.32) });
+      art.paint(g, { split, hole: seg(u, 0.03, 0.2) });
       // 裂痕只畫在撕開的兩半上，而且避開裂縫裡的深空（太空不會裂）
       g.save();
       g.beginPath(); g.rect(-4000, -4000, 8000, 8000); art.gapPath(g, split); g.clip("evenodd");
@@ -86,20 +88,6 @@
       scene.drawCracks(g, ss, "source-atop");
       g.restore();
       art.drawUnder(g);                                  // 兩半底下墊著圖裡延伸的深空（裂縫張開也還是同一片星空）
-    }
-    g.setTransform(k, 0, 0, k, 0, 0);
-    const sg = scene.g;                                  // 縮小一份給 WebGL 當黑洞後面的那張（碎開時也從它剪）
-    sg.setTransform(1, 0, 0, 1, 0, 0);
-    sg.clearRect(0, 0, sceneCv.width, sceneCv.height);
-    sg.drawImage(canvas, 0, 0, sceneCv.width, sceneCv.height);
-    // 黑洞那裡開一扇柔邊的圓窗，露出 WebGL 真的重力透鏡（星空、裂縫邊被扭彎）；窗跟著黑洞長大
-    if (bh && bs.M > 0.004) {
-      const shadow = (2.6 * bs.M) / (bs.camZ * TAN) * (H / 2), r = 8 + shadow * 3.4;
-      const gr = g.createRadialGradient(W / 2, H / 2, r * 0.4, W / 2, H / 2, r);
-      gr.addColorStop(0, "rgba(0,0,0,1)"); gr.addColorStop(1, "rgba(0,0,0,0)");
-      g.globalCompositeOperation = "destination-out";
-      g.fillStyle = gr; g.fillRect(W / 2 - r, H / 2 - r, r * 2, r * 2);
-      g.globalCompositeOperation = "source-over";
     }
   }
   const gateHole = () => Math.min(W, H) * 0.03;
@@ -132,19 +120,22 @@
     const u = t - T0;
     // 黑洞：在裂縫裡長出來、變大；碎開後吸積盤亮起、鏡頭往前衝、慢慢傾斜看到盤面
     bs.t = t;
-    bs.M = 0.18 * out(seg(u, 0.1, 0.95)) + 0.72 * inOut(seg(u, 0.85, 1.9));
+    bs.M = 0.42 * out(seg(u, 0.05, 1.0)) + 0.48 * inOut(seg(u, 0.9, 1.9));   // 一開始就夠大：整張圖都被彎
     bs.disk = out(seg(u, 1.05, 1.9));
-    bs.camZ = lerp(Z0, 7, inOut(seg(u, 1.1, 2.55))) - 5.7 * inn(seg(u, 2.45, 3.45));
+    // 鏡頭從第一格就被往前吸（接著首頁衝進那一格的動作），一路不停，最後衝過事件視界
+    const pull = seg(u, 0, 2.55), ps = pull * pull * (3 - 2 * pull);
+    bs.camZ = Z0 - 0.9 * out(seg(u, 0, 0.7)) - (Z0 - 0.9 - 7) * (0.6 * ps + 0.4 * pull) - 5.7 * inn(seg(u, 2.45, 3.45));   // 一開始就有一股往前拉的力道（接住首頁衝進來的動作）
     bs.incl = 0.13 * inOut(seg(u, 1.0, 2.5)) + 0.012 * Math.sin(t * 37) * seg(u, 0.6, 1.1) * (1 - seg(u, 1.1, 1.5));
-    bs.chroma = 0.12 + 0.25 * seg(u, 1.0, 2.4) + 1.1 * seg(u, 2.6, 3.4);
+    bs.chroma = 0.12 + 0.3 * seg(u, 0.3, 1.0) + 0.25 * seg(u, 1.0, 2.4) + 1.1 * seg(u, 2.6, 3.4);
     bs.glitch = bump(u, 0.95, 1.2) + 0.8 * bump(u, 2.95, 3.35) + (u > 1 && Math.random() < 0.02 ? 0.6 : 0);
     if (u > 1.85 && bs.waveT0 < T0 + 1.8) bs.waveT0 = t;          // 第二道重力波
-    bs.wave = 1;
-    bs.quad = 0.5 * seg(u, 1.0, 1.4) * (1 - seg(u, 2.6, 2.95));
+    bs.wave = u < 1.0 ? 1.7 : 1;                                  // 撕開時的重力波更強（落雷那一下）
+    bs.quad = Math.max(0.3 * seg(u, 0.2, 0.9), 0.5 * seg(u, 1.0, 1.4)) * (1 - seg(u, 2.6, 2.95));   // 空間被一伸一縮
     bs.red = seg(u, 2.75, 3.4) * 0.9;
     bs.dark = seg(u, 3.2, 3.55);
-    bs.zoom = inn(seg(u, 2.4, 3.4));                              // 往裡面掉：放射狀的速度模糊
-    // 碎開之前：WebGL 只在黑洞那扇圓窗裡看得到，不做色調對應、光暈、光條、顆粒，和疊在上面的 2D 一模一樣
+    // 往裡面掉：放射狀的速度模糊（撕開的最後幾格先被吸一下，碎開後退掉，最後衝過事件視界時再來）
+    bs.zoom = Math.max(0.3 * inn(seg(u, 0.55, 1.0)) * (1 - seg(u, 1.0, 1.3)), inn(seg(u, 2.4, 3.4)));
+    // 碎開之前不做色調對應、光暈、光條、顆粒：第一格和首頁那一格一模一樣
     const post = seg(u, 0.95, 1.3);
     bs.tone = post; bs.glow = post; bs.grain = 0.04 * post;
     bs.wrap = shattered ? 0 : 1;                                   // 撕開時被彎得很厲害的光線也打回那張圖上（不露出 WebGL 自己的天空）
@@ -155,7 +146,7 @@
     if (!shattered) {
       ss.cracks = seg(u, 0.5, 0.98);
       drawOpening(t, u);
-      if (u >= 1.0) { scene.shatter(t); shattered = true; bs.flash = 0.75; bs.waveT0 = t; canvas.style.display = "none"; }
+      if (u >= 1.0) { scene.shatter(t); shattered = true; bs.flash = 0.75; bs.waveT0 = t; }
     }
     if (shattered) { ss.pullIn = seg(u, 1.9, 3.0); scene.draw(); }
     bh.setScene(sceneCv);
@@ -333,7 +324,7 @@
     const word = kind === "lock" ? "LOCKED" : kind === "safe" ? "STABILIZED" : "WARNING";
     $("#warnWord").textContent = word; $("#warnWord").dataset.text = word;
     $("#warnSub").textContent = kind === "lock" ? "ESCAPE DENIED" : kind === "safe" ? "ESCAPE UNLOCKED" : "NO HINTS · ONLY MISSIONS";
-    $("#warnSub2").textContent = ban(kind === "lock" ? 1 : kind === "safe" ? 2 : 0);
+    $("#warnSub2").textContent = kind === "warn" ? "" : ban(kind === "lock" ? 1 : 2);   // WARNING 只有英文
     $("#warnSay").textContent = word + "：" + ban(kind === "lock" ? 1 : kind === "safe" ? 2 : 0);
     clearTimeout(bannerTimer);
     w.classList.remove("is-on", "is-short", "is-safe");
@@ -348,151 +339,73 @@
   }
 
   /* ---------- 4. 遠端桌面上的小裂縫：空間還沒穩定，完成任務才能逃離 ----------
-     畫在 #scar（蓋在 iframe 上、不擋操作），和首頁那一格同一種樣子：裂縫裡是星空、白色電漿邊、
-     旁邊爬出一叢會閃的電流、幾片水晶碎片無重力地浮著，灰塵被吸進去。
-     省電：電流網和碎片都先畫好（每道裂縫一張小圖），每秒最多畫 30 次、解析度 1 倍；分頁看不到就停。
-     每隔 9–14 秒輕輕抽一下（裂縫張大、閃電；遠端畫面只抖 2 px、一點點色偏，不會暈）。
+     和首頁那一格同一種樣子：直接從老師的概念圖切兩小叢電流（assets/exam-art.js 的 cutout），從螢幕右邊、左邊往內爬一點點；
+     很小、很淡，平常輕輕閃，偶爾落雷般亮一下（想逃卻被擋下 LOCKED 時也亮一下），不擋操作、也不抖畫面，才能專心寫作業。
+     畫在 #scar（蓋在 iframe 上），每秒最多畫 20 次、1 倍解析度；分頁看不到就停。
      還沒完成任務時，「中斷連線」、開始選單的關機、回到週次的連結都逃不出去（LOCKED）；
-     完成任務（練習電腦的 mission:complete）之後裂縫一道道封起來（STABILIZED），才能正常離開。 */
+     完成任務（練習電腦的 mission:complete）之後小裂縫亮一下就散掉（STABILIZED），才能正常離開。 */
   const scarCv = $("#scar"), scarG = scarCv.getContext("2d");
-  let scars = [], escaped = false, scarRaf = 0, scarPrev = 0, scarDrawn = 0, sealAt = 0, nextJolt = 0, joltAt = -9, scarLoop = null;
-  function bolt2(x0, y0, x1, y1, rough, depth, out) {
-    if (depth === 0) { out.push([x1, y1]); return; }
-    const mx = (x0 + x1) / 2 + (Math.random() * 2 - 1) * rough * 0.4, my = (y0 + y1) / 2 + (Math.random() * 2 - 1) * rough;
-    bolt2(x0, y0, mx, my, rough / 2, depth - 1, out); bolt2(mx, my, x1, y1, rough / 2, depth - 1, out);
-  }
+  let scars = [], escaped = false, scarRaf = 0, scarDrawn = 0, sealAt = 0, scarLoop = null;
+  // 從圖裡切哪一叢（貼圖座標）、放在螢幕哪一邊、多高；左右翻過來，讓原本連著裂縫的那一端貼著螢幕邊
+  const SCAR_SPOTS = [
+    { src: [690, 360, 220, 170], root: 0, edge: 1, y: 0.44 },   // 右半邊往花伸過去的電流 → 從螢幕右邊爬進來
+    { src: [270, 420, 170, 150], root: 1, edge: 0, y: 0.72 },   // 左半邊往湖伸過去的電流 → 從螢幕左邊爬進來
+  ];
   function makeScars() {
-    // 位置避開主要操作區（任務卡、選單、Dock／工作列）：右邊中段、左下、右下
-    const spots = [[0.93, 0.47, 0.24, 0.25], [0.07, 0.7, 0.2, -0.35], [0.9, 0.82, 0.13, -0.55]];
-    const R = window.Rift, rr = R.rng(19);
-    scars = spots.map(([fx, fy, fl, ang], k) => {
-      const L = Math.max(120, Math.min(W, H) * fl * 1.6), pts = [];
-      for (let i = 0; i <= 26; i++) {
-        const u = i / 26, spike = rr() < 0.18 ? (rr() * 2 - 1) * 12 : (rr() * 2 - 1) * 3.5;
-        pts.push([(u - 0.5) * L, spike, Math.pow(Math.sin(u * Math.PI), 0.8)]);
-      }
-      // 這道裂縫專屬的電流網（兩組輪流閃）
-      const pad = 90, cw = Math.ceil(L + pad * 2), ch = pad * 2;
-      const nets = [0, 1].map((li) => {
-        const c = document.createElement("canvas"); c.width = cw; c.height = ch;
-        const g = c.getContext("2d"), r2 = R.rng(40 + k * 7 + li * 13);
-        g.translate(cw / 2, ch / 2); g.globalCompositeOperation = "lighter"; g.lineCap = "round"; g.lineJoin = "round";
-        for (let i = 0; i < 4; i++) {
-          const p = pts[3 + Math.floor(r2() * 20)], side = r2() < 0.5 ? -1 : 1;
-          R.branch(g, r2, p[0], p[1] + side * 6, side * Math.PI / 2 + (r2() * 2 - 1) * 0.7, 30 + r2() * 50, 1.3, 1);
-        }
-        return c;
-      });
-      // 幾片水晶碎片，浮在裂縫旁邊
-      const shards = [0, 1, 2].map((i) => ({ spr: R.shardSprite(rr, 9 + rr() * 13, null, 0, 0, 1, 1), u: (rr() - 0.5) * 0.8, off: (rr() < 0.5 ? -1 : 1) * (14 + rr() * 26), rot: rr() * 6.28, ph: rr() * 6.28 }));
-      return { x: fx * W, y: fy * H, ang, L, pts, wmax: 8 + rr() * 6, ph: rr() * 6.28, arcs: [], dust: [], open: 0, k, nets, cw, ch, shards };
-    });
+    scars = art && art.fx ? SCAR_SPOTS.map((p, k) => {
+      const [sx, sy, sw, sh] = p.src, c = art.cutout(sx, sy, sw, sh, p.root), sc = (Math.min(W, H) * 0.2) / sw;
+      return { c, p, k, w: sw * sc, h: sh * sc, ph: k * 2.1, strikeT: -9, next: performance.now() / 1000 + 4 + k * 3 + Math.random() * 3 };
+    }) : [];
   }
   function startScars() {
-    if (escaped || !window.Rift) return;
-    makeScars();
-    nextJolt = performance.now() / 1000 + 6;
-    const loop = scarLoop = (ms) => {
-      scarRaf = 0;
-      const t = ms / 1000;
-      if (t - scarDrawn >= 1 / 30 - 0.002) {          // 每秒最多 30 次
-        const dt = scarPrev ? Math.min(0.1, t - scarPrev) : 0;
-        scarPrev = t; scarDrawn = t;
-        drawScars(t, dt);
-      }
-      if (sealAt && t - sealAt > 1.6) { scarG.clearRect(0, 0, scarCv.width, scarCv.height); scarCv.style.display = "none"; return; }
-      if (!reduce || sealAt) scarRaf = requestAnimationFrame(loop);
-    };
-    sizeScar();
-    if (reduce) drawScars(0, 0);
-    scarRaf = requestAnimationFrame(loop);
+    if (escaped) return;
+    (art ? art.loadFx() : Promise.resolve(false)).then(() => {
+      if (escaped) return;
+      makeScars();
+      const loop = scarLoop = (ms) => {
+        scarRaf = 0;
+        const t = ms / 1000;
+        if (t - scarDrawn >= 1 / 20 - 0.002) { scarDrawn = t; drawScars(t); }   // 每秒最多 20 次
+        if (sealAt && t - sealAt > 1.4) { scarG.clearRect(0, 0, scarCv.width, scarCv.height); scarCv.style.display = "none"; return; }
+        if (!reduce || sealAt) scarRaf = requestAnimationFrame(loop);
+      };
+      sizeScar();
+      if (reduce) drawScars(0);
+      scarRaf = requestAnimationFrame(loop);
+    });
   }
   function sizeScar() {
     scarCv.width = Math.round(W); scarCv.height = Math.round(H);     // 1 倍就夠清楚，也最省
   }
-  function jolt(t) {     // 輕輕抽一下：遠端畫面抖 2 px、一點點色偏，0.1 秒就回來
-    joltAt = t;
-    if (reduce) return;
-    frame.style.transition = "none";
-    frame.style.transform = `translateX(${Math.random() < 0.5 ? -2 : 2}px)`;
-    frame.style.filter = "hue-rotate(-8deg) saturate(1.15)";
-    setTimeout(() => { frame.style.transform = ""; frame.style.filter = ""; }, 100);
-  }
-  function drawScars(t, dt) {
-    const g = scarG;
+  function drawScars(t) {
+    const g = scarG, env = window.ExamArt.strikeEnv;
     g.setTransform(1, 0, 0, 1, 0, 0);
     g.clearRect(0, 0, W, H);
-    if (!reduce && !sealAt && t > nextJolt) { jolt(t); nextJolt = t + 9 + Math.random() * 5; }
-    const surge = Math.max(0, 1 - (t - joltAt) / 0.6);
-    const line = (P) => { g.beginPath(); P.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y))); g.stroke(); };
     for (const s of scars) {
-      const sk = sealAt ? Math.min(1, Math.max(0, (t - sealAt - s.k * 0.2) / 0.6)) : 0;
-      s.open = Math.min(1, s.open + dt * 1.5);
-      const wv = s.wmax * (0.85 + 0.15 * Math.sin(t * 1.3 + s.ph) + 0.5 * surge) * s.open * (1 - sk);
+      if (!reduce && !sealAt && t > s.next) { s.strikeT = t; s.next = t + 7 + Math.random() * 6; }
+      const e = reduce ? 0 : env(t - s.strikeT);                      // 落雷：一閃、暗一下、再一閃
+      const gone = sealAt ? clamp((t - sealAt - 0.25 - s.k * 0.12) / 0.7, 0, 1) : 0;   // 封起來：先亮一下再散掉
+      const seal = sealAt ? env(t - sealAt - s.k * 0.12) : 0;
+      const rest = reduce ? 0.5 : 0.4 + 0.1 * Math.sin(t * 1.9 + s.ph) + 0.06 * (Math.random() - 0.5);
       g.save();
-      g.translate(s.x, s.y); g.rotate(s.ang);
-      const L = s.pts.map(([x, y, w]) => [x, y - w * wv / 2]), R = s.pts.map(([x, y, w]) => [x, y + w * wv / 2]);
-      // 裂縫裡：深紫星空
-      if (wv > 0.3) {
-        g.beginPath(); L.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y))); for (let i = R.length - 1; i >= 0; i--) g.lineTo(R[i][0], R[i][1]); g.closePath();
-        const gr = g.createLinearGradient(0, -wv, 0, wv);
-        gr.addColorStop(0, "#0b0820"); gr.addColorStop(0.5, "#2a1a70"); gr.addColorStop(1, "#0b0820");
-        g.fillStyle = gr; g.fill();
-        g.fillStyle = "rgba(225,230,255,.85)";
-        for (let i = 0; i < 8; i++) { const u = ((i * 0.618 + t * 0.03 + s.ph) % 1) - 0.5; g.fillRect(u * s.L * 0.8, Math.sin(i * 7 + s.ph) * wv * 0.25, 1.3, 1.3); }
-      }
-      g.globalCompositeOperation = "lighter";
-      // 電流網（兩組輪流閃；抽一下時整個亮起來）
-      if (!sk || sk < 1) {
-        const f1 = reduce ? 0.6 : 0.25 + 0.75 * Math.max(0, Math.sin(t * 6.1 + s.ph)) * (0.7 + 0.3 * Math.random());
-        const f2 = reduce ? 0.4 : 0.25 + 0.75 * Math.max(0, Math.sin(t * 4.3 + s.ph + 1.9)) * (0.7 + 0.3 * Math.random());
-        g.globalAlpha = Math.min(1, (f1 + surge) * (1 - sk)); g.drawImage(s.nets[0], -s.cw / 2, -s.ch / 2);
-        g.globalAlpha = Math.min(1, (f2 + surge) * (1 - sk)); g.drawImage(s.nets[1], -s.cw / 2, -s.ch / 2);
-        g.globalAlpha = 1;
-      }
-      // 邊：紫白電漿光＋白芯（封起來那一下更亮）
-      const fl = reduce ? 1 : 0.8 + 0.2 * Math.random(), glow = (1 - sk) + sk * (1 - sk) * 3;
-      g.lineJoin = "round"; g.lineCap = "round";
-      for (const P of [L, R]) {
-        g.strokeStyle = `rgba(120,80,255,${0.22 * fl * glow})`; g.lineWidth = 12; line(P);
-        g.strokeStyle = `rgba(205,215,255,${0.45 * fl * glow})`; g.lineWidth = 4; line(P);
-      }
-      g.globalCompositeOperation = "source-over";
-      g.strokeStyle = `rgba(250,248,255,${0.92 * Math.min(1, glow)})`; g.lineWidth = 1.5; line(L); line(R);
-      // 偶爾打一道閃電（抽一下時一定會打）
-      if (!reduce && !sealAt && Math.random() < dt * (0.4 + 10 * surge)) {
-        const p = s.pts[3 + Math.floor(Math.random() * (s.pts.length - 6))], out = Math.random() < 0.5 ? -1 : 1, len = 30 + Math.random() * 60;
-        const pts = [[p[0], p[1]]];
-        bolt2(p[0], p[1], p[0] + (Math.random() * 2 - 1) * len * 0.6, p[1] + out * len, len * 0.35, 4, pts);
-        s.arcs.push({ pts, born: t, life: 0.1 + Math.random() * 0.15 });
-      }
-      g.globalCompositeOperation = "lighter";
-      s.arcs = s.arcs.filter((a) => t - a.born < a.life);
-      for (const a of s.arcs) {
-        const al = (1 - (t - a.born) / a.life) * (0.6 + 0.4 * Math.random());
-        [[9, "120,80,255", 0.16], [3.2, "190,205,255", 0.45], [1.2, "255,255,255", 0.95]].forEach(([w, c, k2]) => { g.strokeStyle = `rgba(${c},${k2 * al})`; g.lineWidth = w; line(a.pts); });
-      }
-      // 灰塵被吸進裂縫
-      if (!reduce && !sealAt && Math.random() < dt * 10) s.dust.push({ x: (Math.random() - 0.5) * s.L * 0.8, y: (Math.random() < 0.5 ? -1 : 1) * (20 + Math.random() * 45), life: 0 });
-      s.dust = s.dust.filter((d) => (d.life += dt) < 1.6 && Math.abs(d.y) > 2);
-      for (const d of s.dust) { d.y *= 1 - dt * 2.2; g.fillStyle = `rgba(255,232,200,${0.7 * Math.min(1, d.life * 3)})`; g.fillRect(d.x, d.y, 1.4, 1.4); }
-      g.globalCompositeOperation = "source-over";
-      // 水晶碎片：無重力地慢慢浮動、轉；封起來時被吸回裂縫
-      for (const sh of s.shards) {
-        const bob = reduce ? 0 : Math.sin(t * 0.9 + sh.ph) * 4;
-        g.save();
-        g.globalAlpha = 1 - sk;
-        g.translate(sh.u * s.L, (sh.off + bob) * (1 - sk));
-        g.rotate(sh.rot + (reduce ? 0 : t * 0.15));
-        g.drawImage(sh.spr.c, -sh.spr.size / 2, -sh.spr.size / 2, sh.spr.size, sh.spr.size);
-        g.restore();
+      g.translate(s.p.edge ? W : 0, s.p.y * H);
+      g.scale(-1, 1);
+      const x = s.p.edge ? 0 : -s.w;
+      g.globalAlpha = Math.min(1, (rest + 0.5 * e + 0.6 * seal) * (1 - gone));
+      g.drawImage(s.c, x, -s.h / 2, s.w, s.h);
+      if (e + seal > 0.05) {                                           // 亮起來時多一層光
+        g.globalCompositeOperation = "lighter";
+        g.globalAlpha = Math.min(1, (0.6 * e + 0.8 * seal) * (1 - gone));
+        g.drawImage(s.c, x, -s.h / 2, s.w, s.h);
+        g.globalCompositeOperation = "source-over";
       }
       g.restore();
     }
   }
   function locked() {
     banner("lock");
-    joltAt = performance.now() / 1000; jolt(joltAt);
+    const t = performance.now() / 1000;
+    scars.forEach((s) => { s.strikeT = t; });          // 小裂縫跟著亮一下
   }
   function unlock() {
     if (escaped) return;
@@ -593,7 +506,7 @@
   });
   window.addEventListener("resize", () => {
     size();
-    if (body.classList.contains("in-remote") && !escaped) { sizeScar(); makeScars(); if (reduce) drawScars(0, 0); }
+    if (body.classList.contains("in-remote") && !escaped) { sizeScar(); makeScars(); if (reduce) drawScars(0); }
     bs.sceneHalf = [(SCENE_Z + Z0) * TAN * (W / H), (SCENE_Z + Z0) * TAN];
     if (reduce) rift.draw();
   });
@@ -612,7 +525,7 @@
       cancelAnimationFrame(raf); raf = 0;
       if (ph === "dive") {
         phase = "dive"; T0 = 1000; shattered = false; ss.shardsOn = false; ss.pullIn = 0; scene.bits = []; clock = 0;
-        bhCanvas.style.display = ""; canvas.style.display = ""; secondSurge = false; if (art) art.surge(1000.16);
+        bhCanvas.style.display = ""; canvas.style.display = "none"; secondSurge = false; if (art) art.surge(1000.16); bs.waveT0 = 1000.16;
         seeking = true;
         for (let k = 0; k <= Math.round(u * 30); k++) { now = 1000 + k / 30; st.t = now; setDive(now, 1 / 30); if (phase !== "dive") break; }
         seeking = false;
@@ -636,11 +549,16 @@
   }).then((a) => {
     art = a;
     body.classList.add("is-diving");
+    body.classList.remove("is-loading");
     if (reduce) { toPick(0); setPick(0); return; }
     phase = bh ? "dive" : "fall";
-    if (bh) bhCanvas.style.display = "";
     T0 = performance.now() / 1000;
-    if (art) art.surge(T0 + 0.16);                       // 一開始：先暗一下，再落雷般猛亮
+    if (bh) {
+      bhCanvas.style.display = ""; canvas.style.display = "none";
+      bh.q = 1; bh.makeFbo();                            // 第一格要和那張圖一樣清楚（太慢會自己降）
+      bs.waveT0 = T0 + 0.16;
+    }
+    if (art) art.surge(T0 + 0.16);                       // 一開始：先暗一下，再落雷般猛亮（打出第一圈重力波）
     run();
   });
 })();

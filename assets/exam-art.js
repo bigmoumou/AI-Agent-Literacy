@@ -104,9 +104,9 @@
     const copy = () => new ImageData(new Uint8ClampedArray(base.data), bw, bh);
     const lit = copy(), gap = copy(), glass = copy(), star = copy();
     const k = (v) => Math.max(0, v - 6) * (255 / 249);   // 去掉 JPEG 的雜訊
-    const seeds = [], gapA = new Uint8ClampedArray(bw * bh), starA = new Uint8ClampedArray(bw * bh);
+    const seeds = [], gapA = new Uint8ClampedArray(bw * bh), starA = new Uint8ClampedArray(bw * bh), mA = new Uint8ClampedArray(bw * bh);
     for (let p = 0, q = 0; p < base.data.length; p += 4, q++) {
-      const a = base.data[p + 3] / 255, m = k(mk.data[p]) * a;
+      const a = base.data[p + 3] / 255, m = mA[q] = k(mk.data[p]) * a;
       // 加亮只加在亮的白芯上（亮度越高加越多），大片的紫色光暈不會一起變白
       const lum = (base.data[p] + base.data[p + 1] + base.data[p + 2]) / 765;
       off.data[p + 3] = m; lit.data[p + 3] = m * Math.pow(lum, 1.6);
@@ -137,7 +137,7 @@
     const ph = new Float32Array(gw * gh * 3);
     for (let i = 0; i < ph.length; i++) ph[i] = Math.random() * 6.283;
     this.fx = {
-      bx, by, bw, bh, gw, gh, ph, seeds, gapA, starA, gapH: null, starH: null,
+      bx, by, bw, bh, gw, gh, ph, seeds, gapA, starA, mA, gapH: null, starH: null,
       off: put(off), lit: put(lit), gap: put(gap), glass: put(glass), star: put(star), litGlow,
       hole: hole || null, maskL: half(-1), maskR: half(1),
       lc, lg: lc.getContext("2d"), tmp, tg: tmp.getContext("2d"), halfC, hg: halfC.getContext("2d"),
@@ -184,6 +184,28 @@
       });
     }
     return this.spaceP;
+  };
+
+  /* 從圖裡切一小叢電流（貼圖座標 x, y, w, h），只留電流（透明背景）；四邊淡出，root 那一邊（0 左、1 右）不淡出，
+     因為它會貼著螢幕邊（Week 6 遠端畫面的小裂縫用） */
+  ExamArt.prototype.cutout = function (x, y, w, h, root) {
+    const F = this.fx;
+    if (!F) return null;
+    const c = canvas(w, h), g = c.getContext("2d", { willReadFrequently: true });
+    g.drawImage(this.artCv, x, y, w, h, 0, 0, w, h);
+    const d = g.getImageData(0, 0, w, h);
+    const fade = (v) => Math.min(1, v / 0.18);
+    for (let j = 0; j < h; j++) {
+      for (let i = 0; i < w; i++) {
+        const mx = x + i - F.bx, my = y + j - F.by;
+        const m = mx >= 0 && mx < F.bw && my >= 0 && my < F.bh ? F.mA[my * F.bw + mx] : 0;
+        const u = i / (w - 1), v = j / (h - 1);
+        const f = fade(v) * fade(1 - v) * (root === 0 ? 1 : fade(u)) * (root === 1 ? 1 : fade(1 - u));
+        d.data[(j * w + i) * 4 + 3] = m * f * f;
+      }
+    }
+    g.putImageData(d, 0, 0);
+    return c;
   };
 
   // 在 at 那一刻整道裂縫先暗 0.16 秒（像在蓄電），再落雷般猛亮
@@ -317,6 +339,6 @@
     if (under) this.drawUnder(g);
   };
 
-  ExamArt.TEX_W = TEX_W; ExamArt.TEX_H = TEX_H;
+  ExamArt.TEX_W = TEX_W; ExamArt.TEX_H = TEX_H; ExamArt.strikeEnv = strikeEnv;
   window.ExamArt = ExamArt;
 })();

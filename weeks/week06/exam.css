@@ -12,6 +12,15 @@ body.exam {
   height: 100svh;
 }
 #rift, #bh { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 1; }
+/* 剛打開、那張圖還沒畫上去時：先用 CSS 把同一張圖（frame.jpg）的畫面區鋪滿螢幕，
+   和首頁轉場最後那一張、exam.js 的 cover 一樣（貼圖座標 1024x768，畫面區 40,118,944,532） */
+body.is-loading #rift {
+  --s: max(calc(100vw / 944), calc(100vh / 532));
+  --s: max(calc(100vw / 944), calc(100dvh / 532));
+  background: #000 url(frame.jpg) no-repeat;
+  background-size: calc(var(--s) * 1024) calc(var(--s) * 768);
+  background-position: calc(50vw - var(--s) * 512) calc(50% - var(--s) * 384);
+}
 #scar { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 4; pointer-events: none; display: none; }
 body.in-remote #scar { display: block; }
 #remote { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100svh; border: 0; z-index: 0; background: #000; }
@@ -150,6 +159,7 @@ body.in-remote .page { display: none; }
 .warn-word::before, .warn-word::after { content: attr(data-text); position: absolute; inset: 0; padding-left: .3em; mix-blend-mode: screen; opacity: .55; }
 .warn-word::before { color: #31e1ff; transform: translateX(-3px); }
 .warn-word::after { color: #ff1f5a; transform: translateX(3px); }
+.warn-sub2:empty { display: none; }
 .warn-sub2 { position: relative; font-size: clamp(.8rem, 1.5vw, 1.05rem); font-weight: 700; letter-spacing: .2em; color: #ffd6dc; opacity: 0; }
 .warn.is-on .warn-sub2 { animation: warn-sub 2.9s ease both; }
 /* 還沒完成任務就想離開：同一條紅帶子，短一點 */

@@ -181,13 +181,18 @@
   const FRAME_VS = `#version 300 es
     in vec2 aUv;
     uniform mat4 uProj; uniform vec3 uCam;
-    uniform float uAngle, uTH, uR, uH, uBend;
+    uniform float uAngle, uTH, uR, uH, uBend, uSuck;
     out vec2 vUv; out float vAng;
     void main() {
       float a = uAngle + (aUv.x - 0.5) * uTH;          // 這個頂點離正前方多少角度
-      vec3 p = vec3(uR * sin(a), (aUv.y - 0.5) * uH, -uR * cos(a));
+      vAng = a;
+      // 進考試週時（uSuck 0→1）：旁邊的畫格被吸往正中間那一格、往後退、變扁
+      float k = uSuck * smoothstep(0.2, 1.4, abs(a));
+      a *= 1.0 - 0.6 * k;
+      float r = uR + 10.0 * k;
+      vec3 p = vec3(r * sin(a), (aUv.y - 0.5) * uH * (1.0 - 0.45 * k), -r * cos(a));
       p.y += uBend * a * a;                             // 轉得快時兩端微微翹起
-      vUv = aUv; vAng = a;
+      vUv = aUv;
       gl_Position = uProj * vec4(p - uCam, 1.0);
     }`;
   const FRAME_FS = `#version 300 es
@@ -529,6 +534,8 @@
   const cam = [0, CAM_Y, CAM_BACK];            // 相機一直朝 -z 看，不旋轉
   const proj = new Float32Array(16);
   const fr = { l: -1, r: 1, t: 1, b: -1 };     // 近平面上的視窗範圍（點擊判斷也要用）
+  const lens = { tanH: 1, tanV: 1, frT: 1 };   // 版面算出來的視角（進考試週的轉場要用）
+  let suck = 0;                                // 進考試週時，旁邊的畫格被吸進去的程度
   let pxPerFrame = 600;
   let vw = 1, vh = 1;
   let dpr = Math.min(window.devicePixelRatio || 1, 1.5);
@@ -560,6 +567,7 @@
     for (let k = 0; k < 3; k++) fw = Math.min(fw, band / (0.75 * flare(fw / w))); // 一格（含齒孔）的寬高比是 4:3
     const tanH = Math.tan(half) / (fw / w);
     const tanV = tanH / (w / h);
+    lens.tanH = tanH; lens.tanV = tanV;
     // 膠捲中線本來會落在哪一列像素，再把整個畫面往上或往下移到 band 的正中間
     const ndc0 = (0 - CAM_Y) / ((R + CAM_BACK) * tanV);
     const shift = ((1 - ndc0) / 2) * h - (top + band / 2);
@@ -568,6 +576,13 @@
     fr.b = fr.t - height;
     fr.r = NEAR * tanH;
     fr.l = -fr.r;
+    lens.frT = fr.t;
+    buildProj();
+    pxPerFrame = fw;
+    if (studio) studio.layout(proj, cam, w, h, canvas.width, canvas.height);
+    wake();
+  }
+  function buildProj() {
     proj.fill(0);
     proj[0] = (2 * NEAR) / (fr.r - fr.l);
     proj[5] = (2 * NEAR) / (fr.t - fr.b);
@@ -576,9 +591,6 @@
     proj[10] = -(FAR + NEAR) / (FAR - NEAR);
     proj[11] = -1;
     proj[14] = (-2 * FAR * NEAR) / (FAR - NEAR);
-    pxPerFrame = fw;
-    if (studio) studio.layout(proj, cam, w, h, canvas.width, canvas.height);
-    wake();
   }
   let resizeQueued = false;
   window.addEventListener("resize", () => {
@@ -620,7 +632,7 @@
     gl.uniform3fv(fu.uCam, cam);
     gl.uniform1f(fu.uY, FLOOR_Y);
     gl.uniform3fv(fu.uLine, col.line);
-    gl.uniform1f(fu.uAlpha, col.alpha);
+    gl.uniform1f(fu.uAlpha, col.alpha * (1 - suck));
     gl.uniform1f(fu.uRot, pos * TH);
     gl.uniform1f(fu.uSpokes, N * 4);
     gl.bindVertexArray(floorQuad.vao);
@@ -644,12 +656,16 @@
     gl.uniform1f(u.uR, R);
     gl.uniform1f(u.uH, H);
     gl.uniform1f(u.uBend, bend);
+    gl.uniform1f(u.uSuck, suck);
     gl.uniform3fv(u.uHole, col.hole);
     gl.uniform3fv(u.uFog, col.fog);
     gl.uniform1i(u.uMap, 0);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindVertexArray(arc.vao);
-    for (let i = 0; i < N; i++) {
+    const mid = current();
+    for (let n = 0; n <= N; n++) {
+      const i = n === N ? mid : n;                 // 正中間那一格最後畫
+      if (n < N && i === mid) continue;
       let a = (i - pos) * TH;
       a = Math.atan2(Math.sin(a), Math.cos(a));   // 換算到 -π ~ π
       if (Math.abs(a) > 1.7) continue;             // 在相機後面或旁邊
@@ -706,9 +722,51 @@
     if (!f || f.kind !== "ready" || leaving) return;
     goTo(i, false);
     try { sessionStorage.setItem("film-frame", String(i)); } catch (e) { /* 無法儲存也沒關係 */ }
-    leaving = { t0: performance.now() };
+    const toExam = f.w.exam && examFx && examArt && !reduceMotion;
+    leaving = { t0: performance.now(), exam: toExam, camY: cam[1], frT: fr.t, surged: false };
     document.body.classList.add("is-leaving");
-    setTimeout(() => { window.location.href = root() + f.w.href; }, reduceMotion ? 60 : 650);
+    if (toExam) {
+      document.body.classList.add("is-to-exam");
+      examArt.surge(performance.now() / 1000 + 0.12);   // 一點下去：裂縫先暗一下、再猛亮
+    }
+    setTimeout(() => { window.location.href = root() + f.w.href; }, reduceMotion ? 60 : toExam ? EXAM_LEAVE * 0.9 : 650);
+  }
+  /* 進考試週：被吸進去。先往後一縮（像被拉住），接著越來越快地衝進那一格，旁邊的畫格被吸往中間、往後退，
+     地板和道具淡掉；最後疊上一張和 Week 6 第一格一模一樣的全螢幕畫面（weeks/week06/exam.js 也是這樣把畫面區鋪滿），
+     在落雷最亮的那一刻交接，換頁時就看不出接縫。 */
+  const EXAM_LEAVE = 1000;
+  const seg01 = (v, a, b) => clamp((v - a) / (b - a), 0, 1);
+  let handoff = null;
+  function examLeave(now) {
+    const L = leaving, t = clamp((now - L.t0) / EXAM_LEAVE, 0, 1);
+    const back = Math.sin(seg01(t, 0, 0.14) * Math.PI) * 0.25;
+    const e = Math.pow(seg01(t, 0.04, 0.78), 2), sm = e * e * (3 - 2 * e);   // 0.78 時剛好到位
+    // 衝到那一格中央的大小剛好和 Week 6 把畫面區鋪滿螢幕時一樣：每個貼圖像素在螢幕上的大小相同
+    const I = examArt.img, s = Math.max(vw / I.w, vh / I.h);
+    const zEnd = ((vw / 2) * R * TH) / (TEX_W * lens.tanH * s) - R;
+    cam[2] = CAM_BACK + back + (zEnd - CAM_BACK) * e;
+    cam[1] = L.camY + (0 - L.camY) * sm;
+    fr.t = L.frT + (NEAR * lens.tanV - L.frT) * sm; fr.b = fr.t - 2 * NEAR * lens.tanV;
+    buildProj();
+    const sk = seg01(t, 0, 0.7);
+    suck = sk * sk * (3 - 2 * sk);                           // 一點下去，旁邊的畫格就開始被吸過去
+    if (!L.surged && t > 0.55) { L.surged = true; examArt.surge(now / 1000 + 0.27); }   // 交接那一刻（0.82）落雷
+    const a = seg01(t, 0.78, 0.88);
+    if (a > 0) drawHandoff(a);
+  }
+  function drawHandoff(alpha) {
+    if (!handoff) {
+      handoff = document.createElement("canvas");
+      handoff.className = "exam-handoff"; handoff.setAttribute("aria-hidden", "true");
+      document.body.append(handoff);
+    }
+    const k = Math.min(window.devicePixelRatio || 1, 2), w = Math.round(vw * k), h = Math.round(vh * k);
+    if (handoff.width !== w || handoff.height !== h) { handoff.width = w; handoff.height = h; }
+    const g = handoff.getContext("2d"), I = examArt.img, s = Math.max(vw / I.w, vh / I.h);
+    g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, w, h);
+    g.setTransform(k * s, 0, 0, k * s, k * (vw / 2 - (I.x + I.w / 2) * s), k * (vh / 2 - (I.y + I.h / 2) * s));
+    examArt.paint(g);
+    handoff.style.opacity = String(alpha);
   }
   function activate(i) {
     const f = frames[i];
@@ -720,9 +778,11 @@
   // 從週次頁按「上一頁」回來時，把轉場恢復原狀
   window.addEventListener("pageshow", (e) => {
     if (!e.persisted) return;
-    leaving = null;
-    document.body.classList.remove("is-leaving");
-    cam[2] = CAM_BACK;
+    leaving = null; suck = 0;
+    document.body.classList.remove("is-leaving", "is-to-exam");
+    if (handoff) handoff.style.opacity = "0";
+    cam[2] = CAM_BACK; cam[1] = CAM_Y;
+    layout();
     touch();
   });
 
@@ -929,7 +989,8 @@
       hover[i] += (goal - hover[i]) * (1 - Math.exp(-12 * dt));
       if (Math.abs(goal - hover[i]) < 0.003) hover[i] = goal; else hoverMoving = true;
     }
-    if (leaving) {
+    if (leaving && leaving.exam) examLeave(now);
+    else if (leaving) {
       const t = clamp((now - leaving.t0) / 650, 0, 1);
       cam[2] = CAM_BACK - t * t * t * R * 0.55;
     }

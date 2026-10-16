@@ -678,73 +678,6 @@
     }
   };
 
-  /* ---------- 遠端畫面的小裂縫（weeks/week06/exam.js 的 scars）借用的碎片和電流 ----------
-     shardSprite：一片水晶碎片（深色半透明本體、斜面、白亮邊、星芒），畫一次存成小圖。
-     branch：一叢會分叉的電流（紫光、藍白、白芯三層）。 */
-  function shardSprite(r, R, plate, px, py, pk, k) {
-    const n = 3 + Math.floor(r() * 3), stretch = 0.45 + r() * 0.75, rot0 = r() * TAU, pts = [];
-    for (let i = 0; i < n; i++) {
-      const a = (i / n) * TAU + (r() - 0.5) * 0.9, rr = R * (0.55 + r() * 0.45);
-      const x = Math.cos(a) * rr, y = Math.sin(a) * rr * stretch;
-      pts.push([x * Math.cos(rot0) - y * Math.sin(rot0), x * Math.sin(rot0) + y * Math.cos(rot0)]);
-    }
-    const size = Math.ceil(R * 2 + 16), c = document.createElement("canvas");
-    c.width = c.height = Math.max(4, Math.round(size * k));
-    const g = c.getContext("2d"), o = size / 2;
-    g.setTransform(k, 0, 0, k, 0, 0);
-    const path = () => { g.beginPath(); pts.forEach(([x, y], i) => (i ? g.lineTo(o + x, o + y) : g.moveTo(o + x, o + y))); g.closePath(); };
-    g.save(); path(); g.clip();
-    // 透過玻璃看到的後面：往旁邊偏一點（折射），淡淡的
-    // 玻璃本體：深藍紫、半透明，透出一點後面（往旁邊偏一點，像折射）
-    const body = g.createLinearGradient(o - R, o - R, o + R, o + R);
-    body.addColorStop(0, "rgba(30,24,70,.62)"); body.addColorStop(0.5, "rgba(70,60,150,.3)"); body.addColorStop(1, "rgba(190,200,255,.2)");
-    g.fillStyle = body; g.fillRect(0, 0, size, size);
-    if (plate) { g.globalAlpha = 0.32; g.drawImage(plate, (px - o + R * 0.25) * pk, (py - o - R * 0.15) * pk, size * pk, size * pk, 0, 0, size, size); g.globalAlpha = 1; }
-    // 切面：一塊亮面、一塊暗面
-    const q = pts[Math.floor(n / 2)], c0 = pts[0];
-    g.fillStyle = "rgba(235,240,255,.22)";
-    g.beginPath(); g.moveTo(o + c0[0], o + c0[1]); g.lineTo(o + q[0] * 0.15, o + q[1] * 0.15); g.lineTo(o + pts[1][0], o + pts[1][1]); g.closePath(); g.fill();
-    g.fillStyle = "rgba(10,8,30,.25)";
-    g.beginPath(); g.moveTo(o + q[0], o + q[1]); g.lineTo(o + q[0] * 0.15, o + q[1] * 0.15); g.lineTo(o + pts[(Math.floor(n / 2) + 1) % n][0], o + pts[(Math.floor(n / 2) + 1) % n][1]); g.closePath(); g.fill();
-    g.strokeStyle = "rgba(255,255,255,.4)"; g.lineWidth = 0.9;
-    g.beginPath(); g.moveTo(o + c0[0], o + c0[1]); g.lineTo(o + q[0] * 0.15, o + q[1] * 0.15); g.lineTo(o + q[0], o + q[1]); g.stroke();
-    g.restore();
-    g.lineJoin = "round";
-    // 外圈紫光、內圈斜面、白亮邊
-    g.globalCompositeOperation = "lighter";
-    path(); g.strokeStyle = "rgba(130,100,255,.55)"; g.lineWidth = 7; g.stroke();
-    g.globalCompositeOperation = "source-over";
-    g.save(); g.translate(o, o); g.scale(0.86, 0.86); g.translate(-o, -o);
-    path(); g.strokeStyle = "rgba(255,255,255,.28)"; g.lineWidth = 1.1; g.stroke(); g.restore();
-    path(); g.strokeStyle = "rgba(248,248,255,.95)"; g.lineWidth = 1.6; g.stroke();
-    for (let t = 0; t < 2; t++) {                                          // 一兩邊特別亮（反光）
-      const e = Math.floor(r() * n), a = pts[e], b = pts[(e + 1) % n];
-      g.strokeStyle = "#fff"; g.lineWidth = 2.8; g.beginPath(); g.moveTo(o + a[0], o + a[1]); g.lineTo(o + (a[0] + b[0]) / 2, o + (a[1] + b[1]) / 2); g.stroke();
-    }
-    const sp = pts[Math.floor(r() * n)], sr = Math.max(4, R * 0.18);          // 一個角上的星芒
-    g.globalCompositeOperation = "lighter";
-    const sgl = g.createRadialGradient(o + sp[0], o + sp[1], 0, o + sp[0], o + sp[1], sr);
-    sgl.addColorStop(0, "rgba(255,255,255,.9)"); sgl.addColorStop(1, "rgba(160,140,255,0)");
-    g.fillStyle = sgl; g.fillRect(o + sp[0] - sr, o + sp[1] - sr, sr * 2, sr * 2);
-    g.strokeStyle = "rgba(255,255,255,.8)"; g.lineWidth = 0.8;
-    g.beginPath(); g.moveTo(o + sp[0] - sr * 1.6, o + sp[1]); g.lineTo(o + sp[0] + sr * 1.6, o + sp[1]); g.moveTo(o + sp[0], o + sp[1] - sr * 1.6); g.lineTo(o + sp[0], o + sp[1] + sr * 1.6); g.stroke();
-    return { c, size };
-  }
-  function branch(g, r, x, y, ang, len, w, depth) {
-    const pts = [[x, y]], steps = 7 + Math.floor(r() * 5);
-    let cx = x, cy = y, a = ang;
-    for (let i = 0; i < steps; i++) {
-      a += (r() * 2 - 1) * 0.55;
-      const sl = (len / steps) * (0.6 + r() * 0.8);
-      cx += Math.cos(a) * sl; cy += Math.sin(a) * sl;
-      pts.push([cx, cy]);
-      if (depth < 2 && r() < 0.3) branch(g, r, cx, cy, a + (r() < 0.5 ? -1 : 1) * (0.5 + r() * 0.7), len * (0.35 + r() * 0.3), w * 0.62, depth + 1);
-    }
-    const line = () => { g.beginPath(); pts.forEach(([px, py], i) => (i ? g.lineTo(px, py) : g.moveTo(px, py))); g.stroke(); };
-    g.strokeStyle = "rgba(110,70,255,.16)"; g.lineWidth = w * 9; line();
-    g.strokeStyle = "rgba(125,110,255,.42)"; g.lineWidth = w * 3; line();
-    g.strokeStyle = "rgba(205,215,255,.95)"; g.lineWidth = w; line();
-  }
   Rift.prototype.draw = function () {
     const st = this.state, g = this.g, W = this.W, H = this.H;
     const dt = this.lastT == null ? 0 : clamp(st.t - this.lastT, 0, 0.1);
@@ -798,7 +731,5 @@
     if (st.flash > 0.001) { g.fillStyle = `rgba(240,240,255,${0.55 * st.flash})`; g.fillRect(-50, -50, W + 100, H + 100); }
   };
 
-  // 給遠端畫面的小裂縫（weeks/week06/exam.js）借用同一種碎片和電流
-  Rift.shardSprite = shardSprite; Rift.branch = branch; Rift.rng = rng;
   window.Rift = Rift;
 })();

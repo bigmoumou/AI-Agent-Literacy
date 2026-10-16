@@ -59,6 +59,7 @@ void main() {
     minR = min(minR, r);
     if (M > 0.001 && r < M) { captured = true; break; }
     float dt = clamp(0.055 * r, 0.015, 2.5);
+    if (r > 12.0 * M) dt = max(dt, 0.12);          // 離黑洞遠的地方光幾乎不彎，步子大一點（不然穿過中心附近的光走不完）
     if (M > 0.001) v += (-1.5 * M * h2 * p / pow(r, 5.0)) * dt;
     vec3 np = p + v * dt;
     // 光線穿過黑洞後面的那張畫面（撕開的螢幕）：記下那裡的顏色，後面的星空只透過透明的地方
@@ -92,6 +93,13 @@ void main() {
     }
     p = np;
     if (r > 60.0 && dot(p, v) > 0.0) break;
+  }
+  // 步數用完還沒碰到後面那張畫面的光：照直線算它打在哪裡（不然會露出一塊天空）
+  if (!sceneHit && !captured && v.z > 1e-4 && p.z < uSceneZ) {
+    vec3 hp = p + v * ((uSceneZ - p.z) / v.z);
+    vec2 uv = hp.xy / uSceneHalf * 0.5 + 0.5;
+    if (uWrap > 0.5) uv = 1.0 - abs(1.0 - mod(uv, 2.0));
+    if (uv.x > 0.0 && uv.x < 1.0 && uv.y > 0.0 && uv.y < 1.0) scene = texture(uScene, uv);
   }
   vec3 bg = captured ? vec3(0.0) : sky(normalize(v));
   bg = scene.rgb + bg * (1.0 - scene.a);
