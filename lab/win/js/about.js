@@ -6,7 +6,7 @@
 
   var h = LAB.util.h;
 
-  var TRADEMARK = LAB.week === 4
+  var TRADEMARK = LAB.week >= 4          // Weeks 4 and 5 use Edge, GitHub and Mermaid too
     ? 'Windows、檔案總管、Windows Terminal、PowerShell、Microsoft Edge 與 Visual Studio Code 是 Microsoft 的商標，Codex 是 OpenAI 的商標，GitHub 是 GitHub, Inc. 的商標，Mermaid 是一個開放原始碼專案的名稱。這個練習是獨立的教學模擬，與這些公司和專案都沒有關係。'
     : 'Windows、檔案總管、Windows Terminal、PowerShell 與 Visual Studio Code 是 Microsoft 的商標，Codex 是 OpenAI 的商標。這個練習是獨立的教學模擬，與這些公司都沒有關係。';
   var WALLPAPER = '桌布是用程式畫的原創圖案，沒有使用任何公司的圖片。';
@@ -61,7 +61,7 @@
     ['help', '列出練習版有哪些指令']
   ];
   // Week 4: git talks to the practice GitHub
-  if (LAB.week === 4) COMMANDS.splice(COMMANDS.length - 1, 0, ['git', 'clone 拿一份回家，add＋commit 存一個版本，push 送上雲端，pull 拿回最新版（status、log、remote -v 可以隨時看）']);
+  if (LAB.week >= 4) COMMANDS.splice(COMMANDS.length - 1, 0, ['git', 'clone 拿一份回家，add＋commit 存一個版本，push 送上雲端，pull 拿回最新版（status、log、remote -v 可以隨時看）']);
   var COMMANDS_NOTE = '這是練習版的 Windows PowerShell：真正的電腦上有更多指令，有些在這裡還沒有做。路徑可以用 \ 也可以用 /。';
 
   function p(text, cls) { return h('p', { class: 'ab-p' + (cls ? ' ' + cls : '') }, text); }
@@ -82,7 +82,9 @@
     return h('div', { class: 'ab-body' },
       h('h2', { class: 'ab-h' }, '關於這個練習'),
       p('這是練習用的模擬環境，不是真的 Windows，也不是真的 AI。'),
-      p(LAB.week === 4
+      p(LAB.week === 5
+        ? '你可以在這裡練習「學習分析工具」每週的操作，這次是 Week 5 的 VERIFY.md、選模型、活動紀錄和 context window，還有作業前的準備。照著右上角的任務卡做；想練哪一個任務，按任務卡上的「換任務」自己挑。弄壞了隨時可以重來。'
+        : LAB.week === 4
         ? '你可以在這裡練習「學習分析工具」每週的操作，這次是 Week 4 的內建瀏覽器、GitHub 和 Mermaid。照著右上角的任務卡做；想練哪一個任務，按任務卡上的「換任務」自己挑。弄壞了隨時可以重來。'
         : '你可以在這裡練習「學習分析工具」每週的操作，先從 Week 3 的終端機、檔案總管和 Codex 開始。照著右上角的任務卡做；想練哪一個任務，按任務卡上的「換任務」自己挑。弄壞了隨時可以重來。'),
       p('每次進來都是一台全新的電腦，任務都還沒做過；重新整理或離開這一頁，這次的進度就不會留下。'),

@@ -1,0 +1,99 @@
+/* w5-codex.css — the Week 5 parts of the practice Codex (js/w5/codex5.js, SPEC-w5 §6.2), the Windows copy: the window has its own title bar, so the
+   sidebar and the Settings page start 10 px from the top (no room for traffic lights). Loaded only for ?week=5. Same dark palette (codex.css). */
+
+/* ---- sidebar: Settings at the bottom */
+.cx-side { display: flex; flex-direction: column; }
+.cx-side > * { flex: none; }
+.cx-side-foot { margin-top: auto; position: sticky; bottom: -12px; padding: 8px 0 12px; background: var(--cx-side); }
+.cx-settings-btn svg { color: var(--cx-icon); }
+
+/* ---- below the message box: context ring, model menu, effort */
+.cx-meta.is-w5 { margin-right: 6px; white-space: nowrap; }
+.cx-meta-w5 { position: relative; display: inline-flex; align-items: center; gap: 2px; }
+.cx-model { display: inline-flex; align-items: center; gap: 3px; height: 24px; padding: 0 6px; margin: 0; border: 0; border-radius: 7px; background: none; color: var(--cx-meta); font-size: 11.5px; cursor: default; }
+.cx-model svg { color: var(--cx-meta); }
+.cx-model:hover:not(:disabled), .cx-model[aria-expanded="true"] { background: #343434; color: #f0f0f0; }
+.cx-model:disabled { opacity: .6; }
+.cx-effort { padding: 0 4px 0 2px; font-size: 11.5px; color: var(--cx-meta); }
+.cx-model-menu {
+  position: absolute; right: 0; bottom: calc(100% + 8px); z-index: 4; min-width: 190px; padding: 6px; border-radius: 12px;
+  background: #2b2b2b; box-shadow: 0 10px 30px rgba(0, 0, 0, .5), inset 0 0 0 1px rgba(255, 255, 255, .07);
+}
+.cx-mm-head { padding: 4px 8px 6px; font-size: 11.5px; color: var(--cx-muted); }
+.cx-model-item { display: flex; align-items: center; width: 100%; height: 30px; padding: 0 8px; margin: 0; border: 0; border-radius: 7px; background: none; color: var(--cx-text); font-size: 13px; text-align: left; cursor: default; }
+.cx-model-item:hover { background: #383838; }
+.cx-mm-name { flex: 1; }
+.cx-mm-chk { display: inline-flex; width: 14px; color: #e8e8e8; }
+.cx-ring-wrap { position: relative; display: inline-flex; margin-right: 4px; }
+.cx-ring-wrap[hidden] { display: none; }
+.cx-ring { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; padding: 0; margin: 0; border: 0; border-radius: 7px; background: none; cursor: default; }
+.cx-ring:hover { background: #343434; }
+.cx-ring-bg { stroke: #4a4a4a; }
+.cx-ring-fg { stroke: #c9c9c9; transition: stroke-dasharray .4s ease; }
+.cx-ring.is-high .cx-ring-fg { stroke: #f0b545; }
+.cx-ring-tip {
+  position: absolute; right: -6px; bottom: calc(100% + 8px); z-index: 4; padding: 5px 9px; border-radius: 8px; white-space: nowrap;
+  background: #3a3a3a; color: #f0f0f0; font-size: 12px; box-shadow: 0 6px 18px rgba(0, 0, 0, .45);
+  pointer-events: none;            /* it lies over the message box: the cue (elementFromPoint) must still see the box under it */
+}
+.cx-ring-tip[hidden] { display: none; }
+
+/* ---- activity rows that open */
+.cx-step.cx-act { display: block; }
+.cx-act-line { display: flex; align-items: center; gap: 7px; }
+.cx-act-btn { display: inline-flex; align-items: center; gap: 4px; min-width: 0; max-width: 100%; padding: 0 4px 0 0; margin: 0; border: 0; border-radius: 6px; background: none; color: inherit; font: inherit; line-height: inherit; text-align: left; cursor: pointer; }
+.cx-act-btn:hover .cx-sv { color: #d6d6d6; }
+.cx-act-btn .cx-sl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cx-act-chev { display: inline-flex; color: #8a8a8a; transition: transform .12s ease; }
+.cx-act.is-open .cx-act-chev { transform: rotate(90deg); }
+.cx-act-detail { margin: 2px 0 6px 20px; padding: 7px 10px; border-left: 2px solid #3a3a3a; background: #232323; border-radius: 0 8px 8px 0; font-family: var(--lab-font-mono); font-size: 12px; line-height: 1.55; color: #c8c8c8; -webkit-user-select: text; user-select: text; }
+.cx-act-detail[hidden] { display: none; }
+.cx-act-dl { white-space: pre-wrap; overflow-wrap: anywhere; }
+.cx-act[data-kind="compact"] .cx-sv { color: #c9b27a; }
+
+/* ---- Allow / Deny */
+.cx-slot:empty { display: none; }
+.cx-approve { margin: 8px 0 4px; padding: 12px 14px; border-radius: 12px; background: #2a2a2a; box-shadow: inset 0 0 0 1px #3d3d3d; }
+.cx-ap-title { font-size: 13.5px; font-weight: 700; color: #f2f2f2; }
+.cx-ap-cmd { margin-top: 8px; padding: 8px 10px; border-radius: 8px; background: #1c1c1c; overflow-x: auto; }
+.cx-ap-code { font-family: var(--lab-font-mono); font-size: 12.5px; color: #dcdcdc; white-space: pre-wrap; overflow-wrap: anywhere; background: none !important; padding: 0 !important; -webkit-user-select: text; user-select: text; }
+.cx-ap-code b { color: #ffd479; font-weight: 700; }
+.cx-ap-note { margin-top: 8px; font-size: 12.5px; color: #bdbdbd; }
+.cx-ap-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; }
+.cx-ap-btns .cx-btn { display: inline-block; width: auto; min-width: 84px; height: 30px; margin: 0; }
+
+/* ---- copy, tables, links in answers */
+.cx-msg-tools { display: flex; gap: 4px; margin-top: 6px; }
+.cx-copy { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 24px; padding: 0; margin: 0; border: 0; border-radius: 6px; background: none; color: #8a8a8a; opacity: .75; cursor: default; }
+.cx-asst:hover .cx-copy, .cx-copy:focus-visible { opacity: 1; }
+.cx-copy:hover { background: #2f2f2f; color: #e8e8e8; }
+.cx-copy.is-done { color: #7fd18b; opacity: 1; }
+.cx-table-wrap { margin: 6px 0 8px; overflow-x: auto; }
+.cx-table { border-collapse: collapse; font-size: 13px; line-height: 1.45; }
+.cx-table th, .cx-table td { padding: 5px 10px; border: 1px solid #3a3a3a; text-align: left; vertical-align: top; }
+.cx-table th { background: #2a2a2a; color: #f0f0f0; font-weight: 600; }
+.cx-link { color: #8ab4ff; text-decoration: underline; text-underline-offset: 2px; overflow-wrap: anywhere; cursor: pointer; }
+.cx-link:hover { color: #b3cdff; }
+
+/* ---- Settings (a page over the whole window, as in the app) */
+.cx-root { position: relative; }
+.cx-settings { position: absolute; inset: 0; z-index: 5; display: flex; background: var(--cx-bg); }
+.cx-set-nav { flex: none; width: 240px; padding: 10px 8px 12px; background: var(--cx-side); border-right: 1px solid var(--cx-side-line); overflow-y: auto; }
+.cx-set-back svg { transform: rotate(180deg); }
+.cx-set-back { margin-bottom: 10px; }
+.cx-set-item.is-off .cx-name { color: var(--cx-dis); }
+.cx-set-body { flex: 1; min-width: 0; padding: 22px 32px 24px; overflow-y: auto; }
+.cx-set-h { margin: 0 0 16px; font-size: 20px; font-weight: 700; color: #f2f2f2; }
+.cx-set-card { max-width: 620px; border-radius: 12px; background: #252525; box-shadow: inset 0 0 0 1px #333; }
+.cx-set-row { display: flex; align-items: center; gap: 16px; padding: 12px 16px; }
+.cx-set-row + .cx-set-row { border-top: 1px solid #333; }
+.cx-set-txt { flex: 1; min-width: 0; }
+.cx-set-t { font-size: 13.5px; color: #ececec; }
+.cx-set-s { margin-top: 2px; font-size: 12px; color: var(--cx-muted); }
+.cx-set-val { font-size: 13px; color: var(--cx-meta); }
+.cx-set-val.is-off { color: var(--cx-dis); }
+.cx-switch { position: relative; flex: none; width: 36px; height: 21px; padding: 0; margin: 0; border: 0; border-radius: 11px; background: #4a4a4a; cursor: default; transition: background .15s ease; }
+.cx-switch[aria-checked="true"] { background: #3b82f6; }
+.cx-switch-knob { position: absolute; left: 2px; top: 2px; width: 17px; height: 17px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, .4); transition: transform .15s ease; }
+.cx-switch[aria-checked="true"] .cx-switch-knob { transform: translateX(15px); }
+@media (prefers-reduced-motion: reduce) { .cx-switch, .cx-switch-knob, .cx-ring-fg, .cx-act-chev { transition: none; } }

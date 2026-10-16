@@ -1858,7 +1858,7 @@
   var EDGE_PDF = {
     'syllabus.pdf': { title: '學習分析工具　課程大綱', sub: '國立臺灣師範大學　2026 年秋季班',
       pages: [[['h', '課程簡介'], ['p', '這門課帶大家用電腦把學習留下來的資料整理起來、看出意思。不需要寫程式的背景，從資料夾、終端機一路練到請 Codex 幫忙整理報告。'], ['h', '每週進度'],
-        ['li', 'Week 1　什麼是學習分析'], ['li', 'Week 2　資料長什麼樣子：欄位、列、缺漏值'], ['li', 'Week 3　終端機入門：ls、cd、mv、tar'], ['li', LAB.week === 4 ? 'Week 4　Codex 內建瀏覽器、GitHub 與 Mermaid' : 'Week 4　把成績表整理乾淨'], ['li', 'Week 5　請 Codex 幫忙畫圖']],
+        ['li', 'Week 1　什麼是學習分析'], ['li', 'Week 2　資料長什麼樣子：欄位、列、缺漏值'], ['li', 'Week 3　終端機入門：ls、cd、mv、tar'], ['li', LAB.week >= 4 ? 'Week 4　Codex 內建瀏覽器、GitHub 與 Mermaid' : 'Week 4　把成績表整理乾淨'], ['li', LAB.week === 5 ? 'Week 5　讓 Codex 做對：驗證與 context window' : 'Week 5　請 Codex 幫忙畫圖']],
         [['h', '評分方式'], ['li', '課堂練習　40%'], ['li', '期中作業　30%'], ['li', '期末小專題　30%'], ['h', '注意事項'], ['p', '課堂使用的資料都是假資料。作業請存在自己的資料夾，並依課堂說明命名。']]] },
     'resume.pdf': { title: '個人履歷（範例）', sub: 'an',
       pages: [[['h', '基本資料'], ['p', '姓名：an　　聯絡信箱：an@example.com'], ['h', '學歷'], ['li', '國立臺灣師範大學　學習分析課程　修課中'], ['h', '技能'], ['li', '資料整理（Excel、CSV）'], ['li', '終端機基本操作']]] },

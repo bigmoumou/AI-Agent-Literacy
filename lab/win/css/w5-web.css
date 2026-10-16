@@ -1,0 +1,26 @@
+/* w5-web.css — the made-up open-data site of Week 5 (js/w5/opendata.js). Loaded only for ?week=5. Light page, its own look (no real portal). */
+.od-page { min-height: 100%; background: #f6f8f7; color: #22302b; font-family: var(--lab-font-ui); font-size: 14px; line-height: 1.6; }
+.od-page a { color: #0f6b54; text-decoration: none; }
+.od-page a:hover { text-decoration: underline; }
+.od-top { display: flex; align-items: center; gap: 10px; padding: 12px 24px; background: #fff; border-bottom: 1px solid #dfe7e3; }
+.od-logo { width: 22px; height: 22px; border-radius: 6px; background: linear-gradient(135deg, #2f9e7c, #1d6b8a); }
+.od-brand { font-weight: 700; color: #22302b !important; }
+.od-nav { margin-left: auto; display: flex; gap: 16px; }
+.od-main { max-width: 760px; margin: 0 auto; padding: 20px 24px 28px; }
+.od-main h1 { margin: 6px 0 10px; font-size: 24px; }
+.od-main h2 { margin: 22px 0 8px; font-size: 16px; }
+.od-lead { color: #52615b; }
+.od-card { padding: 14px 16px; background: #fff; border: 1px solid #dfe7e3; border-radius: 10px; }
+.od-card h2 { margin: 0 0 4px; }
+.od-card p { margin: 0; color: #52615b; font-size: 13px; }
+.od-crumb { margin: 0; font-size: 12.5px; color: #6b7a74; }
+.od-meta { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; margin: 0; padding: 12px 16px; background: #fff; border: 1px solid #dfe7e3; border-radius: 10px; }
+.od-meta dt { color: #6b7a74; }
+.od-meta dd { margin: 0; }
+.od-table { border-collapse: collapse; width: 100%; background: #fff; }
+.od-table th, .od-table td { padding: 6px 10px; border: 1px solid #dfe7e3; text-align: left; }
+.od-table th { background: #eef3f1; font-weight: 600; }
+.od-pre { margin: 0; padding: 10px 12px; overflow-x: auto; background: #fff; border: 1px solid #dfe7e3; border-radius: 8px; font-family: var(--lab-font-mono); font-size: 12.5px; line-height: 1.5; white-space: pre; }
+.od-btn { display: inline-block; margin-top: 14px; padding: 8px 14px; border-radius: 8px; background: #0f6b54; color: #fff !important; }
+.od-btn:hover { text-decoration: none !important; background: #0c5a46; }
+.od-foot { padding: 14px 24px 22px; color: #7c8a84; font-size: 12px; text-align: center; }
