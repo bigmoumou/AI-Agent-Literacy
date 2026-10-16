@@ -119,6 +119,56 @@ body.is-still .hud { display: none; }
 .skip:hover { color: #fff; background: rgba(255, 255, 255, .12); }
 .skip[hidden] { display: none; }
 
+/* ---------- WARNING（連進遠端電腦之後，洛克人 BOSS 來襲那種，現代版） ----------
+   一條半透明的暗紅帶子從中間打開，上下兩條斜紋警示帶一直流動，WARNING 亮三次（和警報聲同步），
+   畫面四周跟著泛紅；約 2.9 秒後收掉。不擋操作（pointer-events: none）。 */
+.warn { position: fixed; left: 0; right: 0; top: clamp(56px, 12vh, 132px); z-index: 6; pointer-events: none; visibility: hidden; }
+.warn.is-on { visibility: visible; }
+.warn-band {
+  position: relative; min-height: clamp(96px, 15vh, 150px); padding: 22px 0 20px; box-sizing: border-box; overflow: hidden; transform: scaleY(0);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(8px, 1.4vh, 14px);
+  background: linear-gradient(90deg, rgba(30, 2, 10, 0), rgba(34, 3, 12, .82) 16%, rgba(34, 3, 12, .82) 84%, rgba(30, 2, 10, 0));
+  -webkit-backdrop-filter: blur(6px) saturate(150%); backdrop-filter: blur(6px) saturate(150%);
+}
+.warn-band::before, .warn-band::after {
+  content: ""; position: absolute; left: 0; right: 0; height: 9px; opacity: .9;
+  background: repeating-linear-gradient(-45deg, #ff2d4a 0 12px, transparent 12px 24px);
+  animation: warn-stripes .5s linear infinite;
+}
+.warn-band::before { top: 0; }
+.warn-band::after { bottom: 0; animation-direction: reverse; }
+@keyframes warn-stripes { to { background-position: 33.94px 0; } }
+.warn-line { position: absolute; left: 0; right: 0; height: 1px; background: #ff5a70; box-shadow: 0 0 12px 1px rgba(255, 45, 74, .9); transform: scaleX(0); }
+.warn-line.t { top: 15px; }
+.warn-line.b { bottom: 15px; }
+.warn-word {
+  position: relative; font-family: var(--font-mono); font-weight: 700; line-height: 1;
+  font-size: clamp(2rem, 7.4vw, 5.4rem); letter-spacing: .3em; padding-left: .3em; color: #ff3654;
+  text-shadow: 0 0 22px rgba(255, 40, 70, .8), 0 0 2px rgba(255, 255, 255, .9); opacity: 0;
+}
+.warn-word::before, .warn-word::after { content: attr(data-text); position: absolute; inset: 0; padding-left: .3em; mix-blend-mode: screen; opacity: .55; }
+.warn-word::before { color: #31e1ff; transform: translateX(-3px); }
+.warn-word::after { color: #ff1f5a; transform: translateX(3px); }
+.warn-sub { position: relative; font-family: var(--font-mono); font-size: clamp(.55rem, 1.1vw, .78rem); letter-spacing: .42em; color: rgba(255, 220, 226, .82); opacity: 0; }
+.warn-vig { position: fixed; inset: 0; z-index: 5; pointer-events: none; opacity: 0; background: radial-gradient(ellipse at center, transparent 52%, rgba(255, 20, 50, .42) 100%); }
+.warn.is-on .warn-band { animation: warn-open 2.9s cubic-bezier(.2, .8, .2, 1) both; }
+.warn.is-on .warn-line { animation: warn-line 2.9s ease both; }
+.warn.is-on .warn-word { animation: warn-blink 2.9s steps(1, end) both, warn-jit 0.12s steps(2, end) infinite; }
+.warn.is-on .warn-sub { animation: warn-sub 2.9s ease both; }
+body.warn-on .warn-vig { animation: warn-pulse 2.9s ease both; }
+@keyframes warn-open { 0% { transform: scaleY(0); } 7% { transform: scaleY(1); } 88% { transform: scaleY(1); } 100% { transform: scaleY(0); } }
+@keyframes warn-line { 0% { transform: scaleX(0); opacity: 1; } 9% { transform: scaleX(1); } 86% { transform: scaleX(1); opacity: 1; } 100% { transform: scaleX(0); opacity: 0; } }
+@keyframes warn-blink { 0%, 8% { opacity: 0; } 9%, 26% { opacity: 1; } 27%, 33% { opacity: .08; } 34%, 51% { opacity: 1; } 52%, 58% { opacity: .08; } 59%, 85% { opacity: 1; } 86%, 100% { opacity: 0; } }
+@keyframes warn-jit { 0% { transform: translateX(0); } 50% { transform: translateX(1.5px); } }
+@keyframes warn-sub { 0%, 12% { opacity: 0; } 18%, 82% { opacity: 1; } 90%, 100% { opacity: 0; } }
+@keyframes warn-pulse { 0% { opacity: 0; } 10% { opacity: 1; } 24% { opacity: .2; } 35% { opacity: 1; } 49% { opacity: .2; } 60% { opacity: .9; } 88%, 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .warn.is-on .warn-band { animation: warn-open 2.9s linear both; }
+  .warn.is-on .warn-word { animation: warn-sub 2.9s ease both; }
+  .warn-band::before, .warn-band::after { animation: none; }
+  body.warn-on .warn-vig { animation: none; }
+}
+
 /* 首頁封面用的靜止畫面（?still=1）：只留場景 */
 body.is-still .page, body.is-still .skip { display: none; }
 

@@ -120,10 +120,10 @@
   /* ---------- 狀態 ---------- */
   let phase = "start", T0 = 0, now = 0, raf = 0, prev = 0;
   let pickShown = false, loaded = false, chosen = null, connectAt = 0, revealAt = 0, burst = false;
-  let aimAt = null, chosenAt = null, wc = null, clock = 0, pickDark = 0, shattered = false, seeking = false;
+  let aimAt = null, chosenAt = null, wc = null, clock = 0, pickDark = 0, shattered = false, seeking = false, emergeAt = -9;
   const bs = {        // 黑洞那一段的參數（blackhole.js 的 render）
     t: 0, M: 0, disk: 0, stars: 1, camZ: Z0, incl: 0, tanFov: TAN, sceneOn: 1, sceneZ: SCENE_Z, sceneHalf: [1, 1],
-    chroma: 0, glitch: 0, wave: 0, waveT0: -9, quad: 0, red: 0, dark: 0, flash: 0, grain: 0.04, glow: 1,
+    chroma: 0, glitch: 0, wave: 0, waveT0: -9, quad: 0, red: 0, dark: 0, flash: 0, grain: 0.04, glow: 1, zoom: 0, streak: 0.6,
   };
 
   function base() {   // 2D 每一格先回到預設
@@ -154,32 +154,34 @@
       ss.glitch = t - lastBurst < 0.08 ? 1 : 0;
       if (u >= 1.0) { scene.shatter(t); shattered = true; bs.flash = 0.75; bs.waveT0 = t; }
     } else {
-      ss.pullIn = seg(u, 2.4, 3.9);
+      ss.pullIn = seg(u, 1.9, 3.0);
     }
     ss.t = t;
     scene.draw();
     bh.setScene(sceneCv);
     // 黑洞：在裂縫裡長出來、變大；碎開後吸積盤亮起、鏡頭往前衝、慢慢傾斜看到盤面
     bs.t = t;
-    bs.M = 0.18 * out(seg(u, 0.1, 1.0)) + 0.72 * inOut(seg(u, 0.9, 2.3));
-    bs.disk = out(seg(u, 1.15, 2.3));
-    bs.camZ = lerp(Z0, 6.5, inOut(seg(u, 1.2, 3.4))) - 5.2 * inn(seg(u, 3.3, 4.35));
-    bs.incl = 0.13 * inOut(seg(u, 1.1, 3.2)) + 0.012 * Math.sin(t * 37) * seg(u, 0.6, 1.1) * (1 - seg(u, 1.1, 1.5));
-    bs.chroma = 0.12 + 0.25 * seg(u, 1.0, 3.0) + 1.1 * seg(u, 3.4, 4.3);
-    bs.glitch = (u < 1.15 ? ss.glitch * 0.8 + bump(u, 0.95, 1.2) : 0) + 0.8 * bump(u, 3.75, 4.2) + (Math.random() < 0.02 ? 0.6 : 0);
-    if (u > 2.15 && bs.waveT0 < T0 + 2) bs.waveT0 = t;          // 第二道重力波
+    bs.M = 0.18 * out(seg(u, 0.1, 0.95)) + 0.72 * inOut(seg(u, 0.85, 1.9));
+    bs.disk = out(seg(u, 1.05, 1.9));
+    bs.camZ = lerp(Z0, 7, inOut(seg(u, 1.1, 2.55))) - 5.7 * inn(seg(u, 2.45, 3.45));
+    bs.incl = 0.13 * inOut(seg(u, 1.0, 2.5)) + 0.012 * Math.sin(t * 37) * seg(u, 0.6, 1.1) * (1 - seg(u, 1.1, 1.5));
+    bs.chroma = 0.12 + 0.25 * seg(u, 1.0, 2.4) + 1.1 * seg(u, 2.6, 3.4);
+    bs.glitch = (u < 1.15 ? ss.glitch * 0.8 + bump(u, 0.95, 1.2) : 0) + 0.8 * bump(u, 2.95, 3.35) + (Math.random() < 0.02 ? 0.6 : 0);
+    if (u > 1.85 && bs.waveT0 < T0 + 1.8) bs.waveT0 = t;          // 第二道重力波
     bs.wave = 1;
-    bs.quad = 0.5 * seg(u, 1.0, 1.4) * (1 - seg(u, 3.4, 3.8));
-    bs.red = seg(u, 3.55, 4.3) * 0.9;
-    bs.dark = seg(u, 4.05, 4.45);
+    bs.quad = 0.5 * seg(u, 1.0, 1.4) * (1 - seg(u, 2.6, 2.95));
+    bs.red = seg(u, 2.75, 3.4) * 0.9;
+    bs.dark = seg(u, 3.2, 3.55);
+    bs.zoom = inn(seg(u, 2.4, 3.4));                              // 往裡面掉：放射狀的速度模糊
+    bs.streak = 0.6 + 0.6 * seg(u, 1.4, 2.6);                     // 亮的地方拉出橫向的光條
     bs.flash = Math.max(0, bs.flash - dt * 2.2);
     bh.render(bs, seeking ? 0 : dt * 1000);
     // 時間膨脹：越靠近事件視界，時鐘走得越慢
-    const rate = Math.sqrt(clamp(1 - inn(seg(u, 1.2, 4.3)), 0, 1));
+    const rate = Math.sqrt(clamp(1 - inn(seg(u, 1.1, 3.45)), 0, 1));
     clock += dt * rate;
-    hudShow(u > 1.25 && u < 4.45, rate);
+    hudShow(u > 1.2 && u < 3.55, rate);
     if (u > 0.6) skipBtn.hidden = false;
-    if (u >= 4.45) toPick(1);
+    if (u >= 3.55) toPick(1);
   }
 
   /* ---------- 1'. 沒有 WebGL2：2D 版的撕開＋黑洞 ---------- */
@@ -220,6 +222,7 @@
     bhCanvas.style.display = "none";
     canvas.style.display = "";
     pickDark = dark;
+    emergeAt = now || performance.now() / 1000;
     body.classList.add("is-in-void");
     if (!pickShown) showPick();
   }
@@ -232,6 +235,10 @@
     st.warpC = wc;
     st.flow = phase === "connect" ? lerp(0.03, 0.45, inn(seg(t - connectAt, 0, 2.2))) : aimAt ? 0.04 : 0.025;
     pickDark = Math.max(0, pickDark - 0.025); st.dark = pickDark;
+    // 從黑洞另一頭冒出來：一圈光往外擴散、短短一閃
+    const e = t - emergeAt;
+    st.shock = e > 0 && e < 1.1 ? e / 1.1 : 0;
+    st.flash = e > 0 && e < 0.5 ? 0.35 * (1 - e / 0.5) : 0;
     rift.draw();
   }
   function setConnect(t) {
@@ -265,6 +272,47 @@
     body.classList.add("in-remote");
     pick.hidden = true;
     try { frame.focus(); } catch (e) { /* 不能聚焦也沒關係 */ }
+    setTimeout(warn, 250);
+  }
+
+  /* ---------- 連進去之後：WARNING（洛克人 BOSS 來襲那種，現代版）＋警報聲 ----------
+     警報聲用 Web Audio 現場合成（兩個稍微錯開的方波、高低兩音交替、三次），不用音檔、沒有咻聲或撞擊聲。
+     瀏覽器只准在使用者點過之後出聲，所以聲音在選電腦那一下就先準備好（initAudio）。 */
+  let audio = null;
+  function initAudio() {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      audio = audio || new AC();
+      if (audio.state === "suspended") audio.resume();
+    } catch (e) { audio = null; }
+  }
+  function alarm() {
+    if (!audio) return;
+    const t0 = audio.currentTime + 0.03;
+    const out = audio.createGain(); out.gain.value = 0.15;
+    const comp = audio.createDynamicsCompressor();
+    const lp = audio.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 3000;
+    lp.connect(out); out.connect(comp); comp.connect(audio.destination);
+    const tone = (at, dur, f0, f1) => {
+      [0, 9].forEach((det) => {
+        const o = audio.createOscillator(), g = audio.createGain();
+        o.type = "square"; o.detune.value = det;
+        o.frequency.setValueAtTime(f0, at); o.frequency.linearRampToValueAtTime(f1, at + dur);
+        g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(0.45, at + 0.012);
+        g.gain.setValueAtTime(0.45, at + dur - 0.05); g.gain.linearRampToValueAtTime(0, at + dur);
+        o.connect(g); g.connect(lp); o.start(at); o.stop(at + dur + 0.03);
+      });
+    };
+    // 和畫面上 WARNING 三次亮起同步（exam.css 的 warn-blink：2.9 秒裡的 9%、34%、59%）
+    [0.26, 0.99, 1.71].forEach((p) => { tone(t0 + p, 0.2, 988, 940); tone(t0 + p + 0.24, 0.22, 740, 700); });
+  }
+  function warn() {
+    const w = $("#warn");
+    if (!w) return;
+    body.classList.add("warn-on"); w.classList.add("is-on");
+    alarm();
+    setTimeout(() => { w.classList.remove("is-on"); body.classList.remove("warn-on"); }, 3000);
   }
 
   /* ---------- 迴圈 ---------- */
@@ -298,6 +346,7 @@
   function choose(btn) {
     if (chosen || phase !== "pick") return;
     chosen = btn.dataset.os;
+    initAudio();
     pick.classList.add("is-chosen");
     pick.querySelectorAll(".pick-os").forEach((b) => { b.classList.toggle("is-on", b === btn); b.classList.toggle("is-off", b !== btn); });
     const r = btn.querySelector(".lap-lid").getBoundingClientRect();

@@ -108,6 +108,7 @@
       noSpace: false,                                    // 不畫裂縫裡的深空（交給 blackhole.js 的 WebGL 畫，這裡留透明）
       cracks: 0,                                         // 0–1：玻璃裂痕從裂縫往外爬
       shardsOn: false, shatterT: 0, pullIn: 0,           // 碎成玻璃片之後：無重力漂浮，pullIn 0–1 被吸回中心
+      shock: 0,                                          // 0–1：從中心往外擴散的一圈光（從黑洞另一頭冒出來的那一下）
     };
   }
 
@@ -687,6 +688,15 @@
       g.strokeStyle = `rgba(140,110,255,${0.4 * st.seam})`; g.lineWidth = 30; this.strokeEdge(g, 0, 0);
       g.strokeStyle = `rgba(210,220,255,${0.6 * st.seam})`; g.lineWidth = 8; this.strokeEdge(g, 0, 0);
       g.strokeStyle = `rgba(255,255,255,${st.seam})`; g.lineWidth = 2.2; this.strokeEdge(g, 0, 0);
+      g.restore();
+    }
+    if (st.shock > 0.001 && st.shock < 1) {
+      const k = st.shock, R = Math.hypot(W, H) * 0.62 * (1 - Math.pow(1 - k, 3)), a = 1 - k;
+      g.save(); g.globalCompositeOperation = "lighter";
+      [[60, "130,100,255", 0.18], [18, "210,215,255", 0.4], [3, "255,255,255", 0.9]].forEach(([w, c, al]) => {
+        g.strokeStyle = `rgba(${c},${al * a})`; g.lineWidth = w * (0.4 + a);
+        g.beginPath(); g.ellipse(W / 2, H / 2, R, R * 0.9, 0, 0, Math.PI * 2); g.stroke();
+      });
       g.restore();
     }
     if (st.flash > 0.001) { g.fillStyle = `rgba(240,240,255,${0.55 * st.flash})`; g.fillRect(-50, -50, W + 100, H + 100); }

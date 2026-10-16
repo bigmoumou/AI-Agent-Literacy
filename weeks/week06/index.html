@@ -94,6 +94,10 @@
 <!-- 往黑洞掉的時候：時間膨脹的讀數（越靠近事件視界，時鐘走得越慢） -->
 <p class="hud" id="hud" aria-hidden="true"><span class="hud-k">TIME DILATION</span><span class="hud-v" id="hudRate">×1.000</span><span class="hud-c" id="hudClock">T+ 00:00.000</span></p>
 
+<!-- 連進遠端電腦之後：WARNING（洛克人 BOSS 來襲那種，現代版；exam.js 的 warn() 打開，約 3 秒後自己收掉，附警報聲） -->
+<div class="warn" id="warn" aria-hidden="true"><div class="warn-band"><span class="warn-line t"></span><span class="warn-word" data-text="WARNING">WARNING</span><span class="warn-sub">NO HINTS · ONLY MISSIONS</span><span class="warn-line b"></span></div></div>
+<div class="warn-vig" aria-hidden="true"></div>
+
 <button class="skip" id="skip" type="button" hidden><span data-i18n data-zh-hans="略过" data-en="Skip" data-vi="Bỏ qua">略過</span></button>
 
 <script src="../../assets/rift.js"></script>
