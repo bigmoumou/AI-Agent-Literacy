@@ -5,7 +5,8 @@
    2. 選電腦（2D，#rift）：深空裡浮出兩台筆電；選了之後星光衝向它。
    3. 進到遠端桌面：遠端桌面從兩邊合上，把裂縫封起來（iframe：lab/mac 或 lab/win）。
    沒有 WebGL2 時用 2D 版的撕開＋黑洞；系統設定「減少動態效果」時直接到選電腦，只用淡入淡出。
-   ?still=1：首頁封面（poster.jpg、thumb.jpg）。?still=plate：只有兩半的底圖（首頁畫格動畫用的 plate.jpg）。
+   ?still=1、?still=plate：看第六版的 2D 撕裂畫面和底圖（首頁那一格、poster.jpg、thumb.jpg 已改用老師的概念圖，
+   由 製作/week06/design/build-frame.py 產生）。
    ?debug=1：examSeek("dive", 秒) 跳到某一刻。 */
 (function () {
   "use strict";
