@@ -30,6 +30,13 @@
     vi: ["Đang kết nối…", "Đang đi qua khe nứt…", "Đã kết nối", "Kết nối quá lâu, hãy tải lại trang rồi thử lại."],
   };
   const say = (i) => (STR[LANG] || STR["zh-Hant"])[i];
+  const BAN = {   // 帶子上的中文那一行：[WARNING, LOCKED, STABILIZED]
+    "zh-Hant": ["完成任務，才能逃離", "還沒完成任務，逃不出去", "空間穩定了：可以中斷連線離開"],
+    "zh-Hans": ["完成任务，才能逃离", "还没完成任务，逃不出去", "空间稳定了：可以断开连接离开"],
+    en: ["Complete the mission to escape", "Mission not complete. No way out yet", "Space is stable. You may disconnect now"],
+    vi: ["Hoàn thành nhiệm vụ mới thoát được", "Chưa xong nhiệm vụ, chưa thể thoát", "Không gian đã ổn định: có thể ngắt kết nối"],
+  };
+  const ban = (i) => (BAN[LANG] || BAN["zh-Hant"])[i];
 
   const body = document.body;
   const canvas = $("#rift"), bhCanvas = $("#bh");
@@ -272,7 +279,9 @@
     body.classList.add("in-remote");
     pick.hidden = true;
     try { frame.focus(); } catch (e) { /* 不能聚焦也沒關係 */ }
-    setTimeout(warn, 250);
+    setTimeout(() => banner("warn"), 250);
+    startScars();
+    hookLab(0);
   }
 
   /* ---------- 連進去之後：WARNING（洛克人 BOSS 來襲那種，現代版）＋警報聲 ----------
@@ -307,12 +316,189 @@
     // 和畫面上 WARNING 三次亮起同步（exam.css 的 warn-blink：2.9 秒裡的 9%、34%、59%）
     [0.26, 0.99, 1.71].forEach((p) => { tone(t0 + p, 0.2, 988, 940); tone(t0 + p + 0.24, 0.22, 740, 700); });
   }
-  function warn() {
+  function beep(at, dur, f, type, vol) {
+    const o = audio.createOscillator(), g = audio.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, at);
+    g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(vol, at + 0.01);
+    g.gain.setValueAtTime(vol, at + dur - 0.04); g.gain.linearRampToValueAtTime(0, at + dur);
+    o.connect(g); g.connect(audio.destination); o.start(at); o.stop(at + dur + 0.02);
+  }
+  function buzz() {      // 想逃但還沒完成：兩聲低低的拒絕音
+    if (!audio) return;
+    const t0 = audio.currentTime + 0.02;
+    beep(t0, 0.12, 155, "square", 0.05); beep(t0 + 0.16, 0.16, 130, "square", 0.05);
+  }
+  function chime() {     // 完成任務、空間穩定：三個往上的清亮音
+    if (!audio) return;
+    const t0 = audio.currentTime + 0.03;
+    [[0, 660], [0.12, 880], [0.24, 1320]].forEach(([d, f]) => { beep(t0 + d, 0.32, f, "sine", 0.09); beep(t0 + d, 0.32, f * 2, "sine", 0.02); });
+  }
+  let bannerTimer = 0;
+  function banner(kind) {
     const w = $("#warn");
     if (!w) return;
-    body.classList.add("warn-on"); w.classList.add("is-on");
-    alarm();
-    setTimeout(() => { w.classList.remove("is-on"); body.classList.remove("warn-on"); }, 3000);
+    const word = kind === "lock" ? "LOCKED" : kind === "safe" ? "STABILIZED" : "WARNING";
+    $("#warnWord").textContent = word; $("#warnWord").dataset.text = word;
+    $("#warnSub").textContent = kind === "lock" ? "ESCAPE DENIED" : kind === "safe" ? "ESCAPE UNLOCKED" : "NO HINTS · ONLY MISSIONS";
+    $("#warnSub2").textContent = ban(kind === "lock" ? 1 : kind === "safe" ? 2 : 0);
+    $("#warnSay").textContent = word + "：" + ban(kind === "lock" ? 1 : kind === "safe" ? 2 : 0);
+    clearTimeout(bannerTimer);
+    w.classList.remove("is-on", "is-short", "is-safe");
+    body.classList.remove("warn-on", "warn-short", "warn-safe");
+    void w.offsetWidth;                                  // 重新播一次動畫
+    w.classList.add("is-on");
+    body.classList.add("warn-on");
+    if (kind === "lock") { w.classList.add("is-short"); body.classList.add("warn-short"); buzz(); }
+    else if (kind === "safe") { w.classList.add("is-safe"); body.classList.add("warn-safe"); chime(); }
+    else alarm();
+    bannerTimer = setTimeout(() => { w.classList.remove("is-on", "is-short", "is-safe"); body.classList.remove("warn-on", "warn-short", "warn-safe"); }, kind === "lock" ? 2000 : 3000);
+  }
+
+  /* ---------- 4. 遠端桌面上的小裂縫：空間還沒穩定，完成任務才能逃離 ----------
+     畫在 #scar（蓋在 iframe 上、不擋操作）：三道細細的裂縫，和前面同一種樣子——白色紙纖維邊、紫白電漿光、
+     裂縫裡是深空、偶爾打出閃電、灰塵被吸進去；每隔幾秒抽一下（遠端畫面也跟著抖、色偏一瞬間）。
+     練習電腦按「中斷連線」、開始選單的關機、左上角回到週次的連結，在完成任何一個任務之前都逃不出去（LOCKED）；
+     完成任務（練習電腦的 mission:complete）之後裂縫一道道封起來（STABILIZED），才能正常離開。 */
+  const scarCv = $("#scar"), scarG = scarCv.getContext("2d");
+  let scars = [], escaped = false, scarRaf = 0, scarPrev = 0, sealAt = 0, nextJolt = 0, joltAt = -9;
+  function bolt2(x0, y0, x1, y1, rough, depth, out) {
+    if (depth === 0) { out.push([x1, y1]); return; }
+    const mx = (x0 + x1) / 2 + (Math.random() * 2 - 1) * rough * 0.4, my = (y0 + y1) / 2 + (Math.random() * 2 - 1) * rough;
+    bolt2(x0, y0, mx, my, rough / 2, depth - 1, out); bolt2(mx, my, x1, y1, rough / 2, depth - 1, out);
+  }
+  function makeScars() {
+    // 位置避開主要操作區（任務卡、選單、Dock／工作列）：右邊中段、左下、右下
+    const spots = [[0.93, 0.47, 0.24, 0.25], [0.07, 0.7, 0.2, -0.35], [0.9, 0.82, 0.13, -0.55]];
+    const r = (a, b) => a + Math.random() * (b - a);
+    scars = spots.map(([fx, fy, fl, ang], k) => {
+      const L = Math.max(120, Math.min(W, H) * fl * 1.6), pts = [];
+      const n = 26;
+      for (let i = 0; i <= n; i++) {
+        const u = i / n, spike = Math.random() < 0.18 ? r(-12, 12) : r(-3.5, 3.5);
+        pts.push([(u - 0.5) * L, spike, Math.pow(Math.sin(u * Math.PI), 0.8)]);
+      }
+      return { x: fx * W, y: fy * H, ang, L, pts, wmax: r(9, 15), ph: r(0, 6.28), arcs: [], dust: [], open: 0, k };
+    });
+  }
+  function startScars() {
+    if (escaped) return;
+    makeScars();
+    nextJolt = performance.now() / 1000 + 3.5;
+    const loop = (ms) => {
+      scarRaf = 0;
+      const t = ms / 1000, dt = scarPrev ? Math.min(0.1, t - scarPrev) : 0;
+      scarPrev = t;
+      drawScars(t, dt);
+      if (!(sealAt && t - sealAt > 1.4)) scarRaf = requestAnimationFrame(loop);
+      else { scarG.clearRect(0, 0, scarCv.width, scarCv.height); scarCv.style.display = "none"; }
+    };
+    sizeScar();
+    scarRaf = requestAnimationFrame(loop);
+  }
+  function sizeScar() {
+    const d = Math.min(window.devicePixelRatio || 1, 1.5);
+    scarCv.width = Math.round(W * d); scarCv.height = Math.round(H * d);
+    scarG.setTransform(d, 0, 0, d, 0, 0);
+  }
+  function jolt(t) {     // 抽一下：裂縫猛張、閃電、遠端畫面抖動加色偏一瞬間
+    joltAt = t;
+    if (reduce) return;
+    frame.style.transition = "none";
+    frame.style.transform = `translate(${(Math.random() * 2 - 1) * 6}px, ${(Math.random() * 2 - 1) * 2}px)`;
+    frame.style.filter = "hue-rotate(-18deg) saturate(1.5) contrast(1.08)";
+    setTimeout(() => { frame.style.transform = `translate(${(Math.random() * 2 - 1) * 4}px, 0)`; }, 60);
+    setTimeout(() => { frame.style.transform = ""; frame.style.filter = ""; }, 140);
+  }
+  function drawScars(t, dt) {
+    const g = scarG;
+    g.clearRect(0, 0, W, H);
+    if (!reduce && !sealAt && t > nextJolt) { jolt(t); nextJolt = t + 5 + Math.random() * 4; }
+    const surge = Math.max(0, 1 - (t - joltAt) / 0.5);
+    const seal = sealAt ? Math.min(1, (t - sealAt) / 1.1) : 0;
+    for (const s of scars) {
+      // 封起來：一道接一道（錯開 0.2 秒）
+      const sk = sealAt ? Math.min(1, Math.max(0, (t - sealAt - s.k * 0.2) / 0.6)) : 0;
+      s.open = Math.min(1, s.open + dt * 1.5);
+      const breathe = 0.8 + 0.2 * Math.sin(t * 1.3 + s.ph) + 0.6 * surge;
+      const wv = s.wmax * breathe * s.open * (1 - sk);
+      g.save();
+      g.translate(s.x, s.y); g.rotate(s.ang);
+      const edge = (side) => s.pts.map(([x, y, w]) => [x, y + side * w * wv / 2]);
+      const L = edge(-1), R = edge(1);
+      // 裂縫裡：深空
+      if (wv > 0.3) {
+        g.beginPath(); L.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y))); for (let i = R.length - 1; i >= 0; i--) g.lineTo(R[i][0], R[i][1]); g.closePath();
+        const gr = g.createLinearGradient(0, -wv, 0, wv);
+        gr.addColorStop(0, "#0b0820"); gr.addColorStop(0.5, "#1c1450"); gr.addColorStop(1, "#0b0820");
+        g.fillStyle = gr; g.fill();
+        g.fillStyle = "rgba(220,225,255,.8)";
+        for (let i = 0; i < 6; i++) { const u = ((i * 0.618 + t * 0.03 + s.ph) % 1) - 0.5; g.fillRect(u * s.L * 0.8, Math.sin(i * 7 + s.ph) * wv * 0.25, 1.2, 1.2); }
+      }
+      // 邊：紫白電漿光＋白色纖維芯＋一點色差
+      const fl = reduce ? 1 : 0.8 + 0.2 * Math.random();
+      const line = (P) => { g.beginPath(); P.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y))); g.stroke(); };
+      g.lineJoin = "round"; g.lineCap = "round";
+      g.globalCompositeOperation = "lighter";
+      const glow = (1 - sk) + sk * (1 - sk) * 3;          // 封起來那一下更亮
+      for (const P of [L, R]) {
+        g.strokeStyle = `rgba(130,90,255,${0.2 * fl * glow})`; g.lineWidth = 14; line(P);
+        g.strokeStyle = `rgba(200,210,255,${0.4 * fl * glow})`; g.lineWidth = 4.5; line(P);
+      }
+      g.globalCompositeOperation = "source-over";
+      g.strokeStyle = `rgba(255,70,100,${0.45 * (1 - sk)})`; g.lineWidth = 1.6; g.save(); g.translate(-1.5, 0); line(L); g.restore();
+      g.strokeStyle = `rgba(50,210,255,${0.4 * (1 - sk)})`; g.save(); g.translate(1.5, 0); line(R); g.restore();
+      g.strokeStyle = `rgba(245,242,236,${0.9 * Math.min(1, glow)})`; g.lineWidth = 1.6; line(L); line(R);
+      // 閃電：平常偶爾、抽一下時一定會打
+      if (!reduce && !sealAt && (Math.random() < dt * (0.5 + 12 * surge))) {
+        const i = 3 + Math.floor(Math.random() * (s.pts.length - 6)), p = s.pts[i];
+        const out = Math.random() < 0.5 ? -1 : 1, len = 30 + Math.random() * 70;
+        const pts = [[p[0], p[1]]];
+        bolt2(p[0], p[1], p[0] + (Math.random() * 2 - 1) * len * 0.6, p[1] + out * len, len * 0.35, 4, pts);
+        s.arcs.push({ pts, born: t, life: 0.1 + Math.random() * 0.15 });
+      }
+      g.globalCompositeOperation = "lighter";
+      s.arcs = s.arcs.filter((a) => t - a.born < a.life);
+      for (const a of s.arcs) {
+        const al = (1 - (t - a.born) / a.life) * (0.6 + 0.4 * Math.random());
+        [[10, "150,110,255", 0.14], [3.5, "190,205,255", 0.4], [1.3, "255,255,255", 0.95]].forEach(([w, c, k]) => { g.strokeStyle = `rgba(${c},${k * al})`; g.lineWidth = w; line(a.pts); });
+      }
+      // 灰塵被吸進裂縫
+      if (!reduce && !sealAt && Math.random() < dt * 14) s.dust.push({ x: (Math.random() - 0.5) * s.L * 0.8, y: (Math.random() < 0.5 ? -1 : 1) * (20 + Math.random() * 50), life: 0 });
+      s.dust = s.dust.filter((d) => (d.life += dt) < 1.6 && Math.abs(d.y) > 2);
+      for (const d of s.dust) { d.y *= 1 - dt * 2.2; g.fillStyle = `rgba(255,232,200,${0.7 * Math.min(1, d.life * 3)})`; g.fillRect(d.x, d.y, 1.4, 1.4); }
+      g.globalCompositeOperation = "source-over";
+      g.restore();
+    }
+    if (seal >= 1) scars = [];
+  }
+  function locked() {
+    banner("lock");
+    joltAt = performance.now() / 1000; jolt(joltAt);
+  }
+  function unlock() {
+    if (escaped) return;
+    escaped = true;
+    sealAt = performance.now() / 1000;
+    setTimeout(() => banner("safe"), 700);
+  }
+  // 接上練習電腦（同一個網站，所以讀得到它的 LAB）：任務完成就解鎖；還沒解鎖時擋住離開
+  function hookLab(tries) {
+    let L = null, doc = null;
+    try { L = frame.contentWindow.LAB; doc = frame.contentDocument; } catch (e) { return; }
+    if (!L || !L.bus || !L.remote || !doc) { if (tries < 40) setTimeout(() => hookLab(tries + 1), 250); return; }
+    L.bus.on("mission:complete", unlock);
+    const leave = L.remote.disconnect;
+    L.remote.disconnect = function () { if (escaped) return leave.apply(this, arguments); locked(); };
+    // 逃出來之後回到課程首頁（練習電腦原本會「回上一頁」，在這裡會退回空白的 iframe）
+    L.remote.go = function () { window.location.href = "../../"; };
+    doc.addEventListener("click", (e) => {
+      if (escaped) return;
+      const a = e.target && e.target.closest && e.target.closest("a[href]");
+      if (!a) return;
+      let path = "";
+      try { path = new URL(a.getAttribute("href"), frame.contentWindow.location.href).pathname; } catch (err) { return; }
+      if (!/\/lab\//.test(path)) { e.preventDefault(); e.stopPropagation(); locked(); }
+    }, true);
   }
 
   /* ---------- 迴圈 ---------- */
@@ -371,6 +557,7 @@
     // 練習電腦按「中斷連線」後會換頁：不是遠端電腦的頁面時，整個分頁跟著過去
     try {
       const loc = frame.contentWindow.location;
+      if (loc.href === "about:blank") return;
       if (!/\/lab\//.test(loc.pathname)) window.location.href = loc.href;
     } catch (e) { /* 讀不到就不處理 */ }
   });
@@ -386,6 +573,7 @@
   });
   window.addEventListener("resize", () => {
     size();
+    if (body.classList.contains("in-remote") && !escaped) { sizeScar(); makeScars(); }
     bs.sceneHalf = [(SCENE_Z + Z0) * TAN * (W / H), (SCENE_Z + Z0) * TAN];
     if (reduce || STILL) rift.draw();
   });

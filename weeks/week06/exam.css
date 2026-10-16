@@ -12,6 +12,8 @@ body.exam {
   height: 100svh;
 }
 #rift, #bh { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 1; }
+#scar { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 4; pointer-events: none; display: none; }
+body.in-remote #scar { display: block; }
 #remote { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100svh; border: 0; z-index: 0; background: #000; }
 body.exam .page { position: relative; z-index: 2; height: 100svh; min-height: 0; pointer-events: none; }
 body.exam .page > * { pointer-events: auto; }
@@ -149,6 +151,18 @@ body.is-still .hud { display: none; }
 .warn-word::before, .warn-word::after { content: attr(data-text); position: absolute; inset: 0; padding-left: .3em; mix-blend-mode: screen; opacity: .55; }
 .warn-word::before { color: #31e1ff; transform: translateX(-3px); }
 .warn-word::after { color: #ff1f5a; transform: translateX(3px); }
+.warn-sub2 { position: relative; font-size: clamp(.8rem, 1.5vw, 1.05rem); font-weight: 700; letter-spacing: .2em; color: #ffd6dc; opacity: 0; }
+.warn.is-on .warn-sub2 { animation: warn-sub 2.9s ease both; }
+/* 還沒完成任務就想離開：同一條紅帶子，短一點 */
+.warn.is-short .warn-band, .warn.is-short .warn-line, .warn.is-short .warn-word, .warn.is-short .warn-sub, .warn.is-short .warn-sub2 { animation-duration: 1.9s, 0.12s; }
+body.warn-on.warn-short .warn-vig { animation-duration: 1.9s; }
+/* 完成任務、空間穩定了：換成紫白色 */
+.warn.is-safe .warn-band { background: linear-gradient(90deg, rgba(14, 8, 34, 0), rgba(18, 12, 44, .82) 16%, rgba(18, 12, 44, .82) 84%, rgba(14, 8, 34, 0)); }
+.warn.is-safe .warn-band::before, .warn.is-safe .warn-band::after { background: repeating-linear-gradient(-45deg, #b9a8ff 0 12px, transparent 12px 24px); }
+.warn.is-safe .warn-line { background: #d7ccff; box-shadow: 0 0 12px 1px rgba(160, 130, 255, .9); }
+.warn.is-safe .warn-word { color: #efeaff; text-shadow: 0 0 22px rgba(150, 120, 255, .85), 0 0 2px #fff; }
+.warn.is-safe .warn-sub2 { color: #e6e0ff; }
+body.warn-on.warn-safe .warn-vig { background: radial-gradient(ellipse at center, transparent 52%, rgba(130, 100, 255, .35) 100%); }
 .warn-sub { position: relative; font-family: var(--font-mono); font-size: clamp(.55rem, 1.1vw, .78rem); letter-spacing: .42em; color: rgba(255, 220, 226, .82); opacity: 0; }
 .warn-vig { position: fixed; inset: 0; z-index: 5; pointer-events: none; opacity: 0; background: radial-gradient(ellipse at center, transparent 52%, rgba(255, 20, 50, .42) 100%); }
 .warn.is-on .warn-band { animation: warn-open 2.9s cubic-bezier(.2, .8, .2, 1) both; }
