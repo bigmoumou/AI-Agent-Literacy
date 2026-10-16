@@ -56,6 +56,17 @@ Week 4 影片 01 錄影裡的 Blockbench 介面，以及影片中重現或提到
 - 來源：《洛克人 X4》（Mega Man X4，© CAPCOM）遊戲中 BOSS 出現前的 WARNING 警報聲，由課程教師自行錄製、剪輯，只用在 Week 6 考試入口的教學情境。
 - 這段聲音的著作權屬於 CAPCOM，不適用本專案的 MIT 或 CC BY-NC-SA 4.0 授權，請不要另外取用或再散布。權利人如有疑慮，請來信，會立即移除。
 
+### Week 6 的時空裂縫音效（Freesound，CC0）
+
+`assets/exam-suck.mp3`、`assets/exam-dive.mp3`、`assets/exam-hum.mp3` 是把下列 Freesound 上的 CC0 音效剪輯、加上濾波和變速後混成的（透過 Openverse 找到）：
+
+- "Big Scary Portal Open" by CogFireStudios, CC0 — https://freesound.org/people/CogFireStudios/sounds/617761/
+- "Big Scary Portal 2" by CogFireStudios, CC0 — https://freesound.org/people/CogFireStudios/sounds/617762/
+- "Wormhole .wav" by doug914, CC0 — https://freesound.org/people/doug914/sounds/423636/
+- "Black hole.wav" by vumseplutten1709, CC0 — https://freesound.org/people/vumseplutten1709/sounds/202877/
+
+CC0 不要求標示來源；這裡列出來，方便查核、也謝謝原作者。
+
 ### 製作影片用的工具（不在 repo 裡）
 
 影片以 Claude Code（Anthropic）製作，使用 opus-video skill（Copyright (c) 2026 周行 (Kianzzz)，MIT 授權；本課程使用依需求調整過的版本），並用到 HyperFrames（HeyGen，Apache-2.0）、GSAP、Playwright、FFmpeg、numpy 與 SciPy。這些工具都沒有放在這個 repo。之後公開教學影片生成 prompt 與製作經驗時，用到 opus-video skill 的文字或程式的地方，會保留原作者的 MIT 授權聲明。
@@ -130,6 +141,17 @@ The Blockbench interface in the recording in Week 4 video 01, and the names and 
 - File: `weeks/week06/warning.mp3` (about 4 seconds)
 - Source: the boss WARNING alarm from *Mega Man X4* (© CAPCOM), recorded and trimmed by the course teacher, used only in the Week 6 test entrance for teaching.
 - The sound is CAPCOM's copyright and is not covered by this project's MIT or CC BY-NC-SA 4.0 licences; please do not reuse or redistribute it. If the rights holder has concerns, please get in touch and it will be removed at once.
+
+### Rift sound effects in Week 6 (Freesound, CC0)
+
+`assets/exam-suck.mp3`, `assets/exam-dive.mp3` and `assets/exam-hum.mp3` were cut, filtered, time-stretched and mixed from these CC0 sounds on Freesound (found through Openverse):
+
+- "Big Scary Portal Open" by CogFireStudios, CC0 — https://freesound.org/people/CogFireStudios/sounds/617761/
+- "Big Scary Portal 2" by CogFireStudios, CC0 — https://freesound.org/people/CogFireStudios/sounds/617762/
+- "Wormhole .wav" by doug914, CC0 — https://freesound.org/people/doug914/sounds/423636/
+- "Black hole.wav" by vumseplutten1709, CC0 — https://freesound.org/people/vumseplutten1709/sounds/202877/
+
+CC0 does not require attribution; they are listed here for reference and with thanks to the authors.
 
 ### Tools used to make the videos (not in this repository)
 

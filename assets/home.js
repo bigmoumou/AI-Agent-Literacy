@@ -728,7 +728,7 @@
     if (toExam) {
       document.body.classList.add("is-to-exam");
       examArt.surge(performance.now() / 1000 + 0.12);   // 一點下去：裂縫先暗一下、再猛亮
-      if (sound) { sound.unlock(); sound.zap(0.6, 0.25, 0.12); }
+      if (sound) { sound.unlock(); sound.suck(); sound.zap(0.45, 0.22, 0.12); }   // 被吸進去（整片聲音往低處塌）＋裂縫猛亮時「滋」
     }
     setTimeout(() => { window.location.href = root() + f.w.href; }, reduceMotion ? 60 : toExam ? EXAM_LEAVE * 0.9 : 650);
   }
@@ -737,7 +737,6 @@
      在落雷最亮的那一刻交接，換頁時就看不出接縫。 */
   const EXAM_LEAVE = 1000;
   const seg01 = (v, a, b) => clamp((v - a) / (b - a), 0, 1);
-  const rnd01 = (a, b) => a + Math.random() * (b - a);
   let handoff = null;
   function examLeave(now) {
     const L = leaving, t = clamp((now - L.t0) / EXAM_LEAVE, 0, 1);
@@ -753,10 +752,8 @@
     const sk = seg01(t, 0, 0.7);
     suck = sk * sk * (3 - 2 * sk);                           // 一點下去，旁邊的畫格就開始被吸過去
     if (!L.surged && t > 0.55) { L.surged = true; examArt.surge(now / 1000 + 0.27); }   // 交接那一刻（0.82）落雷
-    if (sound) {                                                // 被吸進去：低吼越來越大、顫得越來越快，劈啪和「滋」越來越密
-      sound.pull(0.05 + 0.15 * Math.max(e, t), 3 + 7 * t, 0.08);
-      if (now - (L.crack || 0) > 70 + Math.random() * (120 - 50 * t)) { L.crack = now; sound.crackle(0.28 + 0.3 * t, 0.12); }
-      if (now - (L.zapAt || 0) > 260 + Math.random() * (220 - 100 * t)) { L.zapAt = now; sound.zap(0.32 + 0.25 * t, rnd01(0.1, 0.18)); }
+    if (sound && t < 0.8) {                                     // 被吸進去（聲音本身在點下去時就開始播）：邊緣的電流劈啪越來越密
+      if (now - (L.crack || 0) > 90 + Math.random() * (130 - 70 * t)) { L.crack = now; sound.crackle(0.22 + 0.25 * t, 0.1); }
     }
     const a = seg01(t, 0.78, 0.88);
     if (a > 0) drawHandoff(a);
@@ -936,6 +933,7 @@
       prepHandoff();
       if (sound) idle(() => sound.prepare());               // 音訊環境、聲音片段在空檔先建好，點下去時不會卡
       idle(() => { const im = new Image(); im.src = root() + "weeks/week06/frame-space.webp"; });   // Week 6 開場撕開時墊的深空，先抓好
+      idle(() => { fetch(root() + "assets/exam-dive.mp3").then((r) => r.arrayBuffer()).catch(() => {}); });   // Week 6 開場那一整段的聲音，也先抓好
       wake();
     }));
   }
@@ -969,14 +967,15 @@
   }
   function examSound(now, fired) {
     if (!sound) return;
-    const front = current() === examI && Math.abs(target - pos) < 0.35 && !indexOpen, k = leaving && leaving.exam ? 1.4 : 1;
+    const front = current() === examI && Math.abs(target - pos) < 0.35 && !indexOpen;
+    const k = leaving && leaving.exam ? clamp(1 - (now - leaving.t0) / (EXAM_LEAVE * 0.7), 0, 1) : 1;   // 被吸進去：高頻的嘶嘶越來越小（整片聲音往低處塌）
     const strikes = examArt.takeStrikes();
     if (!front) { if (examHeard) { sound.quiet(0.5); examHeard = false; } return; }
     examHeard = true;
-    sound.level("drone", 0.13 * k, 0.6);
+    sound.level("drone", leaving && leaving.exam ? 0 : 0.45, leaving ? 0.4 : 0.6);   // 被吸進去時隆隆讓給吸入的聲音
     sound.level("fizz", (0.035 + 0.16 * examArt.activity()) * k, 0.06);
     if (strikes) sound.crackle(0.45, 0.2);
-    if (fired && leaving && leaving.exam) { sound.zap(0.75, 0.35); }   // 交接那一刻再「滋」一聲
+    if (fired && leaving && leaving.exam) { sound.zap(0.5, 0.3); }    // 交接那一刻再「滋」一聲
     else if (fired) sound.zap(0.9, 0.3);
   }
   function flash() {

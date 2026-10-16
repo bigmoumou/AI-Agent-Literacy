@@ -1,13 +1,20 @@
-/* Week 6（TEST）的音效：全部用 Web Audio 現場合成，沒有音檔。
-   首頁（assets/home.js）：Week 6 那一格停在正中間時，低低的嗡鳴＋細碎的電流嘶嘶聲（跟著電流亮暗），
+/* Week 6（TEST）的音效。
+   被吸進去、Week 6 開場、平常的隆隆是三個小 mp3（assets/exam-suck.mp3、exam-dive.mp3、exam-hum.mp3），
+   由 製作/week06/design/sound/build-sound.py 把 Openverse 找到的 Freesound CC0 音效（Big Scary Portal Open、Big Scary Portal 2、
+   Wormhole、Black hole）剪輯、混成（來源見 NOTICE.md）；劈啪、「滋」、玻璃叮叮、電流嘶嘶用 Web Audio 現場合成。
+   聲音的樣子參考 Rift Activation、Explosion From Another Dimension 這類「時空撕裂」音效的頻譜：
+     - 主體是厚的低頻、中低頻顆粒雜訊，一直不規則地抖（不是乾淨的音調，乾淨的音調聽起來像馬達在嗡）；
+     - 「被吸進去」是整片聲音從高頻往低處塌，最後只剩低沉的隆隆（和咻聲、上升音效相反）；
+     - 之後一陣一陣「吸氣」：冒出一點高頻又被吞回去；一條往下滑的暗共鳴，像喉嚨、隧道。
+   首頁（assets/home.js）：Week 6 那一格停在正中間時，低沉的隆隆（顆粒雜訊，慢慢起伏）＋細碎的電流嘶嘶（跟著電流亮暗），
      落雷時劈啪作響、整道猛亮時「滋」一聲。
-   被吸進去時（點「進入考場」到 Week 6 開頭）：乾淨的低頻嗡鳴被慢慢加快的顫音拉著走，劈啪和「滋」變密一點，
-     交接那一刻再「滋」一聲。不用失真（會像破音），也不用咻聲、上升的音效、撞擊聲（老師不喜歡）。
-   Week 6（weeks/week06/exam.js）：撕開時劈啪、黑洞的超低頻隆隆跟著黑洞變大、碎開時玻璃清脆的叮叮聲、
-     越過事件視界時一片安靜；遠端畫面的小裂縫亮起來時很小聲地劈啪。
+   被吸進去（點「進入考場」到換頁，suck）：整片聲音往低處塌、越來越大，左右收到正中間，交接那一刻被吞掉。
+   Week 6 開場（weeks/week06/exam.js，dive）：一整段和畫面的時間軸對齊：猛亮時爆開再塌下去、碎開時一大陣爆開塌成低頻、
+     被吞掉一下，被吸回中心時聲音跟著畫面上的時間膨脹一起變慢變低沉，越過事件視界一片安靜。
+     沒有 WebGL2 的 2D 版時間軸不一樣，那一段用程式合成（makeDive）。劈啪、「滋」、玻璃叮叮跟著畫面上的落雷現場播。
+   不用失真、方波顫音（會像破音），也不用咻聲、上升音效（老師不喜歡）。
    不卡畫面：
-     - 音訊環境、劈啪和「滋」的聲音片段、持續的聲音都在空檔先建好（prepare），點下去時只要喚醒；
-     - 劈啪、「滋」、玻璃聲都是事先做好的幾段聲音輪流播（每次只開一個播放點），不會一次新開一大堆；
+     - 音訊環境、所有聲音片段都在空檔先做好、音檔先解碼好（prepare、loadClip；解碼在背景執行緒），點下去時只開一個播放點；
      - 一段時間沒聲音就把音訊環境暫停，不佔 CPU。
    瀏覽器規定：使用者在這一頁點過、按過鍵、觸控過之後才能發聲。
    右上角的喇叭按鈕可以關掉（記在 localStorage，首頁和 Week 6 共用）；分頁看不到時自動靜音。 */
@@ -17,9 +24,14 @@
   const KEY = "exam-sound";
   const VOL = 0.8;
   let ctx = null, master = null, bed = null, pools = null, off = false, activated = false, napTimer = 0, holdUntil = 0;
-  const levels = { drone: 0, fizz: 0, rumble: 0, pull: 0 };
+  let diveBuf = null, diveSrc = null, diveGain = null, humSrc = null;
+  const clips = {}, clipP = {};
+  const BASE = (() => { try { return new URL(".", document.currentScript.src).href; } catch (e) { return ""; } })();   // assets/
+  const levels = { drone: 0, fizz: 0 };
   try { off = localStorage.getItem(KEY) === "off"; } catch (e) { /* 讀不到就預設開 */ }
   const rnd = (a, b) => a + Math.random() * (b - a);
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const seg = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
 
   function init() {
     if (ctx || !AC) return ctx;
@@ -34,19 +46,54 @@
     return ctx;
   }
 
-  // 事先做好的聲音片段：劈啪（6 段）、「滋」（4 段）、玻璃叮叮（3 段）、一段 2 秒的雜訊（持續的嘶嘶、隆隆用）
-  // 一段一段做（prepare 時分散在空檔，每段只花幾毫秒）；還沒做完就要出聲時當場做完
+  /* ---------- 合成用的小工具 ---------- */
+  // 二階濾波（狀態變數濾波器；頻率可以一直改，每 32 個取樣改一次就夠）：run 之後 low、band 可以讀
+  function svf() {
+    let a1 = 0, a2 = 0, a3 = 0, z1 = 0, z2 = 0;
+    const f = {
+      low: 0, band: 0,
+      set(fc, q, sr) { const g = Math.tan(Math.PI * Math.min(fc, sr * 0.45) / sr), k = 1 / q; a1 = 1 / (1 + g * (g + k)); a2 = g * a1; a3 = g * a2; },
+      run(x) { const v3 = x - z2, v1 = a1 * z1 + a2 * v3, v2 = z2 + a2 * z1 + a3 * v3; z1 = 2 * v1 - z1; z2 = 2 * v2 - z2; f.low = v2; f.band = v1; return v2; },
+    };
+    return f;
+  }
+  // 抖動：一顆一顆的小顆粒（平均每顆 iv 秒、大小隨機，最小 floor），平滑 4 毫秒（不會喀喀響）
+  function tremble(sr) {
+    let m = 0.5, tgt = 0.5, left = 0;
+    const s = Math.exp(-1 / (sr * 0.004));
+    return (iv, floor) => {
+      if (--left <= 0) { tgt = floor + (1 - floor) * Math.pow(Math.random(), 1.4); left = Math.max(1, Math.round(sr * iv * rnd(0.55, 1.45))); }
+      m = tgt + (m - tgt) * s;
+      return m;
+    };
+  }
+  const noise = () => Math.random() * 2 - 1;
+  // 做一段立體聲的聲音（fill 寫左右兩聲道），做完把最大值調到 0.9
+  function stereo(sec, fill) {
+    const sr = ctx.sampleRate, b = ctx.createBuffer(2, Math.round(sr * sec), sr), L = b.getChannelData(0), R = b.getChannelData(1);
+    fill(L, R, sr);
+    let m = 0; for (let i = 0; i < L.length; i++) m = Math.max(m, Math.abs(L[i]), Math.abs(R[i]));
+    const k = 0.9 / (m || 1); for (let i = 0; i < L.length; i++) { L[i] *= k; R[i] *= k; }
+    // 頭尾 5 毫秒淡入淡出（不會喀一聲）
+    const e = Math.round(sr * 0.005);
+    for (let i = 0; i < e; i++) { const a = i / e; L[i] *= a; R[i] *= a; L[L.length - 1 - i] *= a; R[R.length - 1 - i] *= a; }
+    return b;
+  }
+
+  /* ---------- 事先做好的聲音片段 ----------
+     劈啪（6 段）、「滋」（4 段）、玻璃叮叮（3 段）、一段 2 秒的雜訊（電流嘶嘶用）。音檔另外載（loadClip）。
+     一段一段做（prepare 時分散在空檔，每段只花幾毫秒）；還沒做完就要出聲時當場做完 */
   const DENS = [18, 26, 34, 42, 52, 64];
   function poolStep() {
     const sr = ctx.sampleRate, P = pools;
     const buf = (sec, fill) => { const b = ctx.createBuffer(1, Math.round(sr * sec), sr); fill(b.getChannelData(0)); return b; };
-    if (!P.noise) { P.noise = buf(2, (d) => { for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }); return; }
+    if (!P.noise) { P.noise = buf(2, (d) => { for (let i = 0; i < d.length; i++) d[i] = noise(); }); return; }
     if (P.crackles.length < DENS.length) {
       const n = DENS[P.crackles.length];
       P.crackles.push(buf(0.35, (d) => {
         for (let k = 0; k < n; k++) {
           const at = Math.floor(Math.random() * (d.length - sr * 0.01)), len = Math.floor(sr * rnd(0.002, 0.008)), a = rnd(0.25, 1) * (1 - (at / d.length) * 0.5);
-          for (let i = 0; i < len; i++) d[at + i] += (Math.random() * 2 - 1) * a * (1 - i / len);
+          for (let i = 0; i < len; i++) d[at + i] += noise() * a * (1 - i / len);
         }
       }));
       return;
@@ -58,7 +105,7 @@
         for (let i = 0; i < d.length; i++) {
           if (i % step === 0) amp = rnd(0.25, 1) * (1 - i / d.length);
           const ph1 = (i * f1 / sr) % 1, ph2 = (i * f2 / sr) % 1;
-          d[i] = amp * (0.6 * (ph1 * 2 - 1) + 0.3 * (ph2 < 0.5 ? 1 : -1)) + (Math.random() < 0.004 ? (Math.random() * 2 - 1) * amp : 0);
+          d[i] = amp * (0.6 * (ph1 * 2 - 1) + 0.3 * (ph2 < 0.5 ? 1 : -1)) + (Math.random() < 0.004 ? noise() * amp : 0);
         }
       }));
       return;
@@ -83,27 +130,100 @@
     return pools;
   }
 
-  // 持續的聲音：嗡鳴（低頻，慢慢起伏）、電流嘶嘶（高頻雜訊）、黑洞隆隆（超低頻）、
-  // 拉力（被吸進去時：乾淨的低頻，被顫音拉著；顫得越快越緊張，音高不變）
+  // 音檔（suck、hum、dive）：抓下來、解碼（在背景執行緒，不卡畫面）；同一個只抓一次
+  function loadClip(name) {
+    if (!init()) return Promise.resolve(null);
+    if (!clipP[name]) {
+      clipP[name] = fetch(BASE + "exam-" + name + ".mp3")
+        .then((r) => (r.ok ? r.arrayBuffer() : null))
+        .then((a) => (a ? new Promise((ok, no) => ctx.decodeAudioData(a, ok, no)) : null))
+        .then((b) => { clips[name] = b; if (name === "hum") startHum(); return b; })
+        .catch(() => null);
+    }
+    return clipP[name];
+  }
+  // 平常的隆隆：檔案頭尾各多 0.1 秒，從 0.1 秒循環到 4.1 秒（接得起來）
+  function startHum() {
+    if (humSrc || !bed || !clips.hum) return;
+    const s = ctx.createBufferSource();
+    s.buffer = clips.hum; s.loop = true; s.loopStart = 0.1; s.loopEnd = 4.1;
+    s.connect(bed.drone); s.start(0, 0.1);
+    humSrc = s;
+  }
+
+  /* Week 6 開場那一整段（和 exam.js 的時間軸一樣，秒）：
+     dive（WebGL）：0.16、0.6 猛亮，1.0 碎開，1.42、1.86 吸氣，1.9 起被吸回中心，1.1–3.45 時間膨脹，3.1–3.5 安靜下來
+     fall（沒有 WebGL2 的 2D 版）：0.16 猛亮，0.6–2.85 時間膨脹，2.6–2.95 安靜下來 */
+  const TL = {
+    dive: { len: 3.6, surges: [[0.16, 0.55], [0.6, 0.35]], shatter: 1.0, breaths: [1.42, 1.86], pull: [1.9, 3.0], dil: [1.1, 3.45], hush: [3.1, 3.5], hole: [0.05, 1.0, 0.9, 1.9] },
+    fall: { len: 3.0, surges: [[0.16, 0.6]], shatter: null, breaths: [], pull: [0.7, 2.9], dil: [0.6, 2.85], hush: [2.6, 2.95], hole: [0.25, 1.3, 2.05, 2.95] },
+  };
+  function makeDive(kind) {
+    if (!init()) return null;
+    const P = TL[kind] || TL.dive;
+    if (diveBuf && diveBuf.kind === kind) return diveBuf;
+    const b = stereo(P.len, (L, R, sr) => {
+      const body = [svf(), svf()], burst = [svf(), svf()], br = [svf(), svf()], th = svf(), tr = [tremble(sr), tremble(sr)], tb = [tremble(sr), tremble(sr)];
+      const out3 = (v) => 1 - Math.pow(1 - v, 3), io = (v) => (v < 0.5 ? 4 * v * v * v : 1 - Math.pow(-2 * v + 2, 3) / 2);
+      const hits = P.surges.map(([at, a]) => ({ at, a, f0: 6000, f1: 420, fall: 0.6, dec: 0.35, sub: [58, 40, 0.45] }));
+      if (P.shatter != null) hits.push({ at: P.shatter, a: 1, f0: 8000, f1: 300, fall: 0.9, dec: 0.55, sub: [52, 32, 0.8] });
+      let ph = 0, phT = 0;
+      for (let i = 0; i < L.length; i++) {
+        const u = i / sr;
+        const r = Math.sqrt(clamp(1 - Math.pow(seg(u, P.dil[0], P.dil[1]), 3), 0, 1));     // 時間變慢（和畫面上的時鐘一樣）
+        const hush = 1 - seg(u, P.hush[0], P.hush[1]), pull = io(seg(u, P.pull[0], P.pull[1]));
+        const M = 0.45 * out3(seg(u, P.hole[0], P.hole[1])) + 0.55 * io(seg(u, P.hole[2], P.hole[3]));
+        // 一個爆開之後的時間（最近的那個）：決定爆開那一層的濾波器往下塌到哪裡
+        let h = null; for (const x of hits) if (u >= x.at) h = x;
+        if ((i & 31) === 0) {
+          const fc = (300 + 220 * seg(u, 0.16, 1.0) * (1 - seg(u, 1.0, 1.4))) * (0.22 + 0.78 * r);
+          body[0].set(fc, 0.7, sr); body[1].set(fc, 0.7, sr);
+          if (h) { const fx = h.f0 * Math.pow(h.f1 / h.f0, Math.min(1, (u - h.at) / h.fall)); burst[0].set(fx, 0.8, sr); burst[1].set(fx, 0.8, sr); }
+          let bf = 2600; for (const at of P.breaths) if (u >= at - 0.12) bf = 2600 * Math.pow(700 / 2600, clamp((u - at) / 0.4, 0, 1));
+          br[0].set(bf, 1.4, sr); br[1].set(bf, 1.4, sr);
+          th.set(Math.max(45, 700 * Math.pow(80 / 700, pull) * (0.3 + 0.7 * r)), 5, sr);
+        }
+        // 低沉的隆隆：開頭淡入、猛亮前暗一下；碎開後被吞掉一下（真空），再跟著被吸回中心越來越大；時間變慢時抖得越來越慢
+        const dim = u < 0.16 ? 0.7 : 1;
+        const gulp = P.shatter != null ? 0.5 * seg(u, P.shatter, P.shatter + 0.15) * (1 - seg(u, P.shatter + 0.4, P.shatter + 0.9)) : 0;
+        const lv = ((0.24 + 0.18 * seg(u, 0.16, 1.0)) * (1 - gulp) + 0.45 * pull) * seg(u, 0, 0.1) * dim * hush;
+        const iv = 0.032 / Math.max(r, 0.3);
+        // 爆開：一下就到、指數衰減，聲音同時往低處塌
+        let he = 0; for (const x of hits) if (u >= x.at) he += x.a * Math.min(1, (u - x.at) / 0.006) * Math.exp(-(u - x.at) / x.dec);
+        // 吸氣：0.12 秒冒出來、0.35 秒被吞回去
+        let be = 0; for (const at of P.breaths) be += Math.max(0, u < at ? 1 - (at - u) / 0.12 : 1 - (u - at) / 0.35);
+        const c = noise();
+        th.run(c);
+        // 很低的正弦：猛亮、碎開時往下沉的「咚」，黑洞越大越響（越來越慢、越來越低）
+        let thump = 0;
+        for (const x of hits) if (u >= x.at) { const k = u - x.at, f = x.sub[0] * Math.pow(x.sub[1] / x.sub[0], Math.min(1, k / x.sub[2])); thump += x.a * Math.exp(-k / (x.sub[2] * 0.6)) * Math.min(1, k / 0.01) * f / x.sub[0]; }
+        ph += (36 * (0.55 + 0.45 * r)) / sr; phT += (h ? h.sub[0] * Math.pow(h.sub[1] / h.sub[0], Math.min(1, (u - h.at) / h.sub[2])) : 50) / sr;
+        const sub = 0.3 * M * hush * Math.sin(2 * Math.PI * ph) + 0.5 * thump * Math.sin(2 * Math.PI * phT);
+        const mono = 0.3 * th.band * pull * hush + sub;
+        [L, R].forEach((D, k) => {
+          const n = noise();
+          body[k].run(n); burst[k].run(0.5 * n + 0.5 * c); br[k].run(noise());
+          D[i] = 1.5 * body[k].low * tr[k](iv, 0.3) * lv
+            + 0.55 * burst[k].low * tb[k](0.012, 0.2) * he * hush
+            + 0.18 * br[k].band * be * hush
+            + mono;
+        });
+      }
+    });
+    b.kind = kind;
+    diveBuf = b;
+    return b;
+  }
+
+  // 持續的聲音：隆隆（exam-hum.mp3 循環）、電流嘶嘶（高頻雜訊）
   function makeBed() {
     if (bed || !makePools()) return bed;
     const g = () => { const n = ctx.createGain(); n.gain.value = 0; n.connect(master); return n; };
-    bed = { drone: g(), fizz: g(), rumble: g(), pull: g() };
-    const osc = (type, f, a, to, det) => { const o = ctx.createOscillator(), og = ctx.createGain(); o.type = type; o.frequency.value = f; o.detune.value = det || 0; og.gain.value = a; o.connect(og); og.connect(to); o.start(); return o; };
+    bed = { drone: g(), fizz: g() };
     const filt = (type, f, q, to) => { const b = ctx.createBiquadFilter(); b.type = type; b.frequency.value = f; b.Q.value = q; b.connect(to); return b; };
-    const trem = ctx.createGain(); trem.gain.value = 1; trem.connect(bed.drone);
-    const lp = filt("lowpass", 260, 0.8, trem);
-    osc("sawtooth", 55, 0.6, lp); osc("sawtooth", 82.4, 0.35, lp, 4); osc("sawtooth", 110.3, 0.2, lp, -3);
-    const lg = ctx.createGain(); lg.gain.value = 0.25; lg.connect(trem.gain); osc("sine", 0.33, 1, lg);
-    const loop = (out) => { const s = ctx.createBufferSource(); s.buffer = pools.noise; s.loop = true; s.connect(out); s.start(0, Math.random() * 2); };
-    loop(filt("highpass", 1800, 0.7, filt("bandpass", 3600, 0.7, bed.fizz)));
-    loop(filt("lowpass", 110, 0.9, bed.rumble));
-    osc("sine", 34, 0.7, bed.rumble);
-    const ptrem = ctx.createGain(); ptrem.gain.value = 0.7; ptrem.connect(bed.pull);
-    const plp = filt("lowpass", 380, 0.7, ptrem);
-    osc("triangle", 55, 0.7, plp); osc("sine", 82.4, 0.4, plp, 3); osc("sine", 110, 0.3, plp, -4);
-    const pg = ctx.createGain(); pg.gain.value = 0.3; pg.connect(ptrem.gain);
-    bed.pullRate = osc("sine", 3, 1, pg).frequency;
+    const loop = (b, out, at) => { const s = ctx.createBufferSource(); s.buffer = b; s.loop = true; s.connect(out); s.start(0, at); };
+    startHum();
+    loop(pools.noise, filt("highpass", 1800, 0.7, filt("bandpass", 3600, 0.7, bed.fizz)), Math.random() * 2);
     return bed;
   }
 
@@ -112,6 +232,7 @@
   function prepare(now) {
     if (!init()) return;
     if (!pools) pools = { noise: null, crackles: [], zaps: [], glass: [] };
+    loadClip("hum"); if (!now) loadClip("suck");
     if (now) { makePools(); makeBed(); if (ctx.state === "suspended" && !off) ctx.resume().catch(() => {}); if (!busy()) nap(); return; }
     const later = (fn) => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: 400 }) : setTimeout(fn, 30));
     const tick = () => {
@@ -153,7 +274,7 @@
   }
   const ready = () => !!ctx && !off && activated;
 
-  // 調整持續聲音的大小（name：drone、fizz、rumble、pull；smooth：幾秒內到）
+  // 調整持續聲音的大小（name：drone、fizz；smooth：幾秒內到）
   function level(name, v, smooth) {
     v = Math.max(0, v);
     if (v < 0.001 && levels[name] < 0.001) return;
@@ -167,24 +288,20 @@
     Object.keys(levels).forEach((k) => { levels[k] = 0; bed[k].gain.setTargetAtTime(0, ctx.currentTime, (smooth || 0.3) / 3); });
     nap();
   }
-  // 拉力：大小和顫音的快慢（每秒幾下）
-  function pull(v, rate, smooth) {
-    level("pull", v, smooth == null ? 0.1 : smooth);
-    if (bed && rate && ctx && levels.pull > 0.001) bed.pullRate.setTargetAtTime(rate, ctx.currentTime, 0.05);
-  }
-  // 播一段事先做好的聲音：帶通濾波、音量、可以截短（每次只開一個播放點）
+  // 播一段事先做好的聲音：帶通濾波（f 為 0 就不濾）、音量、可以截短（每次只開一個播放點）
   function play(b, gain, f, q, dur, delay, rate) {
-    if (!ok() || !makePools()) return;
+    if (!ok() || !makePools()) return null;
     const t0 = ctx.currentTime + (delay || 0) + 0.005;
-    const s = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), g = ctx.createGain();
+    const s = ctx.createBufferSource(), g = ctx.createGain();
     s.buffer = b; s.playbackRate.value = rate || 1;
-    bp.type = "bandpass"; bp.frequency.value = f; bp.Q.value = q;
     g.gain.value = gain;
     const len = Math.min(dur || b.duration, b.duration / (rate || 1));
     g.gain.setValueAtTime(gain, t0 + Math.max(0, len - 0.04)); g.gain.linearRampToValueAtTime(0, t0 + len);
-    s.connect(bp); bp.connect(g); g.connect(master);
+    if (f) { const bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = f; bp.Q.value = q; s.connect(bp); bp.connect(g); } else s.connect(g);
+    g.connect(master);
     s.start(t0); s.stop(t0 + len + 0.02);
-    if (!busy()) nap();
+    hold(len + 0.1);
+    return { s, g };
   }
   const pick = (a) => a[(Math.random() * a.length) | 0];
   // 一陣劈啪（strength 0..1，dur 秒）
@@ -203,6 +320,27 @@
     if (!ok() || !makePools()) return;
     play(pick(pools.glass), 0.22 * strength, 4200, 0.4, 0.7, 0, rnd(0.95, 1.05));
     crackle(0.5 * strength, 0.12);
+  }
+  // 被吸進去（首頁點「進入考場」那一下）
+  function suck(strength) {
+    if (!ok() || !clips.suck) return;
+    play(clips.suck, 0.8 * (strength == null ? 1 : strength), 0, 0, clips.suck.duration, 0, 1);
+  }
+  // Week 6 開場那一整段：dive 用音檔（還沒解碼好、或是 2D 版的 fall 就用合成的）；stopDive：提早停（跳過時，fade 秒內淡掉）
+  function dive(kind) {
+    if (!ok()) return;
+    const b = kind === "dive" && clips.dive ? clips.dive : makeDive(kind);
+    if (!b) return;
+    stopDive(0.05);
+    const p = play(b, b === clips.dive ? 1.0 : 0.6, 0, 0, b.duration, 0, 1);
+    if (p) { diveSrc = p.s; diveGain = p.g; }
+  }
+  function stopDive(fade) {
+    if (!diveSrc || !ctx) return;
+    const t = ctx.currentTime, g = diveGain.gain;
+    g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.linearRampToValueAtTime(0, t + (fade || 0.3));
+    try { diveSrc.stop(t + (fade || 0.3) + 0.02); } catch (e) { /* 已經停了 */ }
+    diveSrc = diveGain = null;
   }
 
   function setOff(v) {
@@ -233,7 +371,7 @@
   ["pointerdown", "keydown", "touchstart"].forEach((ev) => window.addEventListener(ev, () => { if (!off && !activated) unlock(); }, { capture: true, passive: true }));
 
   window.ExamSound = {
-    prepare, unlock, ready, hold, level, quiet, pull, crackle, zap, glass, bindButton,
+    prepare, makeDive, loadClip, unlock, ready, hold, level, quiet, crackle, zap, glass, suck, dive, stopDive, bindButton,
     isOff: () => off,
     context: () => init(),
     output: () => (init() ? master : null),

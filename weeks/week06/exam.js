@@ -83,11 +83,9 @@
       const c = cover(1);
       g.setTransform(k * c.s, 0, 0, k * c.s, k * c.x, k * c.y);
       const fired = art.step(t, { energy: 1 + 1.8 * seg(u, 0.15, 0.95), auto: false });
-      if (sound && !warming) {
-        const carry = 1 - out(seg(u, 0, 0.8));                 // 接著首頁被吸進來的拉力，慢慢收
-        sound.pull(0.12 * carry + 0.06 * seg(u, 0.55, 0.98), 4 + 6 * carry, 0.08);
+      if (sound && !warming) {                                 // 隆隆、爆開、往下塌是事先做好的一整段（開始時 sound.dive）；這裡只跟著電流
+        const carry = 1 - out(seg(u, 0, 0.8));
         if (carry > 0.2 && t - lastCrack > 0.09 + Math.random() * 0.08) { lastCrack = t; sound.crackle(0.22 + 0.25 * carry, 0.1); }
-        sound.level("drone", 0.09, 0.3);
         sound.level("fizz", 0.035 + 0.12 * art.activity(), 0.06);
         if (art.takeStrikes()) sound.crackle(0.45, 0.2);
         if (fired) sound.zap(0.7, 0.3);
@@ -169,11 +167,7 @@
     clock += dt * rate;
     hudShow(u > 1.2 && u < 3.55, rate);
     if (u > 0.6) skipBtn.hidden = false;
-    if (sound) {                                                   // 黑洞越大越隆隆；越過事件視界一片安靜
-      const hush = 1 - seg(u, 3.1, 3.5);
-      sound.level("rumble", (0.04 + 0.16 * bs.M) * hush, 0.25);
-      if (shattered) { sound.level("fizz", 0.015 * hush, 0.4); sound.level("drone", 0.07 * hush, 0.3); sound.pull(0, 0, 0.5); }
-    }
+    if (sound && shattered) sound.level("fizz", 0.015 * (1 - seg(u, 3.1, 3.5)), 0.4);   // 黑洞的隆隆在那一整段裡
     if (u >= 3.55) toPick(1);
   }
 
@@ -224,7 +218,7 @@
     canvas.style.display = "";
     pickDark = dark;
     emergeAt = now || performance.now() / 1000;
-    if (sound) { sound.level("rumble", 0, 0.6); sound.level("fizz", 0, 0.4); sound.level("drone", 0.05, 1.2); sound.pull(0, 0, 0.4); }
+    if (sound) { sound.stopDive(0.4); sound.level("fizz", 0, 0.4); sound.level("drone", 0.16, 1.2); }
     body.classList.add("is-in-void");
     if (!pickShown) showPick();
   }
@@ -608,7 +602,7 @@
         bhCanvas.style.display = "";
       } catch (e) { /* 畫不出來就算了 */ }
     }
-    if (sound) sound.prepare(true);
+    if (sound) { sound.prepare(true); if (!reduce && !bh) sound.makeDive("fall"); }   // 2D 版開場那一整段的聲音用合成的，也先做好
     done();
   }, 0)));
   const ready = artP.then((a) => {
@@ -636,7 +630,9 @@
       return a;
     });
   });
-  Promise.all([ready, warm]).then(([a]) => {
+  // 開場那一整段的聲音（assets/exam-dive.mp3）先解碼好；最多等 1.5 秒，來不及就用合成的
+  const diveClip = sound && wantBH ? Promise.race([sound.loadClip("dive"), new Promise((r) => setTimeout(r, 1500))]) : null;
+  Promise.all([ready, warm, diveClip]).then(([a]) => {
     art = a;
     body.classList.add("is-diving");
     body.classList.remove("is-loading");
@@ -649,6 +645,7 @@
       bs.waveT0 = T0 + 0.16;
     }
     if (art) art.surge(T0 + 0.16);                       // 一開始：先暗一下，再落雷般猛亮（打出第一圈重力波）
+    if (sound) sound.dive(phase);                        // 聲音和畫面同一刻開始
     run();
   });
 })();
