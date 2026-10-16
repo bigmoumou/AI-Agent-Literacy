@@ -40,7 +40,7 @@
   const ban = (i) => (BAN[LANG] || BAN["zh-Hant"])[i];
   // 音效（assets/exam-sound.js）：撕開時劈啪、黑洞隆隆、碎開時玻璃叮叮、越過事件視界一片安靜
   const sound = window.ExamSound || null;
-  if (sound) { sound.bindButton($("#soundBtn")); sound.unlock(); }
+  if (sound) { sound.bindButton($("#soundBtn")); sound.prepare(); }
 
   const body = document.body;
   const canvas = $("#rift"), bhCanvas = $("#bh");
@@ -83,13 +83,13 @@
       g.setTransform(k * c.s, 0, 0, k * c.s, k * c.x, k * c.y);
       const fired = art.step(t, { energy: 1 + 1.8 * seg(u, 0.15, 0.95), auto: false });
       if (sound) {
-        const wild = 1 - out(seg(u, 0, 0.7));
-        sound.growl(0.32 * wild + 0.14 * seg(u, 0.55, 0.98), 9 + 16 * wild + 8 * seg(u, 0.55, 0.98), 0.06);
-        if (wild > 0.15 && Math.random() < 0.55) sound.crackle(0.35 + 0.6 * wild, 0.08);
+        const carry = 1 - out(seg(u, 0, 0.8));                 // 接著首頁被吸進來的拉力，慢慢收
+        sound.pull(0.12 * carry + 0.06 * seg(u, 0.55, 0.98), 4 + 6 * carry, 0.08);
+        if (carry > 0.2 && t - lastCrack > 0.09 + Math.random() * 0.08) { lastCrack = t; sound.crackle(0.22 + 0.25 * carry, 0.1); }
         sound.level("drone", 0.09, 0.3);
         sound.level("fizz", 0.035 + 0.12 * art.activity(), 0.06);
-        if (art.takeStrikes()) sound.crackle(0.6, 0.2);
-        if (fired) sound.zap(1, 0.32);
+        if (art.takeStrikes()) sound.crackle(0.45, 0.2);
+        if (fired) sound.zap(0.7, 0.3);
       }
       const split = splitAt(u, t);
       art.paint(g, { split, hole: seg(u, 0.03, 0.2) });
@@ -171,7 +171,7 @@
     if (sound) {                                                   // 黑洞越大越隆隆；越過事件視界一片安靜
       const hush = 1 - seg(u, 3.1, 3.5);
       sound.level("rumble", (0.04 + 0.16 * bs.M) * hush, 0.25);
-      if (shattered) { sound.level("fizz", 0.015 * hush, 0.4); sound.level("drone", 0.07 * hush, 0.3); sound.growl(0, 0, 0.5); }
+      if (shattered) { sound.level("fizz", 0.015 * hush, 0.4); sound.level("drone", 0.07 * hush, 0.3); sound.pull(0, 0, 0.5); }
     }
     if (u >= 3.55) toPick(1);
   }
@@ -223,7 +223,7 @@
     canvas.style.display = "";
     pickDark = dark;
     emergeAt = now || performance.now() / 1000;
-    if (sound) { sound.level("rumble", 0, 0.6); sound.level("fizz", 0, 0.4); sound.level("drone", 0.05, 1.2); sound.growl(0, 0, 0.4); }
+    if (sound) { sound.level("rumble", 0, 0.6); sound.level("fizz", 0, 0.4); sound.level("drone", 0.05, 1.2); sound.pull(0, 0, 0.4); }
     body.classList.add("is-in-void");
     if (!pickShown) showPick();
   }
@@ -283,7 +283,7 @@
      警報聲用老師錄的洛克人 X4 WARNING（weeks/week06/warning.mp3：取 4 個乾淨的循環，約 4.2 秒，每秒一次）。
      瀏覽器只准在使用者點過之後出聲，所以在選電腦那一下就把聲音準備好、先解碼（initAudio）。
      載入失敗時退回現場合成的兩音警報。 */
-  let audio = null, warnBuf = null;
+  let audio = null, warnBuf = null, lastCrack = 0;
   const dest = () => { const o = sound && sound.output(); return o && o.context === audio ? o : audio.destination; };   // 走音效開關（右上角的喇叭）
   function initAudio() {
     try {
@@ -300,6 +300,7 @@
   }
   function alarm() {
     if (!audio) return;
+    if (sound && audio === sound.context()) sound.hold(5);   // 警報播完之前不要暫停音訊
     if (warnBuf) {
       const src = audio.createBufferSource(), g = audio.createGain();
       g.gain.value = 0.9; src.buffer = warnBuf; src.connect(g); g.connect(dest());
@@ -329,11 +330,13 @@
   }
   function buzz() {      // 想逃但還沒完成：兩聲低低的拒絕音
     if (!audio) return;
+    if (sound && audio === sound.context()) sound.hold(1.5);
     const t0 = audio.currentTime + 0.02;
     beep(t0, 0.12, 155, "square", 0.05); beep(t0 + 0.16, 0.16, 130, "square", 0.05);
   }
   function chime() {     // 完成任務、空間穩定：三個往上的清亮音
     if (!audio) return;
+    if (sound && audio === sound.context()) sound.hold(1.5);
     const t0 = audio.currentTime + 0.03;
     [[0, 660], [0.12, 880], [0.24, 1320]].forEach(([d, f]) => { beep(t0 + d, 0.32, f, "sine", 0.09); beep(t0 + d, 0.32, f * 2, "sine", 0.02); });
   }
