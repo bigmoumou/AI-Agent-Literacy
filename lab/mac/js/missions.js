@@ -1536,9 +1536,92 @@
       if (rc && cueVisible(want.el, rc) && !termTyping(want.el) && !fieldFocused(want.el)) { ring = true; drawRing(want.el, rc, want.label); }
     }
     if (!ring && cueEl && !cueEl.hidden) { cueEl.hidden = true; cueRect = ''; }
+    ghostUpdate(want, ring);
     // follow the element only while there is one to follow: bus events, window moves, scrolling and this light check every 400 ms
     if (want && !cueTimer) cueTimer = setInterval(cueUpdate, 400);
     else if (!want && cueTimer) { clearInterval(cueTimer); cueTimer = null; }
+  }
+  /* The demo pointer (?guide=ghost, preview 2026-10-16). The menu bar is a thin line of small words at the very top; the student's eyes are
+     on the Finder window in the middle and miss the ring up there (teacher). While the ring points into the menu bar, a pale copy of the
+     pointer (60 % opaque, an amber edge, so it is not the student's own) appears next to the student's mouse (the eye follows what moves
+     near the mouse), glides (0.5 − 0.5·cos πx, a slight arc) to the target in 0.9–1.2 s, presses once (shrinks) and fades; the ring stays.
+     Once when the step starts, again 8 s after a demo without the right click, at most 3 times a step; never again for that step once the
+     mouse comes within 44 px of the target or a menu of the menu bar is opened. Reduced motion: no glide, a still pointer fades in on the
+     target once. Only transform and opacity are animated (Web Animations); between demos nothing runs, the 400 ms cue check decides. */
+  var GHOST_FIRST_MS = 700, GHOST_AGAIN_MS = 8000, GHOST_MAX = 3, GHOST_NEAR = 44;
+  var ghost = { key: '', count: 0, found: false, nextAt: 0, anim: null, el: null, target: null };
+  var mouseAt = null;
+  if (LAB.guideGhost) {
+    document.addEventListener('pointermove', function (e) {
+      mouseAt = { x: e.clientX, y: e.clientY };
+      var t = ghost.target;
+      if (!t || ghost.found) return;
+      var rc = t.getBoundingClientRect();
+      var dx = Math.max(rc.left - e.clientX, 0, e.clientX - rc.right), dy = Math.max(rc.top - e.clientY, 0, e.clientY - rc.bottom);
+      if (Math.sqrt(dx * dx + dy * dy) < GHOST_NEAR) ghost.found = true;      // the student found it: no more demos for this step
+    }, { passive: true, capture: true });
+  }
+  function ghostTf(x, y, s) { return 'translate(' + x.toFixed(1) + 'px, ' + y.toFixed(1) + 'px) scale(' + s + ')'; }
+  function ghostStop() {
+    if (ghost.anim) { try { ghost.anim.cancel(); } catch (e) { /* ignore */ } ghost.anim = null; }
+    if (ghost.el) ghost.el.hidden = true;
+  }
+  function ghostUpdate(want, ring) {
+    if (!LAB.guideGhost) return;
+    var m = missions.current();
+    var inBar = !!(want && ring && want.el.closest && want.el.closest('#lab-menubar'));
+    var key = inBar && m ? m.id + '/' + (want.sid || '') : '';
+    if (ghost.anim && key !== ghost.key) ghostStop();       // the step moved on, or its target left the menu bar: stop a demo in flight
+    if (document.querySelector('#lab-menubar [data-lab=menu-title].is-open')) ghost.found = !!ghost.key;   // a menu of the bar is open: they are up there
+    if (!inBar) { ghost.target = null; return; }
+    if (key !== ghost.key) { ghost.key = key; ghost.count = 0; ghost.found = false; ghost.nextAt = Date.now() + GHOST_FIRST_MS; }
+    ghost.target = want.el;
+    if (ghost.found || ghost.count >= GHOST_MAX || ghost.anim || cuePaused() || Date.now() < ghost.nextAt) return;
+    ghostPlay(want.el);
+  }
+  function ghostPlay(target) {
+    var scr = document.getElementById('lab-screen');
+    if (!scr || !target.animate) return;
+    if (!ghost.el) {
+      ghost.el = h('div', { class: 'lab-ghost', 'aria-hidden': 'true', dataset: { lab: 'cue-ghost' } });
+      ghost.el.innerHTML = '<svg viewBox="-3 -3 20 27" width="20" height="27"><path class="lab-ghost-edge" d="M0 0V17.4L4.1 13.6L7 20.3L10 19L7.2 12.4H12.7Z"/>' +
+        '<path class="lab-ghost-arrow" d="M0 0V17.4L4.1 13.6L7 20.3L10 19L7.2 12.4H12.7Z"/></svg>';
+    }
+    if (ghost.el.parentNode !== scr) scr.appendChild(ghost.el);
+    ghost.count++;
+    var sr = scr.getBoundingClientRect(), tr = target.getBoundingClientRect();
+    // the tip lands on the word, a little left of its middle; the copy starts just below-right of the real pointer (mid-screen if it never moved)
+    var ex = tr.left + Math.min(tr.width * 0.4, 26) - sr.left, ey = tr.top + tr.height * 0.62 - sr.top;
+    var m0 = mouseAt || { x: sr.left + sr.width / 2, y: sr.top + sr.height / 2 };
+    var sx = m0.x - sr.left + 10, sy = m0.y - sr.top + 12;
+    var frames, dur;
+    if (reducedMotion()) {                                // no glide: a still pointer on the target fades in and out once
+      dur = 2200;
+      frames = [{ transform: ghostTf(ex, ey, 1), opacity: 0 }, { transform: ghostTf(ex, ey, 1), opacity: 1, offset: 0.14 },
+        { transform: ghostTf(ex, ey, 1), opacity: 1, offset: 0.78 }, { transform: ghostTf(ex, ey, 1), opacity: 0 }];
+    } else {
+      var dist = Math.sqrt((ex - sx) * (ex - sx) + (ey - sy) * (ey - sy)) || 1;
+      var inMs = 180, glideMs = 900 + 300 * Math.min(1, dist / 900), pressMs = 220, holdMs = 300, outMs = 420;
+      dur = inMs + glideMs + pressMs + holdMs + outMs;
+      var bend = dist * 0.08, qx = (sx + ex) / 2 - (ey - sy) / dist * bend, qy = (sy + ey) / 2 + (ex - sx) / dist * bend;   // a slight arc, like a hand
+      frames = [{ transform: ghostTf(sx, sy, 1), opacity: 0, offset: 0 }, { transform: ghostTf(sx, sy, 1), opacity: 1, offset: inMs / dur }];
+      for (var k = 1; k <= 24; k++) {
+        var u = k / 24, g = 0.5 - 0.5 * Math.cos(Math.PI * u), a = 1 - g;
+        frames.push({ transform: ghostTf(a * a * sx + 2 * a * g * qx + g * g * ex, a * a * sy + 2 * a * g * qy + g * g * ey, 1), opacity: 1, offset: (inMs + glideMs * u) / dur });
+      }
+      var t0 = inMs + glideMs;
+      frames.push({ transform: ghostTf(ex, ey, 0.82), opacity: 1, offset: (t0 + pressMs * 0.45) / dur });     // the press: it shrinks and comes back
+      frames.push({ transform: ghostTf(ex, ey, 1), opacity: 1, offset: (t0 + pressMs) / dur });
+      frames.push({ transform: ghostTf(ex, ey, 1), opacity: 1, offset: (dur - outMs) / dur });
+      frames.push({ transform: ghostTf(ex, ey, 1), opacity: 0, offset: 1 });
+    }
+    ghost.el.hidden = false;
+    var anim = ghost.anim = ghost.el.animate(frames, { duration: dur, easing: 'linear', fill: 'both' });
+    anim.onfinish = function () {
+      if (ghost.anim !== anim) return;
+      ghost.anim = null; ghost.el.hidden = true;
+      ghost.nextAt = Date.now() + GHOST_AGAIN_MS;
+    };
   }
   function cueSoon() {
     if (cueQueued) return;

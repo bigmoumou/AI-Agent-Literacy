@@ -448,6 +448,12 @@ body.lab-card-dragging, body.lab-card-dragging * { cursor: grabbing !important; 
   22.5% { transform: translateY(-16px); animation-timing-function: ease-in; }
   30%, 100% { transform: translateY(0); }
 }
+/* the demo pointer (?guide=ghost, §19.4): a pale copy of the mouse pointer that glides to a cue in the menu bar and presses once.
+   The element's own opacity is animated (fade in/out); the arrow itself is 60 % opaque, with an amber edge so it is not the student's pointer */
+.lab-ghost { position: absolute; left: 0; top: 0; z-index: 1160; pointer-events: none; margin: -3px 0 0 -3px; transform-origin: 3px 3px; opacity: 0; }
+.lab-ghost svg { display: block; overflow: visible; opacity: .6; filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, .35)); }
+.lab-ghost-edge { fill: none; stroke: #e39a2d; stroke-width: 4.2; stroke-linejoin: round; }
+.lab-ghost-arrow { fill: #141414; stroke: #fff; stroke-width: 1.5; stroke-linejoin: round; }
 @media (prefers-reduced-motion: reduce) {
   .lab-cue, .lab-cue-wave, .lab-dock-item.lab-dock-attn .lab-dock-icon { animation: none; }
   .lab-cue-wave { display: none; }

@@ -321,7 +321,10 @@
       {
         // the path bar is off on a fresh Mac (as in macOS); the step id s4p sits between s3 and s4 so the ids of the later steps do not change
         id: 's4p',
-        text: '真的 Mac 預設看不到資料夾的完整位置。按螢幕最上面選單列的「顯示方式」，選「顯示路徑列」。',
+        // ?guide=ghost (preview): the text sends the eyes up first; the menu bar is easy to miss (teacher, 2026-10-16)
+        text: LAB.guideGhost
+          ? '真的 Mac 預設看不到資料夾的完整位置。往上看螢幕最上面那一排（選單列）↖，按「顯示方式」，再選「顯示路徑列」。'
+          : '真的 Mac 預設看不到資料夾的完整位置。按螢幕最上面選單列的「顯示方式」，選「顯示路徑列」。',
         hint: '先點一下 Finder 視窗，選單列左上才會寫 Finder，「顯示方式」就在它右邊幾格。快捷鍵是 ⌥⌘P。打開一次之後，每個 Finder 視窗都會有路徑列。',
         answer: '選單列「顯示方式」→「顯示路徑列」。',
         menuPath: ['顯示路徑列'],

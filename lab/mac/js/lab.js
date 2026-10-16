@@ -21,6 +21,11 @@ window.LAB = window.LAB || {};
   }
   LAB.week = pickWeek();
   LAB.weekInfo = WEEK_INFO;
+  /* ?guide=ghost (preview, 2026-10-16): a demo pointer glides from the student's mouse to a cue that sits in the menu bar, and step
+     s4p of task 1 says to look up (missions.js §19.4, missions-week3.js). Off without the parameter until the teacher has seen it. */
+  LAB.guideGhost = (function () {
+    try { return /[?&]guide=ghost(?:&|$)/.test(String(window.location.search || '')); } catch (e) { return false; }
+  })();
   LAB.weekLabel = function () { return WEEK_INFO[LAB.week].label; };
 
   /* ------------------------------------------------------------------ util */
