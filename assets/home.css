@@ -183,6 +183,12 @@ body.index-open .studio-fx { visibility: hidden; }
 body.is-loading :is(.studio-cam, .studio-mon), body.is-leaving :is(.studio-cam, .studio-mon) { opacity: 0; transition-duration: .45s; }
 body.index-open :is(.studio-cam, .studio-mon), :is(.studio-cam, .studio-mon).is-hidden { visibility: hidden; }
 body.no-film :is(.studio-cam, .studio-mon) { display: none; }
+/* 道具球（.studio-ball）：一張跟著球移動的小畫布，studio.js 只在球滾過去的那幾秒畫它 */
+.studio-ball { position: fixed; left: 0; top: 0; z-index: 1; pointer-events: none; opacity: 0; will-change: transform; }
+.studio-ball.is-on { opacity: 1; }
+body.is-loading .studio-ball, body.is-leaving .studio-ball { opacity: 0; transition: opacity .45s var(--ease); }
+body.index-open .studio-ball, .studio-ball.is-hidden { visibility: hidden; }
+body.no-film .studio-ball { display: none; }
 .studio-mon { width: 320px; height: 180px; transform-origin: 0 0; object-fit: cover; filter: brightness(.62) saturate(.85); }
 .studio-mon.is-on { opacity: .9; }
 :root[data-theme="light"] .studio-mon.is-on { opacity: .5; }

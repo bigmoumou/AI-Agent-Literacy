@@ -9,6 +9,8 @@
      版面或主題改變時，先把機頭在幾十個角度的樣子各畫一次，存成一張小圖集，
      再用一張只有機頭大小的 2D 小畫布輪流貼上去（相鄰兩張交叉淡化）。轉動時 WebGL 完全不用重畫，
      停住的時候小畫布也不畫，等下一個動作再醒來。
+   - 偶爾有一顆道具球從膠捲下方的地板滾過去（第一次在 20～30 秒後，之後每 60～120 秒）：
+     球畫在一張跟著球移動的 2D 小畫布上，從道具後面經過時用一張事先畫好的遮罩擋住。
    - 其他會動的部分（燈的光暈、霧、光裡的灰塵）是 CSS 圖層，只用 transform／opacity。
      減少動態時全部靜止，攝影機停在看著膠捲的角度。
    用法（home.js）：
@@ -772,6 +774,17 @@
       o = vec4(mix(vec3(1.0, 0.16, 0.08), vec3(1.0, 0.8, 0.66), core) * a, a);
     }`;
 
+  // 道具球的遮罩：只畫比球近的道具（世界座標 z 比球大），其他丟掉；影子和地上的光區不算
+  const MASK_FS = `#version 300 es
+    precision mediump float;
+    in vec3 vW; in vec3 vN; in vec4 vC; out vec4 o;
+    uniform float uClipZ;
+    void main() {
+      int mtl = int(vC.a + 0.5);
+      if (mtl == 3 || mtl == 6 || vW.z < uClipZ) discard;
+      o = vec4(1.0);
+    }`;
+
   // CSS 的 matrix3d：把 w×h 的方塊（左上、右上、右下、左下）貼到畫面上的四個點（透視）
   function quadMatrix(w, h, q) {
     const [x0, y0] = q[0], [x1, y1] = q[1], [x2, y2] = q[2], [x3, y3] = q[3];
@@ -833,8 +846,8 @@
       ctx.bindVertexArray(null);
       return vao;
     }
-    const pending = [startProgram(gl, PROP_VS, PROP_FS), startProgram(gl, QUAD_VS, BLUR_FS), startProgram(gl, QUAD_VS, COPY_FS)];
-    let prop = null, blur = null, copy = null, quad = null, ready = false;
+    const pending = [startProgram(gl, PROP_VS, PROP_FS), startProgram(gl, QUAD_VS, BLUR_FS), startProgram(gl, QUAD_VS, COPY_FS), startProgram(gl, PROP_VS, MASK_FS)];
+    let prop = null, blur = null, copy = null, maskP = null, quad = null, ready = false;
 
     /* ---------- 攝影機機頭的小畫布：自己一個很小的 WebGL，只畫機頭（轉動時只重畫這一小塊） ---------- */
     const camEl = document.createElement("canvas");
@@ -848,15 +861,16 @@
     // 著色器都編好之後才建場景、開始畫（建場景是另一個小工作，不和送出著色器擠在同一格）
     function finish() {
       try {
-        [prop, blur, copy] = pending.slice(0, 3).map(finishProgram);
+        [prop, blur, copy, maskP] = pending.slice(0, 4).map(finishProgram);
         quad = quadVao(gl, [blur, copy], [-1, -1, 3, -1, -1, 3]);
       } catch (e) { return; }                       // 編不過：就是沒有道具，膠捲照常
       if (hg) {
-        try { [hp, hglow] = pending.slice(3).map(finishProgram); hquad = quadVao(hg, [hglow], [-1, -1, 1, -1, -1, 1, 1, 1]); } catch (e) { hg = null; }
+        try { [hp, hglow] = pending.slice(4).map(finishProgram); hquad = quadVao(hg, [hglow], [-1, -1, 1, -1, -1, 1, 1, 1]); } catch (e) { hg = null; }
       }
       ready = true;
       if (proj) build(cssW / cssH < 0.8);
       dirty = true;
+      scheduleBall(20 + Math.random() * 10);        // 第一顆球：進首頁 20～30 秒後
       if (opts.onReady) opts.onReady();
     }
     const poll = () => { if (pending.every(compiled)) finish(); else setTimeout(poll, 16); };
@@ -1184,8 +1198,14 @@
     function pause(v) {
       if (v === paused) return;
       paused = v;
-      if (v) { pausedAt = performance.now(); stop(); }
-      else { actT0 += performance.now() - pausedAt; play(); }
+      const now = performance.now();
+      if (v) { pausedAt = now; stop(); stopBall(); return; }
+      const away = now - pausedAt;
+      actT0 += away;
+      play();
+      // 道具球：滾到一半的接著滾完；還沒輪到的，等待時間扣掉看不到的那段
+      if (roll) { roll.t0 += away; ballRaf = requestAnimationFrame(ballStep); }
+      else if (ballDue) { ballDue += away; ballTimer = setTimeout(startRoll, Math.max(500, ballDue - now)); }
     }
     let hidden = false;
     document.addEventListener("visibilitychange", () => pause(document.hidden || hidden));
@@ -1205,6 +1225,210 @@
     }
     mon.addEventListener("load", placeMon);
 
+    /* ---------- 道具球：偶爾有一顆皮球從膠捲下方的地板滾過去 ----------
+       球畫在一張跟著球移動的 2D 小畫布上（用 transform 移動），主畫布完全不重畫。
+       球從道具後面經過時要被擋住：每次滾之前，先把「比球近的道具」畫成一張遮罩（只畫球經過的那一條），
+       讀回 2D 畫布，每一格把遮罩蓋在球上挖掉。沒有球的時候只有一個計時器在等下一次。 */
+    const BALL_R = 0.16;                          // 直徑 30 公分左右的橡膠皮球
+    const ballEl = document.createElement("canvas");
+    ballEl.className = "studio-ball";
+    ballEl.setAttribute("aria-hidden", "true");
+    const bc = ballEl.getContext("2d");
+    const maskCv = document.createElement("canvas");
+    const mc = maskCv.getContext("2d");
+    let ballMask = null, maskDirty = true, maskSync = null, maskTimer = 0;
+    let roll = null, ballRaf = 0, ballTimer = 0, ballDue = 0, layoutGen = 0;
+    // 球的縫線：兩條互相垂直的大圓（球自己的座標，每條用圓面上兩個互相垂直的單位向量表示），和打氣孔的位置
+    const seam = (n) => { const u = norm(cross(n, Math.abs(n[1]) < 0.9 ? [0, 1, 0] : [1, 0, 0])); return [u, cross(n, u)]; };
+    const SEAM_N = norm([0.35, 0.3, 1]);
+    const SEAMS = [seam(SEAM_N), seam(norm(cross(SEAM_N, [0.2, 1, 0])))];
+    const VALVE = norm([0.55, 0.55, 0.62]);
+
+    function scheduleBall(sec) {
+      clearTimeout(ballTimer); ballTimer = 0;
+      if (reduceMotion) { ballDue = 0; return; }   // 減少動態：不出現
+      ballDue = performance.now() + sec * 1000;
+      if (!paused) ballTimer = setTimeout(startRoll, sec * 1000);
+    }
+    function stopBall() { clearTimeout(ballTimer); ballTimer = 0; cancelAnimationFrame(ballRaf); ballRaf = 0; }
+    function endRoll(again) {
+      roll = null;
+      cancelAnimationFrame(ballRaf); ballRaf = 0;
+      ballEl.classList.remove("is-on");
+      if (again) scheduleBall(60 + Math.random() * 60);
+    }
+    // 球的路線：膠捲下方那一條地板（比後面的道具近、比攝影機遠），從畫面一側外面滾到另一側外面
+    function ballPath() {
+      const z = narrow ? -11.6 : -12.6, y = floorY + BALL_R;
+      const a = project([0, y, z]), b = project([1, y, z]);
+      const k = b[0] - a[0];                      // 同一個深度，地上每 1 單位在畫面上是固定的 px
+      const top = project([0, y + BALL_R, z])[1], bottom = project([0, floorY, z])[1];
+      const rPx = (bottom - top) / 2, out = rPx * 3;
+      if (!(k > 0) || bottom < 0 || top > cssH) return null;
+      const xa = (-out - a[0]) / k, xb = (cssW + out - a[0]) / k;
+      const dir = Math.random() < 0.5 ? 1 : -1;
+      return { z, y, rPx, cy: (top + bottom) / 2, x0: dir > 0 ? xa : xb, x1: dir > 0 ? xb : xa, dir };
+    }
+    function startRoll() {
+      ballTimer = 0; ballDue = 0;
+      if (!ready || !proj || !scene || paused || roll) { scheduleBall(30); return; }
+      const path = ballPath();
+      if (!path) { scheduleBall(60 + Math.random() * 60); return; }
+      const gen = layoutGen;
+      makeMask(path, () => {
+        if (paused || gen !== layoutGen) { scheduleBall(5); return; }   // 等遮罩的時候版面變了：晚一點重來
+        const T = narrow ? 5 : 7;                 // 滾過整個畫面的時間；越滾越慢，出去時剩一半的速度
+        const L = Math.abs(path.x1 - path.x0), v0 = L / (0.75 * T);
+        roll = Object.assign(path, { t0: performance.now(), T, v0, decel: (v0 * 0.5) / T });
+        const dpr = pxW / cssW, cw = path.rPx * 2.6 + 6, ch = path.rPx * 2.75 + 6;
+        roll.cw = cw; roll.ch = ch; roll.dpr = dpr;
+        ballEl.width = Math.round(cw * dpr); ballEl.height = Math.round(ch * dpr);
+        ballEl.style.width = cw + "px"; ballEl.style.height = ch + "px";
+        ballRaf = requestAnimationFrame(ballStep);
+      });
+    }
+    // 遮罩：用投影只看球經過的那一條，把比球近的道具畫成白色，等顯示卡畫完再讀回（不卡主執行緒）
+    function makeMask(path, done) {
+      if (!maskDirty && ballMask && ballMask.z === path.z) { done(); return; }
+      const k = (pxW / cssW) * 0.75;
+      const y0 = Math.floor(path.cy - path.rPx * 1.6), h = Math.ceil(path.rPx * 3.4);
+      const W = Math.max(1, Math.round(cssW * k)), H = Math.max(1, Math.round(h * k));
+      const t = colorTex(W, H);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, t.fb);
+      gl.viewport(0, 0, W, H);
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      const Yt = 1 - (y0 / cssH) * 2, Yb = 1 - ((y0 + h) / cssH) * 2;
+      const fit = mat();
+      fit[5] = 2 / (Yt - Yb); fit[13] = -(Yt + Yb) / (Yt - Yb);
+      gl.useProgram(maskP.p);
+      gl.uniformMatrix4fv(maskP.u.uProj, false, mul(fit, Array.from(proj)));
+      gl.uniformMatrix4fv(maskP.u.uModel, false, I4);
+      gl.uniform3fv(maskP.u.uCam, cam);
+      gl.uniform1f(maskP.u.uClipZ, path.z);
+      for (const m of [backMesh, frontMesh]) { gl.bindVertexArray(m.vao); gl.drawArrays(gl.TRIANGLES, 0, m.solid); }
+      if (!hg && headMain) {
+        gl.uniformMatrix4fv(maskP.u.uModel, false, headPose(scene.rig.yawFilm));
+        gl.bindVertexArray(headMain.vao); gl.drawArrays(gl.TRIANGLES, 0, headMain.solid);
+      }
+      gl.bindVertexArray(null);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      if (maskSync) gl.deleteSync(maskSync);
+      maskSync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
+      gl.flush();
+      clearTimeout(maskTimer);
+      const wait = () => {
+        if (gl.clientWaitSync(maskSync, 0, 0) === gl.TIMEOUT_EXPIRED) { maskTimer = setTimeout(wait, 16); return; }
+        gl.deleteSync(maskSync); maskSync = null;
+        const buf = new Uint8Array(W * H * 4);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, t.fb);
+        gl.readPixels(0, 0, W, H, gl.RGBA, gl.UNSIGNED_BYTE, buf);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        freeTex(t);
+        maskCv.width = W; maskCv.height = H;
+        const img = mc.createImageData(W, H);
+        for (let yy = 0; yy < H; yy++) {
+          const si = (H - 1 - yy) * W * 4, di = yy * W * 4;   // WebGL 由下往上，2D 由上往下
+          for (let x = 3; x < W * 4; x += 4) img.data[di + x] = buf[si + x];
+        }
+        mc.putImageData(img, 0, 0);
+        ballMask = { z: path.z, y0, k };
+        maskDirty = false;
+        done();
+      };
+      maskTimer = setTimeout(wait, 16);
+    }
+    function ballStep(now) {
+      ballRaf = 0;
+      if (!roll || paused) return;
+      const t = (now - roll.t0) / 1000;
+      if (t >= roll.T) { endRoll(true); return; }
+      const s = roll.v0 * t - 0.5 * roll.decel * t * t;
+      drawBall(roll.x0 + roll.dir * s, -roll.dir * s / BALL_R);
+      ballRaf = requestAnimationFrame(ballStep);
+    }
+    // 畫球：明暗固定跟著燈（左上方的頂燈），縫線和打氣孔跟著球轉；底下一圈柔邊的影子；最後用遮罩挖掉被道具擋住的地方
+    const rgb = (c) => "rgb(" + c.map((v) => Math.round(clamp(v, 0, 1) * 255)).join(",") + ")";
+    function drawBall(xw, ang) {
+      const r = roll, L = look();
+      const c = [xw, r.y, r.z], sp = project(c);
+      const left = sp[0] - r.cw / 2, top = r.cy - r.rPx - 3;
+      ballEl.style.transform = "translate3d(" + left.toFixed(2) + "px," + top.toFixed(2) + "px,0)";
+      if (!ballEl.classList.contains("is-on")) ballEl.classList.add("is-on");
+      // 這個位置被頂燈照到多少（跟道具的著色器同一套：越靠中間越亮）
+      const lk = sub([0, 7.5, -8.5], [xw, r.y + BALL_R, r.z]), dist = Math.hypot(lk[0], lk[1], lk[2]);
+      const ln = [lk[0] / dist, lk[1] / dist, lk[2] / dist], cd = norm([0, -1, -0.15]);
+      const cone = clamp((-(ln[0] * cd[0] + ln[1] * cd[1] + ln[2] * cd[2]) - 0.55) / 0.4, 0, 1);
+      const key = (0.4 + 0.6 * cone * cone * (3 - 2 * cone)) / (1 + 0.012 * dist * dist);
+      const lightK = L.amb * 1.3 + L.keyCol[0] * key * 0.42;
+      const d = Math.hypot(c[0] - cam[0], c[1] - cam[1], c[2] - cam[2]);
+      const fog = clamp(1 - Math.exp(-d * L.fogK) + 0.1, 0, 0.92);
+      const shade = (base, k) => base.map((v, i) => v * k * (1 - fog) + L.haze[i] * fog);
+      const base = [0.5, 0.17, 0.11];             // 磚紅色的橡膠
+      const R = r.rPx, cx = r.cw / 2, cy = R + 3;
+      bc.setTransform(r.dpr, 0, 0, r.dpr, 0, 0);
+      bc.globalCompositeOperation = "source-over";
+      bc.globalAlpha = 1;
+      bc.clearRect(0, 0, r.cw, r.ch);
+      // 地上的影子（頂燈在後上方，影子落在球的正下方、稍微往後）
+      const sh = bc.createRadialGradient(cx, cy + R * 0.9, 0, cx, cy + R * 0.9, R * 1.25);
+      sh.addColorStop(0, "rgba(0,0,0," + (0.55 * L.shadow).toFixed(3) + ")");
+      sh.addColorStop(1, "rgba(0,0,0,0)");
+      bc.save(); bc.translate(cx, cy + R * 0.9); bc.scale(1, 0.26); bc.translate(-cx, -(cy + R * 0.9));
+      bc.fillStyle = sh; bc.fillRect(cx - R * 1.3, cy + R * 0.9 - R * 1.3, R * 2.6, R * 2.6);
+      bc.restore();
+      // 球身：亮面在左上，往右下變暗
+      const g = bc.createRadialGradient(cx - R * 0.38, cy - R * 0.45, R * 0.05, cx - R * 0.1, cy - R * 0.1, R * 1.25);
+      g.addColorStop(0, rgb(shade(base, lightK * 2.1)));
+      g.addColorStop(0.5, rgb(shade(base, lightK * 1.15)));
+      g.addColorStop(1, rgb(shade(base, lightK * 0.32)));
+      bc.beginPath(); bc.arc(cx, cy, R, 0, Math.PI * 2); bc.fillStyle = g; bc.fill();
+      bc.save(); bc.beginPath(); bc.arc(cx, cy, R, 0, Math.PI * 2); bc.clip();
+      // 縫線：球往右滾就順時針轉；看的角度稍微往下（從上面看下來一點）
+      const e = norm(sub(cam, c)), up = norm(sub([0, 1, 0], e.map((v) => v * e[1]))), rt = cross(up, e);
+      const ca = Math.cos(ang), sa = Math.sin(ang);
+      const turn = (p) => [p[0] * ca - p[1] * sa, p[0] * sa + p[1] * ca, p[2]];
+      const dot = (a2, b2) => a2[0] * b2[0] + a2[1] * b2[1] + a2[2] * b2[2];
+      bc.lineWidth = R * 0.07; bc.lineCap = "round";
+      bc.strokeStyle = rgb(shade(base, lightK * 0.22));
+      for (const [u, v] of SEAMS) {
+        let prev = null;
+        for (let i = 0; i <= 48; i++) {
+          const t = (i / 48) * Math.PI * 2, p = turn([u[0] * Math.cos(t) + v[0] * Math.sin(t), u[1] * Math.cos(t) + v[1] * Math.sin(t), u[2] * Math.cos(t) + v[2] * Math.sin(t)]);
+          const q = [cx + dot(p, rt) * R, cy - dot(p, up) * R, dot(p, e)];
+          if (prev && q[2] > 0 && prev[2] > 0) {
+            bc.globalAlpha = clamp(Math.min(q[2], prev[2]) / 0.3, 0, 1) * 0.85;
+            bc.beginPath(); bc.moveTo(prev[0], prev[1]); bc.lineTo(q[0], q[1]); bc.stroke();
+          }
+          prev = q;
+        }
+      }
+      const vp = turn(VALVE);
+      if (dot(vp, e) > 0.15) {
+        bc.globalAlpha = clamp((dot(vp, e) - 0.15) / 0.3, 0, 1);
+        bc.fillStyle = rgb(shade([0.12, 0.1, 0.09], lightK));
+        bc.beginPath(); bc.arc(cx + dot(vp, rt) * R, cy - dot(vp, up) * R, R * 0.07, 0, Math.PI * 2); bc.fill();
+      }
+      bc.globalAlpha = 1;
+      // 背光在上緣的一條暖色亮邊、左上方一小塊柔和的反光
+      const rim = bc.createRadialGradient(cx, cy + R * 0.25, R * 0.85, cx, cy + R * 0.25, R * 1.3);
+      rim.addColorStop(0, "rgba(0,0,0,0)");
+      rim.addColorStop(1, "rgba(" + L.rimCol.map((v) => Math.round(clamp(v * (1 - fog), 0, 1) * 255)).join(",") + ",0.55)");
+      bc.fillStyle = rim; bc.fillRect(cx - R, cy - R, R * 2, R * 2);
+      const hi = bc.createRadialGradient(cx - R * 0.4, cy - R * 0.48, 0, cx - R * 0.4, cy - R * 0.48, R * 0.38);
+      hi.addColorStop(0, "rgba(255,240,220," + (0.32 * (1 - fog) * Math.min(1, lightK * 2)).toFixed(3) + ")");
+      hi.addColorStop(1, "rgba(255,240,220,0)");
+      bc.fillStyle = hi; bc.fillRect(cx - R, cy - R, R * 2, R * 2);
+      bc.restore();
+      // 被比較近的道具擋住的地方挖掉
+      if (ballMask) {
+        const k = ballMask.k;
+        bc.globalCompositeOperation = "destination-out";
+        bc.drawImage(maskCv, left * k, (top - ballMask.y0) * k, r.cw * k, r.ch * k, 0, 0, r.cw, r.ch);
+        bc.globalCompositeOperation = "source-over";
+      }
+    }
+
     /* ---------- 會動的 CSS 圖層 ---------- */
     const fx = document.createElement("div");
     fx.className = "studio-fx";
@@ -1220,7 +1444,8 @@
     const stage = document.querySelector(".stage");
     stage.parentNode.insertBefore(glow, stage);
     stage.parentNode.insertBefore(fx, stage.nextSibling);
-    stage.parentNode.insertBefore(mon, fx);       // 順序：膠捲畫布 → 監看螢幕的畫面 → 攝影機 → 霧和灰塵
+    stage.parentNode.insertBefore(ballEl, fx);    // 順序：膠捲畫布 → 道具球 → 監看螢幕的畫面 → 攝影機 → 霧和灰塵
+    stage.parentNode.insertBefore(mon, fx);
     stage.parentNode.insertBefore(camEl, fx);
     if (reduceMotion) { fx.classList.add("is-still"); glow.classList.add("is-still"); }
     // 灰塵：每顆的起點、速度不同（固定的亂數，每次載入一樣）
@@ -1258,7 +1483,9 @@
 
     return {
       layout(p, c, w, h, pw, ph) {
-        proj = p; cam = c; cssW = w; cssH = h; pxW = pw; pxH = ph; dirty = true; headDirty = true;
+        proj = p; cam = c; cssW = w; cssH = h; pxW = pw; pxH = ph; dirty = true; headDirty = true; maskDirty = true;
+        layoutGen++;
+        if (roll) endRoll(true);                    // 版面變了：滾到一半的球直接收掉，等下一次
         const isNarrow = w / h < 0.8;
         if (ready && isNarrow !== narrow) { build(isNarrow); yaw = null; stop(); }
       },
@@ -1277,7 +1504,7 @@
       },
       hide(v) {
         hidden = !!v;
-        [fx, glow, camEl, mon].forEach((el) => el.classList.toggle("is-hidden", hidden));
+        [fx, glow, camEl, mon, ballEl].forEach((el) => el.classList.toggle("is-hidden", hidden));
         pause(hidden || document.hidden);
       },
     };
