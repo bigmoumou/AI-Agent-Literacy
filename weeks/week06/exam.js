@@ -40,7 +40,7 @@
   const ban = (i) => (BAN[LANG] || BAN["zh-Hant"])[i];
   // 音效（assets/exam-sound.js）：撕開時劈啪、黑洞隆隆、碎開時玻璃叮叮、越過事件視界一片安靜
   const sound = window.ExamSound || null;
-  if (sound) { sound.bindButton($("#soundBtn")); sound.prepare(); }
+  if (sound) sound.bindButton($("#soundBtn"));
 
   const body = document.body;
   const canvas = $("#rift"), bhCanvas = $("#bh");
@@ -49,8 +49,9 @@
   const sceneCv = document.createElement("canvas");
   const scene = new window.Rift(sceneCv, { seed: 6 });        // 看不到的 2D：撕開、碎掉的螢幕，給黑洞當背景
   const ss = scene.state;
+  // 黑洞（WebGL）在第一次畫面出來之後才建（建的時候要等著色器編譯，會讓頁面晚一點才顯示；見下面的熱身）
   let bh = null;
-  if (!reduce && window.BlackHole) { try { bh = new window.BlackHole(bhCanvas); } catch (e) { bh = null; } }
+  const wantBH = !reduce && !!window.BlackHole;
   const pick = $("#pick"), status = $("#pickStatus"), skipBtn = $("#skip"), frame = $("#remote");
   const hud = $("#hud"), hudRate = $("#hudRate"), hudClock = $("#hudClock");
   let W = 1, H = 1;
@@ -82,7 +83,7 @@
       const c = cover(1);
       g.setTransform(k * c.s, 0, 0, k * c.s, k * c.x, k * c.y);
       const fired = art.step(t, { energy: 1 + 1.8 * seg(u, 0.15, 0.95), auto: false });
-      if (sound) {
+      if (sound && !warming) {
         const carry = 1 - out(seg(u, 0, 0.8));                 // 接著首頁被吸進來的拉力，慢慢收
         sound.pull(0.12 * carry + 0.06 * seg(u, 0.55, 0.98), 4 + 6 * carry, 0.08);
         if (carry > 0.2 && t - lastCrack > 0.09 + Math.random() * 0.08) { lastCrack = t; sound.crackle(0.22 + 0.25 * carry, 0.1); }
@@ -283,7 +284,7 @@
      警報聲用老師錄的洛克人 X4 WARNING（weeks/week06/warning.mp3：取 4 個乾淨的循環，約 4.2 秒，每秒一次）。
      瀏覽器只准在使用者點過之後出聲，所以在選電腦那一下就把聲音準備好、先解碼（initAudio）。
      載入失敗時退回現場合成的兩音警報。 */
-  let audio = null, warnBuf = null, lastCrack = 0;
+  let audio = null, warnBuf = null, lastCrack = 0, warming = false;
   const dest = () => { const o = sound && sound.output(); return o && o.context === audio ? o : audio.destination; };   // 走音效開關（右上角的喇叭）
   function initAudio() {
     try {
@@ -362,27 +363,57 @@
   }
 
   /* ---------- 4. 遠端桌面上的小裂縫：空間還沒穩定，完成任務才能逃離 ----------
-     和首頁那一格同一種樣子：直接從老師的概念圖切兩小叢電流（assets/exam-art.js 的 cutout），從螢幕右邊、左邊往內爬一點點；
-     很小、很淡，平常輕輕閃，偶爾落雷般亮一下（想逃卻被擋下 LOCKED 時也亮一下），不擋操作、也不抖畫面，才能專心寫作業。
+     和首頁那一格同一種樣子（紫藍的光、白芯）：兩道小裂縫從螢幕右邊、左邊往內爬一點點，每道只有 1–3 條電流（多了會很怪）；
+     看得出來但不搶眼，平常輕輕閃，偶爾落雷般亮一下、電流重新長一次（想逃卻被擋下 LOCKED 時也亮一下），
+     不擋操作、也不抖畫面，才能專心寫作業。
      畫在 #scar（蓋在 iframe 上），每秒最多畫 20 次、1 倍解析度；分頁看不到就停。
      還沒完成任務時，「中斷連線」、開始選單的關機、回到週次的連結都逃不出去（LOCKED）；
      完成任務（練習電腦的 mission:complete）之後小裂縫亮一下就散掉（STABILIZED），才能正常離開。 */
   const scarCv = $("#scar"), scarG = scarCv.getContext("2d");
   let scars = [], escaped = false, scarRaf = 0, scarDrawn = 0, sealAt = 0, scarLoop = null;
   // 從圖裡切哪一叢（貼圖座標）、放在螢幕哪一邊、多高；左右翻過來，讓原本連著裂縫的那一端貼著螢幕邊
+  // 放在螢幕哪一邊、多高、幾條電流、多長（螢幕短邊的幾成）、往哪個方向斜
   const SCAR_SPOTS = [
-    { src: [690, 360, 220, 170], root: 0, edge: 1, y: 0.44 },   // 右半邊往花伸過去的電流 → 從螢幕右邊爬進來
-    { src: [270, 420, 170, 150], root: 1, edge: 0, y: 0.72 },   // 左半邊往湖伸過去的電流 → 從螢幕左邊爬進來
+    { edge: 1, y: 0.44, n: 2, len: 0.2, tilt: -0.18 },    // 從螢幕右邊爬進來
+    { edge: 0, y: 0.72, n: 3, len: 0.17, tilt: 0.22 },    // 從螢幕左邊爬進來
   ];
+  // 一條電流：從螢幕邊（0, y0）往內，中點一直往旁邊偏（像閃電），回傳折線
+  function strand(len, y0, ang) {
+    const pts = [[0, y0]], ex = Math.cos(ang) * len, ey = y0 + Math.sin(ang) * len;
+    const go = (x0, y0_, x1, y1, r, d) => {
+      if (d === 0) { pts.push([x1, y1]); return; }
+      const mx = (x0 + x1) / 2 + (Math.random() * 2 - 1) * r * 0.35, my = (y0_ + y1) / 2 + (Math.random() * 2 - 1) * r;
+      go(x0, y0_, mx, my, r / 2, d - 1); go(mx, my, x1, y1, r / 2, d - 1);
+    };
+    go(0, y0, ex, ey, len * 0.22, 5);
+    return pts;
+  }
+  // 一道裂縫畫成一張小圖（落雷時重畫一次，電流換個樣子）
+  function drawScarImage(s) {
+    const L = s.L, pad = 18, c = s.c, g = c.getContext("2d");
+    g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, c.width, c.height);
+    g.translate(pad, c.height / 2);
+    g.lineCap = "round"; g.lineJoin = "round"; g.globalCompositeOperation = "lighter";
+    for (let i = 0; i < s.p.n; i++) {
+      const P = strand(L * (0.65 + Math.random() * 0.35) * (i ? 0.8 : 1), (i - (s.p.n - 1) / 2) * 7, s.p.tilt + (Math.random() * 2 - 1) * 0.35);
+      const line = () => { g.beginPath(); P.forEach(([x, y], k) => (k ? g.lineTo(x, y) : g.moveTo(x, y))); g.stroke(); };
+      [[11, "110,80,255", 0.2], [4, "150,140,255", 0.55], [1.6, "245,245,255", 0.95]].forEach(([w, col, a]) => {
+        g.strokeStyle = `rgba(${col},${a})`; g.lineWidth = w; line();
+      });
+    }
+  }
   function makeScars() {
-    scars = art && art.fx ? SCAR_SPOTS.map((p, k) => {
-      const [sx, sy, sw, sh] = p.src, c = art.cutout(sx, sy, sw, sh, p.root), sc = (Math.min(W, H) * 0.2) / sw;
-      return { c, p, k, w: sw * sc, h: sh * sc, ph: k * 2.1, strikeT: -9, next: performance.now() / 1000 + 4 + k * 3 + Math.random() * 3 };
-    }) : [];
+    scars = SCAR_SPOTS.map((p, k) => {
+      const L = Math.min(W, H) * p.len, c = document.createElement("canvas");
+      c.width = Math.ceil(L + 36); c.height = Math.ceil(L * 0.9 + 36);
+      const s = { p, k, L, c, ph: k * 2.1, strikeT: -9, next: performance.now() / 1000 + 4 + k * 3 + Math.random() * 3 };
+      drawScarImage(s);
+      return s;
+    });
   }
   function startScars() {
     if (escaped) return;
-    (art ? art.loadFx() : Promise.resolve(false)).then(() => {
+    Promise.resolve().then(() => {
       if (escaped) return;
       makeScars();
       const loop = scarLoop = (ms) => {
@@ -405,21 +436,21 @@
     g.setTransform(1, 0, 0, 1, 0, 0);
     g.clearRect(0, 0, W, H);
     for (const s of scars) {
-      if (!reduce && !sealAt && t > s.next) { s.strikeT = t; s.next = t + 7 + Math.random() * 6; if (sound) sound.crackle(0.12, 0.15); }
+      if (!reduce && !sealAt && t > s.next) { s.strikeT = t; s.next = t + 7 + Math.random() * 6; drawScarImage(s); if (sound) sound.crackle(0.12, 0.15); }
       const e = reduce ? 0 : env(t - s.strikeT);                      // 落雷：一閃、暗一下、再一閃
       const gone = sealAt ? clamp((t - sealAt - 0.25 - s.k * 0.12) / 0.7, 0, 1) : 0;   // 封起來：先亮一下再散掉
       const seal = sealAt ? env(t - sealAt - s.k * 0.12) : 0;
-      const rest = reduce ? 0.5 : 0.4 + 0.1 * Math.sin(t * 1.9 + s.ph) + 0.06 * (Math.random() - 0.5);
+      const rest = reduce ? 0.68 : 0.62 + 0.1 * Math.sin(t * 1.9 + s.ph) + 0.08 * (Math.random() - 0.5);
       g.save();
-      g.translate(s.p.edge ? W : 0, s.p.y * H);
-      g.scale(-1, 1);
-      const x = s.p.edge ? 0 : -s.w;
+      g.translate(s.p.edge ? W : 0, s.p.y * H - s.c.height / 2);
+      if (s.p.edge) g.scale(-1, 1);                                     // 右邊的往左爬
+      const x = -18;
       g.globalAlpha = Math.min(1, (rest + 0.5 * e + 0.6 * seal) * (1 - gone));
-      g.drawImage(s.c, x, -s.h / 2, s.w, s.h);
+      g.drawImage(s.c, x, 0);
       if (e + seal > 0.05) {                                           // 亮起來時多一層光
         g.globalCompositeOperation = "lighter";
         g.globalAlpha = Math.min(1, (0.6 * e + 0.8 * seal) * (1 - gone));
-        g.drawImage(s.c, x, -s.h / 2, s.w, s.h);
+        g.drawImage(s.c, x, 0);
         g.globalCompositeOperation = "source-over";
       }
       g.restore();
@@ -561,15 +592,51 @@
   size();
   bs.sceneHalf = [(SCENE_Z + Z0) * TAN * (W / H), (SCENE_Z + Z0) * TAN];
   const artP = window.ExamArt ? window.ExamArt.load("") : Promise.resolve(null);
-  artP.then((a) => {
+  // 開始之前先熱身（還在顯示靜止的那張圖，沒有東西在動，卡一下也看不出來）：
+  //   黑洞的著色器第一次畫的時候才真的編譯、畫面緩衝區也要配置，先在看不到的地方畫一格；音效的聲音片段也一起做好
+  const warm = new Promise((done) => requestAnimationFrame(() => setTimeout(() => {
+    if (wantBH) {
+      try { bh = new window.BlackHole(bhCanvas); bh.resize(W, H, Math.min(window.devicePixelRatio || 1, 1.25)); } catch (e) { bh = null; }
+    }
+    if (bh) {
+      try {
+        bh.q = 0.8; bh.makeFbo(); bh.setScene(sceneCv);
+        // 各種情況都先畫一次（吸積盤、往中心糊開、重力波），之後第一次遇到時才不會卡；黑洞的畫布也先放到靜止圖的後面
+        const keep = Object.assign({}, bs);
+        Object.assign(bs, { M: 0.5, disk: 1, zoom: 0.3, quad: 0.3, wave: 1, waveT0: 0, tone: 1, red: 0.3 }); bh.render(bs, 0);
+        Object.assign(bs, keep); bh.render(bs, 0);
+        bhCanvas.style.display = "";
+      } catch (e) { /* 畫不出來就算了 */ }
+    }
+    if (sound) sound.prepare(true);
+    done();
+  }, 0)));
+  const ready = artP.then((a) => {
     if (!a || reduce) return a;
     // 那張圖一到就先畫上去（不會動），動畫素材到齊再開始撕開
     art = a;
     const c = cover(1), k = rift.dpr;
     rift.g.setTransform(k * c.s, 0, 0, k * c.s, k * c.x, k * c.y);
     a.drawStatic(rift.g);
-    return Promise.all([a.loadFx(), a.loadSpace()]).then(([ok]) => { if (ok) a.patchLayers(); return a; });
-  }).then((a) => {
+    return Promise.all([a.loadFx(), a.loadSpace()]).then(([ok]) => {
+      if (ok) {
+        a.patchLayers();
+        // 撕開的畫面也先試畫一次（配置畫布、上傳到顯示卡），開場第一格才不會卡；碎開要用的也準備好
+        warming = true;
+        try {
+          // 每畫一種就送出去（不然下一次整張清掉時，瀏覽器會把還沒畫的直接丟掉，顯示卡就沒準備到）
+          a.step(0, { auto: false });
+          a.surge(-0.06); ss.cracks = 0; drawOpening(0, 0); scene.flush();   // 還沒撕開、猛亮那一下（電流白熱、光暈）
+          ss.cracks = 0.5; drawOpening(0.3, 0.6); scene.flush();           // 撕開、補洞、裂痕
+          scene.primeShatter();                                            // 碎片、火花
+          scene.flush(true);                                               // 等顯示卡都準備好才開始動
+        } catch (e) { /* 試畫失敗也沒關係 */ }
+        warming = false; secondSurge = false; ss.cracks = 0; a.surge(-99);
+      }
+      return a;
+    });
+  });
+  Promise.all([ready, warm]).then(([a]) => {
     art = a;
     body.classList.add("is-diving");
     body.classList.remove("is-loading");
@@ -577,8 +644,8 @@
     phase = bh ? "dive" : "fall";
     T0 = performance.now() / 1000;
     if (bh) {
-      bhCanvas.style.display = ""; canvas.style.display = "none";
-      bh.q = 1; bh.makeFbo();                            // 第一格要和那張圖一樣清楚（太慢會自己降）
+      bhCanvas.style.display = ""; canvas.style.display = "none";   // 光線追蹤的解析度在熱身時已經設成 0.8（太慢會自己降）
+      ss.cracks = 0;
       bs.waveT0 = T0 + 0.16;
     }
     if (art) art.surge(T0 + 0.16);                       // 一開始：先暗一下，再落雷般猛亮（打出第一圈重力波）

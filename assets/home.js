@@ -761,16 +761,21 @@
     const a = seg01(t, 0.78, 0.88);
     if (a > 0) drawHandoff(a);
   }
-  function drawHandoff(alpha) {
+  // 交接用的全螢幕畫布：先建好；1 倍解析度就夠（那張圖的畫面區本來只有 944 像素寬）
+  function prepHandoff() {
     if (!handoff) {
       handoff = document.createElement("canvas");
       handoff.className = "exam-handoff"; handoff.setAttribute("aria-hidden", "true");
       document.body.append(handoff);
     }
-    const k = Math.min(window.devicePixelRatio || 1, 2), w = Math.round(vw * k), h = Math.round(vh * k);
+    const w = Math.round(vw), h = Math.round(vh);
     if (handoff.width !== w || handoff.height !== h) { handoff.width = w; handoff.height = h; }
+  }
+  function drawHandoff(alpha) {
+    prepHandoff();
+    const k = 1;
     const g = handoff.getContext("2d"), I = examArt.img, s = Math.max(vw / I.w, vh / I.h);
-    g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, w, h);
+    g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, handoff.width, handoff.height);
     g.setTransform(k * s, 0, 0, k * s, k * (vw / 2 - (I.x + I.w / 2) * s), k * (vh / 2 - (I.y + I.h / 2) * s));
     examArt.paint(g);
     handoff.style.opacity = String(alpha);
@@ -919,15 +924,25 @@
   if (sound) sound.bindButton($("#soundBtn"));
   function setupExam() {
     if (examI < 0 || reduceMotion || !examArtP) return;
-    examArtP.then((art) => (art ? art.loadFx() : false)).then((ok) => {
+    afterIntro(() => examArtP.then((art) => (art ? art.loadFx() : false)).then((ok) => new Promise((done) => {
+      // 先在看不到的地方試畫一次（配置畫布、上傳到顯示卡），那一格開始動的第一格才不會卡
+      if (!ok) { done(false); return; }
+      idle(() => { try { const c = document.createElement("canvas"); c.width = TEX_W; c.height = TEX_H; examArt.step(performance.now() / 1000); examArt.paint(c.getContext("2d")); } catch (e) { /* 試畫失敗也沒關係 */ } done(true); });
+    })).then((ok) => {   // 開場轉完才準備，轉的時候不卡
       if (!ok || fellBack || examFx) return;
       flashEl = document.createElement("div"); flashEl.className = "exam-flash"; flashEl.setAttribute("aria-hidden", "true");
       document.body.append(flashEl);
       examFx = { film: null };
+      prepHandoff();
       if (sound) idle(() => sound.prepare());               // 音訊環境、聲音片段在空檔先建好，點下去時不會卡
-      idle(() => { const im = new Image(); im.src = root() + "weeks/week06/frame-space.jpg"; });   // Week 6 開場撕開時墊的深空，先抓好
+      idle(() => { const im = new Image(); im.src = root() + "weeks/week06/frame-space.webp"; });   // Week 6 開場撕開時墊的深空，先抓好
       wake();
-    });
+    }));
+  }
+  // 開場的膠捲轉完、再等一下才做（不跟開場搶時間）
+  function afterIntro(fn) {
+    const wait = introUntil - performance.now() + 250;
+    if (wait > 0) setTimeout(() => idle(fn), wait); else idle(fn);
   }
   function examVisible() {
     let a = (examI - pos) * TH;
@@ -1120,7 +1135,7 @@
         wake();
       }
       // 開場那幾格一格一個工作，避免一次卡住；其餘的等瀏覽器有空再做
-      if (done < FIRST) setTimeout(next, 0); else idle(next);
+      if (done < FIRST) setTimeout(next, 0); else afterIntro(next);   // 其他格等開場轉完再畫
     };
     next();
   });

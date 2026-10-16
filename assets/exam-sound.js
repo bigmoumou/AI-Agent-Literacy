@@ -35,35 +35,51 @@
   }
 
   // 事先做好的聲音片段：劈啪（6 段）、「滋」（4 段）、玻璃叮叮（3 段）、一段 2 秒的雜訊（持續的嘶嘶、隆隆用）
-  function makePools() {
-    if (pools || !init()) return pools;
-    const sr = ctx.sampleRate;
+  // 一段一段做（prepare 時分散在空檔，每段只花幾毫秒）；還沒做完就要出聲時當場做完
+  const DENS = [18, 26, 34, 42, 52, 64];
+  function poolStep() {
+    const sr = ctx.sampleRate, P = pools;
     const buf = (sec, fill) => { const b = ctx.createBuffer(1, Math.round(sr * sec), sr); fill(b.getChannelData(0)); return b; };
-    const noise = buf(2, (d) => { for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; });
-    const crackles = [18, 26, 34, 42, 52, 64].map((n) => buf(0.35, (d) => {
-      for (let k = 0; k < n; k++) {
-        const at = Math.floor(Math.random() * (d.length - sr * 0.01)), len = Math.floor(sr * rnd(0.002, 0.008)), a = rnd(0.25, 1) * (1 - (at / d.length) * 0.5);
-        for (let i = 0; i < len; i++) d[at + i] += (Math.random() * 2 - 1) * a * (1 - i / len);
-      }
-    }));
-    const zaps = [0, 1, 2, 3].map(() => buf(0.45, (d) => {
-      const f1 = rnd(105, 135), f2 = f1 * 2.02, step = Math.floor(sr * 0.014);
-      let amp = 0;
-      for (let i = 0; i < d.length; i++) {
-        if (i % step === 0) amp = rnd(0.25, 1) * (1 - i / d.length);
-        const ph1 = (i * f1 / sr) % 1, ph2 = (i * f2 / sr) % 1;
-        d[i] = amp * (0.6 * (ph1 * 2 - 1) + 0.3 * (ph2 < 0.5 ? 1 : -1)) + (Math.random() < 0.004 ? (Math.random() * 2 - 1) * amp : 0);
-      }
-    }));
-    const glass = [0, 1, 2].map(() => buf(0.7, (d) => {
-      for (let k = 0; k < 18; k++) {
-        const at = Math.floor(Math.pow(Math.random(), 1.6) * 0.42 * sr), f = rnd(2200, 7200), dec = rnd(0.05, 0.25), a = rnd(0.4, 1);
-        for (let i = 0; at + i < d.length; i++) { const t = i / sr; if (t > dec * 4) break; d[at + i] += Math.sin(2 * Math.PI * f * t) * a * Math.exp(-t / dec) * Math.min(1, i / 60); }
-      }
-      let m = 0; for (let i = 0; i < d.length; i++) m = Math.max(m, Math.abs(d[i]));
-      for (let i = 0; i < d.length; i++) d[i] /= m || 1;
-    }));
-    pools = { noise, crackles, zaps, glass };
+    if (!P.noise) { P.noise = buf(2, (d) => { for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }); return; }
+    if (P.crackles.length < DENS.length) {
+      const n = DENS[P.crackles.length];
+      P.crackles.push(buf(0.35, (d) => {
+        for (let k = 0; k < n; k++) {
+          const at = Math.floor(Math.random() * (d.length - sr * 0.01)), len = Math.floor(sr * rnd(0.002, 0.008)), a = rnd(0.25, 1) * (1 - (at / d.length) * 0.5);
+          for (let i = 0; i < len; i++) d[at + i] += (Math.random() * 2 - 1) * a * (1 - i / len);
+        }
+      }));
+      return;
+    }
+    if (P.zaps.length < 4) {
+      P.zaps.push(buf(0.45, (d) => {
+        const f1 = rnd(105, 135), f2 = f1 * 2.02, step = Math.floor(sr * 0.014);
+        let amp = 0;
+        for (let i = 0; i < d.length; i++) {
+          if (i % step === 0) amp = rnd(0.25, 1) * (1 - i / d.length);
+          const ph1 = (i * f1 / sr) % 1, ph2 = (i * f2 / sr) % 1;
+          d[i] = amp * (0.6 * (ph1 * 2 - 1) + 0.3 * (ph2 < 0.5 ? 1 : -1)) + (Math.random() < 0.004 ? (Math.random() * 2 - 1) * amp : 0);
+        }
+      }));
+      return;
+    }
+    if (P.glass.length < 3) {
+      P.glass.push(buf(0.7, (d) => {
+        for (let k = 0; k < 18; k++) {
+          const at = Math.floor(Math.pow(Math.random(), 1.6) * 0.42 * sr), f = rnd(2200, 7200), dec = rnd(0.04, 0.16), a = rnd(0.4, 1);
+          const n = Math.min(d.length - at, Math.floor(Math.min(dec * 3, 0.25) * sr)), w = 2 * Math.PI * f / sr;
+          for (let i = 0; i < n; i++) d[at + i] += Math.sin(w * i) * a * Math.exp(-i / (dec * sr)) * Math.min(1, i / 60);
+        }
+        let m = 0; for (let i = 0; i < d.length; i++) m = Math.max(m, Math.abs(d[i]));
+        for (let i = 0; i < d.length; i++) d[i] /= m || 1;
+      }));
+    }
+  }
+  const poolsDone = () => pools && pools.noise && pools.crackles.length === DENS.length && pools.zaps.length === 4 && pools.glass.length === 3;
+  function makePools() {
+    if (!init()) return null;
+    if (!pools) pools = { noise: null, crackles: [], zaps: [], glass: [] };
+    while (!poolsDone()) poolStep();
     return pools;
   }
 
@@ -92,11 +108,19 @@
   }
 
   // 空檔先建好（首頁 Week 6 動畫準備好時、Week 6 頁面一開始）：點下去時就不用現建
-  function prepare() {
+  // now：馬上全部做好（Week 6 頁面還在顯示靜止的那張圖時用，那時候沒有東西在動）
+  function prepare(now) {
     if (!init()) return;
-    makePools(); makeBed();
-    if (ctx.state === "suspended" && !off) ctx.resume().catch(() => {});   // 瀏覽器准的話（例如從同一個網站點過來）就會開始
-    if (!busy()) nap();
+    if (!pools) pools = { noise: null, crackles: [], zaps: [], glass: [] };
+    if (now) { makePools(); makeBed(); if (ctx.state === "suspended" && !off) ctx.resume().catch(() => {}); if (!busy()) nap(); return; }
+    const later = (fn) => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: 400 }) : setTimeout(fn, 30));
+    const tick = () => {
+      if (!poolsDone()) { poolStep(); later(tick); return; }
+      makeBed();
+      if (ctx.state === "suspended" && !off) ctx.resume().catch(() => {});   // 瀏覽器准的話（例如從同一個網站點過來）就會開始
+      if (!busy()) nap();
+    };
+    later(tick);
   }
   // 接下來幾秒要出聲（例如 WARNING 警報）：叫醒，這段時間不要暫停
   function hold(sec) {
@@ -165,18 +189,18 @@
   const pick = (a) => a[(Math.random() * a.length) | 0];
   // 一陣劈啪（strength 0..1，dur 秒）
   function crackle(strength, dur, delay) {
-    if (!makePools()) return;
+    if (!ok() || !makePools()) return;
     play(pick(pools.crackles), 0.42 * strength, rnd(2400, 4800), 1.1, dur || 0.2, delay, rnd(0.85, 1.2));
   }
   // 電弧「滋」的一聲，加一陣劈啪
   function zap(strength, dur, delay) {
-    if (!makePools()) return;
+    if (!ok() || !makePools()) return;
     play(pick(pools.zaps), 0.32 * strength, 1300, 1.4, dur || 0.25, delay, rnd(0.92, 1.08));
     crackle(0.8 * strength, (dur || 0.25) * 0.9, delay);
   }
   // 玻璃碎裂：一串清脆的叮叮聲
   function glass(strength) {
-    if (!makePools()) return;
+    if (!ok() || !makePools()) return;
     play(pick(pools.glass), 0.22 * strength, 4200, 0.4, 0.7, 0, rnd(0.95, 1.05));
     crackle(0.5 * strength, 0.12);
   }

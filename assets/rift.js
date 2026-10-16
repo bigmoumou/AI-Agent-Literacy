@@ -630,12 +630,39 @@
     g.restore();
   };
   // 碎開：把現在的畫面拍一張下來，之後每一塊都從這張裡剪
+  /* 熱身用：把這張畫布到目前為止畫的東西真的送去顯示卡畫出來。
+     瀏覽器會先把畫的指令存著，等要顯示時才一起畫；中間要是整張被清掉或蓋掉，存著的指令就直接丟掉，顯示卡根本沒畫到。
+     wait：等顯示卡全部畫完才回來（讀回一個像素；只在熱身的最後用，那時畫面是靜止的） */
+  Rift.prototype.flush = function (wait) {
+    const c = this.flushC || (this.flushC = document.createElement("canvas"));
+    if (c.width !== 256) { c.width = 256; c.height = 256; }
+    const g = c.getContext("2d");
+    g.drawImage(this.canvas, 0, 0, 256, 256);
+    if (wait) g.getImageData(0, 0, 1, 1);
+  };
+  /* 碎開要用的東西先準備好（切塊、拍照用的畫布），再直接在這張畫布上畫兩次碎片（剛散開、被吸回中心）和火花，每次都送出去，最後清掉：
+     顯示卡第一次遇到新的畫法（裁切＋疊加、半透明）時要先準備，會卡一下；趁還沒開始動的時候先讓它準備好。
+     （要畫在同一種大畫布上：很小的畫布瀏覽器用 CPU 畫，顯示卡那邊就沒準備到） */
+  Rift.prototype.primeShatter = function () {
+    if (!this.cells) this.prepareShards(16);
+    const c = this.snapC || document.createElement("canvas");
+    if (c.width !== this.canvas.width || c.height !== this.canvas.height) { c.width = this.canvas.width; c.height = this.canvas.height; }
+    c.getContext("2d").drawImage(this.canvas, 0, 0);
+    this.snapC = c;
+    const st = this.state, keep = { shardsOn: st.shardsOn, shatterT: st.shatterT, pullIn: st.pullIn, t: st.t };
+    this.snap = c; st.shardsOn = true; st.shatterT = st.t - 0.3;
+    this.spawnAt(this.W / 2, this.H / 2, 8, "spark");
+    st.pullIn = 0; this.draw(); this.flush();
+    st.pullIn = 0.5; st.t += 0.05; this.draw(); this.flush();
+    Object.assign(st, keep); this.snap = null; this.bits = []; this.lastT = null;
+    this.g.setTransform(1, 0, 0, 1, 0, 0); this.g.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  };
   Rift.prototype.shatter = function (t) {
     if (!this.cells) this.prepareShards(16);
-    const c = document.createElement("canvas");
-    c.width = this.canvas.width; c.height = this.canvas.height;
-    c.getContext("2d").drawImage(this.canvas, 0, 0);
-    this.snap = c;
+    const c = this.snapC || document.createElement("canvas");
+    if (c.width !== this.canvas.width || c.height !== this.canvas.height) { c.width = this.canvas.width; c.height = this.canvas.height; }
+    const cg = c.getContext("2d"); cg.setTransform(1, 0, 0, 1, 0, 0); cg.clearRect(0, 0, c.width, c.height); cg.drawImage(this.canvas, 0, 0);
+    this.snap = this.snapC = c;
     const st = this.state;
     st.shardsOn = true; st.shatterT = t; st.cracks = 0;
     for (const { a, b } of this.crackEdges || []) this.spawnAt((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, 3, "spark");

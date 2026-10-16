@@ -3,9 +3,11 @@
    素材都在 weeks/week06/，由 製作/week06/design/build-frame.py 從 concept-art.webp 產生：
      frame.json      畫面區、動畫那一塊的位置、裂縫衝出齒孔帶的外框、裂縫中線、小黑洞那一塊
      frame.jpg       整格（膠捲貼圖座標 1024x768）
-     frame-fx.jpg    動畫那一塊（半解析度、三格）：電流熄掉時的顏色｜R 電流、G 裂縫裡的深空、B 玻璃反光｜星點
+     frame-fx.jpg    動畫那一塊（半解析度）：電流熄掉時的顏色
+     frame-mask.webp 動畫那一塊的遮罩（半解析度、五格，只看透明度）：電流｜電流加亮｜裂縫裡的深空｜玻璃反光｜星點
      frame-hole.jpg  小黑洞補掉後的那一小塊（撕開時，真的黑洞從裂縫裡長出來）
-     frame-space.jpg 撕開時墊在兩半底下的深空（圖裡的星雲星星，往兩邊延伸到電流和玻璃底下；左半顏色、右半範圍）
+     frame-space.webp 撕開時墊在兩半底下的深空（圖裡的星雲星星，往兩邊延伸到電流和玻璃底下；帶透明度）
+   不卡：各層都是「圖＋遮罩」用 destination-in 疊出來（顯示卡做），不在網頁上一個一個像素算。
    做法：每一格先畫原圖，再用幾張很小的亮度場（每 24 像素一格，放大時自動平滑）決定每個地方：
      電流熄掉多少（熄掉時的顏色蓋上去）、加亮多少（原圖疊上去，超過兩倍就白熱）、深空和星星亮多少，
      再加一道由上往下掠過玻璃的反光、電流的光暈。
@@ -24,7 +26,7 @@
   const image = (src) => new Promise((ok) => {
     const im = new Image();
     im.decoding = "async";
-    im.onload = () => ok(im);
+    im.onload = () => (im.decode ? im.decode().catch(() => {}) : Promise.resolve()).then(() => ok(im));   // 先在背景解碼，第一次畫的時候才不會卡
     im.onerror = () => ok(null);
     im.src = src;
   });
@@ -82,40 +84,28 @@
   // 動畫要用的素材（第一次叫的時候才下載）；用 file:// 直接開時讀不到像素，就只有靜態圖
   ExamArt.prototype.loadFx = function () {
     if (!this.fxP) {
-      this.fxP = Promise.all([image(this.dir + "frame-fx.jpg"), image(this.dir + "frame-hole.jpg")]).then(([fx, hole]) => {
-        if (!fx) return false;
-        try { this.build(fx, hole); return true; } catch (e) { return false; }
+      this.fxP = Promise.all([image(this.dir + "frame-fx.jpg"), image(this.dir + "frame-mask.webp"), image(this.dir + "frame-hole.jpg")]).then(([fx, mask, hole]) => {
+        if (!fx || !mask) return false;
+        try { this.build(fx, mask, hole); return true; } catch (e) { return false; }
       });
     }
     return this.fxP;
   };
-  ExamArt.prototype.build = function (fxImg, hole) {
-    const [bx, by, bw, bh] = this.data.fx, pw = fxImg.width / 3;
-    const read = (c) => c.getContext("2d").getImageData(0, 0, c.width, c.height);
-    const panel = (k) => {                     // frame-fx.jpg 的第 k 格，放大回原尺寸
-      const c = canvas(bw, bh);
-      c.getContext("2d", { willReadFrequently: true }).drawImage(fxImg, k * pw, 0, pw, fxImg.height, 0, 0, bw, bh);
-      return read(c);
+  ExamArt.prototype.build = function (fxImg, maskImg, hole) {
+    const [bx, by, bw, bh] = this.data.fx, pw = maskImg.width / 5, ph0 = maskImg.height;
+    // 一層 = 底圖（原圖那一塊，或熄掉時的顏色）× 第 k 張遮罩
+    const layer = (k, under) => {
+      const c = canvas(bw, bh), g = c.getContext("2d");
+      under(g);
+      g.globalCompositeOperation = "destination-in";
+      g.drawImage(maskImg, k * pw, 0, pw, ph0, 0, 0, bw, bh);
+      return c;
     };
-    const off = panel(0), mk = panel(1), st = panel(2);
-    const ac = canvas(bw, bh);
-    ac.getContext("2d", { willReadFrequently: true }).drawImage(this.artCv, bx, by, bw, bh, 0, 0, bw, bh);
-    const base = read(ac);
-    const copy = () => new ImageData(new Uint8ClampedArray(base.data), bw, bh);
-    const lit = copy(), gap = copy(), glass = copy(), star = copy();
-    const k = (v) => Math.max(0, v - 6) * (255 / 249);   // 去掉 JPEG 的雜訊
-    const seeds = [], gapA = new Uint8ClampedArray(bw * bh), starA = new Uint8ClampedArray(bw * bh), mA = new Uint8ClampedArray(bw * bh);
-    for (let p = 0, q = 0; p < base.data.length; p += 4, q++) {
-      const a = base.data[p + 3] / 255, m = mA[q] = k(mk.data[p]) * a;
-      // 加亮只加在亮的白芯上（亮度越高加越多），大片的紫色光暈不會一起變白
-      const lum = (base.data[p] + base.data[p + 1] + base.data[p + 2]) / 765;
-      off.data[p + 3] = m; lit.data[p + 3] = m * Math.pow(lum, 1.6);
-      gap.data[p + 3] = gapA[q] = k(mk.data[p + 1]) * a;
-      glass.data[p + 3] = k(mk.data[p + 2]) * a;
-      star.data[p + 3] = starA[q] = k(st.data[p + 1]) * a;
-      if (m > 200 && (q & 63) === 0) seeds.push([q % bw, (q / bw) | 0]);   // 落雷、亮光從電流很亮的地方出發
-    }
-    const put = (d) => { const c = canvas(bw, bh); c.getContext("2d").putImageData(d, 0, 0); return c; };
+    const art = (g) => g.drawImage(this.artCv, bx, by, bw, bh, 0, 0, bw, bh);
+    const off = layer(0, (g) => { g.drawImage(fxImg, 0, 0, bw, bh); g.globalCompositeOperation = "destination-in"; art(g); });
+    const lit = layer(1, art), gap = layer(2, art), glass = layer(3, art), star = layer(4, art);
+    const sd = this.data.seeds || [], seeds = [];
+    for (let i = 0; i + 1 < sd.length; i += 2) seeds.push([sd[i], sd[i + 1]]);   // 落雷、亮光從電流很亮的地方出發
     const gw = Math.ceil(bw / CELL), gh = Math.ceil(bh / CELL);
     const field = () => { const c = canvas(gw, gh); return { c, g: c.getContext("2d"), d: new ImageData(gw, gh) }; };
     // 撕開用：裂縫中線左邊、右邊（邊緣柔一點，畫在 1/8 解析度再放大）
@@ -133,12 +123,12 @@
     const lc = canvas(TEX_W, TEX_H), tmp = canvas(bw, bh), glowS = canvas(Math.round(bw / 8), Math.round(bh / 8));
     const glowL = canvas(Math.round(bw / 24), Math.round(bh / 24)), halfC = canvas(TEX_W, TEX_H);
     const litGlow = canvas(glowS.width, glowS.height), lgg = litGlow.getContext("2d");
-    lgg.imageSmoothingQuality = "high"; lgg.drawImage(put(lit), 0, 0, glowS.width, glowS.height);
+    lgg.imageSmoothingQuality = "high"; lgg.drawImage(lit, 0, 0, glowS.width, glowS.height);
     const ph = new Float32Array(gw * gh * 3);
     for (let i = 0; i < ph.length; i++) ph[i] = Math.random() * 6.283;
     this.fx = {
-      bx, by, bw, bh, gw, gh, ph, seeds, gapA, starA, mA, gapH: null, starH: null,
-      off: put(off), lit: put(lit), gap: put(gap), glass: put(glass), star: put(star), litGlow,
+      bx, by, bw, bh, gw, gh, ph, seeds, maskImg, pw, mh: ph0, gapH: null, starH: null,
+      off, lit, gap, glass, star, litGlow,
       hole: hole || null, maskL: half(-1), maskR: half(1),
       lc, lg: lc.getContext("2d"), tmp, tg: tmp.getContext("2d"), halfC, hg: halfC.getContext("2d"),
       glowS, gs: glowS.getContext("2d"), glowL, gl: glowL.getContext("2d"),
@@ -153,59 +143,27 @@
   // 小黑洞補掉後的深空、星星層（撕開時用；不然星雲閃的時候會把畫好的小黑洞疊回來）
   ExamArt.prototype.patchLayers = function () {
     const F = this.fx;
-    if (F.gapH || !F.hole) return;
+    if (!F || F.gapH || !F.hole) return;
     const [bx, by, bw, bh] = this.data.fx, h = this.data.hole;
-    const c = canvas(bw, bh), g = c.getContext("2d", { willReadFrequently: true });
-    g.drawImage(this.artCv, bx, by, bw, bh, 0, 0, bw, bh);
-    g.drawImage(F.hole, h[0] - bx, h[1] - by);
-    const d = g.getImageData(0, 0, bw, bh);
-    const layer = (A) => {
-      const e = new ImageData(new Uint8ClampedArray(d.data), bw, bh);
-      for (let i = 0; i < A.length; i++) e.data[i * 4 + 3] = A[i];
-      const cc = canvas(bw, bh); cc.getContext("2d").putImageData(e, 0, 0); return cc;
+    const layer = (k) => {
+      const c = canvas(bw, bh), g = c.getContext("2d");
+      g.drawImage(this.artCv, bx, by, bw, bh, 0, 0, bw, bh);
+      g.drawImage(F.hole, h[0] - bx, h[1] - by);
+      g.globalCompositeOperation = "destination-in";
+      g.drawImage(F.maskImg, k * F.pw, 0, F.pw, F.mh, 0, 0, bw, bh);
+      return c;
     };
-    F.gapH = layer(F.gapA); F.starH = layer(F.starA);
+    F.gapH = layer(2); F.starH = layer(4);
   };
   ExamArt.prototype.loadSpace = function () {
     if (!this.spaceP) {
-      this.spaceP = image(this.dir + "frame-space.jpg").then((im) => {
+      this.spaceP = image(this.dir + "frame-space.webp").then((im) => {
         if (!im || !this.data.space) return false;
-        try {
-          const [, , sw, sh] = this.data.space, c = canvas(sw, sh), g = c.getContext("2d", { willReadFrequently: true });
-          g.drawImage(im, sw, 0, sw, sh, 0, 0, sw, sh);
-          const a = g.getImageData(0, 0, sw, sh);
-          g.drawImage(im, 0, 0, sw, sh, 0, 0, sw, sh);
-          const d = g.getImageData(0, 0, sw, sh);
-          for (let p = 0; p < d.data.length; p += 4) d.data[p + 3] = a.data[p + 1];
-          g.putImageData(d, 0, 0);
-          this.space = c;
-          return true;
-        } catch (e) { return false; }
+        this.space = im;
+        return true;
       });
     }
     return this.spaceP;
-  };
-
-  /* 從圖裡切一小叢電流（貼圖座標 x, y, w, h），只留電流（透明背景）；四邊淡出，root 那一邊（0 左、1 右）不淡出，
-     因為它會貼著螢幕邊（Week 6 遠端畫面的小裂縫用） */
-  ExamArt.prototype.cutout = function (x, y, w, h, root) {
-    const F = this.fx;
-    if (!F) return null;
-    const c = canvas(w, h), g = c.getContext("2d", { willReadFrequently: true });
-    g.drawImage(this.artCv, x, y, w, h, 0, 0, w, h);
-    const d = g.getImageData(0, 0, w, h);
-    const fade = (v) => Math.min(1, v / 0.18);
-    for (let j = 0; j < h; j++) {
-      for (let i = 0; i < w; i++) {
-        const mx = x + i - F.bx, my = y + j - F.by;
-        const m = mx >= 0 && mx < F.bw && my >= 0 && my < F.bh ? F.mA[my * F.bw + mx] : 0;
-        const u = i / (w - 1), v = j / (h - 1);
-        const f = fade(v) * fade(1 - v) * (root === 0 ? 1 : fade(u)) * (root === 1 ? 1 : fade(1 - u));
-        d.data[(j * w + i) * 4 + 3] = m * f * f;
-      }
-    }
-    g.putImageData(d, 0, 0);
-    return c;
   };
 
   // 給音效（assets/exam-sound.js）：電流現在多亮（0..1）、上次問之後新的局部落雷有幾道
