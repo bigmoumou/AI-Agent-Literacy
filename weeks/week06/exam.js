@@ -38,6 +38,9 @@
     vi: ["Hoàn thành nhiệm vụ mới thoát được", "Chưa xong nhiệm vụ, chưa thể thoát", "Không gian đã ổn định: có thể ngắt kết nối"],
   };
   const ban = (i) => (BAN[LANG] || BAN["zh-Hant"])[i];
+  // 音效（assets/exam-sound.js）：撕開時劈啪、黑洞隆隆、碎開時玻璃叮叮、越過事件視界一片安靜
+  const sound = window.ExamSound || null;
+  if (sound) { sound.bindButton($("#soundBtn")); sound.unlock(); }
 
   const body = document.body;
   const canvas = $("#rift"), bhCanvas = $("#bh");
@@ -78,7 +81,13 @@
       if (u > 0.44 && !secondSurge) { secondSurge = true; art.surge(t + 0.16); bs.waveT0 = t + 0.16; }   // 裂痕開始爬的時候再猛亮一次、再一圈重力波
       const c = cover(1);
       g.setTransform(k * c.s, 0, 0, k * c.s, k * c.x, k * c.y);
-      art.step(t, { energy: 1 + 1.8 * seg(u, 0.15, 0.95), auto: false });
+      const fired = art.step(t, { energy: 1 + 1.8 * seg(u, 0.15, 0.95), auto: false });
+      if (sound) {
+        sound.level("drone", 0.09, 0.3);
+        sound.level("fizz", 0.035 + 0.12 * art.activity(), 0.06);
+        if (art.takeStrikes()) sound.crackle(0.6, 0.2);
+        if (fired) sound.zap(1, 0.32);
+      }
       const split = splitAt(u, t);
       art.paint(g, { split, hole: seg(u, 0.03, 0.2) });
       // 裂痕只畫在撕開的兩半上，而且避開裂縫裡的深空（太空不會裂）
@@ -94,7 +103,7 @@
 
   /* ---------- 狀態 ---------- */
   let phase = "start", T0 = 0, now = 0, raf = 0, prev = 0;
-  let pickShown = false, loaded = false, chosen = null, connectAt = 0, revealAt = 0, burst = false;
+  let pickShown = false, loaded = false, chosen = null, connectAt = 0, revealAt = 0, burst = false, sealed = false;
   let aimAt = null, chosenAt = null, wc = null, clock = 0, pickDark = 0, shattered = false, seeking = false, emergeAt = -9;
   const bs = {        // 黑洞那一段的參數（blackhole.js 的 render）
     t: 0, M: 0, disk: 0, stars: 1, camZ: Z0, incl: 0, tanFov: TAN, sceneOn: 1, sceneZ: SCENE_Z, sceneHalf: [1, 1],
@@ -119,7 +128,7 @@
   function setDive(t, dt) {
     const u = t - T0;
     // 黑洞：在裂縫裡長出來、變大；碎開後吸積盤亮起、鏡頭往前衝、慢慢傾斜看到盤面
-    bs.t = t;
+    bs.t = t; bs.diskT = u;
     bs.M = 0.42 * out(seg(u, 0.05, 1.0)) + 0.48 * inOut(seg(u, 0.9, 1.9));   // 一開始就夠大：整張圖都被彎
     bs.disk = out(seg(u, 1.05, 1.9));
     // 鏡頭從第一格就被往前吸（接著首頁衝進那一格的動作），一路不停，最後衝過事件視界
@@ -127,7 +136,7 @@
     bs.camZ = Z0 - 0.9 * out(seg(u, 0, 0.7)) - (Z0 - 0.9 - 7) * (0.6 * ps + 0.4 * pull) - 5.7 * inn(seg(u, 2.45, 3.45));   // 一開始就有一股往前拉的力道（接住首頁衝進來的動作）
     bs.incl = 0.13 * inOut(seg(u, 1.0, 2.5)) + 0.012 * Math.sin(t * 37) * seg(u, 0.6, 1.1) * (1 - seg(u, 1.1, 1.5));
     bs.chroma = 0.12 + 0.3 * seg(u, 0.3, 1.0) + 0.25 * seg(u, 1.0, 2.4) + 1.1 * seg(u, 2.6, 3.4);
-    bs.glitch = bump(u, 0.95, 1.2) + 0.8 * bump(u, 2.95, 3.35) + (u > 1 && Math.random() < 0.02 ? 0.6 : 0);
+    bs.glitch = 0;                                                 // 不用橫向錯位的條紋：看起來像顯示卡出錯
     if (u > 1.85 && bs.waveT0 < T0 + 1.8) bs.waveT0 = t;          // 第二道重力波
     bs.wave = u < 1.0 ? 1.7 : 1;                                  // 撕開時的重力波更強（落雷那一下）
     bs.quad = Math.max(0.3 * seg(u, 0.2, 0.9), 0.5 * seg(u, 1.0, 1.4)) * (1 - seg(u, 2.6, 2.95));   // 空間被一伸一縮
@@ -137,16 +146,16 @@
     bs.zoom = Math.max(0.3 * inn(seg(u, 0.55, 1.0)) * (1 - seg(u, 1.0, 1.3)), inn(seg(u, 2.4, 3.4)));
     // 碎開之前不做色調對應、光暈、光條、顆粒：第一格和首頁那一格一模一樣
     const post = seg(u, 0.95, 1.3);
-    bs.tone = post; bs.glow = post; bs.grain = 0.04 * post;
+    bs.tone = post; bs.glow = post; bs.grain = 0.015 * post;
     bs.wrap = shattered ? 0 : 1;                                   // 撕開時被彎得很厲害的光線也打回那張圖上（不露出 WebGL 自己的天空）
-    bs.streak = (0.6 + 0.6 * seg(u, 1.4, 2.6)) * post;            // 亮的地方拉出橫向的光條
+    bs.streak = (0.3 + 0.3 * seg(u, 1.4, 2.6)) * post;            // 亮的地方拉出橫向的光條（淡淡的）
     bs.flash = Math.max(0, bs.flash - dt * 2.2);
     // 0–1 秒：撕開（2D，清楚），裂痕 0.5 秒起爬滿；1.0 秒碎成玻璃片，換成 WebGL（白閃蓋住切換），之後碎片無重力漂浮，1.9 秒起被吸回中心
     ss.t = t;
     if (!shattered) {
       ss.cracks = seg(u, 0.5, 0.98);
       drawOpening(t, u);
-      if (u >= 1.0) { scene.shatter(t); shattered = true; bs.flash = 0.75; bs.waveT0 = t; }
+      if (u >= 1.0) { scene.shatter(t); shattered = true; bs.flash = 0.55; bs.waveT0 = t; if (sound) sound.glass(1); }
     }
     if (shattered) { ss.pullIn = seg(u, 1.9, 3.0); scene.draw(); }
     bh.setScene(sceneCv);
@@ -156,6 +165,11 @@
     clock += dt * rate;
     hudShow(u > 1.2 && u < 3.55, rate);
     if (u > 0.6) skipBtn.hidden = false;
+    if (sound) {                                                   // 黑洞越大越隆隆；越過事件視界一片安靜
+      const hush = 1 - seg(u, 3.1, 3.5);
+      sound.level("rumble", (0.04 + 0.16 * bs.M) * hush, 0.25);
+      if (shattered) { sound.level("fizz", 0.015 * hush, 0.4); sound.level("drone", 0.07 * hush, 0.3); }
+    }
     if (u >= 3.55) toPick(1);
   }
 
@@ -168,7 +182,7 @@
     st.gap = lerp(0, W * 0.62, 0.2 * out(seg(u, 0, 0.14)) + 0.8 * inOut(seg(u, 0.22, 0.85)));
     const amp = 7 * Math.pow(1 - seg(u, 0, 0.8), 2);
     st.shakeX = amp * Math.sin(t * 83); st.shakeY = amp * 0.6 * Math.cos(t * 71);
-    st.glitch = u < 0.24 ? 1 : 0; if (u < 0.05) st.glitchSeed = 7;
+    st.glitch = 0;
     st.arcRate = 0; st.plasma = 0;                       // 邊緣交給那張圖自己的電流
     st.pull = Math.pow(seg(u, 0.5, 1.9), 1.5);
     const R0 = gateHole(), R1 = Math.min(W, H) * 0.1;
@@ -206,6 +220,7 @@
     canvas.style.display = "";
     pickDark = dark;
     emergeAt = now || performance.now() / 1000;
+    if (sound) { sound.level("rumble", 0, 0.6); sound.level("fizz", 0, 0.4); sound.level("drone", 0.05, 1.2); }
     body.classList.add("is-in-void");
     if (!pickShown) showPick();
   }
@@ -246,6 +261,7 @@
     st.flash = u < 1.3 ? 0 : 1 - seg(u, 1.3, 1.75);
     st.shakeX = 4 * bump(u, 1.26, 1.7) * Math.sin(t * 90);
     rift.draw();
+    if (sound && u > 1.28 && !sealed) { sealed = true; sound.zap(0.6, 0.22); sound.level("drone", 0, 1.2); }
     if (u > 2.15) finish();
   }
   function finish() {
@@ -265,11 +281,12 @@
      瀏覽器只准在使用者點過之後出聲，所以在選電腦那一下就把聲音準備好、先解碼（initAudio）。
      載入失敗時退回現場合成的兩音警報。 */
   let audio = null, warnBuf = null;
+  const dest = () => { const o = sound && sound.output(); return o && o.context === audio ? o : audio.destination; };   // 走音效開關（右上角的喇叭）
   function initAudio() {
     try {
       const AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) return;
-      audio = audio || new AC();
+      audio = audio || (sound && sound.context()) || new AC();
       if (audio.state === "suspended") audio.resume();
       if (!warnBuf) {
         fetch("warning.mp3").then((r) => r.arrayBuffer())
@@ -282,14 +299,14 @@
     if (!audio) return;
     if (warnBuf) {
       const src = audio.createBufferSource(), g = audio.createGain();
-      g.gain.value = 0.75; src.buffer = warnBuf; src.connect(g); g.connect(audio.destination);
+      g.gain.value = 0.9; src.buffer = warnBuf; src.connect(g); g.connect(dest());
       src.start(audio.currentTime + 0.02);
       return;
     }
     const t0 = audio.currentTime + 0.03;
     const out = audio.createGain(); out.gain.value = 0.15;
     const lp = audio.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 3000;
-    lp.connect(out); out.connect(audio.destination);
+    lp.connect(out); out.connect(dest());
     [0.04, 1.06, 2.05, 3.05].forEach((at) => {
       [0, 9].forEach((det) => {
         const o = audio.createOscillator(), g = audio.createGain();
@@ -305,7 +322,7 @@
     o.type = type; o.frequency.setValueAtTime(f, at);
     g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(vol, at + 0.01);
     g.gain.setValueAtTime(vol, at + dur - 0.04); g.gain.linearRampToValueAtTime(0, at + dur);
-    o.connect(g); g.connect(audio.destination); o.start(at); o.stop(at + dur + 0.02);
+    o.connect(g); g.connect(dest()); o.start(at); o.stop(at + dur + 0.02);
   }
   function buzz() {      // 想逃但還沒完成：兩聲低低的拒絕音
     if (!audio) return;
@@ -382,7 +399,7 @@
     g.setTransform(1, 0, 0, 1, 0, 0);
     g.clearRect(0, 0, W, H);
     for (const s of scars) {
-      if (!reduce && !sealAt && t > s.next) { s.strikeT = t; s.next = t + 7 + Math.random() * 6; }
+      if (!reduce && !sealAt && t > s.next) { s.strikeT = t; s.next = t + 7 + Math.random() * 6; if (sound) sound.crackle(0.12, 0.15); }
       const e = reduce ? 0 : env(t - s.strikeT);                      // 落雷：一閃、暗一下、再一閃
       const gone = sealAt ? clamp((t - sealAt - 0.25 - s.k * 0.12) / 0.7, 0, 1) : 0;   // 封起來：先亮一下再散掉
       const seal = sealAt ? env(t - sealAt - s.k * 0.12) : 0;

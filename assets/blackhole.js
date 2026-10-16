@@ -21,7 +21,7 @@ precision highp float;
 in vec2 vUv; out vec4 o;
 uniform vec2 uRes; uniform float uT;
 uniform vec3 uCam, uFwd, uRight, uUp; uniform float uTan;
-uniform float uM, uDisk, uStars;
+uniform float uM, uDisk, uStars, uDiskT;
 uniform sampler2D uScene; uniform float uSceneOn, uSceneZ, uWrap; uniform vec2 uSceneHalf;
 float h1(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float h3(vec3 p) { return fract(sin(dot(p, vec3(127.1, 311.7, 74.7))) * 43758.5453); }
@@ -76,11 +76,11 @@ void main() {
       if (rr > rin && rr < rout) {
         float ang = atan(cp.z, cp.x);
         float om = 1.4 / pow(rr / M, 1.5);
-        float n = fbm(vec2(rr / M * 2.4, ang * 3.0 + uT * om * 6.0));
-        float n2 = fbm(vec2(rr / M * 7.0, ang * 9.0 + uT * om * 6.0 + 3.0));
+        // 紋路不要太細（幾乎從側面看時，細紋會被壓成一條條水平細線，像顯示卡出錯）
+        float n = fbm(vec2(rr / M * 1.6, ang * 3.0 + uDiskT * om * 6.0));   // 轉的時間從進場算：內圈比外圈轉得快，時間一長紋路會捲得很密
         float x = (rr - rin) / (rout - rin);
         // 一圈圈亮帶和暗紋（雜訊取次方，暗的地方更暗）
-        float dens = smoothstep(0.0, 0.06, x) * smoothstep(1.0, 0.45, x) * (pow(n, 1.8) * 1.6 + 0.25 * n2);
+        float dens = smoothstep(0.0, 0.06, x) * smoothstep(1.0, 0.45, x) * (pow(n, 1.8) * 1.6 + 0.12);
         vec3 vel = normalize(vec3(-cp.z, 0.0, cp.x)) * sqrt(0.5 * M / rr);
         float g = 1.0 / max(0.3, 1.0 - dot(vel, normalize(v)) * 1.4);
         vec3 dc = diskCol(x) * pow(g, 2.5);
@@ -135,17 +135,20 @@ void main() {
   if (hh(band * 91.7 + ts * 13.1) < uGlitch * 0.33) uv.x += (hh(band * 7.3 + ts * 3.7) - 0.5) * 0.14 * uGlitch;
   vec2 cd = (uv - 0.5) * (uChroma * 0.016 + abs(w) * 0.03) + vec2(uGlitch * 0.007, 0.0);
   vec3 c = vec3(texture(uImg, uv + cd).r, texture(uImg, uv).g, texture(uImg, uv - cd).b);
+  // 取樣位置每個像素錯開一點：模糊和光條才是平滑的，不會一層層重影
+  float jit = hh(dot(gl_FragCoord.xy, vec2(12.9898, 78.233)));
   // 往裡面掉的時候：從中心往外的速度模糊
   if (uZoom > 0.001) {
     vec3 zs = c; vec2 dz = uv - 0.5;
-    for (int k = 1; k < 8; k++) zs += texture(uImg, 0.5 + dz * (1.0 - float(k) * 0.022 * uZoom)).rgb;
-    c = zs / 8.0;
+    for (int k = 1; k < 10; k++) zs += texture(uImg, 0.5 + dz * (1.0 - (float(k) - jit) * 0.017 * uZoom)).rgb;
+    c = zs / 10.0;
   }
   // 橫向的光條（電影鏡頭那種）：只有亮的地方會拉出來
   vec3 an = vec3(0.0);
   for (int k = 1; k <= 6; k++) {
     float fk = float(k), wk = 1.0 - fk / 7.0;
-    an += (max(texture(uImg, uv + vec2(fk * 0.014, 0.0)).rgb - 0.62, 0.0) + max(texture(uImg, uv - vec2(fk * 0.014, 0.0)).rgb - 0.62, 0.0)) * wk;
+    float o = (fk - jit) * 0.014;
+    an += (max(texture(uImg, uv + vec2(o, 0.0)).rgb - 0.62, 0.0) + max(texture(uImg, uv - vec2(o, 0.0)).rgb - 0.62, 0.0)) * wk;
   }
   c += an * vec3(0.5, 0.62, 1.0) * 0.16 * uStreak;
   // 光暈：亮的地方往外暈開一點
@@ -272,7 +275,7 @@ void main() {
     gl.uniform3f(u.uCam, 0, cy, cz);
     gl.uniform3fv(u.uFwd, fwd); gl.uniform3fv(u.uRight, right); gl.uniform3fv(u.uUp, up);
     gl.uniform1f(u.uTan, s.tanFov);
-    gl.uniform1f(u.uM, s.M); gl.uniform1f(u.uDisk, s.disk); gl.uniform1f(u.uStars, s.stars);
+    gl.uniform1f(u.uM, s.M); gl.uniform1f(u.uDisk, s.disk); gl.uniform1f(u.uStars, s.stars); gl.uniform1f(u.uDiskT, s.diskT == null ? s.t : s.diskT);
     gl.uniform1f(u.uWrap, s.wrap ? 1 : 0);
     gl.uniform1f(u.uSceneOn, s.sceneOn); gl.uniform1f(u.uSceneZ, s.sceneZ); gl.uniform2f(u.uSceneHalf, s.sceneHalf[0], s.sceneHalf[1]);
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.sceneTex); gl.uniform1i(u.uScene, 0);

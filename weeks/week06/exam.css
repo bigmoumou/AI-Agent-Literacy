@@ -12,6 +12,10 @@ body.exam {
   height: 100svh;
 }
 #rift, #bh { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 1; }
+/* 音效開關（assets/exam-sound.js） */
+.sound-btn .i-off { display: none; }
+.sound-btn.is-off .i-on { display: none; }
+.sound-btn.is-off .i-off { display: block; }
 /* 剛打開、那張圖還沒畫上去時：先用 CSS 把同一張圖（frame.jpg）的畫面區鋪滿螢幕，
    和首頁轉場最後那一張、exam.js 的 cover 一樣（貼圖座標 1024x768，畫面區 40,118,944,532） */
 body.is-loading #rift {
@@ -19,7 +23,8 @@ body.is-loading #rift {
   --s: max(calc(100vw / 944), calc(100dvh / 532));
   background: #000 url(frame.jpg) no-repeat;
   background-size: calc(var(--s) * 1024) calc(var(--s) * 768);
-  background-position: calc(50vw - var(--s) * 512) calc(50% - var(--s) * 384);
+  background-position: calc(50vw - var(--s) * 512) calc(50vh - var(--s) * 384);
+  background-position: calc(50vw - var(--s) * 512) calc(50dvh - var(--s) * 384);
 }
 #scar { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 4; pointer-events: none; display: none; }
 body.in-remote #scar { display: block; }

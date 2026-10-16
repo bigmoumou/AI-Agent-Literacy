@@ -303,6 +303,10 @@ body.spot-on .fx-dust { opacity: 1; }
 
 .curtain { position: fixed; inset: 0; z-index: 40; background: var(--bg); opacity: 0; pointer-events: none; transition: opacity .45s var(--ease) .15s; }
 body.is-leaving .curtain { opacity: 1; pointer-events: auto; }
+/* 音效開關（assets/exam-sound.js） */
+.sound-btn .i-off { display: none; }
+.sound-btn.is-off .i-on { display: none; }
+.sound-btn.is-off .i-off { display: block; }
 /* 進考試週：不用一般的布幕，最後由一張和 Week 6 第一格一樣的全螢幕畫面接手（home.js 的 examLeave） */
 body.is-to-exam .curtain { opacity: 0; }
 body.is-to-exam :is(.hud-top, .hud-bottom) { opacity: 0; transition: opacity .25s ease; pointer-events: none; }

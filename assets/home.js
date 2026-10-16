@@ -728,6 +728,7 @@
     if (toExam) {
       document.body.classList.add("is-to-exam");
       examArt.surge(performance.now() / 1000 + 0.12);   // 一點下去：裂縫先暗一下、再猛亮
+      if (sound) { sound.unlock(); sound.zap(0.7, 0.25, 0.12); }
     }
     setTimeout(() => { window.location.href = root() + f.w.href; }, reduceMotion ? 60 : toExam ? EXAM_LEAVE * 0.9 : 650);
   }
@@ -751,6 +752,7 @@
     const sk = seg01(t, 0, 0.7);
     suck = sk * sk * (3 - 2 * sk);                           // 一點下去，旁邊的畫格就開始被吸過去
     if (!L.surged && t > 0.55) { L.surged = true; examArt.surge(now / 1000 + 0.27); }   // 交接那一刻（0.82）落雷
+    if (sound && now - (L.crack || 0) > 60 + Math.random() * 90) { L.crack = now; sound.crackle(0.25 + 0.55 * e, 0.12); }   // 電流越來越密
     const a = seg01(t, 0.78, 0.88);
     if (a > 0) drawHandoff(a);
   }
@@ -906,7 +908,10 @@
      只有那一格在畫面上、分頁看得到、沒有設定「減少動態效果」時才動（最多每秒 30 次）。
      ====================================================================== */
   const examI = frames.findIndex((f) => f.kind === "ready" && f.w.exam);
-  let examFx = null, examLast = 0, flashEl = null;
+  let examFx = null, examLast = 0, flashEl = null, examHeard = false;
+  // 音效（assets/exam-sound.js）：Week 6 停在正中間時嗡鳴＋電流嘶嘶，落雷劈啪；瀏覽器規定使用者點過、按過鍵之後才會出聲
+  const sound = window.ExamSound || null;
+  if (sound) sound.bindButton($("#soundBtn"));
   function setupExam() {
     if (examI < 0 || reduceMotion || !examArtP) return;
     examArtP.then((art) => (art ? art.loadFx() : false)).then((ok) => {
@@ -930,7 +935,9 @@
       const g = c.getContext("2d"); g.setTransform(s, 0, 0, s, 0, 0); drawFilm(g, frames[examI]);
       examFx.film = c;
     }
-    if (examArt.step(now / 1000) && current() === examI) flash();
+    const fired = examArt.step(now / 1000);
+    if (fired && current() === examI) flash();
+    examSound(now, fired);
     if (scratch.width !== w || scratch.height !== h) { scratch.width = w; scratch.height = h; }
     sg.setTransform(1, 0, 0, 1, 0, 0);
     sg.globalCompositeOperation = "copy"; sg.drawImage(examFx.film, 0, 0);
@@ -938,6 +945,17 @@
     sg.setTransform(s, 0, 0, s, 0, 0);
     examArt.paint(sg);
     retex(tex[examI], scratch);
+  }
+  function examSound(now, fired) {
+    if (!sound) return;
+    const front = current() === examI && Math.abs(target - pos) < 0.35 && !indexOpen, k = leaving && leaving.exam ? 1.9 : 1;
+    const strikes = examArt.takeStrikes();
+    if (!front) { if (examHeard) { sound.quiet(0.5); examHeard = false; } return; }
+    examHeard = true;
+    sound.level("drone", 0.13 * k, 0.6);
+    sound.level("fizz", (0.035 + 0.16 * examArt.activity()) * k, 0.06);
+    if (strikes) sound.crackle(0.5, 0.2);
+    if (fired) sound.zap(0.9, 0.3);
   }
   function flash() {
     if (!flashEl) return;
@@ -1001,7 +1019,7 @@
     if (examFx && !document.hidden && examVisible()) {
       examOn = true;
       if (now - examLast > 33) { examLast = now; examStep(now); }
-    }
+    } else if (examHeard && sound) { sound.quiet(0.5); examHeard = false; }
     draw();
     if (mouse && !drag && !leaving && Math.abs(target - pos) > 1e-3) setHover(pick(mouse.x, mouse.y), mouse.x, mouse.y);
 

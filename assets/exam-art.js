@@ -208,6 +208,10 @@
     return c;
   };
 
+  // 給音效（assets/exam-sound.js）：電流現在多亮（0..1）、上次問之後新的局部落雷有幾道
+  ExamArt.prototype.activity = function () { return this.fx ? this.fx.act || 0 : 0; };
+  ExamArt.prototype.takeStrikes = function () { const F = this.fx; if (!F) return 0; const n = F.newStrikes || 0; F.newStrikes = 0; return n; };
+
   // 在 at 那一刻整道裂縫先暗 0.16 秒（像在蓄電），再落雷般猛亮
   ExamArt.prototype.surge = function (at) { if (this.fx) { this.fx.surgeT = at; this.fx.flashed = false; } };
 
@@ -225,6 +229,7 @@
     if (F.seeds.length && t > F.nextStrike) {           // 局部落雷：一整叢電流白熱、連打兩下
       const s = pick();
       F.strikes.push({ x: s[0], y: s[1], t0: t, r: 55 + Math.random() * 50, a: 1.0 + Math.random() * 0.6 });
+      F.newStrikes = (F.newStrikes || 0) + 1;
       F.nextStrike = t + (1.1 + Math.random() * 1.9) / energy;
     }
     if (F.seeds.length && t > F.nextBolt) {             // 一道亮光沿著電流竄過去
@@ -245,7 +250,7 @@
     F.boom = Math.max(0, surge);
     const { gw, gh, ph } = F, n = gw * gh;
     const dD = F.fDim.d.data, aD = F.fAdd.d.data, hD = F.fHot.d.data, gD = F.fGap.d.data, sD = F.fStar.d.data;
-    let hot = false;
+    let hot = false, act = 0;
     const breath = 0.5 + 0.5 * Math.sin(t * 0.9);
     for (let j = 0; j < gh; j++) {
       for (let i = 0; i < gw; i++) {
@@ -265,14 +270,14 @@
         lv += surge;
         if (lv > 2) hot = true;
         dD[k * 4 + 3] = clamp(1 - lv, 0, 0.8) * 255;
-        aD[k * 4 + 3] = clamp(lv - 1, 0, 1) * 255;
+        aD[k * 4 + 3] = clamp(lv - 1, 0, 1) * 255; act += clamp(lv - 1, 0, 1);
         hD[k * 4 + 3] = clamp(lv - 2, 0, 1) * 255;
         // 裂縫裡：星雲慢慢呼吸、被旁邊的落雷照亮；星星一顆顆（一小區一小區）閃
         gD[k * 4 + 3] = clamp(0.08 * breath + 0.45 * near + 0.55 * Math.max(0, surge), 0, 1) * 255;
         sD[k * 4 + 3] = clamp(Math.pow(Math.max(0, Math.sin(t * (1.3 + (k % 5) * 0.45) + ph[2 * n + k])), 14) * 1.2 + 0.4 * Math.max(0, surge), 0, 1) * 255;
       }
     }
-    F.hot = hot;
+    F.hot = hot; F.act = act / n;
     F.fDim.g.putImageData(F.fDim.d, 0, 0); F.fAdd.g.putImageData(F.fAdd.d, 0, 0); F.fHot.g.putImageData(F.fHot.d, 0, 0);
     F.fGap.g.putImageData(F.fGap.d, 0, 0); F.fStar.g.putImageData(F.fStar.d, 0, 0);
     return fired;
