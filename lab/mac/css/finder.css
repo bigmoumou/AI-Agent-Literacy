@@ -323,3 +323,148 @@
 
 /* ---------------------------------------------------- performance mode */
 html[data-perf="low"] .fd-sidebar { background: #f2f2f3; -webkit-backdrop-filter: none; backdrop-filter: none; }
+
+/* ================================================================== macOS 26 (Tahoe) look
+   Teacher, 2026-10-16, from screenshots of the owner's Mac (drawn in code; no picture of the real Finder is used):
+   - the sidebar is a floating glass panel (a little in from the window edge, faintly tinted, rounded), the traffic lights sit inside it;
+   - the toolbar is glass capsules over the white content: back / forward, the folder name in bold (no folder icon), view (⌃⌄), group (⌄),
+     share · tags · more, and a round search button;
+   - the path bar (and the status bar) sit under the content only, white, with a faint line on top.
+   The window bar (wm.js, bar 'unified') is laid over the top of the window instead of above it, so the sidebar reaches the top edge; it is
+   still the bar: it drags the window, its lights and the toolbar in it work as before. Only colours, sizes and positions change here. */
+.lab-win[data-app="finder"] { --mac-radius: 24px; --fd-side-w: 190px; --fd-inset: 8px; --fd-bar-h: 52px; --fd-cap-h: 34px; }
+.lab-win[data-app="finder"] .lab-win-bar { position: absolute; left: 0; right: 0; top: 0; height: var(--fd-bar-h); background: transparent; border-bottom: 0; z-index: 5; }
+.lab-win[data-app="finder"] .lab-tl { position: absolute; left: calc(var(--fd-inset) + 11px); top: var(--fd-inset); height: 32px; padding: 0; }
+.lab-win[data-app="finder"] .lab-win-tools { padding-left: calc(var(--fd-inset) + var(--fd-side-w) + 10px); }
+.lab-win[data-app="finder"] .lab-win-body { border-radius: var(--mac-radius); }
+.lab-win[data-app="finder"] .fd-root { background: #fff; }
+.lab-win[data-app="finder"] .fd-main { padding-top: var(--fd-bar-h); background: #fff; }
+
+/* toolbar: glass capsules */
+.lab-win[data-app="finder"] .fd-tb { gap: 8px; padding: 0 12px 0 0; }
+.fd-navbtns, .fd-cap, .fd-search {
+  height: var(--fd-cap-h); border-radius: 999px; background: rgba(255, 255, 255, .96);
+  box-shadow: 0 0 0 .5px rgba(0, 0, 0, .1), 0 1px 3px rgba(0, 0, 0, .09), inset 0 1px 0 rgba(255, 255, 255, .9);
+}
+.fd-navbtns { padding: 0 2px; gap: 0; }
+.lab-win[data-app="finder"] .fd-nb { width: 36px; height: var(--fd-cap-h); border-radius: 999px; color: #1d1d1f; }
+.lab-win[data-app="finder"] .fd-nb:disabled { opacity: .28; }
+.lab-win[data-app="finder"] .fd-title { margin-left: 6px; font-size: 15px; font-weight: 700; color: #1d1d1f; }
+.lab-win[data-app="finder"] .fd-title-ico { display: none; }
+.fd-cap {
+  display: inline-flex; align-items: center; justify-content: center; gap: 3px; flex: none; padding: 0 11px 0 12px; margin: 0; border: 0;
+  color: #1d1d1f; font: inherit; cursor: default;
+}
+.fd-cap > svg:nth-child(2), .fd-cap > svg:nth-child(2) * { color: #6e6e73; }
+.fd-cap:hover:not([aria-disabled="true"]), .fd-cap.is-open { background: #fff; }
+.fd-acts { gap: 0; padding: 0 3px; }
+.fd-capb { width: 36px; height: var(--fd-cap-h); padding: 0; margin: 0; border: 0; border-radius: 999px; background: none; color: #1d1d1f; display: flex; align-items: center; justify-content: center; cursor: default; }
+.fd-cap:focus-visible, .fd-capb:focus-visible { outline: 2px solid #f0b545; outline-offset: -1px; }
+/* the view capsule's panel: the four views (the old segmented buttons, data-lab unchanged) as a small glass menu under it */
+.fd-viewwrap { position: relative; flex: none; }
+.fd-viewwrap .fd-seg {
+  position: absolute; right: 0; top: calc(100% + 6px); z-index: 10; display: flex; flex-direction: column; gap: 2px; min-width: 128px; padding: 6px;
+  border-radius: 14px; background: rgba(255, 255, 255, .97); box-shadow: 0 10px 30px rgba(0, 0, 0, .18), 0 0 0 .5px rgba(0, 0, 0, .12);
+}
+.fd-viewwrap .fd-seg[hidden] { display: none; }
+.fd-viewwrap .fd-vb { width: 100%; height: 28px; justify-content: flex-start; gap: 9px; padding: 0 10px; border-radius: 8px; color: #1d1d1f; }
+.fd-viewwrap .fd-vb:hover { background: rgba(0, 0, 0, .05); }
+.fd-viewwrap .fd-vb.is-on { background: rgba(0, 0, 0, .08); box-shadow: none; color: #1d1d1f; }
+.fd-vb-t { font: 13px var(--lab-font-ui); }
+/* search: a round button that widens into the field (it is the field: clicking it puts the caret in) */
+.lab-win[data-app="finder"] .fd-search { width: var(--fd-cap-h); transition: width .2s var(--lab-ease); }
+.lab-win[data-app="finder"] .fd-search:focus-within, .lab-win[data-app="finder"] .fd-search:has(.fd-search-in:not(:placeholder-shown)) { width: 176px; }
+.lab-win[data-app="finder"] .fd-search:focus-within { box-shadow: 0 0 0 3px rgba(10, 108, 255, .28), 0 0 0 .5px rgba(10, 108, 255, .6); }
+.lab-win[data-app="finder"] .fd-search-ico { left: 8.5px; margin-top: -8.5px; color: #1d1d1f; }
+.lab-win[data-app="finder"] .fd-search-in { height: var(--fd-cap-h); padding: 0 12px 0 32px; border: 0; border-radius: 999px; background: transparent; }
+.lab-win[data-app="finder"] .fd-search-in:focus { border: 0; box-shadow: none; }
+.lab-win[data-app="finder"] .fd-search:not(:focus-within) .fd-search-in:placeholder-shown { cursor: default; }
+.lab-win[data-app="finder"] .fd-search:not(:focus-within) .fd-search-in::placeholder { color: transparent; }
+.lab-win[data-app="finder"] .fd-trashbtn { height: var(--fd-cap-h); border: 0; border-radius: 999px; padding: 0 14px; box-shadow: 0 0 0 .5px rgba(0, 0, 0, .1), 0 1px 3px rgba(0, 0, 0, .09); }
+
+/* sidebar: the floating glass panel */
+.lab-win[data-app="finder"] .fd-sidebar {
+  width: var(--fd-side-w); margin: var(--fd-inset) 0 var(--fd-inset) var(--fd-inset); padding: 44px 8px 10px; border-right: 0; border-radius: 17px;
+  background: linear-gradient(180deg, rgba(244, 246, 248, .97), rgba(246, 247, 248, .97));
+  box-shadow: inset 0 0 0 .5px rgba(255, 255, 255, .95), 0 0 0 .5px rgba(0, 0, 0, .07), 0 3px 12px rgba(0, 0, 0, .06);
+}
+.lab-win[data-app="finder"] .fd-side-sec { padding: 12px 10px 4px; font-size: 11px; font-weight: 600; color: #8e8e93; }
+.lab-win[data-app="finder"] .fd-side-item { height: 30px; gap: 10px; padding: 0 10px; margin-bottom: 1px; border-radius: 9px; font-size: 14px; color: #1d1d1f; }
+.lab-win[data-app="finder"] .fd-side-ico { color: #1d1d1f; }
+.lab-win[data-app="finder"].is-inactive .fd-side-ico { color: #8e8e93; }
+.lab-win[data-app="finder"] .fd-side-item.is-cur { background: rgba(0, 0, 0, .075); }
+.lab-win[data-app="finder"].is-inactive .fd-side-item.is-cur { background: rgba(0, 0, 0, .05); }
+.lab-win[data-app="finder"] .fd-side-item.is-inert, .lab-win[data-app="finder"] .fd-side-item.is-inert .fd-side-ico { color: rgba(0, 0, 0, .34); }
+.lab-win[data-app="finder"] .fd-side-item.is-drop, .lab-win[data-app="finder"] .fd-side-item.is-drop .fd-side-ico { color: #fff; }
+
+/* icon view and list view */
+.lab-win[data-app="finder"] .fd-grid { padding: 8px 14px 16px; grid-template-columns: repeat(auto-fill, 100px); gap: 6px 4px; }
+.lab-win[data-app="finder"] .fd-icon { width: 100px; }
+.lab-win[data-app="finder"] .fd-ico { border-radius: 10px; }
+.lab-win[data-app="finder"] .fd-icon.is-sel .fd-ico { background: rgba(0, 0, 0, .08); }
+.lab-win[data-app="finder"] .fd-icon .fd-name-t { border-radius: 5px; }
+.lab-win[data-app="finder"] .fd-list { padding: 0 10px; }
+.lab-win[data-app="finder"] .fd-listhead { height: 28px; background: rgba(255, 255, 255, .96); border-bottom: 0; font-size: 12px; color: #6e6e73; }
+.lab-win[data-app="finder"] .fd-hc { height: 28px; padding: 0 10px; font-size: 12px; border-right: 0; box-shadow: inset -1px 0 0 rgba(0, 0, 0, .07); }
+.lab-win[data-app="finder"] .fd-hc:last-child { box-shadow: none; }
+.lab-win[data-app="finder"] .fd-hc.is-sorted { font-weight: 600; color: #3a3a3c; }
+.lab-win[data-app="finder"] .fd-row { height: 25px; border-radius: 7px; }
+.lab-win[data-app="finder"] .fd-row.is-odd { background: #f5f5f7; }
+.lab-win[data-app="finder"] .fd-c { padding: 0 10px; color: #6e6e73; }
+.lab-win[data-app="finder"] .fd-c-name { color: #1d1d1f; padding-left: calc(6px + var(--depth, 0) * 18px); }
+.lab-win[data-app="finder"].is-active .fd-row.is-sel { background: #0a64e6; }
+/* the disclosure mark is a thin chevron (›), turning down when open */
+.lab-win[data-app="finder"] .fd-disc::before {
+  left: 3px; top: 4px; width: 5px; height: 5px; border: 0; border-right: 1.6px solid #8a8a8f; border-bottom: 1.6px solid #8a8a8f; transform: rotate(-45deg);
+}
+.lab-win[data-app="finder"] .fd-disc.is-open::before { left: 4px; top: 3px; transform: rotate(45deg); }
+.lab-win[data-app="finder"].is-active .fd-row.is-sel .fd-disc::before { border-left-color: transparent; border-right-color: #fff; border-bottom-color: #fff; }
+
+/* path bar and status bar: under the content only, white */
+.lab-win[data-app="finder"] .fd-pathbar { height: 30px; padding: 0 14px; gap: 2px; background: #fff; border-top: 1px solid rgba(0, 0, 0, .065); border-radius: 0 0 var(--mac-radius) 0; color: #6e6e73; }
+.lab-win[data-app="finder"] .fd-ps { height: 22px; gap: 5px; padding: 0 5px; border-radius: 6px; font: 12px var(--lab-font-ui); color: #6e6e73; }
+.lab-win[data-app="finder"] .fd-ps.is-last { color: #6e6e73; }
+.lab-win[data-app="finder"] .fd-ps:first-child .fd-ps-ico { color: #8e8e93; }
+.lab-win[data-app="finder"] .fd-psep { color: #aeaeb2; font-size: 13px; padding: 0 1px; }
+.lab-win[data-app="finder"] .fd-status { background: #fff; border-top: 1px solid rgba(0, 0, 0, .065); }
+.lab-win[data-app="finder"] .fd-root.no-path .fd-status { border-radius: 0 0 var(--mac-radius) 0; }
+@media (prefers-reduced-motion: reduce) { .lab-win[data-app="finder"] .fd-search { transition: none; } }
+
+/* the same look in the dark appearance (系統設定 › 外觀 › 深色): the rules above fix light colours, so each one gets its dark twin here
+   (sysapps.css's dark Finder rules are weaker than these scoped ones) */
+html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-root, html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-main,
+html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-pathbar, html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-status,
+html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-listhead { background: var(--mac-win-bg); }
+html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-navbtns, html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-cap,
+html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-search, html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-trashbtn {
+  background: rgba(62, 62, 66, .92); box-shadow: 0 0 0 .5px rgba(255, 255, 255, .14), 0 1px 3px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .07);
+}
+html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-cap:hover:not([aria-disabled="true"]), html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-cap.is-open { background: rgba(78, 78, 82, .96); }
+html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-nb, html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-title,
+html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-cap, html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-capb,
+html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-search-ico, html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-vb,
+html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-side-item, html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-side-ico,
+html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-c-name { color: var(--mac-text); }
+html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-cap > svg:nth-child(2), html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-cap > svg:nth-child(2) *,
+html[data-appearance="dark"] .lab-win[data-app="finder"].is-inactive .fd-side-ico, html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-c,
+html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-ps, html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-ps.is-last,
+html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-listhead, html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-pathbar { color: var(--mac-text-2); }
+html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-hc.is-sorted { color: #d6d6dc; }
+html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-viewwrap .fd-seg { background: rgb(44, 44, 48); box-shadow: 0 10px 30px rgba(0, 0, 0, .5), 0 0 0 .5px rgba(255, 255, 255, .16); }
+html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-viewwrap .fd-vb:hover { background: rgba(255, 255, 255, .08); }
+html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-viewwrap .fd-vb.is-on { background: rgba(255, 255, 255, .14); box-shadow: none; color: var(--mac-text); }
+html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-sidebar {
+  background: linear-gradient(180deg, rgba(50, 50, 54, .96), rgba(44, 44, 48, .96));
+  box-shadow: inset 0 0 0 .5px rgba(255, 255, 255, .1), 0 0 0 .5px rgba(0, 0, 0, .4), 0 3px 12px rgba(0, 0, 0, .3);
+}
+html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-side-item.is-cur { background: rgba(255, 255, 255, .14); }
+html[data-appearance="dark"] .lab-win[data-app="finder"].is-inactive .fd-side-item.is-cur { background: rgba(255, 255, 255, .08); }
+html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-side-item.is-inert, html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-side-item.is-inert .fd-side-ico { color: rgba(255, 255, 255, .38); }
+html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-side-item.is-drop, html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-side-item.is-drop .fd-side-ico { color: #fff; }
+html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-icon.is-sel .fd-ico { background: rgba(255, 255, 255, .13); }
+html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-hc { box-shadow: inset -1px 0 0 rgba(255, 255, 255, .1); }
+html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-hc:last-child { box-shadow: none; }
+html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-row.is-odd { background: rgba(255, 255, 255, .04); }
+html[data-appearance="dark"] .lab-win[data-app="finder"].is-active .fd-row.is-sel { background: #0a64e6; }
+html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-pathbar, html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-status { border-top-color: rgba(255, 255, 255, .1); }
+html[data-appearance="dark"] .lab-win[data-app="finder"].is-active .fd-row.is-sel .fd-c, html[data-appearance="dark"] .lab-win[data-app="finder"].is-active .fd-row.is-sel .fd-c-name { color: #fff; }

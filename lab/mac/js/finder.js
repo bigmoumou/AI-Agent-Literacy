@@ -33,6 +33,13 @@
   LAB.icons.add('fd-airdrop', glyph('<circle cx="12" cy="12.5" r="1.3" fill="currentColor"/><path d="M8.6 9a4.8 4.8 0 0 1 6.8 0M6 6.4a8.4 8.4 0 0 1 12 0M9.6 16.8l2.4-3 2.4 3z"/>'));
   LAB.icons.add('fd-hdd', glyph('<rect x="3.5" y="7.5" width="17" height="9.5" rx="2.2"/><path d="M3.5 13h17"/><circle cx="17" cy="15.1" r=".7" fill="currentColor" stroke="none"/>'));
   LAB.icons.add('fd-trash', glyph('<path d="M5.5 7h13M9.5 7V5h5v2M7 7l.9 12h8.2L17 7M10.3 10.5v5.5M13.7 10.5v5.5"/>'));
+  // the macOS 26 toolbar (2026-10-16): group, share, tags, more, and the small chevrons of the view and group capsules
+  LAB.icons.add('fd-group', glyph('<rect x="4" y="4.5" width="16" height="4.5" rx="1.3"/><rect x="4" y="12" width="4.2" height="3.4" rx=".9"/><rect x="9.9" y="12" width="4.2" height="3.4" rx=".9"/><rect x="15.8" y="12" width="4.2" height="3.4" rx=".9"/><rect x="4" y="17.2" width="4.2" height="3.4" rx=".9"/><rect x="9.9" y="17.2" width="4.2" height="3.4" rx=".9"/><rect x="15.8" y="17.2" width="4.2" height="3.4" rx=".9"/>'));
+  LAB.icons.add('fd-share', glyph('<path d="M12 3.6v10.8M8.2 7.2L12 3.6l3.8 3.6M8.6 10.2H6.8a1.6 1.6 0 0 0-1.6 1.6v7a1.6 1.6 0 0 0 1.6 1.6h10.4a1.6 1.6 0 0 0 1.6-1.6v-7a1.6 1.6 0 0 0-1.6-1.6h-1.8"/>'));
+  LAB.icons.add('fd-tag', glyph('<path d="M4.2 12.4V5.7a1.5 1.5 0 0 1 1.5-1.5h6.7l7.4 7.4a1.6 1.6 0 0 1 0 2.2l-6.1 6.1a1.6 1.6 0 0 1-2.2 0z"/><circle cx="8.6" cy="8.6" r="1.35"/>'));
+  LAB.icons.add('fd-more', glyph('<circle cx="5.6" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="18.4" cy="12" r="1.5" fill="currentColor" stroke="none"/>'));
+  LAB.icons.add('fd-chev-down', glyph('<path d="M6.5 9.5l5.5 5.5 5.5-5.5" stroke-width="2.2"/>'));
+  LAB.icons.add('fd-chev-updown', glyph('<path d="M7 9.2l5-5 5 5M7 14.8l5 5 5-5" stroke-width="2.2"/>'));
 
   /* ------------------------------------------------------------------ helpers */
   var COLL = null;
@@ -553,8 +560,8 @@
     /* ---------- DOM skeleton ---------- */
     var backBtn = h('button', { type: 'button', class: 'fd-nb', 'aria-label': '返回', title: '返回', disabled: true, dataset: { lab: 'fd-back' } });
     var fwdBtn = h('button', { type: 'button', class: 'fd-nb', 'aria-label': '下一頁', title: '下一頁', disabled: true, dataset: { lab: 'fd-forward' } });
-    backBtn.innerHTML = LAB.icons.get('chev-left', { size: 17 });
-    fwdBtn.innerHTML = LAB.icons.get('chev-right', { size: 17 });
+    backBtn.innerHTML = LAB.icons.get('chev-left', { size: 19 });
+    fwdBtn.innerHTML = LAB.icons.get('chev-right', { size: 19 });
     var titleIco = h('span', { class: 'fd-title-ico', 'aria-hidden': 'true' });
     var titleTxt = h('span', { class: 'fd-title-txt' });
     var trashBtn = h('button', { type: 'button', class: 'fd-trashbtn', hidden: true, dataset: { lab: 'fd-empty-trash' } }, '清倒');
@@ -568,15 +575,47 @@
     viewGalBtn.innerHTML = LAB.icons.get('gallery-view', { size: 16 });
     var searchInput = h('input', { type: 'text', class: 'fd-search-in', placeholder: '搜尋', 'aria-label': '搜尋', spellcheck: 'false', autocomplete: 'off', dataset: { lab: 'fd-search' } });
     var searchIco = h('span', { class: 'fd-search-ico', 'aria-hidden': 'true' });
-    searchIco.innerHTML = LAB.icons.get('search', { size: 13 });
+    searchIco.innerHTML = LAB.icons.get('search', { size: 18 });
 
+    /* macOS 26 toolbar (teacher, 2026-10-16, from screenshots of the owner's Mac): back / forward in one glass capsule, the folder's name in bold,
+       then glass capsules on the right: the view (the current view's icon and ⌃⌄, a small panel with the four views opens under it; the four
+       buttons keep their data-lab and their ⌘1–⌘4), group (▦ ⌄), share · tags · more in one capsule, and a round search button that widens
+       into the field when it is clicked or holds text. Group, share, tags and more are there to look like the real Finder: this practice Mac
+       has none of those features, so they do nothing (their tooltip says so). */
+    [[viewIconBtn, '圖示'], [viewListBtn, '列表'], [viewColBtn, '直欄'], [viewGalBtn, '圖庫']].forEach(function (b) { b[0].appendChild(h('span', { class: 'fd-vb-t' }, b[1])); });
+    var viewPopBtn = h('button', { type: 'button', class: 'fd-cap fd-viewpop', 'aria-label': '顯示方式', title: '顯示方式', 'aria-haspopup': 'true', 'aria-expanded': 'false', dataset: { lab: 'fd-view-menu' } });
+    var viewSeg = h('div', { class: 'fd-seg', role: 'group', 'aria-label': '顯示方式', hidden: true }, viewIconBtn, viewListBtn, viewColBtn, viewGalBtn);
+    var noFeature = '（練習用的 Mac 沒有這個功能）';
+    function capBtn(lab, label, icon) {
+      var b = h('button', { type: 'button', class: 'fd-capb', 'aria-label': label, title: label + noFeature, 'aria-disabled': 'true', dataset: { lab: lab } });
+      b.innerHTML = LAB.icons.get(icon, { size: 18 });
+      return b;
+    }
+    var groupBtn = h('button', { type: 'button', class: 'fd-cap fd-groupbtn', 'aria-label': '分組', title: '分組' + noFeature, 'aria-disabled': 'true', dataset: { lab: 'fd-group' } });
+    groupBtn.innerHTML = LAB.icons.get('fd-group', { size: 20 }) + LAB.icons.get('fd-chev-down', { size: 10 });
+    var searchWrap = h('div', { class: 'fd-search' }, searchIco, searchInput);
     var toolbar = h('div', { class: 'fd-tb' },
       h('div', { class: 'fd-navbtns' }, backBtn, fwdBtn),
       h('div', { class: 'fd-title', dataset: { drag: '1' } }, titleIco, titleTxt),
       h('div', { class: 'fd-spacer', dataset: { drag: '1' } }),
       trashBtn,
-      h('div', { class: 'fd-seg', role: 'group', 'aria-label': '顯示方式' }, viewIconBtn, viewListBtn, viewColBtn, viewGalBtn),
-      h('div', { class: 'fd-search' }, searchIco, searchInput));
+      h('div', { class: 'fd-viewwrap' }, viewPopBtn, viewSeg),
+      groupBtn,
+      h('div', { class: 'fd-cap fd-acts' }, capBtn('fd-share', '分享', 'fd-share'), capBtn('fd-tags', '標籤', 'fd-tag'), capBtn('fd-more', '更多', 'fd-more')),
+      searchWrap);
+    // the view panel: opens under its capsule, closes on a pick, Escape, or a press anywhere else
+    function viewMenu(open) {
+      viewSeg.hidden = !open;
+      viewPopBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      viewPopBtn.classList.toggle('is-open', open);
+    }
+    function viewMenuOutside(e) { if (!viewSeg.hidden && !e.target.closest('.fd-viewwrap')) viewMenu(false); }
+    viewPopBtn.addEventListener('click', function () { viewMenu(viewSeg.hidden); });
+    viewSeg.addEventListener('click', function (e) { if (e.target.closest('.fd-vb')) viewMenu(false); });
+    function viewMenuKey(e) { if (e.key === 'Escape' && !viewSeg.hidden) { e.stopPropagation(); viewMenu(false); viewPopBtn.focus(); } }
+    viewSeg.addEventListener('keydown', viewMenuKey);
+    viewPopBtn.addEventListener('keydown', viewMenuKey);
+    document.addEventListener('pointerdown', viewMenuOutside, true);
 
     var sidebarEl = h('nav', { class: 'fd-sidebar', 'aria-label': '側邊欄' });
     var scrollEl = h('div', { class: 'fd-scroll', role: 'listbox', 'aria-multiselectable': 'true', 'aria-label': '檔案列表', tabindex: '-1', dataset: { lab: 'fd-scroll' } });
@@ -587,16 +626,16 @@
     var scopeDirBtn = h('button', { type: 'button', class: 'fd-scope-b', 'aria-pressed': 'false', dataset: { lab: 'fd-scope-folder' } });
     var scopeEl = h('div', { class: 'fd-scope', hidden: true, role: 'group', 'aria-label': '搜尋範圍', dataset: { lab: 'fd-scope' } },
       h('span', { class: 'fd-scope-l' }, '搜尋：'), scopeMacBtn, scopeDirBtn);
+    // macOS 26: the status bar and the path bar belong to the content area (right of the sidebar), not to the whole window
     var root = h('div', { class: 'fd-root' },
-      h('div', { class: 'fd-body' }, sidebarEl, h('div', { class: 'fd-main' }, scopeEl, scrollEl)),
-      statusEl, pathEl);
+      h('div', { class: 'fd-body' }, sidebarEl, h('div', { class: 'fd-main' }, scopeEl, scrollEl, statusEl, pathEl)));
 
     /* sidebar */
     var sideRecs = [];
     function sideItem(def) {
       var btn = h('button', { type: 'button', class: 'fd-side-item' + (def.inert ? ' is-inert' : ''), dataset: { lab: 'fd-sidebar-item', path: def.path || '' } });
       var ico = h('span', { class: 'fd-side-ico', 'aria-hidden': 'true' });
-      ico.innerHTML = LAB.icons.get(def.icon, { size: 16 });
+      ico.innerHTML = LAB.icons.get(def.icon, { size: 18 });
       btn.appendChild(ico);
       btn.appendChild(h('span', { class: 'fd-side-txt' }, def.label));
       if (def.inert) { btn.setAttribute('aria-disabled', 'true'); btn.addEventListener('click', function () { LAB.ui.toast('AirDrop 在練習版裡不能用'); }); }
@@ -1312,6 +1351,11 @@
         b[0].classList.toggle('is-on', S.mode === b[1]);
         b[0].setAttribute('aria-pressed', S.mode === b[1] ? 'true' : 'false');
       });
+      var vIco = { icon: 'icon-view', list: 'list-view', column: 'columns-view', gallery: 'gallery-view' }[S.mode] || 'icon-view';
+      if (viewPopBtn.getAttribute('data-mode') !== S.mode) {
+        viewPopBtn.setAttribute('data-mode', S.mode);
+        viewPopBtn.innerHTML = LAB.icons.get(vIco, { size: 20 }) + LAB.icons.get('fd-chev-updown', { size: 10 });
+      }
       updateDynamicChrome();
       updateScope();
     }
@@ -2001,6 +2045,7 @@
       pathTargets = [];
       refreshers.delete(render);
       instances.delete(win.id);
+      document.removeEventListener('pointerdown', viewMenuOutside, true);
     });
     refreshers.add(render);              // a tag was added or removed: redraw the dots
 

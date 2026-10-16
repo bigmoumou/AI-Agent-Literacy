@@ -1537,11 +1537,12 @@
     }
     if (!ring && cueEl && !cueEl.hidden) { cueEl.hidden = true; cueRect = ''; }
     ghostUpdate(want, ring);
+    dimUpdate(want, ring);
     // follow the element only while there is one to follow: bus events, window moves, scrolling and this light check every 400 ms
     if (want && !cueTimer) cueTimer = setInterval(cueUpdate, 400);
     else if (!want && cueTimer) { clearInterval(cueTimer); cueTimer = null; }
   }
-  /* The demo pointer (?guide=ghost, preview 2026-10-16). The menu bar is a thin line of small words at the very top; the student's eyes are
+  /* The demo pointer (on by default since 2026-10-16; ?guide=off turns it off). The menu bar is a thin line of small words at the very top; the student's eyes are
      on the Finder window in the middle and miss the ring up there (teacher). While the ring points into the menu bar, a pale copy of the
      pointer (60 % opaque, an amber edge, so it is not the student's own) appears next to the student's mouse (the eye follows what moves
      near the mouse), glides (0.5 − 0.5·cos πx, a slight arc) to the target in 0.9–1.2 s, presses once (shrinks) and fades; the ring stays.
@@ -1622,6 +1623,51 @@
       ghost.anim = null; ghost.el.hidden = true;
       ghost.nextAt = Date.now() + GHOST_AGAIN_MS;
     };
+  }
+  /* The menu bar dim (teacher, 2026-10-16; on for everyone). The menu bar is a thin line of small words at the very top and the ring up there
+     is easy to miss, so while the ring points into the menu bar the whole Mac (the card too) goes darker: a 42 % black layer fading in over
+     0.35 s, with a soft rounded hole around the target, which keeps its full brightness; the ring stays on top of it. Once a menu of the bar
+     is open the hole holds its title and the whole drop-down menu (the ring walks down it, menuPath), so every row can be read. The layer
+     never takes the mouse (pointer-events: none, so elementFromPoint and the cue checks see through it) and fades away when the step is done
+     or the target leaves the menu bar. One element: the hole is the element, the dark is its box-shadow. Reduced motion: no fading or growing. */
+  var dimEl = null, dimKey = '';
+  function boxOf(list) {
+    var l = Infinity, t = Infinity, r = -Infinity, b = -Infinity;
+    list.forEach(function (el) {
+      var rc = el.getBoundingClientRect();
+      if (rc.width < 1 || rc.height < 1) return;
+      l = Math.min(l, rc.left); t = Math.min(t, rc.top); r = Math.max(r, rc.right); b = Math.max(b, rc.bottom);
+    });
+    return r > l ? { left: l, top: t, width: r - l, height: b - t } : null;
+  }
+  function dimUpdate(want, ring) {
+    var rc = null, title = false;
+    if (want && ring && want.el.closest && !cuePaused()) {
+      var open = document.querySelector('#lab-menubar [data-lab=menu-title].is-open');
+      if (want.el.closest('#lab-menubar')) { rc = want.el.getBoundingClientRect(); title = true; }
+      else if (open && want.el.closest('.lab-menu')) rc = boxOf([open].concat(Array.prototype.slice.call(document.querySelectorAll('.lab-menu'))));
+    }
+    var scr = document.getElementById('lab-screen');
+    // the task card stays lit above the dim while the target is the menu title, so the step text (「往上看…」) can be read (teacher, 2026-10-16);
+    // once the menu is open the card goes back under the dim, because the dropdown may lie over it
+    if (rail) rail.classList.toggle('is-lit', !!(rc && title && scr));
+    if (!rc || !scr) {
+      if (dimEl && dimEl.classList.contains('is-on')) dimEl.classList.remove('is-on');
+      return;
+    }
+    if (!dimEl) dimEl = h('div', { class: 'lab-dim', 'aria-hidden': 'true', dataset: { lab: 'cue-dim' } });
+    if (dimEl.parentNode !== scr) scr.appendChild(dimEl);
+    var sr = scr.getBoundingClientRect(), pad = 8;       // 8 px of air, so the soft edge never darkens the target itself
+    var x = Math.round(rc.left - sr.left - pad), y = Math.round(rc.top - sr.top - pad);
+    var w = Math.round(rc.width + pad * 2), hh = Math.round(rc.height + pad * 2), key = x + ',' + y + ',' + w + ',' + hh;
+    var on = dimEl.classList.contains('is-on');
+    if (!on && dimKey !== key) dimEl.style.transition = 'none';     // placed while invisible: no growing from the old place
+    if (key !== dimKey) {
+      dimKey = key;
+      dimEl.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
+      dimEl.style.width = w + 'px'; dimEl.style.height = hh + 'px';
+    }
+    if (!on) { void dimEl.offsetWidth; dimEl.style.transition = ''; dimEl.classList.add('is-on'); }
   }
   function cueSoon() {
     if (cueQueued) return;

@@ -448,6 +448,16 @@ body.lab-card-dragging, body.lab-card-dragging * { cursor: grabbing !important; 
   22.5% { transform: translateY(-16px); animation-timing-function: ease-in; }
   30%, 100% { transform: translateY(0); }
 }
+/* the menu bar dim (§19.4): while the ring points into the menu bar everything but a soft rounded hole around the target goes darker.
+   The hole is this element (under the ring, over the menus, menu bar, windows and card); the dark is its huge blurred shadow */
+.lab-dim {
+  position: absolute; left: 0; top: 0; z-index: 1120; pointer-events: none; border-radius: 12px; opacity: 0;
+  box-shadow: 0 0 16px 9999px rgba(0, 0, 0, .42); transition: opacity .35s ease-out;
+}
+.lab-dim.is-on { opacity: 1; transition: opacity .35s ease-out, transform .18s var(--lab-ease), width .18s var(--lab-ease), height .18s var(--lab-ease); }
+@media (prefers-reduced-motion: reduce) { .lab-dim, .lab-dim.is-on { transition: none; } }
+/* while the dim points at a menu title the task card stays lit above it (below the ring, 1150); missions.js dimUpdate */
+#lab-rail.is-lit { z-index: 1130; }
 /* the demo pointer (?guide=ghost, §19.4): a pale copy of the mouse pointer that glides to a cue in the menu bar and presses once.
    The element's own opacity is animated (fade in/out); the arrow itself is 60 % opaque, with an amber edge so it is not the student's pointer */
 .lab-ghost { position: absolute; left: 0; top: 0; z-index: 1160; pointer-events: none; margin: -3px 0 0 -3px; transform-origin: 3px 3px; opacity: 0; }

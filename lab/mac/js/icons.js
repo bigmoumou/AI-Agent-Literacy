@@ -169,11 +169,12 @@
     var frontTop = 'M70 440V427Q70 369 128 369H896Q954 369 954 427V440';
     return '<defs><path id="' + p + '-b" d="' + back + '"/><path id="' + p + '-f" d="' + front + '"/>' +
       '<clipPath id="' + p + '-cb"><use href="#' + p + '-b"/></clipPath><clipPath id="' + p + '-cf"><use href="#' + p + '-f"/></clipPath>' +
-      lg(p + '-gb', [[0, '#6bcbf8'], [0.42, '#3ea4e8'], [1, '#2379c6']], [0, 251, 0, 372, 1]) +
-      lg(p + '-gf', [[0, '#8fdbfe'], [0.1, '#70caf9'], [0.6, '#4fb2ef'], [1, '#3799e0']], [0, 369, 0, 930, 1]) +
+      // macOS 26 (owner's screenshots, 2026-10-16): a lighter, flatter sky blue than before
+      lg(p + '-gb', [[0, '#82cff6'], [0.45, '#5fb7ec'], [1, '#4199d9']], [0, 251, 0, 372, 1]) +
+      lg(p + '-gf', [[0, '#a6ddfb'], [0.12, '#8ad1f8'], [0.6, '#70c1f3'], [1, '#5cb1ea']], [0, 369, 0, 930, 1]) +
       lg(p + '-gl', [[0, '#fff', 0.85], [1, '#fff', 0]], [0, 369, 0, 440, 1]) +
       lg(p + '-gk', [[0, '#fff', 0.55], [1, '#fff', 0]], [0, 251, 0, 330, 1]) +
-      lg(p + '-gd', [[0, '#1c6cb8', 0], [1, '#1c6cb8', 0.5]], [0, 820, 0, 930, 1]) +
+      lg(p + '-gd', [[0, '#1c6cb8', 0], [1, '#1c6cb8', 0.28]], [0, 820, 0, 930, 1]) +
       (sm ? '' : blur(p + '-sb', 22) + blur(p + '-sc', 9)) + '</defs>' +
       '<g transform="translate(0 -70)">' +
       (sm ? '<use href="#' + p + '-f" transform="translate(0 26)" fill="#06305f" fill-opacity=".26"/>' :
@@ -185,10 +186,24 @@
       '<path d="' + front + '" fill="url(#' + p + '-gf)"/>' +
       '<g clip-path="url(#' + p + '-cf)"><path d="' + frontTop + '" fill="none" stroke="url(#' + p + '-gl)" stroke-width="12"/>' +
       '<rect x="70" y="820" width="884" height="110" fill="url(#' + p + '-gd)"/></g>' +
-      '<use href="#' + p + '-f" fill="none" stroke="#1d6fba" stroke-opacity=".4" stroke-width="3"/>' +
+      '<use href="#' + p + '-f" fill="none" stroke="#1d6fba" stroke-opacity=".26" stroke-width="3"/>' +
       (glyph || '') + '</g>';
   }
   defs['folder'] = [K, folder('lab-i-folder'), folder('lab-i-folder', '', true)];
+  /* the folders of the home folder carry a faint symbol on the front plate, like macOS 26 (下載項目 ↓, 文件, 桌面, 圖片, 音樂, 影片, 公用);
+     the small sizes (sidebar, path bar) stay plain */
+  var FG = 'fill="none" stroke="#2c84cf" stroke-opacity=".5" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"';
+  var FOLDER_GLYPH = {
+    'folder-downloads': '<g ' + FG + '><circle cx="512" cy="652" r="128"/><path d="M512 580V718M454 662l58 58 58-58"/></g>',
+    'folder-documents': '<g ' + FG + '><path d="M444 548H556L600 592V756H444Z"/><path d="M556 548V592H600M474 640H570M474 684H570"/></g>',
+    'folder-desktop': '<g ' + FG + '><rect x="400" y="560" width="224" height="150" rx="18"/><path d="M512 710V760M466 760H558"/></g>',
+    'folder-pictures': '<g ' + FG + '><rect x="398" y="562" width="228" height="176" rx="20"/><path d="M420 716L478 652L522 698L556 664L604 716"/><circle cx="568" cy="612" r="16"/></g>',
+    'folder-music': '<g ' + FG + '><path d="M500 726V574L604 552V704"/><circle cx="470" cy="728" r="30"/><circle cx="574" cy="706" r="30"/></g>',
+    'folder-movies': '<g ' + FG + '><rect x="404" y="566" width="216" height="170" rx="16"/><path d="M448 566V736M576 566V736M404 610H448M404 652H448M404 694H448M576 610H620M576 652H620M576 694H620"/></g>',
+    'folder-public': '<g ' + FG + '><circle cx="512" cy="590" r="34"/><path d="M446 738Q456 650 512 650Q568 650 578 738"/></g>'
+  };
+  Object.keys(FOLDER_GLYPH).forEach(function (k) { defs[k] = [K, folder('lab-i-' + k, FOLDER_GLYPH[k]), folder('lab-i-' + k, '', true)]; });
+  var HOME_FOLDER = { desktop: 'folder-desktop', documents: 'folder-documents', downloads: 'folder-downloads', pictures: 'folder-pictures', music: 'folder-music', movies: 'folder-movies', public: 'folder-public' };
   /* ================================================================== trash: a wire-mesh metal bin ================================================================== */
   function crumple(cx, cy, r, seed, flat) {         // a ball of crumpled paper: jagged outline, creases between three inner points, facets lit from the upper left
     var R = rnd(seed), n = 9, pts = [], inner = [], out = '', i, j, a;
@@ -580,7 +595,10 @@
     has: function (name) { return !!reg[name]; },
     forNode: function (st) {
       if (!st) return 'unknown';
-      if (st.type === 'dir' || st.kind === 'folder') return 'folder';
+      if (st.type === 'dir' || st.kind === 'folder') {
+        var hf = /^\/Users\/[^/]+\/([A-Za-z]+)$/.exec(st.path || '');
+        return (hf && HOME_FOLDER[hf[1].toLowerCase()]) || 'folder';
+      }
       if (st.kind === 'app') return APP_ICON[String(st.name || '').toLowerCase()] || 'app';
       var m = /\.([^./]+)$/.exec(st.name || '');
       var ext = m ? m[1].toLowerCase() : '';
