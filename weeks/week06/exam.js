@@ -625,7 +625,15 @@
   size();
   bs.sceneHalf = [(SCENE_Z + Z0) * TAN * (W / H), (SCENE_Z + Z0) * TAN];
   const artP = window.ExamArt ? window.ExamArt.load("") : Promise.resolve(null);
-  artP.then((a) => (a && !reduce ? Promise.all([a.loadFx(), a.loadSpace()]).then(([ok]) => { if (ok) a.patchLayers(); return a; }) : a)).then((a) => {
+  artP.then((a) => {
+    if (!a || reduce) return a;
+    // 那張圖一到就先畫上去（不會動），動畫素材到齊再開始撕開
+    art = a;
+    const c = cover(1), k = rift.dpr;
+    rift.g.setTransform(k * c.s, 0, 0, k * c.s, k * c.x, k * c.y);
+    a.drawStatic(rift.g);
+    return Promise.all([a.loadFx(), a.loadSpace()]).then(([ok]) => { if (ok) a.patchLayers(); return a; });
+  }).then((a) => {
     art = a;
     body.classList.add("is-diving");
     if (reduce) { toPick(0); setPick(0); return; }

@@ -854,6 +854,7 @@
       flashEl = document.createElement("div"); flashEl.className = "exam-flash"; flashEl.setAttribute("aria-hidden", "true");
       document.body.append(flashEl);
       examFx = { film: null };
+      idle(() => { const im = new Image(); im.src = root() + "weeks/week06/frame-space.jpg"; });   // Week 6 開場撕開時墊的深空，先抓好
       wake();
     });
   }
