@@ -170,6 +170,20 @@ body.warn-on.warn-safe .warn-vig { background: radial-gradient(ellipse at center
 .warn.is-on .warn-word { animation: warn-blink 2.9s steps(1, end) both, warn-jit 0.12s steps(2, end) infinite; }
 .warn.is-on .warn-sub { animation: warn-sub 2.9s ease both; }
 body.warn-on .warn-vig { animation: warn-pulse 2.9s ease both; }
+/* WARNING 本身：4.3 秒，跟著洛克人 X4 的警報聲（每秒一次）亮四次，亮紅和暗紅交替 */
+.warn.is-on:not(.is-short):not(.is-safe) .warn-band { animation: warn-open4 4.3s cubic-bezier(.2, .8, .2, 1) both; }
+.warn.is-on:not(.is-short):not(.is-safe) .warn-line { animation: warn-line4 4.3s ease both; }
+.warn.is-on:not(.is-short):not(.is-safe) .warn-word { animation: warn-blink4 4.3s steps(1, end) both, warn-jit 0.12s steps(2, end) infinite; }
+.warn.is-on:not(.is-short):not(.is-safe) .warn-sub, .warn.is-on:not(.is-short):not(.is-safe) .warn-sub2 { animation: warn-sub4 4.3s ease both; }
+body.warn-on:not(.warn-short):not(.warn-safe) .warn-vig { animation: warn-pulse4 4.3s ease both; }
+@keyframes warn-open4 { 0% { transform: scaleY(0); } 3% { transform: scaleY(1); } 93% { transform: scaleY(1); } 100% { transform: scaleY(0); } }
+@keyframes warn-line4 { 0% { transform: scaleX(0); opacity: 1; } 4% { transform: scaleX(1); } 91% { transform: scaleX(1); opacity: 1; } 100% { transform: scaleX(0); opacity: 0; } }
+@keyframes warn-blink4 {
+  0% { opacity: 0; } 1%, 17% { opacity: 1; } 17.5%, 24% { opacity: .16; } 24.6%, 41% { opacity: 1; } 41.5%, 47% { opacity: .16; }
+  47.7%, 64% { opacity: 1; } 64.5%, 70.5% { opacity: .16; } 71%, 88% { opacity: 1; } 89%, 100% { opacity: 0; }
+}
+@keyframes warn-sub4 { 0%, 5% { opacity: 0; } 9%, 88% { opacity: 1; } 94%, 100% { opacity: 0; } }
+@keyframes warn-pulse4 { 0% { opacity: 0; } 3% { opacity: 1; } 18% { opacity: .2; } 26% { opacity: 1; } 41% { opacity: .2; } 49% { opacity: 1; } 64% { opacity: .2; } 72% { opacity: .9; } 92%, 100% { opacity: 0; } }
 @keyframes warn-open { 0% { transform: scaleY(0); } 7% { transform: scaleY(1); } 88% { transform: scaleY(1); } 100% { transform: scaleY(0); } }
 @keyframes warn-line { 0% { transform: scaleX(0); opacity: 1; } 9% { transform: scaleX(1); } 86% { transform: scaleX(1); opacity: 1; } 100% { transform: scaleX(0); opacity: 0; } }
 @keyframes warn-blink { 0%, 8% { opacity: 0; } 9%, 26% { opacity: 1; } 27%, 33% { opacity: .08; } 34%, 51% { opacity: 1; } 52%, 58% { opacity: .08; } 59%, 85% { opacity: 1; } 86%, 100% { opacity: 0; } }

@@ -509,6 +509,28 @@
       });
       g.globalCompositeOperation = "source-over";
       g.restore();
+      // 碎片和電流也跑到底片上（借用畫格動畫那邊的碎片；電流一閃一閃）
+      const gl = examFx && examFx.r.glass, now = performance.now() / 1000;
+      if (gl) {
+        [[-1, 0.3, 0.9], [1, 0.7, 1.1], [-1, 0.75, 0.7]].forEach(([side, fy, sc], j) => {
+          const spr = gl.sprite(j * 5 + (y0 < 10 ? 0 : 2)), sz = spr.size * 0.5 * sc;
+          const x = cx + side * (half + 8 + j * 6), y = y0 + (y1 - y0) * fy;
+          g.save(); g.translate(x, y); g.rotate(side * 0.5 + j + Math.sin(now * 1.1 + j) * 0.05);
+          g.drawImage(spr.c, -sz / 2, -sz / 2, sz, sz); g.restore();
+        });
+        const fl = 0.4 + 0.6 * Math.max(0, Math.sin(now * 6.3 + y0)) * (0.7 + 0.3 * Math.random());
+        g.globalCompositeOperation = "lighter"; g.lineJoin = "round"; g.lineCap = "round";
+        [-1, 1].forEach((side) => {
+          let x = cx + side * half, y = y0 + (y1 - y0) * (0.35 + 0.3 * r()), a = side > 0 ? 0 : Math.PI;
+          const pts = [[x, y]];
+          for (let k = 0; k < 7; k++) { a += (r() * 2 - 1) * 0.6; x += Math.cos(a) * 14; y += Math.sin(a) * 9; pts.push([x, y]); }
+          [[10, "110,70,255", 0.16], [4, "125,110,255", 0.42], [1.4, "205,215,255", 0.95]].forEach(([w, c, al]) => {
+            g.strokeStyle = `rgba(${c},${al * fl})`; g.lineWidth = w;
+            g.beginPath(); pts.forEach(([px, py], i) => (i ? g.lineTo(px, py) : g.moveTo(px, py))); g.stroke();
+          });
+        });
+        g.globalCompositeOperation = "source-over";
+      }
       // 兩邊撕開的底片：藍光、白色纖維邊
       [L, R].forEach((E) => {
         const line = () => { g.beginPath(); E.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y))); g.stroke(); };
@@ -902,6 +924,7 @@
       const r = new window.Rift(cv, { seed: 6 });
       r.resize(1920, 1080, small ? 0.4 : 0.5);
       r.setPlate((g, W, H) => g.drawImage(img, 0, 0, W, H));
+      r.state.gap = 380; r.buildGlass(r.state);     // 玻璃碎片和電流網先建好
       examFx = { cv, r, nextGlitch: 0, glitchEnd: 0 };
       fxCv = document.createElement("canvas"); fxCv.className = "exam-fx"; fxCv.setAttribute("aria-hidden", "true");
       fxG = fxCv.getContext("2d");
@@ -919,15 +942,15 @@
   }
   function examStep(now) {
     const t = now / 1000, r = examFx.r, st = r.state;
-    st.mode = "halves"; st.t = t;
+    st.mode = "halves"; st.t = t; st.style = "glass";
     // 每隔幾秒抽搐一次：裂縫猛地撐開、閃電狂打、裂痕一下子爬滿、畫面抖動和訊號干擾
     if (!examFx.nextSurge) examFx.nextSurge = t + 1.2;
     if (t > examFx.nextSurge) { examFx.surgeT = t; examFx.nextSurge = t + 3 + Math.random() * 2.5; if (current() === examI) flash(now); }
     const sg = examFx.surgeT ? Math.max(0, 1 - (t - examFx.surgeT) / 0.45) : 0, sp = sg * sg;
-    st.gap = 326 + Math.sin(t * 0.7) * 6 + Math.sin(t * 2.3) * 2 + 70 * sp;
+    st.gap = 380 + Math.sin(t * 0.7) * 6 + Math.sin(t * 2.3) * 2 + 70 * sp;
     st.hole = 1; st.holeR = 32 + 10 * sp; st.lens = 1; st.lensK = 2.6;
     st.arcRate = 3 + 40 * sp; st.dust = 1.8; st.plasma = 1.2 + 0.15 * Math.sin(t * 3.1) + 0.8 * sp; st.leak = 1 + sp;
-    st.cracks = 0.22 + 0.14 * Math.sin(t * 0.8) + 0.05 * Math.sin(t * 2.9) + 0.4 * sp;   // 玻璃裂痕從裂縫往外爬、又縮回去
+    st.cracks = 0.45 * sp;                    // 抽一下時，玻璃裂痕瞬間爬出去（平常交給玻璃碎片和電流網）
     if (t > examFx.nextGlitch) { examFx.glitchEnd = t + 0.12; st.glitchSeed++; examFx.nextGlitch = t + 1.8 + Math.random() * 2.6; }
     st.glitch = t < examFx.glitchEnd || sg > 0.5 ? 1 : 0;
     st.shakeX = sp * (Math.random() * 2 - 1) * 14; st.shakeY = sp * (Math.random() * 2 - 1) * 6;

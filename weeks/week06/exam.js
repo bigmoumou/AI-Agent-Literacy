@@ -102,15 +102,12 @@
     g.textBaseline = "alphabetic";
     const ty = H * (W / H < 0.9 ? 0.36 : 0.4) + fs * 0.36, d = Math.max(2, fs * 0.012);
     g.globalCompositeOperation = "screen";
-    g.fillStyle = "rgba(255,50,70,.75)"; g.fillText("TEST", W / 2 - d, ty);
-    g.fillStyle = "rgba(40,200,255,.8)"; g.fillText("TEST", W / 2 + d, ty);
+    g.fillStyle = "rgba(255,50,70,.35)"; g.fillText("TEST", W / 2 - d * 0.6, ty);
+    g.fillStyle = "rgba(40,200,255,.4)"; g.fillText("TEST", W / 2 + d * 0.6, ty);
     g.globalCompositeOperation = "source-over";
-    g.fillStyle = "#f4f2ec"; g.fillText("TEST", W / 2, ty);
-    const tw = g.measureText("TEST").width + fs * 0.2, top = ty - fs * 0.74, k = g.canvas.width / W;
-    [[0.34, 0.05, 0.03], [0.7, 0.026, -0.038]].forEach(([y0, h0, dx]) => {
-      const sy = top + fs * y0, sh = fs * h0;
-      g.drawImage(g.canvas, (W / 2 - tw / 2) * k, sy * k, tw * k, sh * k, W / 2 - tw / 2 + fs * dx, sy, tw, sh);
-    });
+    g.shadowColor = "rgba(0,0,0,.45)"; g.shadowBlur = fs * 0.08; g.shadowOffsetY = fs * 0.02;
+    g.fillStyle = "#f6f4ef"; g.fillText("TEST", W / 2, ty);
+    g.shadowColor = "transparent"; g.shadowBlur = 0; g.shadowOffsetY = 0;
     if ("letterSpacing" in g) g.letterSpacing = "0px";
     if (STILL === "1") {
       g.font = `700 ${Math.round(H * 0.024)}px "JetBrains Mono", Consolas, monospace`;
@@ -153,7 +150,7 @@
     const u = t - T0;
     // 螢幕（2D，畫在 scene 上）：先劈啪作響、裂痕爬滿，1.0 秒碎開，之後碎片無重力漂浮，2.4 秒起被吸回中心
     if (!shattered) {
-      ss.mode = "halves"; ss.noSpace = true; ss.pull = 0; ss.hole = 0; ss.lens = 0;
+      ss.mode = "halves"; ss.noSpace = true; ss.pull = 0; ss.hole = 0; ss.lens = 0; ss.style = "glass"; ss.boltBoost = 1 + seg(u, 0.3, 0.95);
       ss.gap = g0 * (1 + 0.5 * out(seg(u, 0, 0.9))) + Math.sin(t * 31) * 3 * seg(u, 0.3, 0.9);
       ss.arcRate = 5 + 10 * seg(u, 0, 0.9); ss.plasma = 1.3 + 0.8 * seg(u, 0.4, 0.95); ss.dust = 2.5; ss.leak = 1.4;
       ss.cracks = seg(u, 0.5, 0.98);
@@ -285,36 +282,44 @@
   }
 
   /* ---------- 連進去之後：WARNING（洛克人 BOSS 來襲那種，現代版）＋警報聲 ----------
-     警報聲用 Web Audio 現場合成（兩個稍微錯開的方波、高低兩音交替、三次），不用音檔、沒有咻聲或撞擊聲。
-     瀏覽器只准在使用者點過之後出聲，所以聲音在選電腦那一下就先準備好（initAudio）。 */
-  let audio = null;
+     警報聲用老師錄的洛克人 X4 WARNING（weeks/week06/warning.mp3：取 4 個乾淨的循環，約 4.2 秒，每秒一次）。
+     瀏覽器只准在使用者點過之後出聲，所以在選電腦那一下就把聲音準備好、先解碼（initAudio）。
+     載入失敗時退回現場合成的兩音警報。 */
+  let audio = null, warnBuf = null;
   function initAudio() {
     try {
       const AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) return;
       audio = audio || new AC();
       if (audio.state === "suspended") audio.resume();
+      if (!warnBuf) {
+        fetch("warning.mp3").then((r) => r.arrayBuffer())
+          .then((b) => new Promise((ok, bad) => audio.decodeAudioData(b, ok, bad)))
+          .then((buf) => { warnBuf = buf; }).catch(() => {});
+      }
     } catch (e) { audio = null; }
   }
   function alarm() {
     if (!audio) return;
+    if (warnBuf) {
+      const src = audio.createBufferSource(), g = audio.createGain();
+      g.gain.value = 0.75; src.buffer = warnBuf; src.connect(g); g.connect(audio.destination);
+      src.start(audio.currentTime + 0.02);
+      return;
+    }
     const t0 = audio.currentTime + 0.03;
     const out = audio.createGain(); out.gain.value = 0.15;
-    const comp = audio.createDynamicsCompressor();
     const lp = audio.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 3000;
-    lp.connect(out); out.connect(comp); comp.connect(audio.destination);
-    const tone = (at, dur, f0, f1) => {
+    lp.connect(out); out.connect(audio.destination);
+    [0.04, 1.06, 2.05, 3.05].forEach((at) => {
       [0, 9].forEach((det) => {
         const o = audio.createOscillator(), g = audio.createGain();
         o.type = "square"; o.detune.value = det;
-        o.frequency.setValueAtTime(f0, at); o.frequency.linearRampToValueAtTime(f1, at + dur);
-        g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(0.45, at + 0.012);
-        g.gain.setValueAtTime(0.45, at + dur - 0.05); g.gain.linearRampToValueAtTime(0, at + dur);
-        o.connect(g); g.connect(lp); o.start(at); o.stop(at + dur + 0.03);
+        o.frequency.setValueAtTime(1950, t0 + at); o.frequency.linearRampToValueAtTime(1800, t0 + at + 0.7);
+        g.gain.setValueAtTime(0, t0 + at); g.gain.linearRampToValueAtTime(0.4, t0 + at + 0.02); g.gain.linearRampToValueAtTime(0, t0 + at + 0.75);
+        o.connect(g); g.connect(lp); o.start(t0 + at); o.stop(t0 + at + 0.8);
       });
-    };
-    // 和畫面上 WARNING 三次亮起同步（exam.css 的 warn-blink：2.9 秒裡的 9%、34%、59%）
-    [0.26, 0.99, 1.71].forEach((p) => { tone(t0 + p, 0.2, 988, 940); tone(t0 + p + 0.24, 0.22, 740, 700); });
+    });
   }
   function beep(at, dur, f, type, vol) {
     const o = audio.createOscillator(), g = audio.createGain();
@@ -351,16 +356,18 @@
     if (kind === "lock") { w.classList.add("is-short"); body.classList.add("warn-short"); buzz(); }
     else if (kind === "safe") { w.classList.add("is-safe"); body.classList.add("warn-safe"); chime(); }
     else alarm();
-    bannerTimer = setTimeout(() => { w.classList.remove("is-on", "is-short", "is-safe"); body.classList.remove("warn-on", "warn-short", "warn-safe"); }, kind === "lock" ? 2000 : 3000);
+    bannerTimer = setTimeout(() => { w.classList.remove("is-on", "is-short", "is-safe"); body.classList.remove("warn-on", "warn-short", "warn-safe"); }, kind === "lock" ? 2000 : kind === "safe" ? 3000 : 4400);
   }
 
   /* ---------- 4. 遠端桌面上的小裂縫：空間還沒穩定，完成任務才能逃離 ----------
-     畫在 #scar（蓋在 iframe 上、不擋操作）：三道細細的裂縫，和前面同一種樣子——白色紙纖維邊、紫白電漿光、
-     裂縫裡是深空、偶爾打出閃電、灰塵被吸進去；每隔幾秒抽一下（遠端畫面也跟著抖、色偏一瞬間）。
-     練習電腦按「中斷連線」、開始選單的關機、左上角回到週次的連結，在完成任何一個任務之前都逃不出去（LOCKED）；
+     畫在 #scar（蓋在 iframe 上、不擋操作），和首頁那一格同一種樣子：裂縫裡是星空、白色電漿邊、
+     旁邊爬出一叢會閃的電流、幾片水晶碎片無重力地浮著，灰塵被吸進去。
+     省電：電流網和碎片都先畫好（每道裂縫一張小圖），每秒最多畫 30 次、解析度 1 倍；分頁看不到就停。
+     每隔 9–14 秒輕輕抽一下（裂縫張大、閃電；遠端畫面只抖 2 px、一點點色偏，不會暈）。
+     還沒完成任務時，「中斷連線」、開始選單的關機、回到週次的連結都逃不出去（LOCKED）；
      完成任務（練習電腦的 mission:complete）之後裂縫一道道封起來（STABILIZED），才能正常離開。 */
   const scarCv = $("#scar"), scarG = scarCv.getContext("2d");
-  let scars = [], escaped = false, scarRaf = 0, scarPrev = 0, sealAt = 0, nextJolt = 0, joltAt = -9;
+  let scars = [], escaped = false, scarRaf = 0, scarPrev = 0, scarDrawn = 0, sealAt = 0, nextJolt = 0, joltAt = -9, scarLoop = null;
   function bolt2(x0, y0, x1, y1, rough, depth, out) {
     if (depth === 0) { out.push([x1, y1]); return; }
     const mx = (x0 + x1) / 2 + (Math.random() * 2 - 1) * rough * 0.4, my = (y0 + y1) / 2 + (Math.random() * 2 - 1) * rough;
@@ -369,89 +376,104 @@
   function makeScars() {
     // 位置避開主要操作區（任務卡、選單、Dock／工作列）：右邊中段、左下、右下
     const spots = [[0.93, 0.47, 0.24, 0.25], [0.07, 0.7, 0.2, -0.35], [0.9, 0.82, 0.13, -0.55]];
-    const r = (a, b) => a + Math.random() * (b - a);
+    const R = window.Rift, rr = R.rng(19);
     scars = spots.map(([fx, fy, fl, ang], k) => {
       const L = Math.max(120, Math.min(W, H) * fl * 1.6), pts = [];
-      const n = 26;
-      for (let i = 0; i <= n; i++) {
-        const u = i / n, spike = Math.random() < 0.18 ? r(-12, 12) : r(-3.5, 3.5);
+      for (let i = 0; i <= 26; i++) {
+        const u = i / 26, spike = rr() < 0.18 ? (rr() * 2 - 1) * 12 : (rr() * 2 - 1) * 3.5;
         pts.push([(u - 0.5) * L, spike, Math.pow(Math.sin(u * Math.PI), 0.8)]);
       }
-      return { x: fx * W, y: fy * H, ang, L, pts, wmax: r(9, 15), ph: r(0, 6.28), arcs: [], dust: [], open: 0, k };
+      // 這道裂縫專屬的電流網（兩組輪流閃）
+      const pad = 90, cw = Math.ceil(L + pad * 2), ch = pad * 2;
+      const nets = [0, 1].map((li) => {
+        const c = document.createElement("canvas"); c.width = cw; c.height = ch;
+        const g = c.getContext("2d"), r2 = R.rng(40 + k * 7 + li * 13);
+        g.translate(cw / 2, ch / 2); g.globalCompositeOperation = "lighter"; g.lineCap = "round"; g.lineJoin = "round";
+        for (let i = 0; i < 4; i++) {
+          const p = pts[3 + Math.floor(r2() * 20)], side = r2() < 0.5 ? -1 : 1;
+          R.branch(g, r2, p[0], p[1] + side * 6, side * Math.PI / 2 + (r2() * 2 - 1) * 0.7, 30 + r2() * 50, 1.3, 1);
+        }
+        return c;
+      });
+      // 幾片水晶碎片，浮在裂縫旁邊
+      const shards = [0, 1, 2].map((i) => ({ spr: R.shardSprite(rr, 9 + rr() * 13, null, 0, 0, 1, 1), u: (rr() - 0.5) * 0.8, off: (rr() < 0.5 ? -1 : 1) * (14 + rr() * 26), rot: rr() * 6.28, ph: rr() * 6.28 }));
+      return { x: fx * W, y: fy * H, ang, L, pts, wmax: 8 + rr() * 6, ph: rr() * 6.28, arcs: [], dust: [], open: 0, k, nets, cw, ch, shards };
     });
   }
   function startScars() {
-    if (escaped) return;
+    if (escaped || !window.Rift) return;
     makeScars();
-    nextJolt = performance.now() / 1000 + 3.5;
-    const loop = (ms) => {
+    nextJolt = performance.now() / 1000 + 6;
+    const loop = scarLoop = (ms) => {
       scarRaf = 0;
-      const t = ms / 1000, dt = scarPrev ? Math.min(0.1, t - scarPrev) : 0;
-      scarPrev = t;
-      drawScars(t, dt);
-      if (!(sealAt && t - sealAt > 1.4)) scarRaf = requestAnimationFrame(loop);
-      else { scarG.clearRect(0, 0, scarCv.width, scarCv.height); scarCv.style.display = "none"; }
+      const t = ms / 1000;
+      if (t - scarDrawn >= 1 / 30 - 0.002) {          // 每秒最多 30 次
+        const dt = scarPrev ? Math.min(0.1, t - scarPrev) : 0;
+        scarPrev = t; scarDrawn = t;
+        drawScars(t, dt);
+      }
+      if (sealAt && t - sealAt > 1.6) { scarG.clearRect(0, 0, scarCv.width, scarCv.height); scarCv.style.display = "none"; return; }
+      if (!reduce || sealAt) scarRaf = requestAnimationFrame(loop);
     };
     sizeScar();
+    if (reduce) drawScars(0, 0);
     scarRaf = requestAnimationFrame(loop);
   }
   function sizeScar() {
-    const d = Math.min(window.devicePixelRatio || 1, 1.5);
-    scarCv.width = Math.round(W * d); scarCv.height = Math.round(H * d);
-    scarG.setTransform(d, 0, 0, d, 0, 0);
+    scarCv.width = Math.round(W); scarCv.height = Math.round(H);     // 1 倍就夠清楚，也最省
   }
-  function jolt(t) {     // 抽一下：裂縫猛張、閃電、遠端畫面抖動加色偏一瞬間
+  function jolt(t) {     // 輕輕抽一下：遠端畫面抖 2 px、一點點色偏，0.1 秒就回來
     joltAt = t;
     if (reduce) return;
     frame.style.transition = "none";
-    frame.style.transform = `translate(${(Math.random() * 2 - 1) * 6}px, ${(Math.random() * 2 - 1) * 2}px)`;
-    frame.style.filter = "hue-rotate(-18deg) saturate(1.5) contrast(1.08)";
-    setTimeout(() => { frame.style.transform = `translate(${(Math.random() * 2 - 1) * 4}px, 0)`; }, 60);
-    setTimeout(() => { frame.style.transform = ""; frame.style.filter = ""; }, 140);
+    frame.style.transform = `translateX(${Math.random() < 0.5 ? -2 : 2}px)`;
+    frame.style.filter = "hue-rotate(-8deg) saturate(1.15)";
+    setTimeout(() => { frame.style.transform = ""; frame.style.filter = ""; }, 100);
   }
   function drawScars(t, dt) {
     const g = scarG;
+    g.setTransform(1, 0, 0, 1, 0, 0);
     g.clearRect(0, 0, W, H);
-    if (!reduce && !sealAt && t > nextJolt) { jolt(t); nextJolt = t + 5 + Math.random() * 4; }
-    const surge = Math.max(0, 1 - (t - joltAt) / 0.5);
-    const seal = sealAt ? Math.min(1, (t - sealAt) / 1.1) : 0;
+    if (!reduce && !sealAt && t > nextJolt) { jolt(t); nextJolt = t + 9 + Math.random() * 5; }
+    const surge = Math.max(0, 1 - (t - joltAt) / 0.6);
+    const line = (P) => { g.beginPath(); P.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y))); g.stroke(); };
     for (const s of scars) {
-      // 封起來：一道接一道（錯開 0.2 秒）
       const sk = sealAt ? Math.min(1, Math.max(0, (t - sealAt - s.k * 0.2) / 0.6)) : 0;
       s.open = Math.min(1, s.open + dt * 1.5);
-      const breathe = 0.8 + 0.2 * Math.sin(t * 1.3 + s.ph) + 0.6 * surge;
-      const wv = s.wmax * breathe * s.open * (1 - sk);
+      const wv = s.wmax * (0.85 + 0.15 * Math.sin(t * 1.3 + s.ph) + 0.5 * surge) * s.open * (1 - sk);
       g.save();
       g.translate(s.x, s.y); g.rotate(s.ang);
-      const edge = (side) => s.pts.map(([x, y, w]) => [x, y + side * w * wv / 2]);
-      const L = edge(-1), R = edge(1);
-      // 裂縫裡：深空
+      const L = s.pts.map(([x, y, w]) => [x, y - w * wv / 2]), R = s.pts.map(([x, y, w]) => [x, y + w * wv / 2]);
+      // 裂縫裡：深紫星空
       if (wv > 0.3) {
         g.beginPath(); L.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y))); for (let i = R.length - 1; i >= 0; i--) g.lineTo(R[i][0], R[i][1]); g.closePath();
         const gr = g.createLinearGradient(0, -wv, 0, wv);
-        gr.addColorStop(0, "#0b0820"); gr.addColorStop(0.5, "#1c1450"); gr.addColorStop(1, "#0b0820");
+        gr.addColorStop(0, "#0b0820"); gr.addColorStop(0.5, "#2a1a70"); gr.addColorStop(1, "#0b0820");
         g.fillStyle = gr; g.fill();
-        g.fillStyle = "rgba(220,225,255,.8)";
-        for (let i = 0; i < 6; i++) { const u = ((i * 0.618 + t * 0.03 + s.ph) % 1) - 0.5; g.fillRect(u * s.L * 0.8, Math.sin(i * 7 + s.ph) * wv * 0.25, 1.2, 1.2); }
+        g.fillStyle = "rgba(225,230,255,.85)";
+        for (let i = 0; i < 8; i++) { const u = ((i * 0.618 + t * 0.03 + s.ph) % 1) - 0.5; g.fillRect(u * s.L * 0.8, Math.sin(i * 7 + s.ph) * wv * 0.25, 1.3, 1.3); }
       }
-      // 邊：紫白電漿光＋白色纖維芯＋一點色差
-      const fl = reduce ? 1 : 0.8 + 0.2 * Math.random();
-      const line = (P) => { g.beginPath(); P.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y))); g.stroke(); };
-      g.lineJoin = "round"; g.lineCap = "round";
       g.globalCompositeOperation = "lighter";
-      const glow = (1 - sk) + sk * (1 - sk) * 3;          // 封起來那一下更亮
+      // 電流網（兩組輪流閃；抽一下時整個亮起來）
+      if (!sk || sk < 1) {
+        const f1 = reduce ? 0.6 : 0.25 + 0.75 * Math.max(0, Math.sin(t * 6.1 + s.ph)) * (0.7 + 0.3 * Math.random());
+        const f2 = reduce ? 0.4 : 0.25 + 0.75 * Math.max(0, Math.sin(t * 4.3 + s.ph + 1.9)) * (0.7 + 0.3 * Math.random());
+        g.globalAlpha = Math.min(1, (f1 + surge) * (1 - sk)); g.drawImage(s.nets[0], -s.cw / 2, -s.ch / 2);
+        g.globalAlpha = Math.min(1, (f2 + surge) * (1 - sk)); g.drawImage(s.nets[1], -s.cw / 2, -s.ch / 2);
+        g.globalAlpha = 1;
+      }
+      // 邊：紫白電漿光＋白芯（封起來那一下更亮）
+      const fl = reduce ? 1 : 0.8 + 0.2 * Math.random(), glow = (1 - sk) + sk * (1 - sk) * 3;
+      g.lineJoin = "round"; g.lineCap = "round";
       for (const P of [L, R]) {
-        g.strokeStyle = `rgba(130,90,255,${0.2 * fl * glow})`; g.lineWidth = 14; line(P);
-        g.strokeStyle = `rgba(200,210,255,${0.4 * fl * glow})`; g.lineWidth = 4.5; line(P);
+        g.strokeStyle = `rgba(120,80,255,${0.22 * fl * glow})`; g.lineWidth = 12; line(P);
+        g.strokeStyle = `rgba(205,215,255,${0.45 * fl * glow})`; g.lineWidth = 4; line(P);
       }
       g.globalCompositeOperation = "source-over";
-      g.strokeStyle = `rgba(255,70,100,${0.45 * (1 - sk)})`; g.lineWidth = 1.6; g.save(); g.translate(-1.5, 0); line(L); g.restore();
-      g.strokeStyle = `rgba(50,210,255,${0.4 * (1 - sk)})`; g.save(); g.translate(1.5, 0); line(R); g.restore();
-      g.strokeStyle = `rgba(245,242,236,${0.9 * Math.min(1, glow)})`; g.lineWidth = 1.6; line(L); line(R);
-      // 閃電：平常偶爾、抽一下時一定會打
-      if (!reduce && !sealAt && (Math.random() < dt * (0.5 + 12 * surge))) {
-        const i = 3 + Math.floor(Math.random() * (s.pts.length - 6)), p = s.pts[i];
-        const out = Math.random() < 0.5 ? -1 : 1, len = 30 + Math.random() * 70;
+      g.strokeStyle = `rgba(250,248,255,${0.92 * Math.min(1, glow)})`; g.lineWidth = 1.5; line(L); line(R);
+      // 偶爾打一道閃電（抽一下時一定會打）
+      if (!reduce && !sealAt && Math.random() < dt * (0.4 + 10 * surge)) {
+        const p = s.pts[3 + Math.floor(Math.random() * (s.pts.length - 6))], out = Math.random() < 0.5 ? -1 : 1, len = 30 + Math.random() * 60;
         const pts = [[p[0], p[1]]];
         bolt2(p[0], p[1], p[0] + (Math.random() * 2 - 1) * len * 0.6, p[1] + out * len, len * 0.35, 4, pts);
         s.arcs.push({ pts, born: t, life: 0.1 + Math.random() * 0.15 });
@@ -460,16 +482,25 @@
       s.arcs = s.arcs.filter((a) => t - a.born < a.life);
       for (const a of s.arcs) {
         const al = (1 - (t - a.born) / a.life) * (0.6 + 0.4 * Math.random());
-        [[10, "150,110,255", 0.14], [3.5, "190,205,255", 0.4], [1.3, "255,255,255", 0.95]].forEach(([w, c, k]) => { g.strokeStyle = `rgba(${c},${k * al})`; g.lineWidth = w; line(a.pts); });
+        [[9, "120,80,255", 0.16], [3.2, "190,205,255", 0.45], [1.2, "255,255,255", 0.95]].forEach(([w, c, k2]) => { g.strokeStyle = `rgba(${c},${k2 * al})`; g.lineWidth = w; line(a.pts); });
       }
       // 灰塵被吸進裂縫
-      if (!reduce && !sealAt && Math.random() < dt * 14) s.dust.push({ x: (Math.random() - 0.5) * s.L * 0.8, y: (Math.random() < 0.5 ? -1 : 1) * (20 + Math.random() * 50), life: 0 });
+      if (!reduce && !sealAt && Math.random() < dt * 10) s.dust.push({ x: (Math.random() - 0.5) * s.L * 0.8, y: (Math.random() < 0.5 ? -1 : 1) * (20 + Math.random() * 45), life: 0 });
       s.dust = s.dust.filter((d) => (d.life += dt) < 1.6 && Math.abs(d.y) > 2);
       for (const d of s.dust) { d.y *= 1 - dt * 2.2; g.fillStyle = `rgba(255,232,200,${0.7 * Math.min(1, d.life * 3)})`; g.fillRect(d.x, d.y, 1.4, 1.4); }
       g.globalCompositeOperation = "source-over";
+      // 水晶碎片：無重力地慢慢浮動、轉；封起來時被吸回裂縫
+      for (const sh of s.shards) {
+        const bob = reduce ? 0 : Math.sin(t * 0.9 + sh.ph) * 4;
+        g.save();
+        g.globalAlpha = 1 - sk;
+        g.translate(sh.u * s.L, (sh.off + bob) * (1 - sk));
+        g.rotate(sh.rot + (reduce ? 0 : t * 0.15));
+        g.drawImage(sh.spr.c, -sh.spr.size / 2, -sh.spr.size / 2, sh.spr.size, sh.spr.size);
+        g.restore();
+      }
       g.restore();
     }
-    if (seal >= 1) scars = [];
   }
   function locked() {
     banner("lock");
@@ -479,6 +510,7 @@
     if (escaped) return;
     escaped = true;
     sealAt = performance.now() / 1000;
+    if (!scarRaf && scarLoop) scarRaf = requestAnimationFrame(scarLoop);   // 減少動態效果時迴圈是停著的，封起來要再跑一下
     setTimeout(() => banner("safe"), 700);
   }
   // 接上練習電腦（同一個網站，所以讀得到它的 LAB）：任務完成就解鎖；還沒解鎖時擋住離開
@@ -573,7 +605,7 @@
   });
   window.addEventListener("resize", () => {
     size();
-    if (body.classList.contains("in-remote") && !escaped) { sizeScar(); makeScars(); }
+    if (body.classList.contains("in-remote") && !escaped) { sizeScar(); makeScars(); if (reduce) drawScars(0, 0); }
     bs.sceneHalf = [(SCENE_Z + Z0) * TAN * (W / H), (SCENE_Z + Z0) * TAN];
     if (reduce || STILL) rift.draw();
   });
@@ -611,7 +643,7 @@
     rift.setPlate(plate); scene.setPlate(plate);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { rift.setPlate(plate); scene.setPlate(plate); });
     if (STILL) {
-      base(); st.gap = stillGap(); st.hole = 1; st.holeR = gateHole(); st.lens = 1; st.still = true;
+      base(); st.gap = stillGap(); st.hole = 1; st.holeR = gateHole(); st.lens = 1; st.still = true; st.style = "glass";
       if (STILL === "plate") { st.gap = 0; st.plasma = 0; st.hole = 0; st.lens = 0; }
       window.render = (t) => {
         st.t = t;
@@ -625,7 +657,10 @@
     window.ready = true;
     body.classList.add("is-diving");
     if (reduce) { toPick(0); setPick(0); return; }
-    if (bh) { phase = "dive"; bhCanvas.style.display = ""; canvas.style.display = "none"; }
+    if (bh) {
+      phase = "dive"; bhCanvas.style.display = ""; canvas.style.display = "none";
+      ss.gap = g0; scene.buildGlass(ss);          // 玻璃碎片和電流網先建好，不要卡在第一格
+    }
     else phase = "fall";
     T0 = performance.now() / 1000;
     run();

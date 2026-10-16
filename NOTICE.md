@@ -50,6 +50,12 @@ Week 4 影片 01 錄影裡的 Blockbench 介面，以及影片中重現或提到
   macOS、Finder、Terminal 是 Apple Inc. 的商標，Visual Studio Code 是 Microsoft Corporation 的商標，Codex 是 OpenAI 的商標。這些名稱只用來指稱學生會遇到的軟體，用於教學；本專案與這些公司沒有隸屬、贊助或背書關係。
 - 人物與資料：練習裡的使用者「小安」、帳號、電腦名稱和檔案內容都是虛構的，沒有任何真實的學生資料。
 
+### Week 6 的 WARNING 警報聲
+
+- 檔案：`weeks/week06/warning.mp3`（約 4 秒）
+- 來源：《洛克人 X4》（Mega Man X4，© CAPCOM）遊戲中 BOSS 出現前的 WARNING 警報聲，由課程教師自行錄製、剪輯，只用在 Week 6 考試入口的教學情境。
+- 這段聲音的著作權屬於 CAPCOM，不適用本專案的 MIT 或 CC BY-NC-SA 4.0 授權，請不要另外取用或再散布。權利人如有疑慮，請來信，會立即移除。
+
 ### 製作影片用的工具（不在 repo 裡）
 
 影片以 Claude Code（Anthropic）製作，使用 opus-video skill（Copyright (c) 2026 周行 (Kianzzz)，MIT 授權；本課程使用依需求調整過的版本），並用到 HyperFrames（HeyGen，Apache-2.0）、GSAP、Playwright、FFmpeg、numpy 與 SciPy。這些工具都沒有放在這個 repo。之後公開教學影片生成 prompt 與製作經驗時，用到 opus-video skill 的文字或程式的地方，會保留原作者的 MIT 授權聲明。
@@ -118,6 +124,12 @@ The Blockbench interface in the recording in Week 4 video 01, and the names and 
 - Look and trademarks: the simulated Mac imitates the look and behaviour of macOS, Finder, Terminal, Visual Studio Code and the Codex app, so that students feel at home on a real computer later. All icons, windows, layouts and the laptop image are original drawings made with SVG and CSS; no image files, wallpapers, font files or code from Apple, Microsoft or OpenAI are included (text is simply shown in the visitor's own system fonts), and the icon at the left of the menu bar is the course's own drawing, not Apple's logo.
   macOS, Finder and Terminal are trademarks of Apple Inc., Visual Studio Code is a trademark of Microsoft Corporation, and Codex is a trademark of OpenAI. The names are used only to identify the software students will meet, for teaching; this project is not affiliated with, sponsored by or endorsed by these companies.
 - People and data: the user "小安", the account, the computer name and the file contents in the practice are fictional, and no real student data is used.
+
+### The WARNING sound in Week 6
+
+- File: `weeks/week06/warning.mp3` (about 4 seconds)
+- Source: the boss WARNING alarm from *Mega Man X4* (© CAPCOM), recorded and trimmed by the course teacher, used only in the Week 6 test entrance for teaching.
+- The sound is CAPCOM's copyright and is not covered by this project's MIT or CC BY-NC-SA 4.0 licences; please do not reuse or redistribute it. If the rights holder has concerns, please get in touch and it will be removed at once.
 
 ### Tools used to make the videos (not in this repository)
 
