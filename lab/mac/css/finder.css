@@ -425,6 +425,9 @@ html[data-perf="low"] .fd-sidebar { background: #f2f2f3; -webkit-backdrop-filter
 .lab-win[data-app="finder"] .fd-ps { height: 22px; gap: 5px; padding: 0 5px; border-radius: 6px; font: 12px var(--lab-font-ui); color: #6e6e73; }
 .lab-win[data-app="finder"] .fd-ps.is-last { color: #6e6e73; }
 .lab-win[data-app="finder"] .fd-ps:first-child .fd-ps-ico { color: #8e8e93; }
+/* lab-pathbar-dbl: a click only selects a path-bar segment (as on a real Mac); the selected one lights up like a selected item, a double-click opens it */
+.lab-win[data-app="finder"] .fd-ps.is-sel, html[data-appearance="dark"] .lab-win[data-app="finder"] .fd-ps.is-sel { background: var(--mac-sel-strong); color: #fff; }
+.lab-win[data-app="finder"] .fd-ps.is-sel .fd-ps-ico { color: #fff; }
 .lab-win[data-app="finder"] .fd-psep { color: #aeaeb2; font-size: 13px; padding: 0 1px; }
 .lab-win[data-app="finder"] .fd-status { background: #fff; border-top: 1px solid rgba(0, 0, 0, .065); }
 .lab-win[data-app="finder"] .fd-root.no-path .fd-status { border-radius: 0 0 var(--mac-radius) 0; }

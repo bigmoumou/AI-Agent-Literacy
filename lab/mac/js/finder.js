@@ -629,6 +629,7 @@
     // macOS 26: the status bar and the path bar belong to the content area (right of the sidebar), not to the whole window
     var root = h('div', { class: 'fd-root' },
       h('div', { class: 'fd-body' }, sidebarEl, h('div', { class: 'fd-main' }, scopeEl, scrollEl, statusEl, pathEl)));
+    root.addEventListener('pointerdown', function (e) { if (!pathEl.contains(e.target)) markSeg(null); }, true);   // a click elsewhere unlights the path-bar segment
 
     /* sidebar */
     var sideRecs = [];
@@ -1300,7 +1301,9 @@
       if (isVirt(S.path) || searching()) return null;
       return S.path;
     }
-    var pathTargets = [], barSig = null;
+    var pathTargets = [], barSig = null, segClickT = null;
+    /* the one path-bar segment that is selected (lit) after a click; a rebuilt bar or a click anywhere else in the window clears it */
+    function markSeg(b) { pathEl.querySelectorAll('.fd-ps.is-sel').forEach(function (x) { if (x !== b) x.classList.remove('is-sel'); }); if (b) b.classList.add('is-sel'); }
     function buildPathbar() {
       pathTargets.forEach(function (f) { f(); });
       pathTargets = [];
@@ -1314,14 +1317,26 @@
         var ico = h('span', { class: 'fd-ps-ico', 'aria-hidden': 'true' });
         ico.innerHTML = LAB.icons.get(i === 0 ? 'fd-hdd' : (LAB.vfs.isDir(sg.path) ? 'folder' : LAB.icons.forNode(LAB.vfs.stat(sg.path))), { size: 14 });
         var b = h('button', { type: 'button', class: 'fd-ps' + (i === segs.length - 1 ? ' is-last' : ''), dataset: { lab: 'fd-pathbar-seg', path: sg.path } }, ico, h('span', null, sg.label));
-        // a folder opens in this window (the practice Mac's single click; a real Mac wants a double-click). A file — the selected item's own
-        // segment — is selected (in its folder, which a list of results first opens); a double-click opens it, as on macOS
-        b.addEventListener('click', function () {
-          if (LAB.vfs.isDir(sg.path)) navigate(sg.path, 'pathbar');
-          else if (LAB.vfs.same(LAB.vfs.dirname(sg.path), S.path) && !isVirt(S.path) && !searching()) { setSel([sg.path], { force: true }); S.anchor = sg.path; var rc = items.get(sg.path); if (rc) ensureVisible(rc.el); }
+        // as on a real Mac (lab-pathbar-dbl, teacher: the same as a real Mac): a click only selects the segment (it lights up); a double-click
+        // opens a folder in this window (via 'pathbar'), ⌘ double-click in a new window. A file — the selected item's own segment — is also
+        // selected in the view by a click (in a list of results its folder opens first) and opened by a double-click.
+        // A lone click on a folder sends finder:pathbar-click {winId, path} once it is clear that no second click follows (450 ms), so a task
+        // can say that a double-click is needed without the line flashing up during every double-click
+        b.addEventListener('click', function (e) {
+          markSeg(b);
+          clearTimeout(segClickT); segClickT = null;
+          if (LAB.vfs.isDir(sg.path)) {
+            if (e.detail < 2) segClickT = setTimeout(function () { segClickT = null; LAB.bus.emit('finder:pathbar-click', { winId: win.id, path: sg.path }); }, 450);
+          } else if (LAB.vfs.same(LAB.vfs.dirname(sg.path), S.path) && !isVirt(S.path) && !searching()) { setSel([sg.path], { force: true }); S.anchor = sg.path; var rc = items.get(sg.path); if (rc) ensureVisible(rc.el); }
           else if (LAB.vfs.dirname(sg.path)) { S.pendingSel = [sg.path]; navigate(LAB.vfs.dirname(sg.path), 'pathbar'); S.pendingSel = null; }
         });
-        b.addEventListener('dblclick', function () { if (!LAB.vfs.isDir(sg.path) && LAB.vfs.exists(sg.path)) openItem(sg.path); });
+        b.addEventListener('dblclick', function (e) {
+          clearTimeout(segClickT); segClickT = null;
+          if (LAB.vfs.isDir(sg.path)) {
+            if (e.metaKey || e.ctrlKey) open({ path: sg.path, via: 'pathbar' });
+            else navigate(sg.path, 'pathbar');
+          } else if (LAB.vfs.exists(sg.path)) openItem(sg.path);
+        });
         pathEl.appendChild(b);
         pathTargets.push(LAB.dnd.target(b, {
           id: 'finder:' + win.id + ':pathbar:' + sg.path,

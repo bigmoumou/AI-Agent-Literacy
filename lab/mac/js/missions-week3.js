@@ -334,9 +334,9 @@
       },
       {
         id: 's4',
-        text: '看視窗最下面多出來的路徑列，點其中的「桌面」，回到上一層。',
-        hint: '路徑列從左到右，就是這個資料夾的完整位置：Macintosh HD › 使用者 › an › 桌面 › Project，也就是 /Users/an/Desktop/Project。看不到路徑列：選單列「顯示方式」→「顯示路徑列」。',
-        answer: '點路徑列的「桌面」（或側邊欄的「桌面」，或左上角的返回鍵）。',
+        text: '看視窗最下面多出來的路徑列，在「桌面」上按兩下，回到上一層。',
+        hint: '路徑列從左到右，就是這個資料夾的完整位置：Macintosh HD › 使用者 › an › 桌面 › Project，也就是 /Users/an/Desktop/Project。路徑列上的資料夾要按兩下才會打開（點一下只會反白），和真的 Mac 一樣。看不到路徑列：選單列「顯示方式」→「顯示路徑列」。',
+        answer: '在路徑列的「桌面」上按兩下（或點側邊欄的「桌面」，或左上角的返回鍵）。',
         menuPath: ['顯示路徑列'],      // the bar was turned off again (or never opened): the cue walks to the row that opens it instead of pointing at a segment that is not there
         target: function (api) {
           return pathBarOn() ? chain(fdSeg(DESKTOP), fdSide(DESKTOP), dock('finder'))(api) : openPathBarTarget(api);
@@ -347,6 +347,12 @@
           // state fallback: a Finder window shows the Desktop and none is still inside Project.
           // (A second window left on the Desktop from step 2 must not finish this step by itself.)
           return api.finderAt(DESKTOP) && !api.finderAt(PROJECT);
+        },
+        // lab-pathbar-dbl: on a real Mac (and now here) a single click on a folder in the path bar only lights it up. finder.js sends
+        // finder:pathbar-click only for a lone click (not the first half of a double-click)
+        trap: function (ev) {
+          if (ev && ev.name === 'finder:pathbar-click') return '路徑列上的資料夾要按兩下才會打開。';
+          return null;
         }
       },
       {
