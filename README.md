@@ -12,7 +12,7 @@
 
 ## 網站上有什麼
 
-- **每週影片**：Week 3–5 已開放，共 8 支影片和 6 支補充，之後每週陸續上線。沒有旁白，用動畫和字卡講，每支 1–4 分鐘。
+- **每週影片**：Week 3–5 已開放，共 8 支影片和 6 支補充，之後每週陸續上線；Week 6 是考試週，只有「TEST」入口（考試模式準備中）。沒有旁白，用動畫和字卡講，每支 1–4 分鐘。
 - **練習電腦**：在瀏覽器裡的模擬 Mac／Windows，每週同一台、換那週的任務，照任務卡動手做，弄壞了重來就好。
 - **作品集**：學生同意公開的作業網頁。
 - 不用登入、不追蹤；有繁中、简中、English、Tiếng Việt，深淺色都可以。
@@ -69,7 +69,7 @@ python -m http.server 8000
 
 Course site for Learning Analytics Tools at National Taiwan Normal University: a few short videos each week with chapters and key points, for students to review at their own pace. The videos are planned and reviewed by the teacher and made in code with AI (Claude Code). The site interface is available in English; the text inside the videos is Traditional Chinese.
 
-- **Videos**: Weeks 3–5 are open (8 videos and 6 extras); later weeks follow the course. No narration, 1–4 minutes each.
+- **Videos**: Weeks 3–5 are open (8 videos and 6 extras); later weeks follow the course. Week 6 is the test week, with only a "TEST" entrance (the test mode is in progress). No narration, 1–4 minutes each.
 - **Practice computers**: a simulated Mac or Windows PC in the browser, with step-by-step missions.
 - **Showcase**: student homework pages shared with their permission.
 - No login, no tracking.

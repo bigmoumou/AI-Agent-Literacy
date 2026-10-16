@@ -39,7 +39,7 @@ An AI teaching-video demonstration site for the Learning Analytics Tools course 
 
 ### AI 教學影片
 
-目前（2026 年 10 月）已公開 Week 3「AI Agent 的工作資料夾」、Week 4「AI Agent 內建瀏覽器」與 Week 5「讓 Codex 做對：驗證與 context window」：共 8 支影片加 6 支補充教材（合計 44 分鐘）、129 個章節、73 則重點。Week 6 到 Week 16 依課程進度陸續開放，網站上先顯示「準備中」。
+目前（2026 年 10 月）已公開 Week 3「AI Agent 的工作資料夾」、Week 4「AI Agent 內建瀏覽器」與 Week 5「讓 Codex 做對：驗證與 context window」：共 8 支影片加 6 支補充教材（合計 44 分鐘）、129 個章節、73 則重點。Week 6 是考試週，只有「TEST」入口：從異次元裂縫掉進黑洞，再選一台遠端電腦（Mac 或 Windows）作答（考試模式準備中，目前進去是練習電腦）。Week 7 到 Week 16 依課程進度陸續開放，網站上先顯示「準備中」。
 
 影片沒有旁白，用動畫、字卡和程式合成的配樂說明一個主題，長度從 1 分多到 4 分鐘左右。課程教的是 AI 程式助理的實際用法，影片中示範的工具主要是 OpenAI 的 Codex。
 
@@ -108,7 +108,8 @@ An AI teaching-video demonstration site for the Learning Analytics Tools course 
 |---|---|
 | 網站程式（HTML、CSS、JavaScript）、工具（`tools/`）、範本與說明文件 | 已公開，MIT 授權 |
 | AI 教學影片（HLS）、封面、縮圖，以及每週的文字（繁體中文原文與簡中、英文、越南文翻譯） | 已公開，CC BY-NC-SA 4.0 |
-| Week 6 到 Week 16 | 依課程進度陸續開放 |
+| Week 6（考試） | 入口已公開，考試模式準備中 |
+| Week 7 到 Week 16 | 依課程進度陸續開放 |
 | 學生作品展示（作品集） | 已上線，陸續加入學生同意公開的作品；著作權屬於各作者 |
 | 練習用的模擬電腦（課堂練習） | Mac 版、Windows 版都已上線，每週同一台電腦、換那週的任務：Week 3 有 10 個任務（終端機、Finder、Codex），Week 4 有 11 個（內建瀏覽器、GitHub、Mermaid、作業） |
 | 教學影片生成 prompt：每支影片的 `brief.md`、動態素材規格、三方案提案 | 規劃中，整理後公開 |
@@ -229,7 +230,7 @@ This repository is the website itself; every file the site serves is here.
 
 ### AI teaching videos
 
-As of October 2026, Week 3, "The AI Agent's Working Folder", Week 4, "AI Agent Built-in Browser", and Week 5, "Getting It Right with Codex: Verification and the Context Window", are published: 8 videos plus 6 extras (44 min in total), 129 chapters and 73 key points. Weeks 6 to 16 open as the course goes on and show as "Coming soon" on the site until then.
+As of October 2026, Week 3, "The AI Agent's Working Folder", Week 4, "AI Agent Built-in Browser", and Week 5, "Getting It Right with Codex: Verification and the Context Window", are published: 8 videos plus 6 extras (44 min in total), 129 chapters and 73 key points. Week 6 is the test week and has only a "TEST" entrance: you fall through a dimensional rift into a black hole, then pick a remote computer (Mac or Windows) to work on (the test mode is still being built; for now it opens the practice computer). Weeks 7 to 16 open as the course goes on and show as "Coming soon" on the site until then.
 
 The videos have no voice-over. Each one explains a single topic with animation, text cards and music synthesized in code, and runs between one and about four minutes. The course teaches the practical use of AI coding agents, and the tool shown in the videos is mostly OpenAI's Codex.
 
@@ -298,7 +299,8 @@ The visuals are mainly animated web pages written in HTML, CSS and JavaScript an
 |---|---|
 | Site code (HTML, CSS, JavaScript), tools (`tools/`), templates and documentation | Published, MIT License |
 | AI teaching videos (HLS), posters and thumbnails, and each week's text in Traditional Chinese with its Simplified Chinese, English and Vietnamese translations | Published, CC BY-NC-SA 4.0 |
-| Weeks 6 to 16 | Opening one by one as the course goes on |
+| Week 6 (test) | Entrance published, test mode in progress |
+| Weeks 7 to 16 | Opening one by one as the course goes on |
 | Student work showcase | Live; more work is added as students agree to publish it; copyright stays with each author |
 | Practice environment: a simulated computer (in-class practice) | Mac and Windows versions live (10 missions for Week 3, pick any; the terminal, settings and file managers really work) |
 | Teaching-video prompts: each video's `brief.md`, the specs for the animated materials, and the three-plan proposals | Planned, to be released once cleaned up |
