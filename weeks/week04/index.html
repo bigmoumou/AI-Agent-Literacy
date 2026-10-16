@@ -155,15 +155,85 @@
       </ol>
     </section>
 
-    <section class="unit" id="03-homework-github" data-needs="s1-github s2-mermaid" aria-labelledby="u03-title">
+    <!-- 影片 03：作業「東京銀杏散步地圖網站」（Single-turn Prompting）。作業影片還在做（學弟2，信 20261016-112426-w4-hw-ginkgo），
+         沒有 <video> 時清單用 data-thumb 當縮圖。
+         膠捲裡先放東京銀杏的照片拼貼（weeks/week04/hw/，原檔和授權在 製作/week04/ginkgo-hw/photos/CREDITS.md）；
+         作業影片做好後，把 .hw-mosaic 換成 <video>，照片可以留作 poster。這裡寫成通用版：不寫加分、不寫繳交方式。 -->
+    <section class="unit" id="03-homework-ginkgo" aria-labelledby="u03-title" data-thumb="hw/thumb.jpg">
       <h2 class="unit-title" id="u03-title"><span class="unit-num" data-ui="video.n" data-n="03">影片 03</span><span data-i18n
+        data-zh-hans="作业：东京银杏散步地图网站"
+        data-en="Homework: A Tokyo Ginkgo Walking-Map Website"
+        data-vi="Bài tập: Trang web bản đồ dạo bộ ngắm bạch quả Tokyo">作業：東京銀杏散步地圖網站</span></h2>
+
+      <div class="film">
+        <div class="player hw-mosaic">
+          <figure class="hw-ph hw-hero"><img src="hw/hero-utokyo.jpg" alt="東京大學本鄉校區的銀杏大道，整排黃葉" width="1100" height="924" loading="lazy" decoding="async"
+            data-i18n-attr="alt" data-zh-hans="东京大学本乡校区的银杏大道，整排黄叶" data-en="The ginkgo avenue on the University of Tokyo's Hongo campus, a row of yellow trees" data-vi="Đại lộ bạch quả ở khuôn viên Hongo, Đại học Tokyo, cả hàng lá vàng"><figcaption data-i18n data-zh-hans="东京大学 本乡" data-en="University of Tokyo, Hongo" data-vi="Đại học Tokyo, Hongo">東京大學 本鄉</figcaption></figure>
+          <figure class="hw-ph"><img src="hw/showa-park.jpg" alt="昭和記念公園，抬頭看到滿樹黃葉" width="700" height="588" loading="lazy" decoding="async"
+            data-i18n-attr="alt" data-zh-hans="昭和纪念公园，抬头看到满树黄叶" data-en="Showa Kinen Park: looking up into a tree full of yellow leaves" data-vi="Công viên Showa Kinen: ngước nhìn tán cây đầy lá vàng"><figcaption data-i18n data-zh-hans="昭和纪念公园" data-en="Showa Kinen Park" data-vi="Công viên Showa Kinen">昭和記念公園</figcaption></figure>
+          <figure class="hw-ph"><img src="hw/kyu-iwasaki.jpg" alt="旧岩崎邸庭園的銀杏枝條和藍天" width="700" height="588" loading="lazy" decoding="async"
+            data-i18n-attr="alt" data-zh-hans="旧岩崎邸庭园的银杏枝条和蓝天" data-en="Ginkgo branches against a blue sky at Kyu-Iwasaki-tei Gardens" data-vi="Cành bạch quả trên nền trời xanh ở vườn Kyu-Iwasaki-tei"><figcaption>旧岩崎邸庭園</figcaption></figure>
+          <figure class="hw-ph"><img src="hw/leaves.jpg" alt="幾片變黃的銀杏葉" width="700" height="588" loading="lazy" decoding="async"
+            data-i18n-attr="alt" data-zh-hans="几片变黄的银杏叶" data-en="A few ginkgo leaves turning yellow" data-vi="Vài chiếc lá bạch quả đang ngả vàng"><figcaption data-i18n data-zh-hans="色づき始め → 见顷" data-en="Turning yellow → at its best" data-vi="Bắt đầu đổi màu → đẹp nhất">色づき始め → 見頃</figcaption></figure>
+          <figure class="hw-ph"><img src="hw/fallen-avenue.jpg" alt="鋪滿黃色落葉的校園道路" width="700" height="588" loading="lazy" decoding="async"
+            data-i18n-attr="alt" data-zh-hans="铺满黄色落叶的校园道路" data-en="A campus road covered in fallen yellow leaves" data-vi="Con đường trong khuôn viên phủ đầy lá vàng rụng"><figcaption data-i18n data-zh-hans="落叶" data-en="Leaves fallen" data-vi="Lá đã rụng">落葉</figcaption></figure>
+        </div>
+      </div>
+
+      <p class="hw-lead" data-i18n
+        data-zh-hans="樱花地图很多人做过了！这次我们做<strong>东京银杏地图</strong>。"
+        data-en="Plenty of people have made cherry-blossom maps. This time we make a <strong>Tokyo ginkgo map</strong>."
+        data-vi="Bản đồ hoa anh đào thì nhiều người làm rồi. Lần này chúng ta làm <strong>bản đồ bạch quả Tokyo</strong>.">櫻花地圖很多人做過了！這次我們做<strong>東京銀杏地圖</strong>。</p>
+
+      <ol class="points">
+        <li><p data-i18n
+          data-zh-hans="<strong>任务：做一个像「樱花地图」的统整网站。</strong>参考 Weathernews「さくらCh.」、tenki.jp「桜開花・満開情報」，把东京各地的银杏整理在一起：每个地点的状态变化（青叶 → 色づき始め → 黄葉進行 → 見頃 → 落葉始め → 落葉）、好的 UI/UX（发挥想象力，自己实际用用看），再加一个功能：银杏散步路线规划。"
+          data-en="<strong>Task: build a round-up site like a “cherry-blossom map”.</strong> Taking Weathernews’ “さくらCh.” and tenki.jp’s “桜開花・満開情報” as references, bring Tokyo’s ginkgo spots together: how each spot changes (green leaves → 色づき始め, starting to turn → 黄葉進行, turning → 見頃, at its best → 落葉始め, starting to fall → 落葉, fallen), a good UI/UX (use your imagination and try it yourself), and one more feature: planning a ginkgo walking route."
+          data-vi="<strong>Nhiệm vụ: làm một trang tổng hợp giống “bản đồ hoa anh đào”.</strong> Tham khảo “さくらCh.” của Weathernews và “桜開花・満開情報” của tenki.jp, gom các điểm ngắm bạch quả ở Tokyo lại: trạng thái của từng điểm thay đổi ra sao (lá xanh → 色づき始め bắt đầu đổi màu → 黄葉進行 đang vàng → 見頃 đẹp nhất → 落葉始め bắt đầu rụng → 落葉 đã rụng), UI/UX tốt (hãy phát huy trí tưởng tượng và tự dùng thử), và thêm một tính năng: lên lộ trình dạo bộ ngắm bạch quả.">
+          <strong>任務：做一個像「櫻花地圖」的統整網站。</strong>參考 Weathernews「さくらCh.」、tenki.jp「桜開花・満開情報」，把東京各地的銀杏整理在一起：每個地點的狀態變化（青葉 → 色づき始め → 黄葉進行 → 見頃 → 落葉始め → 落葉）、好的 UI/UX（發揮想像力，自己實際用用看），再加一個功能：銀杏散步路線規劃。</p></li>
+        <li><p data-i18n
+          data-zh-hans="<strong>资料要先请 Codex 分析。</strong>老师用 GPT-6 Pro 整理了一份<a href='https://docs.google.com/spreadsheets/d/1dx_41InyuuWuILc4ZHJW8tTZMVOCpIuSz-QzISzd7y0/edit?usp=sharing' target='_blank' rel='noopener'>东京银杏各地点官方资料来源</a>，而且故意多抓了一些信息，不是每一栏、每一行都有用。哪些来源可信、哪些已经失效、哪些字段和网站无关，好好思考，好好和 Codex 讨论，再决定要用什么。"
+          data-en="<strong>Have Codex analyse the data first.</strong> The teacher used GPT-6 Pro to put together <a href='https://docs.google.com/spreadsheets/d/1dx_41InyuuWuILc4ZHJW8tTZMVOCpIuSz-QzISzd7y0/edit?usp=sharing' target='_blank' rel='noopener'>the official sources for each ginkgo spot in Tokyo</a>, and collected more than you need on purpose: not every column or row is useful. Which sources can be trusted, which no longer work, which columns have nothing to do with the site? Think it through and talk it over with Codex before deciding what to use."
+          data-vi="<strong>Nhờ Codex phân tích dữ liệu trước.</strong> Giáo viên đã dùng GPT-6 Pro tổng hợp <a href='https://docs.google.com/spreadsheets/d/1dx_41InyuuWuILc4ZHJW8tTZMVOCpIuSz-QzISzd7y0/edit?usp=sharing' target='_blank' rel='noopener'>các nguồn chính thức cho từng điểm bạch quả ở Tokyo</a>, và cố ý lấy nhiều hơn mức cần: không phải cột nào, dòng nào cũng hữu ích. Nguồn nào đáng tin, nguồn nào đã hỏng, cột nào không liên quan đến trang web? Hãy suy nghĩ kỹ, bàn kỹ với Codex rồi mới quyết định dùng gì.">
+          <strong>資料要先請 Codex 分析。</strong>老師用 GPT-6 Pro 整理了一份<a href="https://docs.google.com/spreadsheets/d/1dx_41InyuuWuILc4ZHJW8tTZMVOCpIuSz-QzISzd7y0/edit?usp=sharing" target="_blank" rel="noopener">東京銀杏各地點官方資料來源</a>，而且故意多抓了一些資訊，不是每一欄、每一列都有用。哪些來源可信、哪些已經失效、哪些欄位跟網站無關，好好思考，好好跟 Codex 討論，再決定要用什麼。</p></li>
+        <li><p data-i18n
+          data-zh-hans="<strong>把需求写成一份 <code>BRIEF.md</code>。</strong>在敏捷开发里，设计和产品领域有「需求简报」：由「人」写清楚要做什么、给谁用、做到什么程度算好，再交给执行者。这次的执行者是 AI Agent，想想看这样做合不合理。"
+          data-en="<strong>Write what you want as a <code>BRIEF.md</code>.</strong> In agile development, design and product teams use a “brief”: a <em>person</em> writes down what to build, who it is for and how good counts as done, then hands it to whoever does the work. This time the one doing the work is an AI agent: think about whether that makes sense."
+          data-vi="<strong>Viết yêu cầu thành một tệp <code>BRIEF.md</code>.</strong> Trong phát triển linh hoạt (agile), mảng thiết kế và sản phẩm có “bản tóm tắt yêu cầu”: <em>con người</em> viết rõ làm gì, cho ai dùng, làm đến mức nào là đạt, rồi giao cho người thực hiện. Lần này người thực hiện là một AI agent, hãy nghĩ xem làm vậy có hợp lý không.">
+          <strong>把需求寫成一份 <code>BRIEF.md</code>。</strong>在敏捷開發裡，設計和產品領域有「需求簡報」：由「人」寫清楚要做什麼、給誰用、做到什麼程度算好，再交給執行者。這次的執行者是 AI Agent，想想看這樣做合不合理。</p></li>
+        <li><p data-i18n
+          data-zh-hans="<strong>Single-turn Prompting：只有一次机会。</strong>把 <code>BRIEF.md</code> 交给 AI，从零开始做完，中途不能追问、不能修改、不能补充。这个练习训练的是我们人类的思考：动手之前先把想法想清楚，想得越多、越详细，项目越能控制；没想清楚，你根本不知道自己在做什么。"
+          data-en="<strong>Single-turn prompting: one chance only.</strong> Hand <code>BRIEF.md</code> to the AI and it builds everything from scratch, with no follow-up questions, no changes and nothing added along the way. What this trains is our own, human thinking: think it through before you start. The more and the more carefully you think, the more control you have over the project; if you haven’t thought it through, you don’t really know what you are doing."
+          data-vi="<strong>Single-turn prompting: chỉ có một cơ hội.</strong> Giao <code>BRIEF.md</code> cho AI, nó làm từ đầu đến cuối; giữa chừng không được hỏi thêm, không được sửa, không được bổ sung. Bài tập này rèn luyện tư duy của chính con người chúng ta: nghĩ cho rõ trước khi bắt tay. Nghĩ càng nhiều, càng chi tiết thì càng kiểm soát được dự án; chưa nghĩ rõ thì bạn thật ra không biết mình đang làm gì.">
+          <strong>Single-turn Prompting：只有一次機會。</strong>把 <code>BRIEF.md</code> 交給 AI，從零開始做完，中途不能追問、不能修改、不能補充。這個練習訓練的是我們人類的思考：動手之前先把想法想清楚，想得越多、越詳細，專案越能控制；沒想清楚，你根本不知道自己在做什麼。</p></li>
+        <li><p data-i18n
+          data-zh-hans="<strong>规则。</strong><code>BRIEF.md</code> 中英文不含符号 1500 字以内；只能用 HTML、CSS、JS 做静态网站，不做动态网站；网站上要有地方揭露引用的资料来源，并说明是教学使用、非营利。"
+          data-en="<strong>Rules.</strong> <code>BRIEF.md</code> is at most 1,500 characters of Chinese or English, not counting punctuation; the site is static, built with HTML, CSS and JS only, nothing dynamic; and somewhere on the site you list the sources you used and say it is for teaching, not for profit."
+          data-vi="<strong>Quy tắc.</strong> <code>BRIEF.md</code> tối đa 1.500 ký tự tiếng Trung hoặc tiếng Anh, không tính dấu câu; chỉ dùng HTML, CSS, JS làm trang tĩnh, không làm trang động; trên trang phải có chỗ ghi rõ các nguồn đã trích dẫn và nói rõ là dùng cho giảng dạy, phi lợi nhuận.">
+          <strong>規則。</strong><code>BRIEF.md</code> 中英文不含符號 1500 字以內；只能用 HTML、CSS、JS 做靜態網站，不做動態網站；網站上要有地方揭露引用的資料來源，並說明是教學使用、非營利。</p></li>
+        <li><p data-i18n
+          data-zh-hans="<strong>看看大家做出来的网站。</strong>同一份资料、同样只跑一次，每份 <code>BRIEF.md</code> 做出来的网站都不一样：<a href='../../works/'>作品集</a>。"
+          data-en="<strong>See what others built.</strong> Same data, one run each, and every <code>BRIEF.md</code> led to a different site: <a href='../../works/'>the showcase</a>."
+          data-vi="<strong>Xem các trang mọi người đã làm.</strong> Cùng một dữ liệu, mỗi bản chỉ chạy một lần, và mỗi <code>BRIEF.md</code> cho ra một trang khác nhau: <a href='../../works/'>bộ sưu tập tác phẩm</a>.">
+          <strong>看看大家做出來的網站。</strong>同一份資料、同樣只跑一次，每份 <code>BRIEF.md</code> 做出來的網站都不一樣：<a href="../../works/">作品集</a>。</p></li>
+      </ol>
+
+      <p class="hw-credit" data-i18n
+        data-zh-hans="照片：Wikimedia Commons，部分经裁切。东京大学本乡（Tokyo538，CC0）、昭和纪念公园（雷太，CC BY 2.0）、旧岩崎邸庭园（Guilhem Vellut，CC BY 2.0）、银杏叶（Yoshikazu TAKADA，CC BY 2.0）、本乡落叶（Tokyo538，CC0）。"
+        data-en="Photos: Wikimedia Commons, some cropped. University of Tokyo, Hongo (Tokyo538, CC0); Showa Kinen Park (雷太, CC BY 2.0); Kyu-Iwasaki-tei Gardens (Guilhem Vellut, CC BY 2.0); ginkgo leaves (Yoshikazu TAKADA, CC BY 2.0); fallen leaves at Hongo (Tokyo538, CC0)."
+        data-vi="Ảnh: Wikimedia Commons, một số đã cắt. Đại học Tokyo, Hongo (Tokyo538, CC0); Công viên Showa Kinen (雷太, CC BY 2.0); vườn Kyu-Iwasaki-tei (Guilhem Vellut, CC BY 2.0); lá bạch quả (Yoshikazu TAKADA, CC BY 2.0); lá rụng ở Hongo (Tokyo538, CC0).">照片：Wikimedia Commons，部分經裁切。<a href="https://commons.wikimedia.org/wiki/File:Ginkgo_trees_on_Hongo_Campus,_University_of_Tokyo.jpg" target="_blank" rel="noopener">東京大學本鄉</a>（Tokyo538，CC0）、<a href="https://commons.wikimedia.org/wiki/File:Plants_in_Showa_Commemorative_National_Government_Park,_Japan;_November_2018_(04).jpg" target="_blank" rel="noopener">昭和記念公園</a>（雷太，<a href="https://creativecommons.org/licenses/by/2.0/" target="_blank" rel="noopener">CC BY 2.0</a>）、<a href="https://commons.wikimedia.org/wiki/File:Ginkgo_tree_@_Kyu-Iwasaki-tei_Gardens_@_Ueno_(11096209824).jpg" target="_blank" rel="noopener">旧岩崎邸庭園</a>（Guilhem Vellut，CC BY 2.0）、<a href="https://commons.wikimedia.org/wiki/File:Ginkgo_Leaves_(22818025003).jpg" target="_blank" rel="noopener">銀杏葉</a>（Yoshikazu TAKADA，CC BY 2.0）、<a href="https://commons.wikimedia.org/wiki/File:Ginkgo_leaves_on_Hongo_Campus,_University_of_Tokyo.jpg" target="_blank" rel="noopener">本鄉落葉</a>（Tokyo538，CC0）。</p>
+    </section>
+
+
+    <section class="unit" id="04-homework-github" data-was="03-homework-github" data-needs="s1-github s2-mermaid" aria-labelledby="u04-title">
+      <h2 class="unit-title" id="u04-title"><span class="unit-num" data-ui="video.n" data-n="04">影片 04</span><span data-i18n
         data-zh-hans="远程连接作业：GitHub、Mermaid、内置浏览器"
         data-en="Remote Homework: GitHub, Mermaid and the Built-in Browser"
         data-vi="Bài tập từ xa: GitHub, Mermaid và trình duyệt tích hợp">遠端連線作業：GitHub、Mermaid、內建瀏覽器</span></h2>
 
       <div class="film">
         <div class="player">
-          <video controls preload="metadata" playsinline data-hls="video/03-homework-github/hls/index.m3u8" poster="video/03-homework-github/poster.jpg" width="1920" height="1080">
+          <video controls preload="metadata" playsinline data-hls="video/04-homework-github/hls/index.m3u8" poster="video/04-homework-github/poster.jpg" width="1920" height="1080">
             你的瀏覽器無法播放這支影片。
           </video>
         </div>
@@ -308,76 +378,7 @@
     </section>
 
 
-    <!-- 作業：不是這週影片的一支，是一份練習題（class unit-hw，video.js 在清單上寫「作業 1」，縮圖用 data-thumb）。
-         膠捲裡先放東京銀杏的照片拼貼（weeks/week04/hw/，原檔和授權在 製作/week04/ginkgo-hw/photos/CREDITS.md）；
-         作業影片做好後，把 .hw-mosaic 換成 <video>，照片可以留作 poster。這裡寫成通用版：不寫加分、不寫繳交方式。 -->
-    <section class="unit unit-hw" id="hw-ginkgo-map" aria-labelledby="uhw-title" data-thumb="hw/thumb.jpg">
-      <h2 class="unit-title" id="uhw-title"><span class="unit-num" data-ui="video.hw" data-n="1">作業 1</span><span data-i18n
-        data-zh-hans="东京银杏散步地图网站"
-        data-en="A Tokyo Ginkgo Walking-Map Website"
-        data-vi="Trang web bản đồ dạo bộ ngắm bạch quả Tokyo">東京銀杏散步地圖網站</span></h2>
-
-      <div class="film">
-        <div class="player hw-mosaic">
-          <figure class="hw-ph hw-hero"><img src="hw/hero-utokyo.jpg" alt="東京大學本鄉校區的銀杏大道，整排黃葉" width="1100" height="924" loading="lazy" decoding="async"
-            data-i18n-attr="alt" data-zh-hans="东京大学本乡校区的银杏大道，整排黄叶" data-en="The ginkgo avenue on the University of Tokyo's Hongo campus, a row of yellow trees" data-vi="Đại lộ bạch quả ở khuôn viên Hongo, Đại học Tokyo, cả hàng lá vàng"><figcaption data-i18n data-zh-hans="东京大学 本乡" data-en="University of Tokyo, Hongo" data-vi="Đại học Tokyo, Hongo">東京大學 本鄉</figcaption></figure>
-          <figure class="hw-ph"><img src="hw/showa-park.jpg" alt="昭和記念公園，抬頭看到滿樹黃葉" width="700" height="588" loading="lazy" decoding="async"
-            data-i18n-attr="alt" data-zh-hans="昭和纪念公园，抬头看到满树黄叶" data-en="Showa Kinen Park: looking up into a tree full of yellow leaves" data-vi="Công viên Showa Kinen: ngước nhìn tán cây đầy lá vàng"><figcaption data-i18n data-zh-hans="昭和纪念公园" data-en="Showa Kinen Park" data-vi="Công viên Showa Kinen">昭和記念公園</figcaption></figure>
-          <figure class="hw-ph"><img src="hw/kyu-iwasaki.jpg" alt="旧岩崎邸庭園的銀杏枝條和藍天" width="700" height="588" loading="lazy" decoding="async"
-            data-i18n-attr="alt" data-zh-hans="旧岩崎邸庭园的银杏枝条和蓝天" data-en="Ginkgo branches against a blue sky at Kyu-Iwasaki-tei Gardens" data-vi="Cành bạch quả trên nền trời xanh ở vườn Kyu-Iwasaki-tei"><figcaption>旧岩崎邸庭園</figcaption></figure>
-          <figure class="hw-ph"><img src="hw/leaves.jpg" alt="幾片變黃的銀杏葉" width="700" height="588" loading="lazy" decoding="async"
-            data-i18n-attr="alt" data-zh-hans="几片变黄的银杏叶" data-en="A few ginkgo leaves turning yellow" data-vi="Vài chiếc lá bạch quả đang ngả vàng"><figcaption data-i18n data-zh-hans="色づき始め → 见顷" data-en="Turning yellow → at its best" data-vi="Bắt đầu đổi màu → đẹp nhất">色づき始め → 見頃</figcaption></figure>
-          <figure class="hw-ph"><img src="hw/fallen-avenue.jpg" alt="鋪滿黃色落葉的校園道路" width="700" height="588" loading="lazy" decoding="async"
-            data-i18n-attr="alt" data-zh-hans="铺满黄色落叶的校园道路" data-en="A campus road covered in fallen yellow leaves" data-vi="Con đường trong khuôn viên phủ đầy lá vàng rụng"><figcaption data-i18n data-zh-hans="落叶" data-en="Leaves fallen" data-vi="Lá đã rụng">落葉</figcaption></figure>
-        </div>
-      </div>
-
-      <p class="hw-lead" data-i18n
-        data-zh-hans="樱花地图很多人做过了！这次我们做<strong>东京银杏地图</strong>。"
-        data-en="Plenty of people have made cherry-blossom maps. This time we make a <strong>Tokyo ginkgo map</strong>."
-        data-vi="Bản đồ hoa anh đào thì nhiều người làm rồi. Lần này chúng ta làm <strong>bản đồ bạch quả Tokyo</strong>.">櫻花地圖很多人做過了！這次我們做<strong>東京銀杏地圖</strong>。</p>
-
-      <ol class="points">
-        <li><p data-i18n
-          data-zh-hans="<strong>任务：做一个像「樱花地图」的统整网站。</strong>参考 Weathernews「さくらCh.」、tenki.jp「桜開花・満開情報」，把东京各地的银杏整理在一起：每个地点的状态变化（青叶 → 色づき始め → 黄葉進行 → 見頃 → 落葉始め → 落葉）、好的 UI/UX（发挥想象力，自己实际用用看），再加一个功能：银杏散步路线规划。"
-          data-en="<strong>Task: build a round-up site like a “cherry-blossom map”.</strong> Taking Weathernews’ “さくらCh.” and tenki.jp’s “桜開花・満開情報” as references, bring Tokyo’s ginkgo spots together: how each spot changes (green leaves → 色づき始め, starting to turn → 黄葉進行, turning → 見頃, at its best → 落葉始め, starting to fall → 落葉, fallen), a good UI/UX (use your imagination and try it yourself), and one more feature: planning a ginkgo walking route."
-          data-vi="<strong>Nhiệm vụ: làm một trang tổng hợp giống “bản đồ hoa anh đào”.</strong> Tham khảo “さくらCh.” của Weathernews và “桜開花・満開情報” của tenki.jp, gom các điểm ngắm bạch quả ở Tokyo lại: trạng thái của từng điểm thay đổi ra sao (lá xanh → 色づき始め bắt đầu đổi màu → 黄葉進行 đang vàng → 見頃 đẹp nhất → 落葉始め bắt đầu rụng → 落葉 đã rụng), UI/UX tốt (hãy phát huy trí tưởng tượng và tự dùng thử), và thêm một tính năng: lên lộ trình dạo bộ ngắm bạch quả.">
-          <strong>任務：做一個像「櫻花地圖」的統整網站。</strong>參考 Weathernews「さくらCh.」、tenki.jp「桜開花・満開情報」，把東京各地的銀杏整理在一起：每個地點的狀態變化（青葉 → 色づき始め → 黄葉進行 → 見頃 → 落葉始め → 落葉）、好的 UI/UX（發揮想像力，自己實際用用看），再加一個功能：銀杏散步路線規劃。</p></li>
-        <li><p data-i18n
-          data-zh-hans="<strong>资料要先请 Codex 分析。</strong>老师用 GPT-6 Pro 整理了一份<a href='https://docs.google.com/spreadsheets/d/1dx_41InyuuWuILc4ZHJW8tTZMVOCpIuSz-QzISzd7y0/edit?usp=sharing' target='_blank' rel='noopener'>东京银杏各地点官方资料来源</a>，而且故意多抓了一些信息，不是每一栏、每一行都有用。哪些来源可信、哪些已经失效、哪些字段和网站无关，好好思考，好好和 Codex 讨论，再决定要用什么。"
-          data-en="<strong>Have Codex analyse the data first.</strong> The teacher used GPT-6 Pro to put together <a href='https://docs.google.com/spreadsheets/d/1dx_41InyuuWuILc4ZHJW8tTZMVOCpIuSz-QzISzd7y0/edit?usp=sharing' target='_blank' rel='noopener'>the official sources for each ginkgo spot in Tokyo</a>, and collected more than you need on purpose: not every column or row is useful. Which sources can be trusted, which no longer work, which columns have nothing to do with the site? Think it through and talk it over with Codex before deciding what to use."
-          data-vi="<strong>Nhờ Codex phân tích dữ liệu trước.</strong> Giáo viên đã dùng GPT-6 Pro tổng hợp <a href='https://docs.google.com/spreadsheets/d/1dx_41InyuuWuILc4ZHJW8tTZMVOCpIuSz-QzISzd7y0/edit?usp=sharing' target='_blank' rel='noopener'>các nguồn chính thức cho từng điểm bạch quả ở Tokyo</a>, và cố ý lấy nhiều hơn mức cần: không phải cột nào, dòng nào cũng hữu ích. Nguồn nào đáng tin, nguồn nào đã hỏng, cột nào không liên quan đến trang web? Hãy suy nghĩ kỹ, bàn kỹ với Codex rồi mới quyết định dùng gì.">
-          <strong>資料要先請 Codex 分析。</strong>老師用 GPT-6 Pro 整理了一份<a href="https://docs.google.com/spreadsheets/d/1dx_41InyuuWuILc4ZHJW8tTZMVOCpIuSz-QzISzd7y0/edit?usp=sharing" target="_blank" rel="noopener">東京銀杏各地點官方資料來源</a>，而且故意多抓了一些資訊，不是每一欄、每一列都有用。哪些來源可信、哪些已經失效、哪些欄位跟網站無關，好好思考，好好跟 Codex 討論，再決定要用什麼。</p></li>
-        <li><p data-i18n
-          data-zh-hans="<strong>把需求写成一份 <code>BRIEF.md</code>。</strong>在敏捷开发里，设计和产品领域有「需求简报」：由「人」写清楚要做什么、给谁用、做到什么程度算好，再交给执行者。这次的执行者是 AI Agent，想想看这样做合不合理。"
-          data-en="<strong>Write what you want as a <code>BRIEF.md</code>.</strong> In agile development, design and product teams use a “brief”: a <em>person</em> writes down what to build, who it is for and how good counts as done, then hands it to whoever does the work. This time the one doing the work is an AI agent: think about whether that makes sense."
-          data-vi="<strong>Viết yêu cầu thành một tệp <code>BRIEF.md</code>.</strong> Trong phát triển linh hoạt (agile), mảng thiết kế và sản phẩm có “bản tóm tắt yêu cầu”: <em>con người</em> viết rõ làm gì, cho ai dùng, làm đến mức nào là đạt, rồi giao cho người thực hiện. Lần này người thực hiện là một AI agent, hãy nghĩ xem làm vậy có hợp lý không.">
-          <strong>把需求寫成一份 <code>BRIEF.md</code>。</strong>在敏捷開發裡，設計和產品領域有「需求簡報」：由「人」寫清楚要做什麼、給誰用、做到什麼程度算好，再交給執行者。這次的執行者是 AI Agent，想想看這樣做合不合理。</p></li>
-        <li><p data-i18n
-          data-zh-hans="<strong>Single-turn Prompting：只有一次机会。</strong>把 <code>BRIEF.md</code> 交给 AI，从零开始做完，中途不能追问、不能修改、不能补充。这个练习训练的是我们人类的思考：动手之前先把想法想清楚，想得越多、越详细，项目越能控制；没想清楚，你根本不知道自己在做什么。"
-          data-en="<strong>Single-turn prompting: one chance only.</strong> Hand <code>BRIEF.md</code> to the AI and it builds everything from scratch, with no follow-up questions, no changes and nothing added along the way. What this trains is our own, human thinking: think it through before you start. The more and the more carefully you think, the more control you have over the project; if you haven’t thought it through, you don’t really know what you are doing."
-          data-vi="<strong>Single-turn prompting: chỉ có một cơ hội.</strong> Giao <code>BRIEF.md</code> cho AI, nó làm từ đầu đến cuối; giữa chừng không được hỏi thêm, không được sửa, không được bổ sung. Bài tập này rèn luyện tư duy của chính con người chúng ta: nghĩ cho rõ trước khi bắt tay. Nghĩ càng nhiều, càng chi tiết thì càng kiểm soát được dự án; chưa nghĩ rõ thì bạn thật ra không biết mình đang làm gì.">
-          <strong>Single-turn Prompting：只有一次機會。</strong>把 <code>BRIEF.md</code> 交給 AI，從零開始做完，中途不能追問、不能修改、不能補充。這個練習訓練的是我們人類的思考：動手之前先把想法想清楚，想得越多、越詳細，專案越能控制；沒想清楚，你根本不知道自己在做什麼。</p></li>
-        <li><p data-i18n
-          data-zh-hans="<strong>规则。</strong><code>BRIEF.md</code> 中英文不含符号 1500 字以内；只能用 HTML、CSS、JS 做静态网站，不做动态网站；网站上要有地方揭露引用的资料来源，并说明是教学使用、非营利。"
-          data-en="<strong>Rules.</strong> <code>BRIEF.md</code> is at most 1,500 characters of Chinese or English, not counting punctuation; the site is static, built with HTML, CSS and JS only, nothing dynamic; and somewhere on the site you list the sources you used and say it is for teaching, not for profit."
-          data-vi="<strong>Quy tắc.</strong> <code>BRIEF.md</code> tối đa 1.500 ký tự tiếng Trung hoặc tiếng Anh, không tính dấu câu; chỉ dùng HTML, CSS, JS làm trang tĩnh, không làm trang động; trên trang phải có chỗ ghi rõ các nguồn đã trích dẫn và nói rõ là dùng cho giảng dạy, phi lợi nhuận.">
-          <strong>規則。</strong><code>BRIEF.md</code> 中英文不含符號 1500 字以內；只能用 HTML、CSS、JS 做靜態網站，不做動態網站；網站上要有地方揭露引用的資料來源，並說明是教學使用、非營利。</p></li>
-        <li><p data-i18n
-          data-zh-hans="<strong>看看大家做出来的网站。</strong>同一份资料、同样只跑一次，每份 <code>BRIEF.md</code> 做出来的网站都不一样：<a href='../../works/'>作品集</a>。"
-          data-en="<strong>See what others built.</strong> Same data, one run each, and every <code>BRIEF.md</code> led to a different site: <a href='../../works/'>the showcase</a>."
-          data-vi="<strong>Xem các trang mọi người đã làm.</strong> Cùng một dữ liệu, mỗi bản chỉ chạy một lần, và mỗi <code>BRIEF.md</code> cho ra một trang khác nhau: <a href='../../works/'>bộ sưu tập tác phẩm</a>.">
-          <strong>看看大家做出來的網站。</strong>同一份資料、同樣只跑一次，每份 <code>BRIEF.md</code> 做出來的網站都不一樣：<a href="../../works/">作品集</a>。</p></li>
-      </ol>
-
-      <p class="hw-credit" data-i18n
-        data-zh-hans="照片：Wikimedia Commons，部分经裁切。东京大学本乡（Tokyo538，CC0）、昭和纪念公园（雷太，CC BY 2.0）、旧岩崎邸庭园（Guilhem Vellut，CC BY 2.0）、银杏叶（Yoshikazu TAKADA，CC BY 2.0）、本乡落叶（Tokyo538，CC0）。"
-        data-en="Photos: Wikimedia Commons, some cropped. University of Tokyo, Hongo (Tokyo538, CC0); Showa Kinen Park (雷太, CC BY 2.0); Kyu-Iwasaki-tei Gardens (Guilhem Vellut, CC BY 2.0); ginkgo leaves (Yoshikazu TAKADA, CC BY 2.0); fallen leaves at Hongo (Tokyo538, CC0)."
-        data-vi="Ảnh: Wikimedia Commons, một số đã cắt. Đại học Tokyo, Hongo (Tokyo538, CC0); Công viên Showa Kinen (雷太, CC BY 2.0); vườn Kyu-Iwasaki-tei (Guilhem Vellut, CC BY 2.0); lá bạch quả (Yoshikazu TAKADA, CC BY 2.0); lá rụng ở Hongo (Tokyo538, CC0).">照片：Wikimedia Commons，部分經裁切。<a href="https://commons.wikimedia.org/wiki/File:Ginkgo_trees_on_Hongo_Campus,_University_of_Tokyo.jpg" target="_blank" rel="noopener">東京大學本鄉</a>（Tokyo538，CC0）、<a href="https://commons.wikimedia.org/wiki/File:Plants_in_Showa_Commemorative_National_Government_Park,_Japan;_November_2018_(04).jpg" target="_blank" rel="noopener">昭和記念公園</a>（雷太，<a href="https://creativecommons.org/licenses/by/2.0/" target="_blank" rel="noopener">CC BY 2.0</a>）、<a href="https://commons.wikimedia.org/wiki/File:Ginkgo_tree_@_Kyu-Iwasaki-tei_Gardens_@_Ueno_(11096209824).jpg" target="_blank" rel="noopener">旧岩崎邸庭園</a>（Guilhem Vellut，CC BY 2.0）、<a href="https://commons.wikimedia.org/wiki/File:Ginkgo_Leaves_(22818025003).jpg" target="_blank" rel="noopener">銀杏葉</a>（Yoshikazu TAKADA，CC BY 2.0）、<a href="https://commons.wikimedia.org/wiki/File:Ginkgo_leaves_on_Hongo_Campus,_University_of_Tokyo.jpg" target="_blank" rel="noopener">本鄉落葉</a>（Tokyo538，CC0）。</p>
-    </section>
-
-
-    <!-- 課堂練習：不是影片，是在瀏覽器裡執行的模擬電腦（lab/mac/、lab/win/，前端而已）。
+<!-- 課堂練習：不是影片，是在瀏覽器裡執行的模擬電腦（lab/mac/、lab/win/，前端而已）。
          class 是 unit-lab：video.js 在清單上寫「練習 1」，縮圖用 data-thumb；沒有 <video>，所以沒有長度、觀看進度，
          也不會被「下一支」自動打開。膠捲裡是左右兩台筆電（Mac｜Windows），點哪一台就在同一個分頁打開那一個練習。 -->
     <section class="unit unit-lab" id="lab-mac" aria-labelledby="ulab-title" data-thumb="lab/thumb.jpg">

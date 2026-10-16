@@ -11,7 +11,7 @@
 
   var FM = W4.FM, HW = W4.HW, REPO = W4.REPO;
   var HW_ARCH = HW + '/ARCHITECTURE.md', HW_CSS = HW + '/site/style.css';
-  var G_HW = '作業（影片 03）';
+  var G_HW = '作業（影片 04）';
   var TAG = 'Week 4 作業';
   var MAP = 'GitHub 雲端倉庫 ⇄ 你電腦上的倉庫資料夾 · clone 拿一份回家 · add＋commit 存一個版本（只在你的電腦）· push 送上雲 · pull 拿回最新';
   var T_TERM = K.T_TERM;

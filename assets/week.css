@@ -164,7 +164,7 @@ body::after {
   .points code { white-space: normal; overflow-wrap: anywhere; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 }
 
-/* ---------- 作業（section.unit-hw）：可以還沒有影片。膠捲裡先放照片拼貼（左邊一張大圖、右邊四張小圖），
+/* ---------- 還沒有影片的一支（Week 4 影片 03 作業影片在做）：膠捲裡先放照片拼貼（左邊一張大圖、右邊四張小圖），
    影片做好後把 .hw-mosaic 換成 <video>。照片不動、不放大，只有左下角一行地點（沒有底框，靠淡淡的漸層讓白字看得清楚）。 ---------- */
 .hw-mosaic { display: grid; grid-template-columns: 2fr 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 3px; background: #0b0c0f; }
 .hw-ph { position: relative; margin: 0; min-width: 0; min-height: 0; overflow: hidden; }
