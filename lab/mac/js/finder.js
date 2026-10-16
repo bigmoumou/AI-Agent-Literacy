@@ -688,8 +688,7 @@
       if (!inRender && !same) {
         var em = effMode();
         if (em === 'column') render();                 // the selection decides which columns and which preview are shown
-        else if (em === 'gallery') updateGallery();
-        else if (barFollowsSel()) updatePathbar();
+        else { if (em === 'gallery') updateGallery(); updatePathbar(); }   // the path bar follows a single selection (macOS 26)
       }
       // a selection the program made (a new folder, a rename) is silent; the next deliberate click on it still counts as a click by the student
       if (o.silent) S.silentSel = true;
@@ -1292,12 +1291,13 @@
       parts.forEach(function (pt) { cur += '/' + pt; segs.push({ path: cur, label: LAB.vfs.displayName(cur) }); });
       return segs;
     }
-    /* where the path bar points: the folder, or (in a list of results, tags or columns) the one selected item */
-    function barFollowsSel() { return isVirt(S.path) || searching() || effMode() === 'column'; }
+    /* where the path bar points: as on macOS 26, the one selected item (the bar gets one more segment, e.g. Macintosh HD › 使用者 › an › 下載項目
+       with 下載項目 selected in an), otherwise the folder; in a list of results or tags there is no folder, so nothing without a selection */
     function barPath() {
       var only = S.sel.size === 1 ? Array.from(S.sel)[0] : null;
-      if (effMode() === 'column') return only && LAB.vfs.exists(only) ? only : curDir();
-      if (isVirt(S.path) || searching()) return only && LAB.vfs.exists(only) ? only : null;
+      if (only && LAB.vfs.exists(only)) return only;
+      if (effMode() === 'column') return curDir();
+      if (isVirt(S.path) || searching()) return null;
       return S.path;
     }
     var pathTargets = [], barSig = null;
@@ -1314,10 +1314,14 @@
         var ico = h('span', { class: 'fd-ps-ico', 'aria-hidden': 'true' });
         ico.innerHTML = LAB.icons.get(i === 0 ? 'fd-hdd' : (LAB.vfs.isDir(sg.path) ? 'folder' : LAB.icons.forNode(LAB.vfs.stat(sg.path))), { size: 14 });
         var b = h('button', { type: 'button', class: 'fd-ps' + (i === segs.length - 1 ? ' is-last' : ''), dataset: { lab: 'fd-pathbar-seg', path: sg.path } }, ico, h('span', null, sg.label));
+        // a folder opens in this window (the practice Mac's single click; a real Mac wants a double-click). A file — the selected item's own
+        // segment — is selected (in its folder, which a list of results first opens); a double-click opens it, as on macOS
         b.addEventListener('click', function () {
           if (LAB.vfs.isDir(sg.path)) navigate(sg.path, 'pathbar');
+          else if (LAB.vfs.same(LAB.vfs.dirname(sg.path), S.path) && !isVirt(S.path) && !searching()) { setSel([sg.path], { force: true }); S.anchor = sg.path; var rc = items.get(sg.path); if (rc) ensureVisible(rc.el); }
           else if (LAB.vfs.dirname(sg.path)) { S.pendingSel = [sg.path]; navigate(LAB.vfs.dirname(sg.path), 'pathbar'); S.pendingSel = null; }
         });
+        b.addEventListener('dblclick', function () { if (!LAB.vfs.isDir(sg.path) && LAB.vfs.exists(sg.path)) openItem(sg.path); });
         pathEl.appendChild(b);
         pathTargets.push(LAB.dnd.target(b, {
           id: 'finder:' + win.id + ':pathbar:' + sg.path,

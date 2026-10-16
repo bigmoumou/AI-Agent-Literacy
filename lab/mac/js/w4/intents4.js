@@ -539,6 +539,13 @@
     id: 'write_mermaid',
     test: function (t) { return t.indexOf('mermaid') >= 0 && /畫|寫|加|新增|流程|draw|write|add|create|make|幫/i.test(t); },
     run: function (ctx) {
+      // not in a project (the New chat box): there is no project folder, so no ARCHITECTURE.md to add to. Say so, as the other Week 4 replies
+      // do, instead of writing a new one into ~/Documents (lab-fixes-r1: Week 4 mission 8 step 8 used to tick anyway)
+      if (!ctx.project) {
+        ctx.say('這個對話不在專案裡（輸入框上方沒有專案標籤），所以我看不到專案的檔案，不知道要把圖加進哪一個 ARCHITECTURE.md。');
+        ctx.say('請先點左邊的專案（還沒有的話，把專案資料夾拖進左邊的側邊欄），再在專案底下的對話請我做。');
+        return;
+      }
       var items = listFrom(ctx.rawText);
       var ids = 'ABCDEFGH'.split('');
       var lines = ['flowchart TD'];

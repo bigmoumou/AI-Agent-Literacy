@@ -128,19 +128,22 @@ window.LAB = window.LAB || {};
   function sp2(n) { return (n < 10 ? ' ' : '') + n; }
   function ampm(d) { return d.getHours() < 12 ? '上午' : '下午'; }
   function h12(d) { var h = d.getHours() % 12; return h === 0 ? 12 : h; }
+  function dayPeriod(d) { var h = d.getHours(); return h < 5 ? '凌晨' : h < 8 ? '清晨' : h < 12 ? '上午' : h < 13 ? '中午' : h < 19 ? '下午' : '晚上'; }
   function sameDay(a, b) { return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); }
 
   var fmt = {
     clockMenubar: function (d) {
       return (d.getMonth() + 1) + '月' + d.getDate() + '日週' + ZH_DAY[d.getDay()] + ' ' + ampm(d) + h12(d) + ':' + p2(d.getMinutes());
     },
+    /* Finder's 修改日期 column as macOS 26 shows it in 繁體中文 (the site owner's screenshot): '2026/7/20 上午 10:08', '2026/10/11 中午 12:37',
+       '2026/10/9 晚上 11:29'; the last three days are 今天 / 昨天 / 前天. The time of day is a CLDR day period (zh-Hant: 凌晨 0–5, 清晨 5–8,
+       上午 8–12, 中午 12–13, 下午 13–19, 晚上 19–24), with a space before the 12-hour time. */
     finderDate: function (ms) {
       var d = new Date(ms), now = LAB.clock.now();
-      var t = ampm(d) + h12(d) + ':' + p2(d.getMinutes());
-      if (sameDay(d, now)) return '今天 ' + t;
-      var y = new Date(now.getTime() - 86400000);
-      if (sameDay(d, y)) return '昨天 ' + t;
-      return d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日 ' + t;
+      var t = dayPeriod(d) + ' ' + h12(d) + ':' + p2(d.getMinutes());
+      var rel = ['今天', '昨天', '前天'];
+      for (var i = 0; i < rel.length; i++) if (sameDay(d, new Date(now.getFullYear(), now.getMonth(), now.getDate() - i, 12))) return rel[i] + ' ' + t;
+      return d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' + t;
     },
     lsDate: function (ms) {
       var d = new Date(ms), now = LAB.clock.now().getTime();
