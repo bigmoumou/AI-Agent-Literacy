@@ -31,13 +31,15 @@
 <script src="../../assets/course.js" defer></script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23f6efdc'/%3E%3Cpath d='M9.5 24v-5M16 24v-9M22.5 24V8' stroke='%238a5400' stroke-width='4.2'/%3E%3C/svg%3E">
 </head>
-<!-- Week 6 只有考試。整頁是一個場景（assets/rift.js 畫在 #rift）：
-     1. 入口：Mac 和 Windows 的桌面從中間撕開，裂縫深處有一個小黑洞，邊緣冒電漿光、兩邊之間打閃電，中間寫 TEST。
-     2. 按「進入考場」：裂縫整個撕開，兩半被黑洞拉長吞掉；時空井浮出來、鏡頭往下掉（時間膨脹、重力紅移），穿過去之後是深空。
-     3. 選一台電腦（Mac／Windows），連線。
-     4. 遠端桌面從兩邊合上來把裂縫封起來，就進到遠端電腦（iframe，lab/mac 或 lab/win）。
-     流程和計時在 exam.js。系統設定「減少動態效果」時，只用淡入淡出。 -->
+<!-- Week 6 只有考試，一進來就直接掉進去（流程和計時在 exam.js）：
+     1. 撕開的 Mac／Windows 螢幕劈啪作響，裂縫裡長出黑洞，螢幕被重力扭曲、碎成玻璃片無重力漂浮，
+        再被吸回中心扭成光環；鏡頭衝向黑洞（時間膨脹、重力紅移、重力波、畫面撕裂），越過事件視界全黑。
+        黑洞是 WebGL 逐像素光線追蹤（assets/blackhole.js，畫在 #bh），螢幕和碎片是 2D（assets/rift.js）。
+     2. 深空裡選一台電腦（Mac／Windows），連線（#rift）。
+     3. 遠端桌面從兩邊合上來把裂縫封起來，就進到遠端電腦（iframe，lab/mac 或 lab/win）。
+     沒有 WebGL2 時用 2D 版；系統設定「減少動態效果」時直接到選電腦。 -->
 <body class="exam" data-root="../../">
+<canvas id="bh" aria-hidden="true" style="display:none"></canvas>
 <canvas id="rift" aria-hidden="true"></canvas>
 <iframe id="remote" title="遠端電腦" hidden allow="fullscreen"></iframe>
 
@@ -53,30 +55,13 @@
   </header>
 
   <main class="stage">
-    <!-- 入口 -->
-    <section class="gate" id="gate" aria-labelledby="examTitle">
-      <h1 class="vh" id="examTitle">TEST</h1>
-      <p class="kicker"><span class="dot" aria-hidden="true"></span>WEEK 06・TEST</p>
-      <p class="gate-lede" data-i18n
+    <h1 class="vh" id="examTitle">TEST</h1>
+    <!-- 選電腦 -->
+    <section class="pick" id="pick" hidden aria-labelledby="pickTitle">
+      <p class="pick-lede" data-i18n
         data-zh-hans="没有提示，只有任务。"
         data-en="No hints. Only missions."
         data-vi="Không có gợi ý, chỉ có nhiệm vụ.">沒有提示，只有任務。</p>
-      <p class="gate-sub" data-i18n
-        data-zh-hans="选一台电脑（Mac 或 Windows），穿过裂缝连到远程桌面，靠自己完成任务卡上指定的事。"
-        data-en="Pick a computer (Mac or Windows), go through the rift to its remote desktop, and finish the tasks on the mission card on your own."
-        data-vi="Chọn một máy tính (Mac hoặc Windows), đi qua khe nứt để vào màn hình từ xa, và tự hoàn thành những việc ghi trên thẻ nhiệm vụ.">選一台電腦（Mac 或 Windows），穿過裂縫連到遠端桌面，靠自己完成任務卡上指定的事。</p>
-      <button class="gate-go" id="enter" type="button"><span data-i18n
-        data-zh-hans="进入考场"
-        data-en="Enter the test"
-        data-vi="Vào phòng thi">進入考場</span><span class="arrow" aria-hidden="true">→</span></button>
-      <p class="gate-note" data-i18n
-        data-zh-hans="考试还没开始：现在进去是练习用的远程电脑。"
-        data-en="The test has not started yet: for now you will enter the practice remote computer."
-        data-vi="Bài kiểm tra chưa bắt đầu: hiện tại bạn sẽ vào máy tính từ xa dùng để luyện tập.">考試還沒開始：現在進去是練習用的遠端電腦。</p>
-    </section>
-
-    <!-- 選電腦 -->
-    <section class="pick" id="pick" hidden aria-labelledby="pickTitle">
       <p class="pick-title" id="pickTitle" data-i18n
         data-zh-hans="选一台电脑"
         data-en="Pick a computer"
@@ -92,6 +77,10 @@
         </button>
       </div>
       <p class="pick-status" id="pickStatus" role="status" aria-live="polite"></p>
+      <p class="pick-note" data-i18n
+        data-zh-hans="考试还没开始：现在进去是练习用的远程电脑。"
+        data-en="The test has not started yet: for now you will enter the practice remote computer."
+        data-vi="Bài kiểm tra chưa bắt đầu: hiện tại bạn sẽ vào máy tính từ xa dùng để luyện tập.">考試還沒開始：現在進去是練習用的遠端電腦。</p>
     </section>
   </main>
 
@@ -108,6 +97,7 @@
 <button class="skip" id="skip" type="button" hidden><span data-i18n data-zh-hans="略过" data-en="Skip" data-vi="Bỏ qua">略過</span></button>
 
 <script src="../../assets/rift.js"></script>
+<script src="../../assets/blackhole.js"></script>
 <script src="exam.js"></script>
 </body>
 </html>

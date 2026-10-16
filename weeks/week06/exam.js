@@ -1,6 +1,12 @@
-/* Week 6（TEST）的入口流程：入口 → 撕開、掉進黑洞 → 選電腦 → 連線 → 裂縫合上、進到遠端桌面。
-   畫面用 assets/rift.js 畫；這裡只決定每個時刻 rift.state 是多少，以及 DOM 什麼時候出現。
-   ?still=1：只畫一張靜止的入口畫面（首頁膠捲的封面 poster.jpg、thumb.jpg 用這個產生，見 README 的 Week 6 說明）。 */
+/* Week 6（TEST）：一進來就直接掉進去（沒有入口那一關）。
+   1. 碎裂（WebGL，assets/blackhole.js）：撕開的螢幕劈啪作響，裂縫裡長出一個黑洞，螢幕被重力扭曲、裂痕爬滿、碎成玻璃片，
+      碎片無重力漂浮、翻轉，接著被吸回中心、扭成光環；鏡頭往黑洞衝，時間膨脹、重力紅移、重力波、畫面撕裂，越過事件視界全黑。
+      螢幕和碎片由 2D canvas 畫（assets/rift.js 的 scene），當作黑洞後面的那張畫面傳給 WebGL。
+   2. 選電腦（2D，#rift）：深空裡浮出兩台筆電；選了之後星光衝向它。
+   3. 進到遠端桌面：遠端桌面從兩邊合上，把裂縫封起來（iframe：lab/mac 或 lab/win）。
+   沒有 WebGL2 時用 2D 版的撕開＋黑洞；系統設定「減少動態效果」時直接到選電腦，只用淡入淡出。
+   ?still=1：首頁封面（poster.jpg、thumb.jpg）。?still=plate：只有兩半的底圖（首頁畫格動畫用的 plate.jpg）。
+   ?debug=1：examSeek("dive", 秒) 跳到某一刻。 */
 (function () {
   "use strict";
 
@@ -14,7 +20,7 @@
   const bump = (u, a, b) => { const m = (a + b) / 2; return u < a || u > b ? 0 : u < m ? (u - a) / (m - a) : (b - u) / (b - m); };
 
   const params = new URLSearchParams(location.search);
-  const STILL = params.get("still") === "1";
+  const STILL = params.get("still");                       // "1"（首頁封面）或 "plate"（只有底圖）
   const reduce = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   const LANG = (window.I18N && window.I18N.lang) || "zh-Hant";
   const STR = {
@@ -25,18 +31,28 @@
   };
   const say = (i) => (STR[LANG] || STR["zh-Hant"])[i];
 
-  const canvas = $("#rift");
-  const rift = new window.Rift(canvas, { seed: 6 });
-  const st = rift.state;
   const body = document.body;
+  const canvas = $("#rift"), bhCanvas = $("#bh");
+  const rift = new window.Rift(canvas, { seed: 6 });          // 看得到的 2D：選電腦、連線、合上（沒有 WebGL 時也畫掉進去）
+  const st = rift.state;
+  const sceneCv = document.createElement("canvas");
+  const scene = new window.Rift(sceneCv, { seed: 6 });        // 看不到的 2D：撕開、碎掉的螢幕，給黑洞當背景
+  const ss = scene.state;
+  let bh = null;
+  if (!reduce && !STILL && window.BlackHole) { try { bh = new window.BlackHole(bhCanvas); } catch (e) { bh = null; } }
   const pick = $("#pick"), status = $("#pickStatus"), skipBtn = $("#skip"), frame = $("#remote");
+  const hud = $("#hud"), hudRate = $("#hudRate"), hudClock = $("#hudClock");
   let W = 1, H = 1, g0 = 120;
+  const Z0 = 12, SCENE_Z = 8, TAN = 0.5;                     // 黑洞的鏡頭：起點距離、背後畫面的位置、視角
 
   if (STILL) body.classList.add("is-still");
 
   function size() {
     W = window.innerWidth; H = window.innerHeight;
-    rift.resize(W, H, STILL ? 1 : Math.min(window.devicePixelRatio || 1, 1.5));
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    rift.resize(W, H, STILL ? 1 : dpr);
+    scene.resize(W, H, Math.min(1, 1280 / W));
+    if (bh) bh.resize(W, H, Math.min(dpr, 1.25));
     g0 = clamp(W * 0.15, 90, 270);
   }
 
@@ -71,8 +87,7 @@
     const vig = g.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.3, W / 2, H / 2, Math.hypot(W, H) * 0.6);
     vig.addColorStop(0, "rgba(0,0,0,0)"); vig.addColorStop(1, "rgba(0,0,0,.6)");
     g.fillStyle = vig; g.fillRect(0, 0, W, H);
-
-    // TEST：紅、青兩色錯開一點（訊號不穩的色差），中間白字
+    // TEST：紅、青兩色錯開一點（訊號不穩的色差），中間白字，兩條橫切片錯位
     const fs = Math.min(W * 0.22, H * 0.27);
     g.font = `900 ${fs}px "Noto Sans TC", "Microsoft JhengHei", "PingFang TC", sans-serif`;
     if ("letterSpacing" in g) g.letterSpacing = `${(fs * 0.05).toFixed(1)}px`;
@@ -84,17 +99,13 @@
     g.fillStyle = "rgba(40,200,255,.8)"; g.fillText("TEST", W / 2 + d, ty);
     g.globalCompositeOperation = "source-over";
     g.fillStyle = "#f4f2ec"; g.fillText("TEST", W / 2, ty);
-    // 訊號斷掉的細縫
-    // 訊號不穩：TEST 有兩條橫切片錯位
     const tw = g.measureText("TEST").width + fs * 0.2, top = ty - fs * 0.74, k = g.canvas.width / W;
     [[0.34, 0.05, 0.03], [0.7, 0.026, -0.038]].forEach(([y0, h0, dx]) => {
       const sy = top + fs * y0, sh = fs * h0;
       g.drawImage(g.canvas, (W / 2 - tw / 2) * k, sy * k, tw * k, sh * k, W / 2 - tw / 2 + fs * dx, sy, tw, sh);
     });
     if ("letterSpacing" in g) g.letterSpacing = "0px";
-
-    if (STILL) {
-      // 首頁封面：角落的小字（膠捲的右上角會另外畫「WEEK 06・TEST」）
+    if (STILL === "1") {
       g.font = `700 ${Math.round(H * 0.024)}px "JetBrains Mono", Consolas, monospace`;
       g.fillStyle = "rgba(190,215,255,.75)";
       const half = stillGap() / 2;      // 兩半會各往外移半個裂縫寬，字要先往內放
@@ -104,22 +115,22 @@
   }
 
   const stillGap = () => clamp(W * 0.17, 90, 330);
-  const gateHole = () => Math.min(W, H) * 0.03;     // 入口時，裂縫深處看得到的那個小黑洞
+  const gateHole = () => Math.min(W, H) * 0.03;
 
-  /* ---------- 時間軸 ---------- */
-  let phase = "gate", T0 = 0, now = 0, raf = 0, prev = 0;
-  let nextGlitch = 2.2, glitchEnd = 0, burst = false, pickShown = false;
-  let loaded = false, chosen = null, connectAt = 0, revealAt = 0;
-  let aimAt = null, chosenAt = null, wc = null;     // 星光流出來的地方：滑鼠指著的筆電、選了的筆電
-  let clock = 0, pickDark = 0;
-  const hud = $("#hud"), hudRate = $("#hudRate"), hudClock = $("#hudClock");
+  /* ---------- 狀態 ---------- */
+  let phase = "start", T0 = 0, now = 0, raf = 0, prev = 0;
+  let pickShown = false, loaded = false, chosen = null, connectAt = 0, revealAt = 0, burst = false;
+  let aimAt = null, chosenAt = null, wc = null, clock = 0, pickDark = 0, shattered = false, seeking = false;
+  const bs = {        // 黑洞那一段的參數（blackhole.js 的 render）
+    t: 0, M: 0, disk: 0, stars: 1, camZ: Z0, incl: 0, tanFov: TAN, sceneOn: 1, sceneZ: SCENE_Z, sceneHalf: [1, 1],
+    chroma: 0, glitch: 0, wave: 0, waveT0: -9, quad: 0, red: 0, dark: 0, flash: 0, grain: 0.04, glow: 1,
+  };
 
-  function base() {        // 每一格先回到預設，再由各階段覆寫
+  function base() {   // 2D 每一格先回到預設
     st.mode = "halves"; st.pull = 0; st.well = 0; st.dive = 0; st.warp = 0; st.flow = 0; st.warpC = null; st.ring = 0;
     st.redshift = 0; st.dark = 0; st.flash = 0; st.seam = 0; st.glitch = 0; st.shakeX = 0; st.shakeY = 0;
     st.arcRate = 0; st.plasma = 1; st.leak = 1; st.dust = 0; st.disc = 1; st.lens = 0; st.lensK = 2.6; st.hole = 0; st.holeR = 0;
   }
-
   function hudShow(on, rate) {
     hud.classList.toggle("is-on", on);
     if (!on) return;
@@ -129,31 +140,60 @@
     hud.style.setProperty("--red", (1 - rate).toFixed(3));
   }
 
-  function setGate(t) {
-    base();
-    st.gap = g0 + Math.sin(t * 0.7) * 5 + Math.sin(t * 1.9) * 2;
-    st.hole = 1; st.holeR = gateHole(); st.lens = 1;
-    st.leak = 0.85 + 0.15 * Math.sin(t * 1.3);
-    st.arcRate = 0.9; st.dust = 0.9;
-    if (t > nextGlitch) { glitchEnd = t + 0.13; st.glitchSeed++; nextGlitch = t + 3.5 + Math.random() * 3.5; }
-    st.glitch = t < glitchEnd ? 1 : 0;
-    st.shakeX = st.glitch ? (Math.random() * 2 - 1) * 1.6 : 0;
+  /* ---------- 1. 碎裂、掉進黑洞（WebGL） ---------- */
+  let lastBurst = 0;
+  function setDive(t, dt) {
+    const u = t - T0;
+    // 螢幕（2D，畫在 scene 上）：先劈啪作響、裂痕爬滿，1.0 秒碎開，之後碎片無重力漂浮，2.4 秒起被吸回中心
+    if (!shattered) {
+      ss.mode = "halves"; ss.noSpace = true; ss.pull = 0; ss.hole = 0; ss.lens = 0;
+      ss.gap = g0 * (1 + 0.5 * out(seg(u, 0, 0.9))) + Math.sin(t * 31) * 3 * seg(u, 0.3, 0.9);
+      ss.arcRate = 5 + 10 * seg(u, 0, 0.9); ss.plasma = 1.3 + 0.8 * seg(u, 0.4, 0.95); ss.dust = 2.5; ss.leak = 1.4;
+      ss.cracks = seg(u, 0.5, 0.98);
+      if (t - lastBurst > 0.22 && Math.random() < 0.5) { ss.glitchSeed++; lastBurst = t; }
+      ss.glitch = t - lastBurst < 0.08 ? 1 : 0;
+      if (u >= 1.0) { scene.shatter(t); shattered = true; bs.flash = 0.75; bs.waveT0 = t; }
+    } else {
+      ss.pullIn = seg(u, 2.4, 3.9);
+    }
+    ss.t = t;
+    scene.draw();
+    bh.setScene(sceneCv);
+    // 黑洞：在裂縫裡長出來、變大；碎開後吸積盤亮起、鏡頭往前衝、慢慢傾斜看到盤面
+    bs.t = t;
+    bs.M = 0.18 * out(seg(u, 0.1, 1.0)) + 0.72 * inOut(seg(u, 0.9, 2.3));
+    bs.disk = out(seg(u, 1.15, 2.3));
+    bs.camZ = lerp(Z0, 6.5, inOut(seg(u, 1.2, 3.4))) - 5.2 * inn(seg(u, 3.3, 4.35));
+    bs.incl = 0.13 * inOut(seg(u, 1.1, 3.2)) + 0.012 * Math.sin(t * 37) * seg(u, 0.6, 1.1) * (1 - seg(u, 1.1, 1.5));
+    bs.chroma = 0.12 + 0.25 * seg(u, 1.0, 3.0) + 1.1 * seg(u, 3.4, 4.3);
+    bs.glitch = (u < 1.15 ? ss.glitch * 0.8 + bump(u, 0.95, 1.2) : 0) + 0.8 * bump(u, 3.75, 4.2) + (Math.random() < 0.02 ? 0.6 : 0);
+    if (u > 2.15 && bs.waveT0 < T0 + 2) bs.waveT0 = t;          // 第二道重力波
+    bs.wave = 1;
+    bs.quad = 0.5 * seg(u, 1.0, 1.4) * (1 - seg(u, 3.4, 3.8));
+    bs.red = seg(u, 3.55, 4.3) * 0.9;
+    bs.dark = seg(u, 4.05, 4.45);
+    bs.flash = Math.max(0, bs.flash - dt * 2.2);
+    bh.render(bs, seeking ? 0 : dt * 1000);
+    // 時間膨脹：越靠近事件視界，時鐘走得越慢
+    const rate = Math.sqrt(clamp(1 - inn(seg(u, 1.2, 4.3)), 0, 1));
+    clock += dt * rate;
+    hudShow(u > 1.25 && u < 4.45, rate);
+    if (u > 0.6) skipBtn.hidden = false;
+    if (u >= 4.45) toPick(1);
   }
 
+  /* ---------- 1'. 沒有 WebGL2：2D 版的撕開＋黑洞 ---------- */
   function setFall(t, dt) {
     const u = t - T0;
     base();
     if (!burst) { burst = true; rift.spawn(90, true); }
-    // 1. 撕開：先猛扯一下，再整個拉開；閃電狂打、畫面訊號亂跳
     st.gap = lerp(g0, W * 0.62, 0.2 * out(seg(u, 0, 0.14)) + 0.8 * inOut(seg(u, 0.22, 0.85)));
     const amp = 7 * Math.pow(1 - seg(u, 0, 0.8), 2);
     st.shakeX = amp * Math.sin(t * 83); st.shakeY = amp * 0.6 * Math.cos(t * 71);
     st.glitch = u < 0.24 ? 1 : 0; if (u < 0.05) st.glitchSeed = 7;
     st.arcRate = u < 0.7 ? 9 : 0;
     st.leak = 1 + bump(u, 0, 0.6); st.plasma = 1 + bump(u, 0, 0.7);
-    // 2. 兩半被黑洞拉長、轉、縮小、吞掉
     st.pull = Math.pow(seg(u, 0.5, 1.9), 1.5);
-    // 3. 黑洞長大、時空井浮出來，鏡頭沿著井往喉嚨掉；越掉越快，畫面往紅色偏移，最後全黑
     const R0 = gateHole(), R1 = Math.min(W, H) * 0.1;
     st.hole = 1; st.lens = 1;
     st.holeR = lerp(R0, R1, out(seg(u, 0.25, 1.3))) + (Math.hypot(W, H) * 0.85 - R1) * inn(seg(u, 2.05, 2.95));
@@ -163,20 +203,26 @@
     st.warp = 0.8 * inn(seg(u, 1.4, 2.9));
     st.disc = 1 - seg(u, 2.0, 2.5);
     st.redshift = seg(u, 2.0, 2.75);
-    st.dark = u < 2.95 ? seg(u, 2.6, 2.95) : 1 - seg(u, 3.0, 3.8);
-    if (u >= 2.95) {     // 穿過事件視界：只剩深空、背後一圈光環
-      st.hole = 0; st.holeR = 0; st.lens = 0; st.warp = 0; st.well = 0; st.redshift = 0; st.pull = 1; st.plasma = 0;
-      st.flow = 0.025; st.ring = seg(u, 3.0, 3.9);
-    }
-    // 時間膨脹：越靠近事件視界，時鐘走得越慢，到邊緣停住
+    st.dark = seg(u, 2.6, 2.95);
     const rate = Math.sqrt(clamp(1 - inn(seg(u, 0.6, 2.85)), 0, 1));
     clock += dt * rate;
-    hudShow(u > 0.55 && u < 3.0, rate);
+    hudShow(u > 0.55 && u < 2.95, rate);
     if (u > 0.4) skipBtn.hidden = false;
-    if (u >= 3.25 && !pickShown) showPick();
-    if (u >= 3.9) { phase = "pick"; skipBtn.hidden = true; }
+    if (u >= 2.95) toPick(1);
+    rift.draw();
   }
 
+  /* ---------- 2. 選電腦、連線（2D） ---------- */
+  function toPick(dark) {
+    if (phase === "pick" || phase === "connect" || phase === "reveal" || phase === "done") return;
+    phase = "pick";
+    skipBtn.hidden = true; hudShow(false);
+    bhCanvas.style.display = "none";
+    canvas.style.display = "";
+    pickDark = dark;
+    body.classList.add("is-in-void");
+    if (!pickShown) showPick();
+  }
   function setPick(t) {
     base();
     st.gap = W * 1.45; st.pull = 1; st.plasma = 0; st.ring = phase === "connect" ? 1 - seg(t - connectAt, 0, 1.2) : 1;
@@ -185,40 +231,33 @@
     wc = wc ? { x: lerp(wc.x, want.x, 0.06), y: lerp(wc.y, want.y, 0.06) } : want;
     st.warpC = wc;
     st.flow = phase === "connect" ? lerp(0.03, 0.45, inn(seg(t - connectAt, 0, 2.2))) : aimAt ? 0.04 : 0.025;
-    pickDark = Math.max(0, pickDark - 0.02); st.dark = pickDark;
+    pickDark = Math.max(0, pickDark - 0.025); st.dark = pickDark;
+    rift.draw();
   }
-
   function setConnect(t) {
     setPick(t);
     const u = t - connectAt;
     if (u < 0.75) status.textContent = say(0);
     else if (!loaded || u < 1.6) status.textContent = say(1);
     else if (!revealAt) { status.textContent = say(2); revealAt = t + 0.4; }
-    if (revealAt && t >= revealAt) { phase = "reveal"; startReveal(t); }
+    if (revealAt && t >= revealAt) { phase = "reveal"; revealAt = t; pick.classList.add("is-leaving"); frame.hidden = false; }
     if (!loaded && u > 15) status.textContent = say(3);
   }
 
-  function startReveal(t) {
-    revealAt = t;
-    pick.classList.add("is-leaving");
-    frame.hidden = false;
-  }
-
+  /* ---------- 3. 遠端桌面從兩邊合上 ---------- */
   function setReveal(t) {
     const u = t - revealAt;
     base();
     st.mode = "reveal";
-    // 遠端桌面從兩邊合上來，裂縫邊緣一路劈啪作響，合上那一刻閃一下
     st.gap = lerp(W * 1.45, 0, inOut(seg(u, 0, 1.3)));
     st.warpC = wc; st.flow = 0.35 * (1 - seg(u, 0, 1.3));
     st.plasma = 1.4; st.arcRate = u < 1.25 ? 6 : 0; st.dust = u < 1.1 ? 1.5 : 0;
     st.seam = u < 1.3 ? 0 : 1 - seg(u, 1.3, 2.1);
     st.flash = u < 1.3 ? 0 : 1 - seg(u, 1.3, 1.75);
-    const amp = 4 * bump(u, 1.26, 1.7);
-    st.shakeX = amp * Math.sin(t * 90);
+    st.shakeX = 4 * bump(u, 1.26, 1.7) * Math.sin(t * 90);
+    rift.draw();
     if (u > 2.15) finish();
   }
-
   function finish() {
     phase = "done";
     cancelAnimationFrame(raf); raf = 0;
@@ -228,18 +267,18 @@
     try { frame.focus(); } catch (e) { /* 不能聚焦也沒關係 */ }
   }
 
+  /* ---------- 迴圈 ---------- */
   function tick(ms) {
     now = ms / 1000;
     const dt = prev ? clamp(now - prev, 0, 0.1) : 0;
     prev = now;
     st.t = now;
-    if (phase === "gate") setGate(now);
+    if (phase === "dive") setDive(now, dt);
     else if (phase === "fall") setFall(now, dt);
     else if (phase === "pick") setPick(now);
     else if (phase === "connect") setConnect(now);
     else if (phase === "reveal") setReveal(now);
     if (phase === "done") return;
-    rift.draw();
     raf = requestAnimationFrame(tick);
   }
   function run() { if (!raf && phase !== "done" && !document.hidden) { prev = 0; raf = requestAnimationFrame(tick); } }
@@ -247,7 +286,6 @@
     if (document.hidden) { cancelAnimationFrame(raf); raf = 0; } else if (!reduce) run();
   });
 
-  /* ---------- 操作 ---------- */
   function showPick() {
     pickShown = true;
     pick.hidden = false;
@@ -255,28 +293,10 @@
     const first = pick.querySelector(".pick-os");
     setTimeout(() => { try { first.focus({ preventScroll: true }); } catch (e) { /* ignore */ } }, reduce ? 50 : 900);
   }
-
-  function enter() {
-    if (phase !== "gate") return;
-    body.classList.add("is-diving");
-    if (reduce) {
-      phase = "pick";
-      base(); st.gap = W * 1.45; st.pull = 1; st.plasma = 0; st.ring = 1;
-      rift.draw();
-      showPick();
-      return;
-    }
-    phase = "fall"; T0 = now || performance.now() / 1000;
-  }
-  function skip() {
-    if (phase !== "fall") return;
-    phase = "pick"; skipBtn.hidden = true;
-    pickDark = 0.7; hudShow(false);
-    if (!pickShown) showPick();
-  }
+  function skip() { if (phase === "dive" || phase === "fall") toPick(0.7); }
 
   function choose(btn) {
-    if (chosen || (phase !== "pick" && !(reduce && pickShown))) return;
+    if (chosen || phase !== "pick") return;
     chosen = btn.dataset.os;
     pick.classList.add("is-chosen");
     pick.querySelectorAll(".pick-os").forEach((b) => { b.classList.toggle("is-on", b === btn); b.classList.toggle("is-off", b !== btn); });
@@ -303,10 +323,9 @@
     try {
       const loc = frame.contentWindow.location;
       if (!/\/lab\//.test(loc.pathname)) window.location.href = loc.href;
-    } catch (e) { /* 不同來源讀不到，就不處理 */ }
+    } catch (e) { /* 讀不到就不處理 */ }
   });
 
-  $("#enter").addEventListener("click", enter);
   skipBtn.addEventListener("click", skip);
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") skip(); });
   pick.querySelectorAll(".pick-os").forEach((b) => {
@@ -316,28 +335,30 @@
     b.addEventListener("focus", aim);
     b.addEventListener("pointerleave", () => { if (!chosen) aimAt = null; });
   });
-  window.addEventListener("resize", () => { size(); if (reduce || STILL) rift.draw(); });
+  window.addEventListener("resize", () => {
+    size();
+    bs.sceneHalf = [(SCENE_Z + Z0) * TAN * (W / H), (SCENE_Z + Z0) * TAN];
+    if (reduce || STILL) rift.draw();
+  });
 
-  /* ---------- 檢查用：?debug=1 時 examSeek("fall", 1.2) 直接跳到某一刻（停住，不再動） ---------- */
+  /* ---------- 檢查用：?debug=1 時 examSeek("dive", 秒) ---------- */
   if (params.get("debug") === "1") {
     window.examSeek = (ph, u) => {
       cancelAnimationFrame(raf); raf = 0;
-      phase = ph; burst = true; pickShown = true;
-      if (ph === "fall") { T0 = 1000; clock = 0; }
-      if (ph === "reveal") revealAt = 1000;
-      for (let k = 0; k <= Math.round(u * 60); k++) {
-        now = 1000 + k / 60; st.t = now;
-        if (ph === "fall") setFall(now, 1 / 60); else if (ph === "reveal") setReveal(now); else setGate(now);
-        if (phase === "done") break;
+      if (ph === "dive") {
+        phase = "dive"; T0 = 1000; shattered = false; ss.shardsOn = false; ss.pullIn = 0; scene.bits = []; clock = 0;
+        bhCanvas.style.display = ""; canvas.style.display = "none";
+        seeking = true;
+        for (let k = 0; k <= Math.round(u * 30); k++) { now = 1000 + k / 30; st.t = now; setDive(now, 1 / 30); if (phase !== "dive") break; }
+        seeking = false;
       }
-      rift.lastT = null; rift.bits = [];
-      canvas.style.display = ""; rift.draw();
-      return { phase, gap: Math.round(st.gap), holeR: Math.round(st.holeR), dark: +st.dark.toFixed(2) };
+      return { phase, M: +bs.M.toFixed(2), camZ: +bs.camZ.toFixed(2), q: bh && +bh.q.toFixed(2) };
     };
   }
 
   /* ---------- 開始 ---------- */
   size();
+  bs.sceneHalf = [(SCENE_Z + Z0) * TAN * (W / H), (SCENE_Z + Z0) * TAN];
   window.ready = false;
   const fontsOk = document.fonts && document.fonts.load
     ? Promise.race([
@@ -350,16 +371,26 @@
     : Promise.resolve();
   Promise.all([load("../week04/lab/screen-mac.jpg"), load("../week04/lab/screen-win.jpg"), fontsOk]).then(([mac, win]) => {
     imgs.mac = mac; imgs.win = win;
-    rift.setPlate(plate);
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { rift.setPlate(plate); if (reduce || STILL) rift.draw(); });
+    rift.setPlate(plate); scene.setPlate(plate);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { rift.setPlate(plate); scene.setPlate(plate); });
     if (STILL) {
       base(); st.gap = stillGap(); st.hole = 1; st.holeR = gateHole(); st.lens = 1; st.still = true;
-      window.render = (t) => { st.t = t; rift.draw(); };
+      if (STILL === "plate") { st.gap = 0; st.plasma = 0; st.hole = 0; st.lens = 0; }
+      window.render = (t) => {
+        st.t = t;
+        if (STILL === "plate") { const g = rift.g; g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, canvas.width, canvas.height); g.drawImage(rift.plate, 0, 0); }
+        else rift.draw();
+      };
       window.render(7.3);
       window.ready = true;
       return;
     }
     window.ready = true;
-    if (reduce) { setGate(0); st.glitch = 0; st.shakeX = 0; st.arcRate = 0; st.dust = 0; rift.draw(); } else run();
+    body.classList.add("is-diving");
+    if (reduce) { toPick(0); setPick(0); return; }
+    if (bh) { phase = "dive"; bhCanvas.style.display = ""; canvas.style.display = "none"; }
+    else phase = "fall";
+    T0 = performance.now() / 1000;
+    run();
   });
 })();

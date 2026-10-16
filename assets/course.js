@@ -108,22 +108,22 @@
       href: "weeks/week06/",
       thumb: "weeks/week06/thumb.jpg",
       still: "weeks/week06/poster.jpg",
-      meta: "考試・遠端電腦 Mac／Windows",
+      meta: "考試・沒有提示，只有任務",
       i18n: {
         "zh-Hans": {
           title: "TEST",
           summary: "没有提示，只有任务：连到一台远程电脑（Mac 或 Windows），靠自己完成指定的事。",
-          meta: "考试・远程电脑 Mac／Windows",
+          meta: "考试・没有提示，只有任务",
         },
         en: {
           title: "TEST",
           summary: "No hints, only missions: connect to a remote computer (Mac or Windows) and finish the assigned tasks on your own.",
-          meta: "Test · remote computer, Mac / Windows",
+          meta: "Test · No hints, only missions",
         },
         vi: {
           title: "TEST",
           summary: "Không có gợi ý, chỉ có nhiệm vụ: kết nối tới một máy tính từ xa (Mac hoặc Windows) và tự hoàn thành những việc được giao.",
-          meta: "Bài kiểm tra · máy tính từ xa Mac / Windows",
+          meta: "Bài kiểm tra · Không gợi ý, chỉ có nhiệm vụ",
         },
       },
     },

@@ -105,6 +105,9 @@
       pull: 0,                                           // 0–1：兩半被黑洞拉長、轉、縮小、吞掉
       redshift: 0, dark: 0, flash: 0, seam: 0,
       shakeX: 0, shakeY: 0, glitch: 0, glitchSeed: 1, still: false,
+      noSpace: false,                                    // 不畫裂縫裡的深空（交給 blackhole.js 的 WebGL 畫，這裡留透明）
+      cracks: 0,                                         // 0–1：玻璃裂痕從裂縫往外爬
+      shardsOn: false, shatterT: 0, pullIn: 0,           // 碎成玻璃片之後：無重力漂浮，pullIn 0–1 被吸回中心
     };
   }
 
@@ -531,6 +534,120 @@
     g.restore();
   };
 
+  /* ---------- 玻璃碎片：先用 Voronoi 把畫面切成十幾塊，裂痕沿著這些邊爬出去，碎開之後每塊各自無重力漂浮 ---------- */
+  function clipPoly(poly, nx, ny, c) {         // 保留 nx*x + ny*y <= c 的那一側
+    const out = [];
+    for (let i = 0; i < poly.length; i++) {
+      const a = poly[i], b = poly[(i + 1) % poly.length];
+      const da = nx * a[0] + ny * a[1] - c, db = nx * b[0] + ny * b[1] - c;
+      if (da <= 0) out.push(a);
+      if ((da < 0) !== (db < 0)) { const k = da / (da - db); out.push([a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k]); }
+    }
+    return out;
+  }
+  Rift.prototype.prepareShards = function (n) {
+    const W = this.W, H = this.H, r = rng(this.seed + 41), seeds = [];
+    let guard = 0;
+    while (seeds.length < n && guard++ < 4000) {
+      // 靠近中間的裂縫多切幾塊（碎得比較細）
+      const x = W / 2 + (r() * 2 - 1) * W * 0.55 * Math.pow(r(), 0.6), y = r() * H;
+      const md = Math.min(W, H) * 0.12;
+      if (seeds.every(([sx, sy]) => Math.hypot(sx - x, sy - y) > md)) seeds.push([clamp(x, 4, W - 4), y]);
+    }
+    this.cells = seeds.map((si, i) => {
+      let poly = [[0, 0], [W, 0], [W, H], [0, H]];
+      seeds.forEach((sj, j) => {
+        if (i === j || poly.length < 3) return;
+        const nx = sj[0] - si[0], ny = sj[1] - si[1];
+        poly = clipPoly(poly, nx, ny, (sj[0] * sj[0] + sj[1] * sj[1] - si[0] * si[0] - si[1] * si[1]) / 2);
+      });
+      const cx = poly.reduce((a, q) => a + q[0], 0) / poly.length, cy = poly.reduce((a, q) => a + q[1], 0) / poly.length;
+      const dx = cx - W / 2, dy = cy - H / 2, d = Math.hypot(dx, dy) || 1;
+      return {
+        poly, c: [cx, cy], dir: [dx / d + (r() * 2 - 1) * 0.3, dy / d + (r() * 2 - 1) * 0.3],
+        speed: (20 + r() * 55) * this.S * 1.6, rv: (r() * 2 - 1) * 0.45, tv: 0.35 + r() * 0.9, tp: r() * 0.8,
+        vz: (r() * 2 - 1) * 0.18 + 0.04,
+      };
+    });
+    // 裂痕：各塊之間的邊（不含畫面外框），由裂縫往外依距離慢慢出現
+    const edges = [];
+    const onBorder = (q) => q[0] < 1 || q[0] > W - 1 || q[1] < 1 || q[1] > H - 1;
+    this.cells.forEach((cell) => cell.poly.forEach((a, i) => {
+      const b = cell.poly[(i + 1) % cell.poly.length];
+      if (onBorder(a) && onBorder(b)) return;
+      if (a[0] < b[0] || (a[0] === b[0] && a[1] < b[1])) edges.push([a, b]);
+    }));
+    this.crackEdges = edges;
+  };
+  Rift.prototype.drawCracks = function (g, st) {
+    if (st.cracks <= 0.001) return;
+    if (!this.crackEdges) this.prepareShards(16);
+    const W = this.W, front = st.cracks * W * 0.62;
+    g.save();
+    g.globalCompositeOperation = "lighter"; g.lineCap = "round";
+    for (const [a, b] of this.crackEdges) {
+      const da = Math.abs(a[0] - W / 2), db = Math.abs(b[0] - W / 2);
+      const n = da <= db ? a : b, f = da <= db ? b : a, dn = Math.min(da, db), df = Math.max(da, db);
+      if (front <= dn) continue;
+      const k = clamp((front - dn) / ((df - dn) || 1), 0, 1);
+      const x = n[0] + (f[0] - n[0]) * k, y = n[1] + (f[1] - n[1]) * k;
+      const fl = st.still ? 1 : 0.75 + 0.25 * Math.random();
+      [[9, "150,120,255", 0.14], [3.2, "205,215,255", 0.4], [1.2, "255,255,255", 0.95]].forEach(([w, c, al]) => {
+        g.strokeStyle = `rgba(${c},${al * fl})`; g.lineWidth = w;
+        g.beginPath(); g.moveTo(n[0], n[1]); g.lineTo(x, y); g.stroke();
+      });
+    }
+    g.restore();
+  };
+  // 碎開：把現在的畫面拍一張下來，之後每一塊都從這張裡剪
+  Rift.prototype.shatter = function (t) {
+    if (!this.cells) this.prepareShards(16);
+    const c = document.createElement("canvas");
+    c.width = this.canvas.width; c.height = this.canvas.height;
+    c.getContext("2d").drawImage(this.canvas, 0, 0);
+    this.snap = c;
+    const st = this.state;
+    st.shardsOn = true; st.shatterT = t; st.cracks = 0;
+    for (const [a, b] of this.crackEdges || []) this.spawnAt((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, 3, "spark");
+  };
+  Rift.prototype.drawShards = function (g, st) {
+    if (!this.snap) return;
+    const W = this.W, H = this.H, tau = Math.max(0, st.t - st.shatterT), P = st.pullIn;
+    const pe = P * P * (3 - 2 * P);
+    for (const s of this.cells) {
+      const dx = s.c[0] + s.dir[0] * s.speed * tau, dy = s.c[1] + s.dir[1] * s.speed * tau;
+      const px = lerp(dx, W / 2, Math.pow(pe, 1.2)), py = lerp(dy, H / 2, Math.pow(pe, 1.2));
+      const tilt = s.tp + s.tv * tau, sx = Math.cos(tilt);
+      const sc = (1 + s.vz * tau) * (1 - 0.92 * pe);
+      if (sc < 0.02) continue;
+      const ra = Math.atan2(py - H / 2, px - W / 2), stretch = pe * 1.6;
+      g.save();
+      g.globalAlpha = 1 - Math.pow(P, 4);
+      g.translate(px, py);
+      g.rotate(ra); g.scale(1 + stretch, 1 / (1 + 0.6 * stretch)); g.rotate(-ra);
+      g.rotate(s.rv * tau);
+      g.scale(sx * sc, sc);
+      g.translate(-s.c[0], -s.c[1]);
+      g.beginPath(); s.poly.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y))); g.closePath();
+      g.save(); g.clip();
+      g.drawImage(this.snap, 0, 0, this.snap.width, this.snap.height, 0, 0, W, H);
+      // 玻璃的反光：轉到某個角度時亮一下
+      const sheen = Math.max(0, Math.sin(tilt * 1.3)) * 0.32;
+      if (sheen > 0.01) {
+        const gr = g.createLinearGradient(s.c[0] - 200, s.c[1] - 200, s.c[0] + 200, s.c[1] + 200);
+        gr.addColorStop(0, "rgba(255,255,255,0)"); gr.addColorStop(0.5, `rgba(235,240,255,${sheen})`); gr.addColorStop(1, "rgba(255,255,255,0)");
+        g.fillStyle = gr; g.fillRect(s.c[0] - 400, s.c[1] - 400, 800, 800);
+      }
+      g.restore();
+      // 邊：剛碎開時電漿般發亮，之後剩一條細細的玻璃邊
+      const hot = Math.exp(-tau * 1.1);
+      g.globalCompositeOperation = "lighter";
+      g.strokeStyle = `rgba(150,120,255,${0.35 * hot})`; g.lineWidth = 10 / Math.max(0.3, sc); g.stroke();
+      g.strokeStyle = `rgba(230,235,255,${0.25 + 0.6 * hot})`; g.lineWidth = 1.6 / Math.max(0.3, sc); g.stroke();
+      g.restore();
+    }
+  };
+
   Rift.prototype.draw = function () {
     const st = this.state, g = this.g, W = this.W, H = this.H;
     const dt = this.lastT == null ? 0 : clamp(st.t - this.lastT, 0, 0.1);
@@ -538,9 +655,14 @@
     g.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
     g.clearRect(0, 0, W, H);
     g.translate(st.shakeX, st.shakeY);
+    if (st.shardsOn) {
+      this.drawShards(g, st);
+      if (!st.still) this.drawBits(g, st, dt);
+      return;
+    }
     const open = st.gap > 0.5;
     const halvesOn = st.mode === "halves" && st.gap < W * 1.3 && st.pull < 0.999;
-    if (open) {
+    if (open && !st.noSpace) {
       g.save();
       if (st.mode === "reveal" || (st.gap < W * 1.3 && st.pull <= 0)) this.clipGap(g, st.gap + (st.mode === "reveal" ? 0 : 2));
       this.drawSpace(g, st);
@@ -551,6 +673,7 @@
     if (open && st.dust > 0 && !st.still) this.spawnDust(Math.random() < st.dust * dt * 30 ? 1 : 0);
     if (halvesOn) { this.drawHalf(g, st, -1); this.drawHalf(g, st, 1); }
     if (open && st.pull <= 0) { this.drawPlasma(g, st); this.drawArcs(g, st, dt); }
+    this.drawCracks(g, st);
     if (!st.still) this.drawBits(g, st, dt);
     // 重力紅移、全黑、閃光
     if (st.redshift > 0.001) {

@@ -316,6 +316,14 @@
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     return t;
   }
+  // 重新上傳同一張貼圖（考試週那一格會動，每秒更新幾十次，不要每次都建新的）
+  function retex(t, source) {
+    gl.bindTexture(gl.TEXTURE_2D, t);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+  }
   const blank = texture(null);
   const tex = frames.map(() => blank);
 
@@ -415,8 +423,9 @@
     g.fillStyle = "#222";
     g.fillRect(x, y, w, h);
     if (img) {
-      const s = Math.max(w / img.naturalWidth, h / img.naturalHeight);
-      const dw = img.naturalWidth * s, dh = img.naturalHeight * s;
+      const iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height;
+      const s = Math.max(w / iw, h / ih);
+      const dw = iw * s, dh = ih * s;
       g.drawImage(img, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
     }
     // 右上角「WEEK 03・已開放」（標題寫在畫面下方的介紹裡，這裡不重複；封面左上角是影片自己的標題）
@@ -534,7 +543,7 @@
     };
     draw(true);
     // 用 file:// 直接開的時候圖片會汙染 canvas，WebGL 不能用，改畫沒有圖片的版本
-    if (img) { try { sg.getImageData(0, 0, 1, 1); } catch (e) { draw(false); } }
+    if (img && !(img instanceof HTMLCanvasElement)) { try { sg.getImageData(0, 0, 1, 1); } catch (e) { draw(false); } }
     return scratch;
   }
 
@@ -567,6 +576,7 @@
   const fr = { l: -1, r: 1, t: 1, b: -1 };     // 近平面上的視窗範圍（點擊判斷也要用）
   let pxPerFrame = 600;
   let vw = 1, vh = 1;
+  let frameBox = { cx: 0, cy: 0, w: 0, h: 0 };   // 正中間那一格在螢幕上的位置（考試週的火花從這裡飄出來）
   let dpr = Math.min(window.devicePixelRatio || 1, 1.5);
   const brandEl = $(".brand");
   const dockEl = $(".dock");
@@ -594,6 +604,8 @@
     };
     let fw = portrait ? w * 0.86 : Math.min(w * 0.44, (h * 0.5) / 0.75);
     for (let k = 0; k < 3; k++) fw = Math.min(fw, band / (0.75 * flare(fw / w))); // 一格（含齒孔）的寬高比是 4:3
+    frameBox = { cx: w / 2, cy: top + band / 2, w: fw, h: fw * 0.75 };
+    if (typeof sizeFx === "function") sizeFx();
     const tanH = Math.tan(half) / (fw / w);
     const tanV = tanH / (w / h);
     // 膠捲中線本來會落在哪一列像素，再把整個畫面往上或往下移到 band 的正中間
@@ -875,6 +887,99 @@
   canvas.addEventListener("webglcontextlost", (e) => { e.preventDefault(); fallback(); });
 
   /* ======================================================================
+     考試週（Week 6 TEST）：那一格會動——裂縫打閃電、電漿邊、玻璃裂痕一伸一縮、灰塵被吸進去、訊號干擾。
+     用 assets/rift.js 畫在一張小畫布上（底圖 weeks/week06/plate.jpg），再貼回那一格的貼圖。
+     只有那一格在畫面上、分頁看得到、沒有設定「減少動態效果」時才動（最多每秒 30 次）。
+     那一格停在正中間時，畫面上還會飄出火花和碎屑（無重力），閃電打下來時整個攝影棚閃一下（一秒多最多一次、很淡）。
+     ====================================================================== */
+  const examI = frames.findIndex((f) => f.kind === "ready" && f.w.exam);
+  let examFx = null, examLast = 0, flashAt = 0, fxParts = [], fxCv = null, fxG = null, flashEl = null;
+  function setupExam() {
+    if (examI < 0 || reduceMotion || !window.Rift) return;
+    loadImage(root() + "weeks/week06/plate.jpg").then((img) => {
+      if (!img || fellBack) return;
+      const cv = document.createElement("canvas");
+      const r = new window.Rift(cv, { seed: 6 });
+      r.resize(1920, 1080, small ? 0.4 : 0.5);
+      r.setPlate((g, W, H) => g.drawImage(img, 0, 0, W, H));
+      examFx = { cv, r, nextGlitch: 0, glitchEnd: 0 };
+      fxCv = document.createElement("canvas"); fxCv.className = "exam-fx"; fxCv.setAttribute("aria-hidden", "true");
+      fxG = fxCv.getContext("2d");
+      flashEl = document.createElement("div"); flashEl.className = "exam-flash"; flashEl.setAttribute("aria-hidden", "true");
+      document.body.append(fxCv, flashEl);
+      sizeFx();
+      wake();
+    });
+  }
+  function sizeFx() { if (fxCv) { fxCv.width = Math.round(vw); fxCv.height = Math.round(vh); } }
+  function examVisible() {
+    let a = (examI - pos) * TH;
+    a = Math.atan2(Math.sin(a), Math.cos(a));
+    return Math.abs(a) < 1.25;
+  }
+  function examStep(now) {
+    const t = now / 1000, r = examFx.r, st = r.state;
+    st.mode = "halves"; st.t = t;
+    // 每隔幾秒抽搐一次：裂縫猛地撐開、閃電狂打、裂痕一下子爬滿、畫面抖動和訊號干擾
+    if (!examFx.nextSurge) examFx.nextSurge = t + 1.2;
+    if (t > examFx.nextSurge) { examFx.surgeT = t; examFx.nextSurge = t + 3 + Math.random() * 2.5; if (current() === examI) flash(now); }
+    const sg = examFx.surgeT ? Math.max(0, 1 - (t - examFx.surgeT) / 0.45) : 0, sp = sg * sg;
+    st.gap = 326 + Math.sin(t * 0.7) * 6 + Math.sin(t * 2.3) * 2 + 70 * sp;
+    st.hole = 1; st.holeR = 32 + 10 * sp; st.lens = 1; st.lensK = 2.6;
+    st.arcRate = 3 + 40 * sp; st.dust = 1.8; st.plasma = 1.2 + 0.15 * Math.sin(t * 3.1) + 0.8 * sp; st.leak = 1 + sp;
+    st.cracks = 0.22 + 0.14 * Math.sin(t * 0.8) + 0.05 * Math.sin(t * 2.9) + 0.4 * sp;   // 玻璃裂痕從裂縫往外爬、又縮回去
+    if (t > examFx.nextGlitch) { examFx.glitchEnd = t + 0.12; st.glitchSeed++; examFx.nextGlitch = t + 1.8 + Math.random() * 2.6; }
+    st.glitch = t < examFx.glitchEnd || sg > 0.5 ? 1 : 0;
+    st.shakeX = sp * (Math.random() * 2 - 1) * 14; st.shakeY = sp * (Math.random() * 2 - 1) * 6;
+    const before = r.arcs.length;
+    r.draw();
+    if (r.arcs.length > before && current() === examI && now - flashAt > 1400) flash(now);
+    retex(tex[examI], paintFrame(frames[examI], examFx.cv));
+  }
+  function flash(now) {
+    flashAt = now;
+    if (!flashEl) return;
+    flashEl.style.transition = "none"; flashEl.style.opacity = "0.2";
+    void flashEl.offsetWidth;
+    flashEl.style.transition = ""; flashEl.style.opacity = "0";
+  }
+  function fxStep(dt, on) {
+    if (!fxG) return false;
+    const box = frameBox;
+    if (on && Math.random() < dt * 28) {
+      const shard = Math.random() < 0.15;
+      fxParts.push({
+        x: box.cx + (Math.random() * 2 - 1) * box.w * 0.06, y: box.cy + (Math.random() - 0.5) * box.h * 0.62,
+        vx: (Math.random() < 0.5 ? -1 : 1) * (12 + Math.random() * 55), vy: (Math.random() * 2 - 1) * 18 - 6,
+        life: 0, max: 1.6 + Math.random() * 2.4, s: shard ? 3 + Math.random() * 4 : 0.8 + Math.random() * 1.6,
+        rot: Math.random() * 6.28, vr: (Math.random() * 2 - 1) * 1.2, shard, warm: Math.random() < 0.35,
+      });
+    }
+    fxG.clearRect(0, 0, fxCv.width, fxCv.height);
+    const keep = [];
+    for (const p of fxParts) {
+      p.life += dt;
+      if (p.life >= p.max) continue;
+      p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= 1 - 0.25 * dt; p.vy *= 1 - 0.25 * dt; p.rot += p.vr * dt;
+      const a = Math.sin((p.life / p.max) * Math.PI);
+      if (p.shard) {
+        fxG.save(); fxG.translate(p.x, p.y); fxG.rotate(p.rot);
+        fxG.fillStyle = `rgba(236,232,222,${a * 0.7})`;
+        fxG.beginPath(); fxG.moveTo(-p.s, -p.s * 0.4); fxG.lineTo(p.s * 0.9, -p.s * 0.6); fxG.lineTo(p.s * 0.3, p.s * 0.8); fxG.closePath(); fxG.fill();
+        fxG.restore();
+      } else {
+        fxG.fillStyle = `rgba(160,130,255,${a * 0.16})`;
+        fxG.beginPath(); fxG.arc(p.x, p.y, p.s * 4, 0, 6.283); fxG.fill();
+        fxG.fillStyle = p.warm ? `rgba(255,214,160,${a})` : `rgba(215,205,255,${a})`;
+        fxG.beginPath(); fxG.arc(p.x, p.y, p.s, 0, 6.283); fxG.fill();
+      }
+      keep.push(p);
+    }
+    fxParts = keep;
+    return keep.length > 0;
+  }
+
+  /* ======================================================================
      動畫迴圈：有東西在動才畫，停住就睡，等下一次自動前進再醒來
      ====================================================================== */
   let raf = 0, sleepTimer = 0;
@@ -924,10 +1029,16 @@
 
     const c = current();
     if (c !== shown) showInfo(c, true);
+    let examOn = false, fxAlive = false;
+    if (examFx && !document.hidden && examVisible()) {
+      examOn = true;
+      if (now - examLast > 33) { examLast = now; examStep(now); }
+    }
+    if (examFx) fxAlive = fxStep(dt, c === examI && Math.abs(target - pos) < 0.02 && !leaving && !indexOpen && !document.hidden);
     draw();
     if (mouse && !drag && !leaving && Math.abs(target - pos) > 1e-3) setHover(pick(mouse.x, mouse.y), mouse.x, mouse.y);
 
-    const moving = pos !== target || vel !== 0 || hoverMoving || !!leaving || now < introUntil || (studioT0 > 0 && now - studioT0 < STUDIO_FADE) ||
+    const moving = pos !== target || vel !== 0 || hoverMoving || !!leaving || now < introUntil || (studioT0 > 0 && now - studioT0 < STUDIO_FADE) || examOn || fxAlive ||
       !near(col.fog[0], want.fog[0]) || !near(col.alpha, want.alpha);
 
     // 太慢就降解析度（只在連續動畫時量，睡醒的第一格不算）
@@ -1003,6 +1114,7 @@
         introUntil = performance.now() + 2400;
         touch();
         loadStudio();
+        setupExam();
       } else {
         wake();
       }
