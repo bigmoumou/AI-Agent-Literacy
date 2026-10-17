@@ -369,12 +369,16 @@ body:not(.in-remote) #guide { display: none; }
 #guide.is-hud .g-reset:hover { color: var(--txt); text-decoration: underline; text-underline-offset: 4px; }
 .g-reset[hidden] { display: none; }
 .g-htitle { margin-top: 12px; font-size: 18px; font-weight: 600; letter-spacing: .05em; }
+/* 第 1 關：目前僅能使用鍵盤打字（一亮一暗地閃，不是硬切的閃爍） */
+.g-note { margin-top: 8px; font-size: 14px; font-weight: 700; letter-spacing: .08em; color: #ff8f7e; animation: g-note 1.3s ease-in-out infinite; }
+.g-note[hidden] { display: none; }
+@keyframes g-note { 0%, 100% { opacity: 1; } 50% { opacity: .22; } }
 #guide .g-hgoal .g-k { white-space: nowrap; color: var(--g-label); font-family: var(--font-body); font-size: 14px; font-weight: 700; letter-spacing: .08em; }
 .g-hgoal { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: baseline; margin: 14px 0 16px; font-size: 15px; font-weight: 500; line-height: 2; }
 .g-hud .g-stab { padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, .1); }
-#guide .g-hud .g-stab > .g-k:first-child { color: var(--g-violet); font-family: var(--font-body); font-size: 14px; font-weight: 700; letter-spacing: .08em; }
-.g-hud .g-segs { gap: 6px; }
-.g-hud .g-segs i { width: 28px; height: 3px; border-radius: 2px; background: rgba(160, 166, 176, .32); }
+#guide .g-hud .g-stab > .g-k:first-child { white-space: nowrap; color: var(--g-violet); font-family: var(--font-body); font-size: 14px; font-weight: 700; letter-spacing: .08em; }
+.g-hud .g-segs { flex: 1 1 auto; min-width: 0; gap: 6px; }
+.g-hud .g-segs i { flex: 0 1 28px; min-width: 12px; height: 3px; border-radius: 2px; background: rgba(160, 166, 176, .32); }
 .g-hud .g-segs i.on { background: var(--g-violet); }
 .g-hud .g-pct { margin-left: auto; font-weight: 700; }
 /* 目標裡的檔名、資料夾名：小標籤 */
@@ -398,5 +402,5 @@ body:not(.in-remote) #guide { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
   .g-dim, .g-bar, .g-title, .g-goal, .g-panel, .g-hud, .g-stamp, .g-segs i { transition: none; }
-  .g-face img, .g-dot, .g-ping.is-on i { animation: none; }
+  .g-face img, .g-dot, .g-ping.is-on i, .g-note { animation: none; }
 }

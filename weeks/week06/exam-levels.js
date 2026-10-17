@@ -274,13 +274,19 @@
         w0.setTitle = function (t) { return set.call(this, String(t).replace(/ — -zsh — \d+×\d+$/, " — zsh")); };
         w0.setTitle(w0.getTitle());
       } catch (e) { /* 改不了就算了 */ }
+      place();
+      setTimeout(() => { try { frame.focus(); inst.win.focus(); inst.focus(); } catch (e) { /* 沒有就算了 */ } }, 60);
+    };
+    let moved = false, dragging = false;
+    const place = () => {
       try {
         const z = L.stage.zoomRect(), w = Math.round(Math.min(z.w * 0.72, 980)), h = Math.round(Math.min(z.h * 0.58, 500));
         inst.win.setRect({ x: Math.round(z.x + (z.w - w) / 2), y: Math.round(z.y + (z.h - h) * 0.42), w, h });
       } catch (e) { /* 調不了就用預設大小 */ }
-      setTimeout(() => { try { frame.focus(); inst.win.focus(); inst.focus(); } catch (e) { /* 沒有就算了 */ } }, 60);
     };
     open();
+    offs.push(L.bus.on("win:move", (d) => { if (inst && d && d.id === inst.win.id) moved = true; }));   // 只有學生拖的時候才會有 win:move（擺位置用的是 setRect）
+    offs.push(L.bus.on("stage:resize", () => { if (!moved && inst) setTimeout(place, 0); }));   // 視窗大小變了：沒拖過就重新擺到中間（不會被切到畫面外）
     // 終端機被關掉（Cmd+W、exit、Alt+F4）就再開一個：滑鼠不能用，沒有終端機就卡住了
     let reopenT = 0;
     const watch = () => {
@@ -288,13 +294,36 @@
       reopenT = setTimeout(() => { try { if (!L.wm.byApp("terminal").length || (inst && inst.isDead && inst.isDead())) open(); } catch (e) { open(); } }, 350);
     };
     ["win:close", "app:quit", "term:exit"].forEach((n) => offs.push(L.bus.on(n, watch)));
-    // 擋滑鼠：蓋一層透明的，按下去什麼都不會發生（也不會讓終端機失去焦點）
-    const cover = doc.createElement("div");
-    cover.id = "exam-nomouse";
-    cover.style.cssText = "position:fixed;inset:0;z-index:2147483646;background:transparent;cursor:not-allowed";
-    ["pointerdown", "mousedown", "mouseup", "click", "dblclick", "contextmenu", "wheel", "touchstart", "dragstart"].forEach((t) =>
-      cover.addEventListener(t, (e) => { e.preventDefault(); e.stopPropagation(); try { inst && inst.focus(); } catch (err) { /* 沒有就算了 */ } }, { passive: false }));
-    doc.body.append(cover);
+    /* 擋滑鼠：在最前面（視窗的 capture）把事件攔下來，按下去什麼都不會發生、終端機也不會失去焦點。
+       只有兩件事可以用滑鼠做（老師 2026-10-17）：拖終端機的標題列（紅綠燈、分頁按鈕不行），按上方的「中斷連線」（會被 LOCKED 擋下）。 */
+    const okFor = (t) => {
+      if (!t || !t.closest) return "";
+      if (t.closest('[data-lab="remote-disconnect"]')) return "exit";
+      if (t.closest('.lab-win[data-app="terminal"] .lab-win-bar, .lab-win[data-app="terminal"] [data-drag]') &&
+        !t.closest("button, input, textarea, select, a, [contenteditable], [data-nodrag], .lab-tl")) return "drag";
+      return "";
+    };
+    const refocus = () => setTimeout(() => { try { inst && inst.focus(); } catch (err) { /* 沒有就算了 */ } }, 0);
+    const block = (e) => {
+      const ok = okFor(e.target);
+      if (ok === "drag" && (e.type === "pointerdown" || e.type === "mousedown")) { if (e.type === "pointerdown") dragging = true; return; }
+      if (ok === "exit" && e.type !== "dblclick" && e.type !== "contextmenu" && e.type !== "wheel") { if (e.type === "click") refocus(); return; }
+      if (dragging && (e.type === "pointermove" || e.type === "mousemove")) return;
+      e.preventDefault(); e.stopImmediatePropagation(); e.stopPropagation();
+      if (e.type === "pointerdown" || e.type === "click") refocus();
+    };
+    const BLOCK = ["pointerdown", "mousedown", "click", "dblclick", "auxclick", "contextmenu", "wheel", "touchstart", "dragstart", "pointerover", "mouseover", "pointermove", "mousemove"];
+    BLOCK.forEach((t) => win.addEventListener(t, block, { capture: true, passive: false }));
+    const endDrag = () => { if (dragging) { dragging = false; refocus(); } };
+    ["pointerup", "pointercancel"].forEach((t) => win.addEventListener(t, endDrag, true));
+    // 游標：到處都是「不能用」，終端機的標題列是「可以拖」，中斷連線是「可以按」
+    const cur = doc.createElement("style");
+    cur.textContent = "html.exam-nomouse,html.exam-nomouse *{cursor:not-allowed!important}" +
+      "html.exam-nomouse .lab-win[data-app=terminal] .lab-win-bar,html.exam-nomouse .lab-win[data-app=terminal] .lab-win-bar *{cursor:grab!important}" +
+      "html.exam-nomouse .lab-win[data-app=terminal] .lab-win-bar :is(button,.lab-tl,.lab-tl *,a,[data-nodrag]){cursor:not-allowed!important}" +
+      "html.exam-nomouse [data-lab=remote-disconnect],html.exam-nomouse [data-lab=remote-disconnect] *{cursor:pointer!important}";
+    doc.head.append(cur);
+    doc.documentElement.classList.add("exam-nomouse");
     // 擋快捷鍵：關視窗、結束、隱藏、開新視窗、Spotlight、開始功能表
     const kill = (e) => {
       const k = (e.key || "").toLowerCase();
@@ -317,7 +346,9 @@
     return function () {
       clearTimeout(reopenT);
       offs.forEach((off) => { try { off(); } catch (e) { /* 已經拿掉了 */ } });
-      cover.remove();
+      BLOCK.forEach((t) => win.removeEventListener(t, block, { capture: true }));
+      ["pointerup", "pointercancel"].forEach((t) => win.removeEventListener(t, endDrag, true));
+      doc.documentElement.classList.remove("exam-nomouse"); cur.remove();
       // 過關：終端機縮到 Dock（工作列），讓人看到裂縫縫起來、桌布開始恢復；要用再點開
       try { L.wm.byApp("terminal").forEach((w) => w.minimize()); } catch (e) { /* 縮不了就算了 */ }
       offKey(); L.keys.hasModal = hasModal;

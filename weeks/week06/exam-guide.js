@@ -16,7 +16,7 @@
   // 每一關：標題、目標、訊號、小安開頭的通訊、卡住時的提醒（秒數、表情、話）、規則被吃掉、結果不對時說的話、要亮的資料夾
   const LV = [
     {
-      title: "散落的座標", signal: "弱",
+      title: "散落的座標", signal: "弱", note: "目前僅能使用鍵盤打字",   // 第 1 關鎖滑鼠：目標列上閃著提醒（老師 2026-10-17）
       goal: "把三份觀測紀錄 `obs-a`、`obs-b`、`obs-c` 都搬進桌面上的 `rescue` 資料夾。",
       intro: [
         ["worried", "……收得到嗎？太好了，我終於聯繫到你了！"],
@@ -92,7 +92,7 @@
       '<div class="g-who"><span class="g-k g-amber">小安 ── 從裂縫的另一頭</span><span class="g-k" data-g="sig"></span></div>' +
       '<div class="g-lines" data-g="lines"></div><div class="g-foot"><span class="g-k" data-g="page"></span><span class="g-k g-keys">Enter 下一句　Esc 略過</span></div></div></div></div>' +
       '<div class="g-hud" data-g="hud"><div class="g-hrow"><span class="g-k g-amber" data-g="hk"></span><button type="button" class="g-k g-reset" data-g="reset">重來這一關</button></div>' +
-      '<div class="g-htitle" data-g="ht"></div><p class="g-hgoal"><span class="g-k">目標</span><span data-g="hg"></span></p>' +
+      '<div class="g-htitle" data-g="ht"></div><div class="g-note" data-g="note" hidden></div><p class="g-hgoal"><span class="g-k">目標</span><span data-g="hg"></span></p>' +
       '<div class="g-stab"><span class="g-k">時空穩定度</span><span class="g-segs" data-g="hs"></span><span class="g-k g-pct" data-g="hp"></span></div></div>' +
       '<div class="g-stamp"><div class="g-k g-amber" data-g="sk"></div><div class="g-big">修復完成</div>' +
       '<div class="g-stab"><span class="g-k">時空穩定度</span><span class="g-segs" data-g="ss"></span><span class="g-k g-pct" data-g="sp"></span></div></div>' +
@@ -225,6 +225,7 @@
       const lv = LV[i];
       $("hk").textContent = i < 4 ? "任務 " + pad(i + 1) + " / 04" : "任務完成";
       $("ht").textContent = lv ? lv.title : DONE.title;
+      $("note").textContent = (lv && lv.note) || ""; $("note").hidden = !(lv && lv.note);
       $("hg").innerHTML = goalHTML(lv ? lv.goal : DONE.goal);
       setStab(stab, [["hs", "hp"]]);
       $("reset").hidden = !(i === 1 || i === 2);
