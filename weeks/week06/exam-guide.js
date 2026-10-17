@@ -99,7 +99,7 @@
     const faceSrc = (n) => "fox/" + n + ".webp";
     ["worried", "determined", "happy", "surprised", "thinking"].forEach((n) => { const im = new Image(); im.src = faceSrc(n); });   // 先載好，換表情不會閃
 
-    let level = -1, stab = 0, cut = null, timers = [], said = {}, toastBusy = false, toastQ = [];
+    let level = -1, stab = 0, cut = null, timers = [], said = {}, toastBusy = false, toastQ = [], toastCut = null, toastDone = Promise.resolve();
     const setStab = (n, where) => {
       where.forEach(([s, p]) => { $(s).innerHTML = segs(n); $(p).textContent = n * 25 + "%"; });
     };
@@ -201,10 +201,19 @@
       if (cut) return;
       if (toastBusy) { toastQ.push([say, signal]); return; }
       toastBusy = true;
-      await talk(makeCut(), [say], signal || (LV[level] || LV[0]).signal, true);
+      toastCut = makeCut();
+      toastDone = talk(toastCut, [say], signal || (LV[level] || LV[0]).signal, true);
+      await toastDone;
+      toastCut = null;
       toastBusy = false;
       const nx = toastQ.shift();
       if (nx && !cut) toast(nx[0], nx[1]); else toastQ = [];
+    }
+
+    // 過關、下一關開始時：還在說的短通訊馬上斷線（不然會和下一段通訊搶同一個面板）
+    async function hush() {
+      toastQ = [];
+      if (toastCut) { toastCut.skip(); await toastDone; }
     }
 
     /* ---------- 目標列 ---------- */
@@ -223,6 +232,7 @@
     /* ---------- 每一關開始 ---------- */
     async function brief(i, resumed) {
       stopNudges();
+      await hush();
       level = i;
       layout();
       const lv = LV[i], c = makeCut();
@@ -271,6 +281,7 @@
     /* ---------- 過關 ---------- */
     function passed(i) {
       stopNudges();
+      hush();
       stab = Math.max(stab, i + 1);
       $("sk").textContent = "第 " + (i + 1) + " 關";
       setStab(stab - 1, [["ss", "sp"]]);
@@ -289,6 +300,7 @@
     // 四關都過了：目標列寫「可以離開了」，STABILIZED 之後小安說最後一句
     function finish(quiet) {
       stopNudges();
+      hush();
       stab = 4; level = 4;
       showHud(4);
       if (!quiet) setTimeout(() => toast(DONE.final, "穩定"), reduce ? 600 : 3600);
