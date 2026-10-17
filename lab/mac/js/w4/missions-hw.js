@@ -443,9 +443,9 @@
       },
       {
         id: 's2',
-        text: '用 Annotate 框一個你想改的地方，留言：[[標題字太小，改大一點]]（也可以寫別的）',
-        hint: '按瀏覽器面板上的 Annotate，點一個元素，在留言框寫一句話，按 Send。',
-        answer: 'Annotate › 點標題 › 貼上留言 › Send。',
+        text: '用標註框一個你想改的地方，留言：[[標題字太小，改大一點]]（也可以寫別的）',
+        hint: '按網址列右邊的標註按鈕（對話框圖示，滑鼠移上去會寫 Annotate），點一個元素，在留言框寫一句話，按 Send。',
+        answer: '網址列右邊的標註按鈕（對話框圖示）› 點標題 › 貼上留言 › Send。',
         replay: 'mission',
         // Annotate -> the heading of the page (a transparent box over it) -> the comment box, then its Send button once something is written;
         // nothing while Codex answers the comment that was just sent (the ring must not jump back to Annotate)

@@ -346,7 +346,7 @@
     minutes: 6,
     resetsFiles: true,
     needs: [FM],
-    intro: '不會寫程式也能改設計：在網頁上框出想改的地方，用一句話說明，Codex 就照著改。這個任務練習瀏覽器面板上的 Annotate（標註）。瀏覽器已經幫你打開了。',
+    intro: '不會寫程式也能改設計：在網頁上框出想改的地方，用一句話說明，Codex 就照著改。這個任務練習瀏覽器面板上的標註（Annotate）：網址列右邊那個對話框圖示。瀏覽器已經幫你打開了。',
     prepare: function (api) {
       ensureBase4(api);
       freshSite(api);
@@ -357,9 +357,9 @@
     steps: [
       {
         id: 's1',
-        text: '按瀏覽器面板工具列上的「Annotate」，進入標註模式。',
-        hint: '進入之後，滑鼠移到網頁上會出現一個框，表示可以選這個地方。',
-        answer: '點一下工具列上的「Annotate」。',
+        text: '按網址列右邊的標註按鈕（對話框圖示，滑鼠移上去會寫 Annotate），進入標註模式。',
+        hint: '按下去以後那個圖示會變藍。進入之後，滑鼠移到網頁上會出現一個框，表示可以選這個地方。',
+        answer: '點一下網址列右邊的對話框圖示（標註按鈕）。',
         target: T_ANNOTATE,
         check: function (ev, api) {
           return !!api.seen('cxbrowser:annotate-mode', function (d) { return d.on === true; });
@@ -409,7 +409,7 @@
         }
       }
     ],
-    outro: 'Annotate：點元素、寫留言、送出，Codex 就知道你指的是哪裡。如果想先試試看再決定，內建瀏覽器還有 Adjust 可以先預覽，不滿意再取消。'
+    outro: '標註（Annotate，網址列右邊的對話框圖示）：點元素、寫留言、送出，Codex 就知道你指的是哪裡。如果想先試試看再決定，內建瀏覽器還有 Adjust 可以先預覽，不滿意再取消。'
   });
 
   /* ================================================================== 4 · 查：整理公開網頁，附上網址 */

@@ -328,7 +328,7 @@
       var a = ctx.annotation, raw = ctx.rawText;
       var tagText = '`<' + a.tag + '>`' + (a.text ? '「' + a.text + '」' : '');
       if (!ctx.project) {
-        ctx.say('我看到你框的是 ' + tagText + '，但這個對話不在專案裡（輸入框上方沒有專案標籤），我找不到專案裡的 site/style.css。請點左邊的專案，在專案底下的對話再用一次 Annotate。');
+        ctx.say('我看到你框的是 ' + tagText + '，但這個對話不在專案裡（輸入框上方沒有專案標籤），我找不到專案裡的 site/style.css。請點左邊的專案，在專案底下的對話再用一次標註（網址列右邊的對話框圖示）。');
         return;
       }
       var site = C.siteFor(ctx.cwd);

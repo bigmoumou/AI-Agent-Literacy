@@ -453,9 +453,9 @@
       },
       {
         id: 's2',
-        text: '用 Annotate 框一個你想改的地方，留言：[[標題字太小，改大一點]]（也可以寫別的）',
-        hint: '按瀏覽器面板上的 Annotate，點一個元素，在留言框寫一句話，按 Send。',
-        answer: 'Annotate › 點標題 › 貼上留言 › Send。',
+        text: '用標註框一個你想改的地方，留言：[[標題字太小，改大一點]]（也可以寫別的）',
+        hint: '按網址列右邊的標註按鈕（對話框圖示，滑鼠移上去會寫 Annotate），點一個元素，在留言框寫一句話，按 Send。',
+        answer: '網址列右邊的標註按鈕（對話框圖示）› 點標題 › 貼上留言 › Send。',
         replay: 'mission',
         // the comment card (box, then Send) › the heading of the page while Annotate is on › the Annotate button
         target: whileIdle(K.chain(commentTarget, K.trusted(function () { return LAB.cxbrowser && LAB.cxbrowser.cueTarget ? LAB.cxbrowser.cueTarget('h1') : null; }), K.inWins('codex', 'cxb-annotate'), K.dock('codex'))),
