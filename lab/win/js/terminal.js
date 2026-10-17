@@ -2534,7 +2534,7 @@
     return out;
   }
   /* .git is hidden on Windows (git sets the attribute), so Get-ChildItem needs -Force to show it */
-  function isHiddenItem(st) { return st.name === '.git'; }
+  function isHiddenItem(st) { return st.name === '.git' || !!st.attrHidden; }   // 另外有「隱藏」屬性的（LAB.vfs.setHidden，例如 AppData）
 
   /* ------------------------------------------------------------ the table that Get-ChildItem / mkdir / New-Item print */
   /* groups: [{dir:'C:\\Users\\an', items:[stat…]}] -> the lines of Format-Table: 2 blank lines, `    目錄: dir`, 2 blank lines, header, dashes, rows; then 2 blank lines at the very end */
@@ -2604,7 +2604,8 @@
     function keep(st, useInc) {
       if (P.Directory && st.type !== 'dir') return false;
       if (P.File && st.type === 'dir') return false;
-      if (P.Hidden || P.System) return false;                         // nothing in the practice PC is hidden or a system file
+      if (P.Hidden && !isHiddenItem(st)) return false;                // -Hidden：只列有隱藏屬性的
+      if (P.System) return false;                                     // nothing in the practice PC is a system file
       if (P.ReadOnly && modeOf(st).charAt(2) !== 'r') return false;
       if (filter && !filter.test(st.name)) return false;
       if (inc && useInc && !inc.some(function (re) { return re.test(st.name); })) return false;
@@ -2612,7 +2613,7 @@
       return true;
     }
     function walk(dirAbs, dirDisp, level, rel, useInc) {
-      var kids = vfs.list(dirAbs).filter(function (st) { return !isTrash(st) && (P.Force || !isHiddenItem(st)); }).sort(dirsFirst);
+      var kids = vfs.list(dirAbs).filter(function (st) { return !isTrash(st) && (P.Force || P.Hidden || !isHiddenItem(st)); }).sort(dirsFirst);
       kids.forEach(function (st) { if (keep(st, useInc)) addItem(dirDisp, st, rel + st.name); });
       if (recurse && level < maxDepth) kids.forEach(function (st) { if (st.type === 'dir') walk(st.path, joinDisp(dirDisp, st.name), level + 1, rel + st.name + '\\', useInc); });
     }

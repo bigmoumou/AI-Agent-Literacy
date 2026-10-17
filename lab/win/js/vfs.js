@@ -186,7 +186,7 @@
       var dot = name.charAt(0) === '.';
       var st = {
         path: canonPath, name: name, type: node.type, kind: 'text', size: 0,
-        mtime: node.mtime, ctime: node.ctime, dot: dot, hidden: dot
+        mtime: node.mtime, ctime: node.ctime, dot: dot, hidden: dot, attrHidden: !!node.hidden
       };
       if (node.type === 'dir') { st.kind = 'folder'; st.size = 0; st.count = node.kids.size; }
       else {
@@ -196,6 +196,8 @@
       return st;
     }
     inst.exists = function (p) { if (isVirtual(p)) return false; return !!lookup(p); };
+    /* Windows 的「隱藏」屬性（例如 AppData）：Get-ChildItem 要加 -Force 才列出來（Week 6 考試第 1 關用） */
+    inst.setHidden = function (p, v) { var l = isVirtual(p) ? null : lookup(p); if (l) l.node.hidden = !!v; return !!l; };
     inst.isDir = function (p) { var l = isVirtual(p) ? null : lookup(p); return !!l && l.node.type === 'dir'; };
     inst.isFile = function (p) { var l = isVirtual(p) ? null : lookup(p); return !!l && l.node.type === 'file'; };
     inst.stat = function (p) {

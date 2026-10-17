@@ -22,6 +22,9 @@
   const bump = (u, a, b) => { const m = (a + b) / 2; return u < a || u > b ? 0 : u < m ? (u - a) / (m - a) : (b - u) / (b - m); };
 
   const params = new URLSearchParams(location.search);
+  /* 考試的四關（exam-levels.js）：網址加 ?exam=1 才開（老師先審；還沒開放前，學生進去還是練習用的遠端電腦，題目不會提早曝光）。
+     要正式開放時，把下面改成 true（或拿掉這個判斷）。 */
+  const EXAM_ON = params.get("exam") === "1";
   const reduce = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   const LANG = (window.I18N && window.I18N.lang) || "zh-Hant";
   const STR = {
@@ -281,7 +284,10 @@
     body.classList.add("in-remote");
     pick.hidden = true;
     try { frame.focus(); } catch (e) { /* 不能聚焦也沒關係 */ }
-    setTimeout(() => banner("warn"), 250);
+    // 重新整理後接著考（已經過了幾關）：不再播一次 WARNING
+    let resumed = false;
+    try { const p = JSON.parse(sessionStorage.getItem("exam-progress") || "{}"); resumed = EXAM_ON && p.os === chosen && p.passed > 0; } catch (e) { /* 讀不到就當第一次 */ }
+    if (!resumed) setTimeout(() => banner("warn"), 250);
     startScars();
     hookLab(0);
   }
@@ -368,20 +374,24 @@
     bannerTimer = setTimeout(() => { w.classList.remove("is-on", "is-short", "is-safe"); body.classList.remove("warn-on", "warn-short", "warn-safe"); }, kind === "lock" ? 2000 : kind === "safe" ? 3000 : 4400);
   }
 
-  /* ---------- 4. 遠端桌面上的小裂縫：空間還沒穩定，完成任務才能逃離 ----------
-     和首頁那一格同一種樣子（紫藍的光、白芯）：兩道小裂縫從螢幕右邊、左邊往內爬一點點，每道只有 1–3 條電流（多了會很怪）；
+  /* ---------- 4. 遠端桌面上的小裂縫：空間還沒穩定，四關都過才能逃離（關卡在 exam-levels.js） ----------
+     和首頁那一格同一種樣子（紫藍的光、白芯）：三道小裂縫從螢幕右邊、左邊往內爬一點點，每道只有 1–3 條電流（多了會很怪）；
+     前三關每過一關縫起一道（先亮一下再散掉），第 4 關（問答）過了才 STABILIZED；
      看得出來但不搶眼，平常輕輕閃，偶爾落雷般亮一下、電流重新長一次（想逃卻被擋下 LOCKED 時也亮一下），
      不擋操作、也不抖畫面，才能專心寫作業。
      畫在 #scar（蓋在 iframe 上），每秒最多畫 20 次、1 倍解析度；分頁看不到就停。
-     還沒完成任務時，「中斷連線」、開始選單的關機、回到週次的連結都逃不出去（LOCKED）；
-     完成任務（練習電腦的 mission:complete）之後小裂縫亮一下就散掉（STABILIZED），才能正常離開。 */
+     還沒過完四關時，「中斷連線」、開始選單的關機、回到週次的連結都逃不出去（LOCKED）；
+     四關都過了（exam-levels.js 的 onDone）才 STABILIZED，能正常離開。
+     另外一層紫紅的暈影（#exam-vign），每過一關淡一點；桌布也每過一關恢復一階（exam-wall.js）。 */
   const scarCv = $("#scar"), scarG = scarCv.getContext("2d");
-  let scars = [], escaped = false, scarRaf = 0, scarDrawn = 0, sealAt = 0, scarLoop = null;
+  let scars = [], escaped = false, scarRaf = 0, scarDrawn = 0, sealAt = 0, scarLoop = null, stage = 0;
+  const scarSeal = [0, 0, 0];                                  // 每道裂縫縫起來的時間（-99：一開始就已經縫好了）
   // 從圖裡切哪一叢（貼圖座標）、放在螢幕哪一邊、多高；左右翻過來，讓原本連著裂縫的那一端貼著螢幕邊
   // 放在螢幕哪一邊、多高、幾條電流、多長（螢幕短邊的幾成）、往哪個方向斜
   const SCAR_SPOTS = [
-    { edge: 1, y: 0.44, n: 2, len: 0.2, tilt: -0.18 },    // 從螢幕右邊爬進來
-    { edge: 0, y: 0.72, n: 3, len: 0.17, tilt: 0.22 },    // 從螢幕左邊爬進來
+    { edge: 1, y: 0.34, n: 2, len: 0.2, tilt: -0.18 },    // 從螢幕右邊爬進來
+    { edge: 0, y: 0.66, n: 3, len: 0.17, tilt: 0.22 },    // 從螢幕左邊爬進來
+    { edge: 1, y: 0.8, n: 1, len: 0.14, tilt: 0.3 },      // 右下，比較短
   ];
   // 一條電流：從螢幕邊（0, y0）往內，中點一直往旁邊偏（像閃電），回傳折線
   function strand(len, y0, ang) {
@@ -412,7 +422,7 @@
     scars = SCAR_SPOTS.map((p, k) => {
       const L = Math.min(W, H) * p.len, c = document.createElement("canvas");
       c.width = Math.ceil(L + 36); c.height = Math.ceil(L * 0.9 + 36);
-      const s = { p, k, L, c, ph: k * 2.1, strikeT: -9, next: performance.now() / 1000 + 4 + k * 3 + Math.random() * 3 };
+      const s = { p, k, L, c, ph: k * 2.1, strikeT: -9, next: performance.now() / 1000 + 4 + k * 3 + Math.random() * 3, sealAt: scarSeal[k] };
       drawScarImage(s);
       return s;
     });
@@ -426,8 +436,8 @@
         scarRaf = 0;
         const t = ms / 1000;
         if (t - scarDrawn >= 1 / 20 - 0.002) { scarDrawn = t; drawScars(t); }   // 每秒最多 20 次
-        if (sealAt && t - sealAt > 1.4) { scarG.clearRect(0, 0, scarCv.width, scarCv.height); scarCv.style.display = "none"; return; }
-        if (!reduce || sealAt) scarRaf = requestAnimationFrame(loop);
+        if (scars.length && scars.every((s) => s.sealAt && t - s.sealAt > 1.6)) { scarG.clearRect(0, 0, scarCv.width, scarCv.height); scarCv.style.display = "none"; return; }
+        if (!reduce || scars.some((s) => s.sealAt > 0 && t - s.sealAt < 1.6)) scarRaf = requestAnimationFrame(loop);
       };
       sizeScar();
       if (reduce) drawScars(0);
@@ -442,10 +452,12 @@
     g.setTransform(1, 0, 0, 1, 0, 0);
     g.clearRect(0, 0, W, H);
     for (const s of scars) {
-      if (!reduce && !sealAt && t > s.next) { s.strikeT = t; s.next = t + 7 + Math.random() * 6; drawScarImage(s); if (sound) sound.crackle(0.12, 0.15); }
+      // 落雷：每過一關越來越少（空間越來越穩定）
+      if (!reduce && !s.sealAt && t > s.next) { s.strikeT = t; s.next = t + (7 + Math.random() * 6) * (1 + stage); drawScarImage(s); if (sound) sound.crackle(0.12, 0.15); }
       const e = reduce ? 0 : env(t - s.strikeT);                      // 落雷：一閃、暗一下、再一閃
-      const gone = sealAt ? clamp((t - sealAt - 0.25 - s.k * 0.12) / 0.7, 0, 1) : 0;   // 封起來：先亮一下再散掉
-      const seal = sealAt ? env(t - sealAt - s.k * 0.12) : 0;
+      const gone = s.sealAt ? clamp((t - s.sealAt - 0.25) / 0.7, 0, 1) : 0;   // 縫起來：先亮一下再散掉
+      const seal = s.sealAt ? env(t - s.sealAt) : 0;
+      if (gone >= 1) continue;
       const rest = reduce ? 0.68 : 0.62 + 0.1 * Math.sin(t * 1.9 + s.ph) + 0.08 * (Math.random() - 0.5);
       g.save();
       g.translate(s.p.edge ? W : 0, s.p.y * H - s.c.height / 2);
@@ -467,19 +479,58 @@
     const t = performance.now() / 1000;
     scars.forEach((s) => { s.strikeT = t; });          // 小裂縫跟著亮一下
   }
-  function unlock() {
+  function unlock(quiet) {
     if (escaped) return;
     escaped = true;
     sealAt = performance.now() / 1000;
+    scars.forEach((s, k) => { if (!s.sealAt) s.sealAt = scarSeal[k] = sealAt; });
     if (!scarRaf && scarLoop) scarRaf = requestAnimationFrame(scarLoop);   // 減少動態效果時迴圈是停著的，封起來要再跑一下
-    setTimeout(() => banner("safe"), 700);
+    if (!quiet) setTimeout(() => banner("safe"), 700);
+  }
+  // 過了幾關（0–4）：前三關每過一關縫起一道裂縫；暈影越來越淡（animate：要不要播縫起來的那一下）
+  const vign = document.createElement("div");
+  vign.id = "exam-vign"; vign.setAttribute("aria-hidden", "true");
+  document.body.append(vign);
+  function setStage(n, animate) {
+    stage = n;
+    const now2 = performance.now() / 1000;
+    for (let k = 0; k < 3; k++) {
+      if (k < n && !scarSeal[k]) {
+        scarSeal[k] = animate ? now2 : -99;
+        const s = scars[k];
+        if (s) s.sealAt = scarSeal[k];
+      }
+    }
+    vign.style.opacity = String([0.85, 0.6, 0.38, 0.18, 0][Math.min(4, n)]);
+    if (animate && n <= 3) {                                     // 縫起來的聲音：一陣劈啪慢慢收掉、低低的一聲
+      if (sound) { sound.crackle(0.5, 0.35); sound.zap(0.35, 0.3, 0.25, 0.6); }
+    }
+    if (!scarRaf && scarLoop) scarRaf = requestAnimationFrame(scarLoop);
+  }
+  // Codex 寫出來的不對：空間還不穩定（剩下的裂縫一起閃一下、低低的嗡一聲；不說哪裡錯）
+  function unstable() {
+    const t = performance.now() / 1000;
+    scars.forEach((s) => { if (!s.sealAt) s.strikeT = t; });
+    if (sound) sound.crackle(0.45, 0.25);
+    buzz();
+    if (!scarRaf && scarLoop) scarRaf = requestAnimationFrame(scarLoop);
   }
   // 接上練習電腦（同一個網站，所以讀得到它的 LAB）：任務完成就解鎖；還沒解鎖時擋住離開
   function hookLab(tries) {
     let L = null, doc = null;
     try { L = frame.contentWindow.LAB; doc = frame.contentDocument; } catch (e) { return; }
-    if (!L || !L.bus || !L.remote || !doc) { if (tries < 40) setTimeout(() => hookLab(tries + 1), 250); return; }
-    L.bus.on("mission:complete", unlock);
+    if (!L || !L.bus || !L.remote || !doc || !L.missions || !L.codex || !L.terminal || !L.vfs || !doc.getElementById("lab-wall")) { if (tries < 60) setTimeout(() => hookLab(tries + 1), 250); return; }
+    if (EXAM_ON && window.ExamLevels) {
+      window.ExamLevels.start({
+        frame, os: chosen,
+        hooks: {
+          onStage: setStage,
+          onUnstable: unstable,
+          onDone: (resumed) => unlock(resumed),
+          sfx: (k) => { if (k === "no") buzz(); else if (sound) { sound.crackle(0.3, 0.2); sound.zap(0.25, 0.2, 0, 0.8); } },   // 問答：答錯低低的拒絕音、答對一小聲電弧
+        },
+      });
+    } else L.bus.on("mission:complete", () => unlock());
     const leave = L.remote.disconnect;
     L.remote.disconnect = function () { if (escaped) return leave.apply(this, arguments); locked(); };
     // 逃出來之後回到課程首頁（練習電腦原本會「回上一頁」，在這裡會退回空白的 iframe）
@@ -532,7 +583,7 @@
     const r = btn.querySelector(".lap-lid").getBoundingClientRect();
     chosenAt = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
     // 遠端電腦在後面先載入（被深空蓋住，看不到）；?connect=0 跳過練習電腦自己的「連線中」畫面
-    frame.src = `../../lab/${chosen}/?connect=0`;
+    frame.src = `../../lab/${chosen}/?connect=0` + (EXAM_ON ? "&welcome=0&intro=0&guide=off" : "");   // 考試：不跳選任務的畫面、不顯示示範游標
     frame.hidden = false;
     connectAt = now || performance.now() / 1000;
     status.textContent = say(0);

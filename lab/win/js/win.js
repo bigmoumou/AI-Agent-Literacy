@@ -149,7 +149,8 @@
   function mode(st) {
     if (typeof st === 'string') st = LAB.vfs.stat(st);
     if (!st) return '------';
-    if (st.type !== 'dir') return '-a----';
+    if (st.type !== 'dir') return st.attrHidden ? '-a-h--' : '-a----';
+    if (st.attrHidden) return 'd--h--';
     var p = st.path || '';
     var i = p.lastIndexOf('/');
     if (i > 0 && fold(p.slice(0, i)) === fold(HOME) && READONLY_DIRS[fold(p.slice(i + 1))]) return 'd-r---';
