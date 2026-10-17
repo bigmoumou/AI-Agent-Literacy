@@ -22,7 +22,7 @@
   "use strict";
   const AC = window.AudioContext || window.webkitAudioContext;
   const KEY = "exam-sound";
-  const VOL = 0.8;
+  const VOL = 1.0;                                         // 老師 2026-10-17：整體 +20%（原本 0.8；壓縮器會吃掉一點，實際輸出量起來 +20%）
   let ctx = null, master = null, bed = null, pools = null, off = false, activated = false, napTimer = 0, holdUntil = 0;
   let diveBuf = null, diveSrc = null, diveGain = null, humSrc = null;
   const clips = {}, clipP = {};
@@ -40,9 +40,13 @@
     ctx.addEventListener && ctx.addEventListener("statechange", () => { if (ctx.state === "running") activated = true; });
     master = ctx.createGain();
     master.gain.value = off || document.hidden ? 0 : VOL;
-    const comp = ctx.createDynamicsCompressor();              // 溫和地壓一下尖峰
+    const comp = ctx.createDynamicsCompressor();              // 溫和地壓一下尖峰（總音量 +20% 時最猛的瞬間由這裡壓住，不破音）
     comp.threshold.value = -10; comp.knee.value = 8; comp.ratio.value = 3; comp.attack.value = 0.004; comp.release.value = 0.25;
-    master.connect(comp); comp.connect(ctx.destination);
+    // 最後一道限幅：只壓最頂端（超過 −2.5 dB 的劈啪、爆開那種很短的尖峰），最高約 −1.5 dB，不破音；瀏覽器會自動補 +1.41 dB，後面乘 0.85 抵掉，其他聲音不受影響
+    const lim = ctx.createDynamicsCompressor();
+    lim.threshold.value = -2.5; lim.knee.value = 0; lim.ratio.value = 20; lim.attack.value = 0.001; lim.release.value = 0.06;
+    const trim = ctx.createGain(); trim.gain.value = 0.85;
+    master.connect(comp); comp.connect(lim); lim.connect(trim); trim.connect(ctx.destination);
     return ctx;
   }
 
