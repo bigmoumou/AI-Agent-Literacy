@@ -82,7 +82,8 @@
     if (I > 0.45 && t - lastZap > 0.2 + 0.3 * (1 - I) + Math.random() * 0.2) { lastZap = t; sound.zap(0.35 + 0.4 * I, 0.18, 0, pitch); }
   }
   // 撕開的那張圖畫在 scene：給 WebGL 當黑洞後面的那張（整張被重力彎曲；碎開時也從它剪）
-  function drawOpening(t, u) {
+  // pre（0..1）：蓄勢中（還沒開始撕開，u 是 0），越大電流越激動
+  function drawOpening(t, u, pre) {
     const g = scene.g, k = scene.dpr;
     g.setTransform(1, 0, 0, 1, 0, 0);
     g.clearRect(0, 0, sceneCv.width, sceneCv.height);
@@ -90,9 +91,10 @@
       if (u > 0.44 && !secondSurge) { secondSurge = true; art.surge(t + 0.16); bs.waveT0 = t + 0.16; }   // 裂痕開始爬的時候再猛亮一次、再一圈重力波
       const c = cover(1);
       g.setTransform(k * c.s, 0, 0, k * c.s, k * c.x, k * c.y);
-      const fired = art.step(t, { energy: 1 + 1.8 * seg(u, 0.15, 0.95), auto: false });
+      const fired = art.step(t, { energy: pre != null ? 1 + 1.5 * pre : 1 + 1.8 * seg(u, 0.15, 0.95), auto: false });
       if (sound && !warming) {                                 // 隆隆、爆開、往下塌是事先做好的一整段（開始時 sound.dive）；這裡只跟著電流
-        lightning(t, Math.max(1 - out(seg(u, 0, 0.8)), 0.85 * seg(u, 0.45, 0.98)), 1);   // 接著首頁被吸進來；裂痕爬滿時越來越劇烈
+        // 蓄勢時劈啪越來越密；撕開時接著越來越劇烈（裂痕爬滿時最劇烈）
+        lightning(t, pre != null ? 0.3 + 0.5 * pre : Math.max(1 - out(seg(u, 0, 0.8)), 0.85 * seg(u, 0.45, 0.98)), 1);
         sound.level("fizz", 0.035 + 0.12 * art.activity(), 0.06);
         if (art.takeStrikes()) sound.crackle(0.54, 0.2);
         if (fired) sound.zap(0.84, 0.3);
@@ -111,7 +113,7 @@
   const gateHole = () => Math.min(W, H) * 0.03;
 
   /* ---------- 狀態 ---------- */
-  let phase = "start", T0 = 0, now = 0, raf = 0, prev = 0;
+  let phase = "start", T0 = 0, now = 0, raf = 0, prev = 0, preC = 0;   // preC：蓄勢結束時裂痕爬到哪裡（撕開時接著爬）
   let pickShown = false, loaded = false, chosen = null, connectAt = 0, revealAt = 0, burst = false, sealed = false;
   let aimAt = null, chosenAt = null, wc = null, clock = 0, pickDark = 0, shattered = false, seeking = false, emergeAt = -9;
   const bs = {        // 黑洞那一段的參數（blackhole.js 的 render）
@@ -162,7 +164,7 @@
     // 0–1 秒：撕開（2D，清楚），裂痕 0.5 秒起爬滿；1.0 秒碎成玻璃片，換成 WebGL（白閃蓋住切換），之後碎片無重力漂浮，1.9 秒起被吸回中心
     ss.t = t;
     if (!shattered) {
-      ss.cracks = seg(u, 0.5, 0.98);
+      ss.cracks = preC + (1 - preC) * seg(u, 0.5, 0.98);
       drawOpening(t, u);
       if (u >= 1.0) { scene.shatter(t); shattered = true; bs.flash = 0.55; bs.waveT0 = t; if (sound) sound.zap(0.8, 0.3); }   // 碎開：一聲電弧（不用玻璃叮叮）
     }
@@ -498,7 +500,8 @@
     const dt = prev ? clamp(now - prev, 0, 0.1) : 0;
     prev = now;
     st.t = now;
-    if (phase === "dive") setDive(now, dt);
+    if (phase === "pre") setPre(now);
+    else if (phase === "dive") setDive(now, dt);
     else if (phase === "fall") setFall(now, dt);
     else if (phase === "pick") setPick(now);
     else if (phase === "connect") setConnect(now);
@@ -582,7 +585,7 @@
     window.examSeek = (ph, u) => {
       cancelAnimationFrame(raf); raf = 0;
       if (ph === "dive") {
-        phase = "dive"; T0 = 1000; shattered = false; ss.shardsOn = false; ss.pullIn = 0; scene.bits = []; clock = 0;
+        phase = "dive"; T0 = 1000; preC = PRE_CRACKS; shattered = false; ss.shardsOn = false; ss.pullIn = 0; scene.bits = []; clock = 0;
         bhCanvas.style.display = ""; canvas.style.display = "none"; secondSurge = false; if (art) art.surge(1000.16); bs.waveT0 = 1000.16;
         seeking = true;
         for (let k = 0; k <= Math.round(u * 30); k++) { now = 1000 + k / 30; st.t = now; setDive(now, 1 / 30); if (phase !== "dive") break; }
@@ -596,66 +599,94 @@
   size();
   bs.sceneHalf = [(SCENE_Z + Z0) * TAN * (W / H), (SCENE_Z + Z0) * TAN];
   const artP = window.ExamArt ? window.ExamArt.load("") : Promise.resolve(null);
-  // 開始之前先熱身（還在顯示靜止的那張圖，沒有東西在動，卡一下也看不出來）：
-  //   黑洞的著色器第一次畫的時候才真的編譯、畫面緩衝區也要配置，先在看不到的地方畫一格；音效的聲音片段也一起做好
-  const warm = new Promise((done) => requestAnimationFrame(() => setTimeout(() => {
-    if (wantBH) {
-      try { bh = new window.BlackHole(bhCanvas); bh.resize(W, H, Math.min(window.devicePixelRatio || 1, 1.25)); } catch (e) { bh = null; }
-    }
+  /* 那張圖一到就先畫上去（和首頁最後一格同一張）。動畫素材到齊就進入「蓄勢」（pre）：裂縫邊的電流越來越激動、一陣陣落雷，
+     裂痕從裂縫往外爬，劈啪越來越密，底下虛空低鳴——時空快要撕開了（老師：點進來後停住 0.5 秒不動很怪）。
+     重的準備工作：
+       - 建 WebGL 畫布（瀏覽器一定要當場做完，約 0.1–0.16 秒）放在靜止那張剛畫上、還在等動畫素材的空檔；著色器在背景編譯；
+       - 顯示卡第一次準備撕開、碎片的畫法（會卡一下）放在蓄勢中間那道落雷最亮的那一格：最亮的那一下停住，看起來就是閃光。
+     都做完、而且至少蓄勢 PRE_MIN 秒，才暗一下、落雷撕開（dive；沒有 WebGL2 時 fall）。 */
+  const PRE_MIN = 0.75, PRE_MAX = 3, PRE_CRACKS = 0.38, PRE_SURGE = 0.3, PRE_FLASH = 0.46;   // 蓄勢中間那道落雷：0.3 秒起暗一下、0.42 秒猛亮
+  let preT0 = 0, preSurged = false, bhWarm = false;
+  // 開場那一整段的聲音（assets/exam-dive.mp3）先解碼好；最多等 1.5 秒，來不及就用合成的
+  let clipOK = !(sound && wantBH);
+  if (!clipOK) Promise.race([sound.loadClip("dive"), new Promise((r) => setTimeout(r, 1500))]).then(() => { clipOK = true; });
+  // 黑洞的畫布、著色器（在靜止那張畫上之後、等動畫素材的空檔做）
+  function makeBH() {
+    if (!wantBH || bh) return;
+    try { bh = new window.BlackHole(bhCanvas); bh.resize(W, H, Math.min(window.devicePixelRatio || 1, 1.25)); } catch (e) { bh = null; }
+  }
+  // 黑洞各種情況都先畫一次（吸積盤、往中心糊開、重力波）；畫在靜止那張後面，看不到
+  function warmBH() {
+    if (!bh || bhWarm) return;
+    bhWarm = true;
+    try {
+      bh.q = 0.8; bh.makeFbo(); bh.setScene(sceneCv);
+      const keep = Object.assign({}, bs);
+      Object.assign(bs, { M: 0.5, disk: 1, zoom: 0.3, quad: 0.3, wave: 1, waveT0: 0, tone: 1, red: 0.3 }); bh.render(bs, 0);
+      Object.assign(bs, keep); bh.render(bs, 0);
+      bhCanvas.style.display = "";
+    } catch (e) { bh = null; }
+  }
+  const bhReady = () => { if (!bh) return true; try { return bh.ready(); } catch (e) { bh = null; return true; } };
+  // 蓄勢時的準備工作：一格做一個；回傳 false 表示還沒好（或還沒到時候），下一格再問一次
+  const jobs = [
+    () => { if (sound) sound.prepare(true); return true; },          // 音效片段
+    (p) => {                                                         // 落雷最亮的那一格：撕開、補洞、裂痕、碎片、火花的畫法一次準備好（黑洞好了也一起）
+      if (p < PRE_FLASH) return false;
+      if (art) {
+        warming = true; const sc = secondSurge, c0 = ss.cracks;
+        secondSurge = true;                                          // 試畫時不要觸發第二次猛亮
+        try { ss.cracks = 0.6; drawOpening(now, 0.6); scene.flush(); } catch (e) { /* 試畫失敗也沒關係 */ }
+        warming = false; secondSurge = sc; ss.cracks = c0;
+      }
+      try { scene.primeShatter(); } catch (e) { /* 試畫失敗也沒關係 */ }
+      if (bhReady()) warmBH();
+      return true;
+    },
+    () => { if (!bhReady()) return false; warmBH(); return true; },  // 黑洞的著色器還沒編好就再等（不卡畫面）
+    () => { if (sound && !bh) sound.makeDive("fall"); return true; },   // 2D 版開場那一整段的聲音用合成的
+  ];
+  function setPre(t) {
+    const p = t - preT0, k = Math.min(1, p / PRE_MIN);
+    ss.t = t;
+    ss.cracks = PRE_CRACKS * inOut(k);                             // 裂痕從裂縫往外爬
+    if (art && !preSurged && p > PRE_SURGE) { preSurged = true; art.surge(t + 0.12); }   // 中間一道落雷（先暗一下再猛亮）
+    drawOpening(t, 0, k);
+    const g = rift.g;
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    g.drawImage(sceneCv, 0, 0, canvas.width, canvas.height);
+    if (sound) sound.level("drone", 0.12 + 0.2 * k, 0.25);        // 虛空低鳴越來越大
+    if (jobs.length && jobs[0](p)) jobs.shift();
+    if ((!jobs.length && clipOK && p >= PRE_MIN) || p >= PRE_MAX) startOpening(t);
+  }
+  function startOpening(t) {
+    phase = bh ? "dive" : "fall";
+    T0 = t;
+    preC = ss.cracks;
     if (bh) {
-      try {
-        bh.q = 0.8; bh.makeFbo(); bh.setScene(sceneCv);
-        // 各種情況都先畫一次（吸積盤、往中心糊開、重力波），之後第一次遇到時才不會卡；黑洞的畫布也先放到靜止圖的後面
-        const keep = Object.assign({}, bs);
-        Object.assign(bs, { M: 0.5, disk: 1, zoom: 0.3, quad: 0.3, wave: 1, waveT0: 0, tone: 1, red: 0.3 }); bh.render(bs, 0);
-        Object.assign(bs, keep); bh.render(bs, 0);
-        bhCanvas.style.display = "";
-      } catch (e) { /* 畫不出來就算了 */ }
+      bhCanvas.style.display = ""; canvas.style.display = "none";   // 光線追蹤的解析度在熱身時已經設成 0.8（太慢會自己降）
+      bs.waveT0 = T0 + 0.16;
     }
-    if (sound) { sound.prepare(true); if (!reduce && !bh) sound.makeDive("fall"); }   // 2D 版開場那一整段的聲音用合成的，也先做好
-    done();
-  }, 0)));
-  const ready = artP.then((a) => {
+    if (art) art.surge(T0 + 0.16);                                 // 先暗一下，再落雷般猛亮（打出第一圈重力波）
+    if (sound) { sound.level("drone", 0, 0.3); sound.dive(phase); }   // 聲音和畫面同一刻開始（隆隆交給那一整段）
+  }
+  artP.then((a) => {
     if (!a || reduce) return a;
-    // 那張圖一到就先畫上去（不會動），動畫素材到齊再開始撕開
     art = a;
     const c = cover(1), k = rift.dpr;
     rift.g.setTransform(k * c.s, 0, 0, k * c.s, k * c.x, k * c.y);
     a.drawStatic(rift.g);
-    return Promise.all([a.loadFx(), a.loadSpace()]).then(([ok]) => {
-      if (ok) {
-        a.patchLayers();
-        // 撕開的畫面也先試畫一次（配置畫布、上傳到顯示卡），開場第一格才不會卡；碎開要用的也準備好
-        warming = true;
-        try {
-          // 每畫一種就送出去（不然下一次整張清掉時，瀏覽器會把還沒畫的直接丟掉，顯示卡就沒準備到）
-          a.step(0, { auto: false });
-          a.surge(-0.06); ss.cracks = 0; drawOpening(0, 0); scene.flush();   // 還沒撕開、猛亮那一下（電流白熱、光暈）
-          ss.cracks = 0.5; drawOpening(0.3, 0.6); scene.flush();           // 撕開、補洞、裂痕
-          scene.primeShatter();                                            // 碎片、火花
-          scene.flush(true);                                               // 等顯示卡都準備好才開始動
-        } catch (e) { /* 試畫失敗也沒關係 */ }
-        warming = false; secondSurge = false; ss.cracks = 0; a.surge(-99);
-      }
-      return a;
-    });
-  });
-  // 開場那一整段的聲音（assets/exam-dive.mp3）先解碼好；最多等 1.5 秒，來不及就用合成的
-  const diveClip = sound && wantBH ? Promise.race([sound.loadClip("dive"), new Promise((r) => setTimeout(r, 1500))]) : null;
-  Promise.all([ready, warm, diveClip]).then(([a]) => {
+    // 靜止那張畫上去之後（下一格），趁等動畫素材的空檔建黑洞的畫布
+    const bhP = new Promise((done) => requestAnimationFrame(() => setTimeout(() => { makeBH(); done(); }, 0)));
+    return Promise.all([a.loadFx(), a.loadSpace(), bhP]).then(([ok]) => { if (ok) a.patchLayers(); return a; });
+  }).then((a) => {
     art = a;
     body.classList.add("is-diving");
     body.classList.remove("is-loading");
-    if (reduce) { toPick(0); setPick(0); return; }
-    phase = bh ? "dive" : "fall";
-    T0 = performance.now() / 1000;
-    if (bh) {
-      bhCanvas.style.display = ""; canvas.style.display = "none";   // 光線追蹤的解析度在熱身時已經設成 0.8（太慢會自己降）
-      ss.cracks = 0;
-      bs.waveT0 = T0 + 0.16;
-    }
-    if (art) art.surge(T0 + 0.16);                       // 一開始：先暗一下，再落雷般猛亮（打出第一圈重力波）
-    if (sound) sound.dive(phase);                        // 聲音和畫面同一刻開始
+    if (reduce) { if (sound) sound.prepare(true); toPick(0); setPick(0); return; }
+    if (!a) makeBH();
+    phase = "pre";
+    preT0 = performance.now() / 1000;
     run();
   });
 })();

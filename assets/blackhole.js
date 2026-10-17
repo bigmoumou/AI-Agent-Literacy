@@ -178,24 +178,23 @@ void main() {
     const gl = canvas.getContext("webgl2", { antialias: false, alpha: false, premultipliedAlpha: false, powerPreference: "high-performance" });
     if (!gl) throw new Error("no webgl2");
     this.gl = gl; this.canvas = canvas;
+    // 著色器：瀏覽器有 KHR_parallel_shader_compile 時在背景編譯（ready() 問好了沒，不會卡住畫面）；沒有的話當場等
+    this.par = gl.getExtension("KHR_parallel_shader_compile");
     const prog = (fs) => {
-      const p = gl.createProgram();
+      const p = gl.createProgram(), sh = [];
       [[gl.VERTEX_SHADER, VS], [gl.FRAGMENT_SHADER, fs]].forEach(([type, src]) => {
         const s = gl.createShader(type);
         gl.shaderSource(s, src); gl.compileShader(s);
-        if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
-        gl.attachShader(p, s);
+        gl.attachShader(p, s); sh.push(s);
       });
       gl.bindAttribLocation(p, 0, "aP");
       gl.linkProgram(p);
-      if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
-      const u = {};
-      const n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
-      for (let i = 0; i < n; i++) { const a = gl.getActiveUniform(p, i); u[a.name] = gl.getUniformLocation(p, a.name); }
-      return { p, u };
+      return { p, u: null, sh };
     };
     this.trace = prog(FS_TRACE);
     this.post = prog(FS_POST);
+    this.done = false;
+    if (!this.par) this.finish();
     this.vao = gl.createVertexArray();
     gl.bindVertexArray(this.vao);
     const b = gl.createBuffer();
@@ -208,6 +207,24 @@ void main() {
     this.q = 0.5;            // 光線追蹤那一道的解析度倍數（會依速度自動調整）
     this.slow = 0; this.fast = 0;
   }
+  // 著色器編好了沒（背景編譯中就回 false；編好了就把 uniform 位置找好）；編譯失敗會丟出錯誤
+  BlackHole.prototype.ready = function () {
+    if (this.done) return true;
+    const gl = this.gl, k = this.par && this.par.COMPLETION_STATUS_KHR;
+    if (k && ![this.trace, this.post].every((o) => gl.getProgramParameter(o.p, k))) return false;
+    this.finish();
+    return true;
+  };
+  BlackHole.prototype.finish = function () {
+    const gl = this.gl;
+    [this.trace, this.post].forEach((o) => {
+      if (!gl.getProgramParameter(o.p, gl.LINK_STATUS)) throw new Error(o.sh.map((s) => gl.getShaderInfoLog(s)).join("\n") + gl.getProgramInfoLog(o.p));
+      o.u = {};
+      const n = gl.getProgramParameter(o.p, gl.ACTIVE_UNIFORMS);
+      for (let i = 0; i < n; i++) { const a = gl.getActiveUniform(o.p, i); o.u[a.name] = gl.getUniformLocation(o.p, a.name); }
+    });
+    this.done = true;
+  };
   BlackHole.prototype.tex = function () {
     const gl = this.gl, t = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, t);
@@ -252,6 +269,7 @@ void main() {
   /* s：{ t, M, disk, stars, camZ, incl, tanFov, sceneOn, sceneZ, sceneHalf:[x,y],
           chroma, glitch, wave, waveT0, quad, red, dark, flash, grain, glow, zoom, streak, tone（0 不做色調對應） } */
   BlackHole.prototype.render = function (s, frameMs) {
+    if (!this.done && !this.ready()) return;
     const gl = this.gl;
     // 太慢就降低光線追蹤的解析度，很快就提高一點
     if (frameMs) {
