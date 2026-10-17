@@ -406,7 +406,7 @@
       if (!inGW(ctx)) { ctx.say(NOT_IN_GW); return; }
       if (!ctx.browser) { ctx.say('這個練習版沒有內建瀏覽器。'); return; }
       ctx.activity('run', 'Used the browser', 'site/index.html', null, function () { ctx.browser.open({ target: W5.HTML, by: 'codex' }); });
-      ctx.say('用內建瀏覽器打開了 site/index.html。要看手機的寬度，按瀏覽器上面的 Phone。');
+      ctx.say('用內建瀏覽器打開了 site/index.html。要看手機的寬度，按瀏覽器右上的「⋯」› Device toolbar › Show device toolbar，把寬度改成 390。');
     }
   }, { priority: 109 });
 

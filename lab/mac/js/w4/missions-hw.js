@@ -465,14 +465,16 @@
       },
       {
         id: 's3',
-        text: 'Codex 說修好了，你也自己再看一次：用瀏覽器面板的寬度按鈕切到手機寬度，確認沒有東西超出畫面。',
-        hint: '自己確認，不要只相信它的回報。（這顆寬度按鈕是練習版加的；Codex 剛剛已經是用手機寬度看，所以按瀏覽器面板上的 Reload（重新載入），或切到桌面再切回手機。）',
-        answer: '點瀏覽器面板上的寬度按鈕，切到手機寬度（已經是手機寬度的話，按 Reload）。',
-        // already in the phone width (Codex measured it in step 1): the reload button counts too; else the Phone button
+        text: 'Codex 說修好了，你也自己再看一次：在內建瀏覽器用手機的寬度看一遍，確認沒有東西超出畫面。',
+        hint: '自己確認，不要只相信它的回報。Codex 剛剛已經用手機寬度看過（網址列下面那一條 Device toolbar，寬 390），所以按網址列左邊的重新整理就好。那一條不見了的話：按右上的「⋯」› Device toolbar › Show device toolbar，把寬度改成 390。',
+        answer: '按重新整理（Device toolbar 不見了的話：「⋯」› Device toolbar › Show device toolbar，寬度改成 390）。',
+        // already in a phone's width (Codex measured it in step 1, the Device toolbar is on at 390): the reload button counts too; else
+        // ⋯ › Device toolbar › Show device toolbar › the width box (cxbrowser-r2; the practice-only Phone button is gone)
         target: K.chain(function () {
-          var ph = cxEl('[data-lab=cxb-viewport-btn][data-mode=phone]');
-          if (ph && ph.getAttribute('aria-pressed') === 'true') return cxEl('[data-lab=cxb-reload]');
-          return ph;
+          var st = null;
+          try { st = LAB.cxbrowser.state(); } catch (e) { st = null; }
+          if (st && st.mode === 'phone') return cxEl('[data-lab=cxb-reload]');
+          return LAB.cxbrowser && LAB.cxbrowser.deviceCue ? LAB.cxbrowser.deviceCue() : null;
         }, K.dock('codex')),
         check: function (ev, api) {
           var v = api.seen('cxbrowser:viewport', function (x) { return x.mode === 'phone' && x.by === 'user'; }) ||

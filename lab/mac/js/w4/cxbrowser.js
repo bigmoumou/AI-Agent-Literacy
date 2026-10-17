@@ -18,6 +18,20 @@
 
   var DESKTOP_W = 1040;            // the "desktop" width of the page (it is scaled down to fit the panel)
   var PHONE_W = 390;
+  var PHONE_MAX = 430;             // cxbrowser-r2: a Device toolbar width up to this is "a phone" (cxbrowser:viewport / measure mode 'phone')
+  /* the Device toolbar's 「Dimensions」 list (a few of Chrome's own devices; Responsive = any width and height) */
+  var PRESETS = [
+    { id: 'responsive', label: 'Responsive' },
+    { id: 'iphone-se', label: 'iPhone SE', w: 375, h: 667 },
+    { id: 'iphone-12-pro', label: 'iPhone 12 Pro', w: 390, h: 844 },
+    { id: 'iphone-14-pro-max', label: 'iPhone 14 Pro Max', w: 430, h: 932 },
+    { id: 'pixel-7', label: 'Pixel 7', w: 412, h: 915 },
+    { id: 'ipad-mini', label: 'iPad Mini', w: 768, h: 1024 },
+    { id: 'ipad-air', label: 'iPad Air', w: 820, h: 1180 }
+  ];
+  var ZOOMS = [25, 33, 50, 67, 75, 80, 90, 100, 110, 125, 150, 175, 200, 250, 300];      // ⋯ › Zoom − ＋ (Chrome's steps)
+  var DEV_MIN = 100, DEV_MAX = 2560;
+  function clampDev(n) { n = Math.round(Number(n) || 0); return Math.max(DEV_MIN, Math.min(DEV_MAX, n)); }
   var NATIVE_MIN_W = 440;          // the made-up public pages are laid out at the panel's own width (scale 1), never narrower than this
   var SEARCH_HOST = 'search.example';
   var START_QUERY = '佛羅倫斯 美術館';
@@ -33,8 +47,18 @@
   function glyph(inner) { return '<svg viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' + inner + '</g></svg>'; }
   LAB.icons.add('cxb-reload', glyph('<path d="M18.5 8.5A7 7 0 1 0 19 13"/><path d="M18.7 4.5v4.3h-4.3"/>'));
   LAB.icons.add('cxb-comment', glyph('<path d="M5 6.5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-6l-4 3.5v-3.5H7a2 2 0 0 1-2-2z"/>'));
-  LAB.icons.add('cxb-phone', glyph('<rect x="8" y="3.5" width="8" height="17" rx="2"/><path d="M11 17.5h2"/>'));
-  LAB.icons.add('cxb-desktop', glyph('<rect x="3.5" y="5" width="17" height="11" rx="1.6"/><path d="M9 20h6M12 16v4"/>'));
+  // cxbrowser-r2 (the real Codex browser): select element, Annotate, downloads, ⋯, new tab, pop out, the side panel, rotate
+  LAB.icons.add('cxb-pick', glyph('<path d="M10 18.5H6.5a2 2 0 0 1-2-2v-10a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2V10"/><path d="M12 12l7.5 3-3.1 1.3-1.3 3.2z"/>'));
+  LAB.icons.add('cxb-annot', glyph('<path d="M5 7a2.5 2.5 0 0 1 2.5-2.5h9A2.5 2.5 0 0 1 19 7v6a2.5 2.5 0 0 1-2.5 2.5H11l-4 3.5v-3.5h.5A2.5 2.5 0 0 1 5 13z"/><path d="M14.5 8.2a3 3 0 1 0 .3 3"/>'));
+  LAB.icons.add('cxb-download', glyph('<path d="M12 4.5v10M8 11l4 4 4-4"/><path d="M5 17.5v1a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1"/>'));
+  LAB.icons.add('cxb-more', '<svg viewBox="0 0 24 24"><g fill="currentColor"><circle cx="5.5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18.5" cy="12" r="1.6"/></g></svg>');
+  LAB.icons.add('cxb-plus', glyph('<path d="M12 5.5v13M5.5 12h13"/>'));
+  LAB.icons.add('cxb-minus', glyph('<path d="M5.5 12h13"/>'));
+  LAB.icons.add('cxb-popout', glyph('<path d="M14 5h5v5M19 5l-5.5 5.5"/><path d="M10 19H5v-5M5 19l5.5-5.5"/>'));
+  LAB.icons.add('cxb-sidepanel', glyph('<rect x="3.5" y="5" width="17" height="14" rx="2.5"/><path d="M14.5 5v14"/>'));
+  LAB.icons.add('cxb-rotate', glyph('<rect x="8.5" y="8" width="11" height="12" rx="1.8"/><path d="M4.5 13.5V8a3 3 0 0 1 3-3h4"/><path d="M9.5 3l2 2-2 2"/>'));
+  LAB.icons.add('cxb-chev-down', glyph('<path d="M7.5 10l4.5 4.5 4.5-4.5"/>'));
+  function practiceOnly() { try { LAB.ui.toast('練習版沒有這個功能'); } catch (e) { /* no toast */ } }
   function ico(name, size) { return LAB.icons.el(name, { size: size || 16 }); }
 
   /* ======================================================================== */
@@ -42,7 +66,9 @@
   /* ======================================================================== */
   var S = {
     open: false,
-    mode: 'desktop',             // 'desktop' | 'phone'
+    mode: 'desktop',             // 'desktop' | 'phone' — cxbrowser-r2: 'phone' while the Device toolbar is on with a width ≤ PHONE_MAX
+    dev: { on: false, w: 0, h: 0, preset: 'responsive' },   // the Device toolbar (⋯ › Device toolbar › Show device toolbar); w, h = 0: fill the panel
+    zoom: 100,                   // ⋯ › Zoom (percent)
     kind: 'blank',               // 'blank' | 'file' | 'web' | 'search' | 'offline' | 'stuck'
     url: 'about:blank', title: 'New tab',
     file: null,                  // vfs path (kind file | stuck)
@@ -210,7 +236,7 @@
     return { title: parsed.title || '' };
   }
   /* ---------------------------------------------------------------- a throw-away frame off screen: measuring and asking questions */
-  function widthFor(mode) { return mode === 'phone' ? PHONE_W : DESKTOP_W; }
+  function widthFor(mode) { return typeof mode === 'number' ? mode : mode === 'phone' ? PHONE_W : DESKTOP_W; }      // a number: that width (the Device toolbar)
   function probe(mode, src, fn) {
     return new Promise(function (resolve, reject) {
       var f = makeFrame('cxb-probe');
@@ -355,27 +381,124 @@
   /* ======================================================================== */
   /*  THE PANEL                                                                */
   /* ======================================================================== */
+  var HANDLE = 14, DEV_TOP = 10;   // the Device toolbar's handles (px) and the gap above its box
   function mount(host, win) {
     var timers = [];
     function later(fn, ms) { var id = setTimeout(function () { var i = timers.indexOf(id); if (i >= 0) timers.splice(i, 1); fn(); }, ms); timers.push(id); return id; }
 
-    /* ---- skeleton ---- */
+    /* ---- skeleton (cxbrowser-r2: the real Codex browser, from the teacher's screenshots) ----
+       row 1: the tab (site icon, title, ×) and 「+」; on the right two small buttons (open in a window, close the side panel)
+       row 2: ← →, reload, 「select element」, the address capsule (only the site's domain until it is clicked), Annotate, Downloads, 「⋯」
+       row 3, only while it is on: the Device toolbar 「Dimensions: Responsive ⌄   width × height  rotate  100%   ×」
+       The practice-only 「Desktop｜Phone」 switch is gone: a phone width is ⋯ › Device toolbar › Show device toolbar and a width ≤ 430. */
     var tabTitle = h('span', { class: 'cxb-tab-title' }, S.title);
-    var tab = h('div', { class: 'cxb-tab', dataset: { lab: 'cxb-tab' } }, h('span', { class: 'cxb-fav', 'aria-hidden': 'true' }), tabTitle);
-    var closeBtn = h('button', { type: 'button', class: 'cxb-ib', 'aria-label': 'Close browser', title: 'Close', dataset: { lab: 'cxb-close' }, on: { click: function () { api.close('user'); } } }, ico('x', 15));
-
-    var btnPhone = h('button', { type: 'button', class: 'cxb-seg', 'aria-pressed': 'false', dataset: { lab: 'cxb-viewport-btn', mode: 'phone' }, on: { click: function () { api.setMode('phone', 'user'); } } }, ico('cxb-phone', 13), h('span', null, 'Phone'));
-    var btnDesk = h('button', { type: 'button', class: 'cxb-seg', 'aria-pressed': 'true', dataset: { lab: 'cxb-viewport-btn', mode: 'desktop' }, on: { click: function () { api.setMode('desktop', 'user'); } } }, ico('cxb-desktop', 13), h('span', null, 'Desktop'));
-    var widthBox = h('div', { class: 'cxb-width', role: 'group', 'aria-label': 'Page width (practice only)', title: '練習版專用的寬度按鈕：真正的 Codex 不一定長這樣', dataset: { lab: 'cxb-viewport' } },
-      h('span', { class: 'cxb-width-note' }, '練習版'), btnDesk, btnPhone);
-    var annBtn = h('button', { type: 'button', class: 'cxb-ann', 'aria-pressed': 'false', dataset: { lab: 'cxb-annotate' }, on: { click: function () { api.annotate(!S.annotate, 'user'); } } }, ico('cxb-comment', 14), h('span', null, 'Annotate'));
-    var top = h('div', { class: 'cxb-top' }, tab, widthBox, annBtn, closeBtn);
+    var tabClose = h('button', { type: 'button', class: 'cxb-tab-x', 'aria-label': 'Close tab', title: 'Close tab', dataset: { lab: 'cxb-tab-close' }, on: { click: function () { api.close('user'); } } }, ico('x', 12));
+    var tab = h('div', { class: 'cxb-tab', dataset: { lab: 'cxb-tab' } }, h('span', { class: 'cxb-fav', 'aria-hidden': 'true' }), tabTitle, tabClose);
+    var newTabBtn = h('button', { type: 'button', class: 'cxb-ib cxb-sm', 'aria-label': 'New tab', title: 'New tab', dataset: { lab: 'cxb-newtab' }, on: { click: practiceOnly } }, ico('cxb-plus', 16));
+    var popBtn = h('button', { type: 'button', class: 'cxb-ib cxb-sm', 'aria-label': 'Open in a window', title: 'Open in a window', dataset: { lab: 'cxb-popout' }, on: { click: practiceOnly } }, ico('cxb-popout', 13));
+    var closeBtn = h('button', { type: 'button', class: 'cxb-ib cxb-sm', 'aria-label': 'Close browser', title: 'Close browser', dataset: { lab: 'cxb-close' }, on: { click: function () { api.close('user'); } } }, ico('cxb-sidepanel', 15));
+    var top = h('div', { class: 'cxb-top' }, tab, newTabBtn, h('span', { class: 'cxb-gap' }), popBtn, closeBtn);
 
     var backBtn = h('button', { type: 'button', class: 'cxb-ib', 'aria-label': 'Back', dataset: { lab: 'cxb-back' }, on: { click: function () { api.back(); } } }, ico('chev-left', 16));
     var fwdBtn = h('button', { type: 'button', class: 'cxb-ib', 'aria-label': 'Forward', dataset: { lab: 'cxb-forward' }, on: { click: function () { api.forward(); } } }, ico('chev-right', 16));
-    var rldBtn = h('button', { type: 'button', class: 'cxb-ib', 'aria-label': 'Reload', dataset: { lab: 'cxb-reload' }, on: { click: function () { api.reload('user'); } } }, ico('cxb-reload', 15));
+    var rldBtn = h('button', { type: 'button', class: 'cxb-ib cxb-round', 'aria-label': 'Reload', title: 'Reload', dataset: { lab: 'cxb-reload' }, on: { click: function () { api.reload('user'); } } }, ico('cxb-reload', 15));
+    var pickBtn = h('button', { type: 'button', class: 'cxb-ib cxb-round', 'aria-label': 'Select element', title: 'Select element', dataset: { lab: 'cxb-pick' }, on: { click: practiceOnly } }, ico('cxb-pick', 15));
     var addr = h('input', { type: 'text', class: 'cxb-addr', spellcheck: 'false', autocomplete: 'off', 'aria-label': 'Address', dataset: { lab: 'cxb-address' } });
-    var nav = h('div', { class: 'cxb-nav' }, backBtn, fwdBtn, rldBtn, addr);
+    // Annotate keeps its job (Week 4); it is the comment button right of the address, as in the screenshot (an icon, its name in the tooltip)
+    var annBtn = h('button', { type: 'button', class: 'cxb-ib cxb-ann', 'aria-pressed': 'false', 'aria-label': 'Annotate', title: 'Annotate', dataset: { lab: 'cxb-annotate' }, on: { click: function () { api.annotate(!S.annotate, 'user'); } } }, ico('cxb-annot', 16));
+    var dlBtn = h('button', { type: 'button', class: 'cxb-ib', 'aria-label': 'Downloads', title: 'Downloads', dataset: { lab: 'cxb-downloads' }, on: { click: practiceOnly } }, ico('cxb-download', 15));
+    var moreBtn = h('button', { type: 'button', class: 'cxb-ib cxb-round', 'aria-label': 'More', title: 'More', 'aria-haspopup': 'menu', 'aria-expanded': 'false', dataset: { lab: 'cxb-more' }, on: { click: function () { showMenu(menu.hidden); } } }, ico('cxb-more', 16));
+    var nav = h('div', { class: 'cxb-nav' }, h('div', { class: 'cxb-pill2' }, backBtn, fwdBtn), rldBtn, pickBtn, addr, h('div', { class: 'cxb-pill2' }, annBtn, dlBtn), moreBtn);
+
+    /* ---- 「⋯」: the items and their order of the real one; Zoom and Device toolbar › Show device toolbar work, the rest say 練習版沒有這個功能 ---- */
+    function mrow(key, label, o) {
+      o = o || {};
+      var b = h('button', { type: 'button', class: 'cxb-mi' + (o.sub ? ' has-sub' : ''), role: 'menuitem', dataset: { lab: 'cxb-menu-item', item: key } }, h('span', { class: 'cxb-mi-l' }, label), o.sub ? ico('chev-right', 13) : null);
+      b.addEventListener('click', function (e) { e.stopPropagation(); (o.act || function () { showMenu(false); practiceOnly(); })(); });
+      if (!o.keepSub) b.addEventListener('pointerenter', function () { showSub(!!o.sub); });
+      return b;
+    }
+    function msep() { return h('div', { class: 'cxb-msep', role: 'separator' }); }
+    var zoomVal = h('span', { class: 'cxb-zoom-v', dataset: { lab: 'cxb-zoom-value' } }, '100%');
+    var zoomOut = h('button', { type: 'button', class: 'cxb-zb', 'aria-label': 'Zoom out', dataset: { lab: 'cxb-zoom-out' }, on: { click: function (e) { e.stopPropagation(); api.zoomStep(-1, 'user'); } } }, ico('cxb-minus', 14));
+    var zoomIn = h('button', { type: 'button', class: 'cxb-zb', 'aria-label': 'Zoom in', dataset: { lab: 'cxb-zoom-in' }, on: { click: function (e) { e.stopPropagation(); api.zoomStep(1, 'user'); } } }, ico('cxb-plus', 14));
+    var zoomReset = h('button', { type: 'button', class: 'cxb-zb cxb-zr', 'aria-label': 'Reset zoom', title: 'Reset', dataset: { lab: 'cxb-zoom-reset' }, on: { click: function (e) { e.stopPropagation(); api.zoomTo(100, 'user'); } } }, ico('cxb-reload', 14));
+    var zoomRow = h('div', { class: 'cxb-mi cxb-mi-zoom', role: 'group', 'aria-label': 'Zoom', dataset: { lab: 'cxb-menu-item', item: 'zoom' } },
+      h('span', { class: 'cxb-mi-l' }, 'Zoom'), h('span', { class: 'cxb-zoom' }, zoomOut, zoomVal, zoomIn), zoomReset);
+    zoomRow.addEventListener('pointerenter', function () { showSub(false); });
+    var devRow = mrow('device', 'Device toolbar', { sub: true, keepSub: true, act: function () { showSub(sub.hidden); } });
+    devRow.addEventListener('pointerenter', function () { showSub(true); });
+    var subShow = mrow('device-show', 'Show device toolbar', { keepSub: true, act: function () { showMenu(false); api.device({ on: !S.dev.on }, 'user'); } });
+    var subAlways = mrow('device-always', 'Always show in new tabs', { keepSub: true });
+    var menu = h('div', { class: 'cxb-menu', role: 'menu', hidden: true, dataset: { lab: 'cxb-menu' } },
+      mrow('find', 'Find in page'), mrow('print', 'Print'), msep(), zoomRow, msep(), devRow, mrow('screenshot', 'Take a screenshot'), msep(),
+      mrow('import', 'Import cookies and passwords…'), mrow('passwords', 'Passwords and autofill', { sub: true }), mrow('downloads', 'Downloads'),
+      mrow('history', 'History'), mrow('clear', 'Clear browsing data'), msep(), mrow('settings', 'Browser settings'));
+    var sub = h('div', { class: 'cxb-menu cxb-sub', role: 'menu', hidden: true, dataset: { lab: 'cxb-submenu' } }, subShow, subAlways);
+    function showMenu(on) {
+      menu.hidden = !on; moreBtn.setAttribute('aria-expanded', on ? 'true' : 'false'); moreBtn.classList.toggle('is-on', !!on);
+      if (!on) showSub(false);
+      if (on) { showPresets(false); placeMenu(); }
+    }
+    function showSub(on) { sub.hidden = !on; devRow.classList.toggle('is-open', !!on); if (on) placeMenu(); }
+    function placeMenu() {
+      var rr = root.getBoundingClientRect(), mb = moreBtn.getBoundingClientRect();
+      var mt = Math.round(mb.bottom - rr.top + 6);
+      menu.style.top = mt + 'px';
+      menu.style.right = Math.max(6, Math.round(rr.right - mb.right)) + 'px';
+      menu.style.maxHeight = Math.max(160, Math.round(rr.height - mt - 8)) + 'px';      // a short panel: the menu scrolls instead of running off the bottom
+      if (!sub.hidden) {
+        var dr = devRow.getBoundingClientRect(), mr = menu.getBoundingClientRect();
+        sub.style.top = Math.round(dr.top - rr.top - 5) + 'px';
+        // to the left of the menu; a narrow panel (the Windows one) has no room there, so it stays inside the panel and lies over the menu's left part
+        sub.style.right = Math.round(Math.min(rr.right - mr.left + 4, rr.width - (sub.offsetWidth || 244) - 6)) + 'px';
+      }
+    }
+
+    /* ---- the Device toolbar ---- */
+    var presetName = h('span', { class: 'cxb-dev-pn' }, 'Responsive');
+    var presetBtn = h('button', { type: 'button', class: 'cxb-dev-preset', 'aria-haspopup': 'listbox', 'aria-label': 'Dimensions', dataset: { lab: 'cxb-dev-preset' }, on: { click: function (e) { e.stopPropagation(); showPresets(presetList.hidden); } } }, presetName, ico('cxb-chev-down', 12));
+    var presetList = h('div', { class: 'cxb-menu cxb-presets', role: 'listbox', hidden: true, dataset: { lab: 'cxb-dev-presets' } });
+    PRESETS.forEach(function (pr) {
+      var b = h('button', { type: 'button', class: 'cxb-mi', role: 'option', dataset: { lab: 'cxb-dev-option', preset: pr.id } }, h('span', { class: 'cxb-mi-l' }, pr.label), pr.w ? h('span', { class: 'cxb-mi-r' }, pr.w + ' × ' + pr.h) : null);
+      b.addEventListener('click', function (e) {
+        e.stopPropagation(); showPresets(false);
+        api.device(pr.w ? { preset: pr.id, w: pr.w, h: pr.h } : { preset: 'responsive' }, 'user');
+      });
+      presetList.appendChild(b);
+    });
+    function showPresets(on) {
+      presetList.hidden = !on;
+      if (on) { var rr = root.getBoundingClientRect(), pb = presetBtn.getBoundingClientRect(); presetList.style.top = Math.round(pb.bottom - rr.top + 4) + 'px'; presetList.style.left = Math.round(pb.left - rr.left) + 'px'; }
+    }
+    function numBox(lab, label, key) {
+      var inp = h('input', { type: 'text', inputmode: 'numeric', class: 'cxb-dev-num', spellcheck: 'false', autocomplete: 'off', 'aria-label': label, dataset: { lab: lab } });
+      function commit() {
+        var n = parseInt(String(inp.value).replace(/[^\d]/g, ''), 10);
+        if (!n) { syncChrome(); return; }
+        var o = { preset: 'responsive' }; o[key] = n;
+        if (clampDev(n) !== S.dev[key] || S.dev.preset !== 'responsive') api.device(o, 'user'); else syncChrome();
+      }
+      inp.addEventListener('focus', function () { try { inp.select(); } catch (e) { /* ignore */ } });
+      inp.addEventListener('blur', commit);
+      inp.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !LAB.ui.isImeEnter(e)) { e.preventDefault(); commit(); try { inp.select(); } catch (err) { /* ignore */ } }
+        else if (e.key === 'Escape') { syncChrome(); inp.blur(); }
+        else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+          e.preventDefault();
+          var d = (e.key === 'ArrowUp' ? 1 : -1) * (e.shiftKey ? 10 : 1), o = { preset: 'responsive' };
+          o[key] = (S.dev[key] || 0) + d; api.device(o, 'user'); try { inp.select(); } catch (err) { /* ignore */ }
+        }
+      });
+      return inp;
+    }
+    var wIn = numBox('cxb-dev-w', 'Width', 'w'), hIn = numBox('cxb-dev-h', 'Height', 'h');
+    var rotBtn = h('button', { type: 'button', class: 'cxb-ib cxb-sm', 'aria-label': 'Rotate', title: 'Rotate', dataset: { lab: 'cxb-dev-rotate' }, on: { click: function () { api.device({ w: S.dev.h, h: S.dev.w, preset: S.dev.preset }, 'user'); } } }, ico('cxb-rotate', 15));
+    var scaleLbl = h('span', { class: 'cxb-dev-scale', title: 'Zoom of the device view', dataset: { lab: 'cxb-dev-scale' } }, '100%');
+    var devClose = h('button', { type: 'button', class: 'cxb-ib cxb-sm', 'aria-label': 'Close device toolbar', title: 'Close device toolbar', dataset: { lab: 'cxb-dev-close' }, on: { click: function () { api.device({ on: false }, 'user'); } } }, ico('x', 13));
+    var devbar = h('div', { class: 'cxb-devbar', hidden: true, dataset: { lab: 'cxb-devbar' } },
+      h('span', { class: 'cxb-dev-l' }, 'Dimensions:'), presetBtn,
+      h('span', { class: 'cxb-dev-dims' }, wIn, h('span', { class: 'cxb-dev-x' }, '×'), hIn, rotBtn, scaleLbl), devClose);
 
     var frameHold = h('div', { class: 'cxb-framehold' });
     var native = h('div', { class: 'cxb-native', hidden: true, dataset: { lab: 'cxb-native' } });
@@ -388,8 +511,10 @@
     // lives in the sandboxed frame (v.cueTarget places this box over it; same as the Windows lab, cue audit 2026-10-14)
     var cueBox = h('div', { class: 'cxb-cuebox', hidden: true, 'aria-hidden': 'true', dataset: { lab: 'cxb-cue-target' } });
     var shield = h('div', { class: 'cxb-shield', dataset: { lab: 'cxb-shield' } }, cueBox);
-    var page = h('div', { class: 'cxb-page' }, scaler, hoverEl, selEl, dragEl, shield, load);
-    var root = h('div', { class: 'cxb', dataset: { lab: 'cxb-panel' } }, top, nav, page);
+    // the Device toolbar's handles: drag the left / right edge (the page stays centred, so the width changes twice as fast) or the bottom edge
+    var handles = ['left', 'right', 'bottom'].map(function (side) { return h('div', { class: 'cxb-dev-handle is-' + side, title: side === 'bottom' ? 'Drag to change the height' : 'Drag to change the width', dataset: { lab: 'cxb-dev-handle', side: side } }); });
+    var page = h('div', { class: 'cxb-page' }, scaler, handles[0], handles[1], handles[2], hoverEl, selEl, dragEl, shield, load);
+    var root = h('div', { class: 'cxb', dataset: { lab: 'cxb-panel' } }, top, nav, devbar, page, menu, sub, presetList);
     host.appendChild(root);
     // the window's drag strip (40 px, over the whole top of a Codex window) must stop where the panel starts, or it would cover the tabs and buttons
     win.el.classList.add('cxb-open');
@@ -399,9 +524,53 @@
     var v = view = {
       host: host, win: win, root: root, page: page, scaler: scaler, native: native, frameHold: frameHold, frame: null, doc: null, scale: 1,
       addr: addr, tabTitle: tabTitle, load: load, shield: shield, hover: hoverEl, selEl: selEl, dragEl: dragEl, card: null, later: later,
-      btnPhone: btnPhone, btnDesk: btnDesk, annBtn: annBtn, backBtn: backBtn, fwdBtn: fwdBtn, relayout: layout, reposition: reposition,
-      closeCard: closeCard, showCard: showCard
+      annBtn: annBtn, backBtn: backBtn, fwdBtn: fwdBtn, relayout: layout, reposition: reposition,
+      closeCard: closeCard, showCard: showCard,
+      moreBtn: moreBtn, menu: menu, devRow: devRow, subShow: subShow, wIn: wIn, hIn: hIn, devbar: devbar, devClose: devClose, presetBtn: presetBtn,
+      menuOpen: function () { return !menu.hidden; }, subOpen: function () { return !menu.hidden && !sub.hidden; }, showMenu: showMenu,
+      devArea: function () { return { w: Math.max(DEV_MIN, page.clientWidth - 2 * HANDLE), h: Math.max(DEV_MIN, page.clientHeight - DEV_TOP - HANDLE) }; }
     };
+    /* a click anywhere else closes the menus; Escape too */
+    function onDocDown(e) {
+      var t = e.target;
+      if (!menu.hidden && !menu.contains(t) && !sub.contains(t) && !moreBtn.contains(t)) showMenu(false);
+      if (!presetList.hidden && !presetList.contains(t) && !presetBtn.contains(t)) showPresets(false);
+    }
+    document.addEventListener('pointerdown', onDocDown, true);
+    function onMenuKey(e) { if (e.key === 'Escape' && (!menu.hidden || !presetList.hidden)) { e.stopPropagation(); showMenu(false); showPresets(false); moreBtn.focus(); } }
+    root.addEventListener('keydown', onMenuKey);
+
+    /* ---- the handles of the Device toolbar ---- */
+    var drag = null;
+    handles.forEach(function (hd) {
+      var side = hd.dataset.side;
+      hd.addEventListener('pointerdown', function (e) {
+        if (!S.dev.on || e.button !== 0) return;
+        e.preventDefault();
+        drag = { side: side, x: e.clientX, y: e.clientY, w: S.dev.w, h: S.dev.h, fit: v.fit || 1, id: e.pointerId, moved: false };
+        v.dragFit = drag.fit;                                      // the view keeps its zoom while the edge moves (it is fitted again when the drag ends)
+        try { hd.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+        root.classList.add('is-resizing');
+      });
+      hd.addEventListener('pointermove', function (e) {
+        if (!drag || drag.id !== e.pointerId) return;
+        var dx = (e.clientX - drag.x) / drag.fit, dy = (e.clientY - drag.y) / drag.fit;
+        if (side === 'bottom') S.dev.h = clampDev(drag.h + dy);
+        else S.dev.w = clampDev(drag.w + 2 * (side === 'right' ? dx : -dx));
+        S.dev.preset = 'responsive';
+        drag.moved = true;
+        syncChrome(); layout();
+      });
+      function end(e) {
+        if (!drag || drag.id !== e.pointerId) return;
+        var d = drag; drag = null; v.dragFit = 0;
+        try { hd.releasePointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+        root.classList.remove('is-resizing');
+        if (d.moved) api.device({ w: S.dev.w, h: S.dev.h, preset: 'responsive' }, 'user'); else layout();
+      }
+      hd.addEventListener('pointerup', end);
+      hd.addEventListener('pointercancel', end);
+    });
 
     /* ---- address bar ---- */
     addr.addEventListener('focus', function () { addr.value = S.url === 'about:blank' ? '' : readable(S.url); try { addr.select(); } catch (e) { /* ignore */ } });
@@ -424,33 +593,62 @@
     function syncAddr() {
       if (document.activeElement === addr) return;
       var u = S.url === 'about:blank' ? '' : readable(S.url);
+      // cxbrowser-r2: like a real browser, a web address shows only its domain (learning-analytics-tools.pages.dev); a click shows the whole of it.
+      // A file has no domain: its address is shown, the start cut off when it does not fit
+      var pu = parseUrl(S.url), shown = pu && (pu.scheme === 'http' || pu.scheme === 'https') && pu.host ? pu.host : u;
       var room = Math.max(18, Math.floor((addr.clientWidth || 200) / 7.4) - 3);
-      addr.value = u.length > room ? '…' + u.slice(u.length - room + 1) : u;
+      // a domain is never cut at the start (a box too narrow ends it with … by css); a file's path keeps its end (the file name)
+      addr.value = shown !== u || shown.length <= room ? shown : '…' + shown.slice(shown.length - room + 1);
       addr.title = u;
       addr.placeholder = 'Search or enter address';
     }
 
     /* ---- layout: the page is laid out at its own width (390 phone, 1100 desktop) and scaled to fit the panel ---- */
     function logicalWidth() {
-      if (S.mode === 'phone') return PHONE_W;
       if (S.kind === 'file') return DESKTOP_W;
       return Math.max(NATIVE_MIN_W, page.clientWidth);
     }
+    /* cxbrowser-r2. Without the Device toolbar: as before, the page is laid out at its own width (1040 for the student's site, the panel's width for
+       the made-up pages) and scaled down to fit. With it: a box of the chosen width × height, centred, with the three handles, fitted into the panel
+       (the toolbar's 「100%」 says how much it had to shrink, as Chrome's device mode does). ⋯ › Zoom on top of that: the page is laid out zoom
+       times narrower and drawn zoom times bigger (the box keeps its size on the screen). */
     function layout() {
       var pw = page.clientWidth, ph = page.clientHeight;
       if (!pw || !ph) return;
-      var phone = S.mode === 'phone', L = logicalWidth();
-      var scale = Math.min(1, (pw - (phone ? 20 : 0)) / L);
+      var z = (S.zoom || 100) / 100, dev = S.dev.on, base, fit, dispW, dispH, left, topY = 0;
+      if (dev) {
+        var ar = v.devArea();
+        if (!S.dev.w) S.dev.w = clampDev(ar.w);
+        if (!S.dev.h) S.dev.h = clampDev(ar.h);
+        fit = v.dragFit || Math.min(1, ar.w / S.dev.w, ar.h / S.dev.h);
+        base = S.dev.w; dispW = S.dev.w * fit; dispH = S.dev.h * fit;
+        left = Math.round((pw - dispW) / 2); topY = DEV_TOP;
+      } else {
+        base = logicalWidth(); fit = Math.min(1, pw / base); dispW = base * fit; dispH = ph;
+        left = Math.max(0, Math.round((pw - dispW) / 2));
+      }
+      var L = base / z, k = fit * z;
       scaler.style.width = L + 'px';
-      scaler.style.height = Math.round(ph / scale) + 'px';
-      scaler.style.transform = scale === 1 ? 'none' : 'scale(' + scale + ')';
+      scaler.style.height = Math.round(dispH / k) + 'px';
+      scaler.style.transform = k === 1 ? 'none' : 'scale(' + k + ')';
+      scaler.style.left = left + 'px';
+      scaler.style.top = topY + 'px';
       syncBar();
-      scaler.style.left = Math.max(0, Math.round((pw - L * scale) / 2)) + 'px';
-      v.scale = scale;
-      root.classList.toggle('is-phone', phone);
+      v.scale = k; v.fit = fit;
+      handles.forEach(function (hd) {
+        hd.hidden = !dev;
+        if (!dev) return;
+        var s = hd.dataset.side;
+        if (s === 'bottom') { hd.style.left = left + 'px'; hd.style.top = Math.round(topY + dispH) + 'px'; hd.style.width = Math.round(dispW) + 'px'; hd.style.height = HANDLE + 'px'; }
+        else { hd.style.left = (s === 'left' ? left - HANDLE : Math.round(left + dispW)) + 'px'; hd.style.top = topY + 'px'; hd.style.width = HANDLE + 'px'; hd.style.height = Math.round(dispH) + 'px'; }
+      });
+      scaleLbl.textContent = Math.round(fit * 100) + '%';
+      root.classList.toggle('is-phone', S.mode === 'phone');
+      root.classList.toggle('is-device', dev);
       root.classList.toggle('is-narrow', host.clientWidth < 470);
       syncAddr();
       reposition();
+      if (!menu.hidden) placeMenu();
     }
     var ro = null;
     if (window.ResizeObserver) { ro = new ResizeObserver(function () { layout(); }); ro.observe(page); }
@@ -460,10 +658,14 @@
     function syncChrome() {
       tabTitle.textContent = S.title || 'New tab';
       tab.title = S.title || '';
-      btnPhone.setAttribute('aria-pressed', S.mode === 'phone' ? 'true' : 'false');
-      btnDesk.setAttribute('aria-pressed', S.mode === 'desktop' ? 'true' : 'false');
-      btnPhone.classList.toggle('is-on', S.mode === 'phone');
-      btnDesk.classList.toggle('is-on', S.mode === 'desktop');
+      devbar.hidden = !S.dev.on;
+      if (document.activeElement !== wIn) wIn.value = S.dev.w ? String(S.dev.w) : '';
+      if (document.activeElement !== hIn) hIn.value = S.dev.h ? String(S.dev.h) : '';
+      var pr = PRESETS.filter(function (x) { return x.id === S.dev.preset; })[0] || PRESETS[0];
+      presetName.textContent = pr.label;
+      subShow.firstChild.textContent = S.dev.on ? 'Hide device toolbar' : 'Show device toolbar';
+      zoomVal.textContent = (S.zoom || 100) + '%';
+      zoomOut.disabled = (S.zoom || 100) <= ZOOMS[0]; zoomIn.disabled = (S.zoom || 100) >= ZOOMS[ZOOMS.length - 1];
       annBtn.classList.toggle('is-on', S.annotate);
       annBtn.setAttribute('aria-pressed', S.annotate ? 'true' : 'false');
       shield.classList.toggle('is-on', S.annotate);
@@ -782,6 +984,8 @@
       if (ro) ro.disconnect();
       if (offResize) offResize();
       host.removeEventListener('keydown', onHostKey);
+      document.removeEventListener('pointerdown', onDocDown, true);
+      root.removeEventListener('keydown', onMenuKey);
       offSend(); offReply();
       win.el.classList.remove('cxb-open');
       win.el.style.removeProperty('--cxb-w');
@@ -860,7 +1064,8 @@
 
   var api = {};
   LAB.cxbrowser = api;
-  api.DESKTOP_W = DESKTOP_W; api.PHONE_W = PHONE_W; api.SEARCH_HOST = SEARCH_HOST; api.START_QUERY = START_QUERY;
+  api.DESKTOP_W = DESKTOP_W; api.PHONE_W = PHONE_W; api.PHONE_MAX = PHONE_MAX; api.PRESETS = PRESETS; api.ZOOMS = ZOOMS;
+  api.SEARCH_HOST = SEARCH_HOST; api.START_QUERY = START_QUERY;
   api.searchUrl = searchUrl;
   api.classify = classify;
   api.loadSite = loadSite;
@@ -868,6 +1073,7 @@
   api.state = function () {
     return {
       open: S.open, mode: S.mode, kind: S.kind, url: S.url, title: S.title, file: S.file, q: S.q, loading: S.loading, annotate: S.annotate,
+      device: { on: S.dev.on, width: S.dev.w || null, height: S.dev.h || null, preset: S.dev.preset }, zoom: S.zoom,
       selection: snapshotSel(), stuck: { armed: S.stuck.armed, hit: S.stuck.hit, fixed: S.stuck.fixed },
       lastMeasure: JSON.parse(JSON.stringify(S.lastMeasure)), mounted: !!view, unreadable: S.unreadable,
       history: S.hist.map(function (x) { return x.url; }), historyAt: S.histAt
@@ -883,9 +1089,9 @@
     o = o || {};
     var by = o.by || 'codex', t = null;
     S.open = true;
-    if (o.mode === 'phone' || o.mode === 'desktop') {
-      if (S.mode !== o.mode) { S.mode = o.mode; emit('cxbrowser:viewport', { mode: S.mode, by: by }); }
-    }
+    // Codex looks at the page in a phone's width: the Device toolbar opens at 390 (Responsive), as the student would set it; desktop closes it
+    if (o.mode === 'phone') { S.dev.on = true; S.dev.w = PHONE_W; S.dev.preset = 'responsive'; viewportChanged(by, true); }
+    else if (o.mode === 'desktop' && S.dev.on) { S.dev.on = false; viewportChanged(by, true); }
     if (o.target !== undefined && o.target !== null) { t = classify(o.target); applyEntry(t); pushHistory({ url: t.url, kind: t.kind, file: t.file, q: t.q, host: t.host, path: t.path, title: t.title }); }
     else if (S.kind === 'blank' && S.hist.length === 0) { t = classify(''); pushHistory({ url: t.url, kind: 'blank', title: 'New tab' }); }
     var fresh = !view;
@@ -933,18 +1139,74 @@
     emit('cxbrowser:close', { by: by || 'user' });
     return true;
   };
-  api.setMode = function (mode, by) {
-    if (mode !== 'phone' && mode !== 'desktop') return false;
-    if (S.mode === mode) { return true; }
+  /* ---- the Device toolbar and zoom (cxbrowser-r2) ---- */
+  function devMode() { return S.dev.on && S.dev.w > 0 && S.dev.w <= PHONE_MAX ? 'phone' : 'desktop'; }
+  var lastVp = { mode: 'desktop', on: false, width: 0, height: 0 };
+  /* after any change of the Device toolbar: the mode follows the width (≤ 430 is a phone), the view is laid out again, and cxbrowser:viewport
+     {mode, width, height, device, by} goes out when anything of it changed. The student's own change also measures the page at that width
+     (cxbrowser:measure by 'user', a fresh answer to "does it still stick out?"), as the old Phone button did. quiet: no measuring (Codex measures itself) */
+  function viewportChanged(by, quiet) {
+    by = by || 'user';
+    if (view) view.syncChrome();             // the Device toolbar's row first: the page is 40 px lower once it shows, and Responsive fills what is left
+    if (S.dev.on && view && (!S.dev.w || !S.dev.h)) { var ar = view.devArea(); if (!S.dev.w) S.dev.w = clampDev(ar.w); if (!S.dev.h) S.dev.h = clampDev(ar.h); }
+    var mode = devMode(), on = S.dev.on, w = on ? S.dev.w : 0, hh = on ? S.dev.h : 0;
+    var changed = mode !== lastVp.mode || on !== lastVp.on || w !== lastVp.width || hh !== lastVp.height;
     S.mode = mode;
     if (view) { view.syncChrome(); view.relayout(); if (S.sel) view.clearSelection(); }
-    emit('cxbrowser:viewport', { mode: mode, by: by || 'user' });
-    // the student's own switch looks at the page too: the width they see is measured again (a fresh answer for "does it still stick out?")
-    if ((by || 'user') === 'user' && S.kind === 'file' && S.file) {
-      api.measure(mode, { file: S.file }).then(function (m) { if (S.mode === mode) api.announceMeasure(m, 'user'); }, function () { /* nothing to measure */ });
+    if (!changed) return false;
+    var widthChanged = on !== lastVp.on || w !== lastVp.width;
+    lastVp = { mode: mode, on: on, width: w, height: hh };
+    emit('cxbrowser:viewport', { mode: mode, width: on ? w : null, height: on ? hh : null, device: on, by: by });
+    if (!quiet && widthChanged && by === 'user' && S.kind === 'file' && S.file) {
+      var mw = on ? w : DESKTOP_W;
+      api.measure(mode, { file: S.file, width: mw }).then(function (m) {
+        if (S.mode === mode && (on ? S.dev.on && S.dev.w === mw : !S.dev.on)) api.announceMeasure(m, 'user');
+      }, function () { /* nothing to measure */ });
     }
     return true;
+  }
+  /* device({on, w, h, preset}, by): the Device toolbar. on: false closes it; anything else opens it (w, h left out: as they were, or the panel's size) */
+  api.device = function (o, by) {
+    o = o || {};
+    if (o.on === false) { if (!S.dev.on) return false; S.dev.on = false; return viewportChanged(by); }
+    S.dev.on = true;
+    if (o.preset) S.dev.preset = o.preset;
+    if (o.w !== undefined && o.w !== null) S.dev.w = clampDev(o.w);
+    if (o.h !== undefined && o.h !== null) S.dev.h = clampDev(o.h);
+    return viewportChanged(by);
   };
+  /* the old 「Desktop｜Phone」 call (Codex, tests): phone = the Device toolbar at 390 × (as it was), desktop = the toolbar closed */
+  api.setMode = function (mode, by) {
+    if (mode !== 'phone' && mode !== 'desktop') return false;
+    if (mode === 'phone') api.device({ w: PHONE_W, preset: 'responsive' }, by);
+    else api.device({ on: false }, by);
+    return true;
+  };
+  api.zoomTo = function (pct, by) {
+    pct = Math.max(ZOOMS[0], Math.min(ZOOMS[ZOOMS.length - 1], Math.round(Number(pct) || 100)));
+    if (pct === S.zoom) return false;
+    S.zoom = pct;
+    if (view) { view.syncChrome(); view.relayout(); if (S.sel) view.clearSelection(); }
+    emit('cxbrowser:zoom', { zoom: pct, by: by || 'user' });
+    return true;
+  };
+  api.zoomStep = function (dir, by) {
+    var cur = S.zoom || 100, i, next = cur;
+    if (dir > 0) { for (i = 0; i < ZOOMS.length; i++) if (ZOOMS[i] > cur) { next = ZOOMS[i]; break; } }
+    else { for (i = ZOOMS.length - 1; i >= 0; i--) if (ZOOMS[i] < cur) { next = ZOOMS[i]; break; } }
+    return api.zoomTo(next, by);
+  };
+  /* missions: what to point at for a phone's width — 「⋯」, then Device toolbar, then Show device toolbar, then the width box (null: it is a phone width already,
+     or the browser is not on the screen) */
+  api.deviceCue = function () {
+    if (!view || !S.open) return null;
+    if (S.dev.on) return S.mode === 'phone' ? null : view.wIn;
+    if (view.subOpen()) return view.subShow;
+    if (view.menuOpen()) return view.devRow;
+    return view.moreBtn;
+  };
+  /* …and back to the normal width: the × of the Device toolbar (null while it is closed) */
+  api.deviceCloseCue = function () { return view && S.open && S.dev.on ? view.devClose : null; };
   api.annotate = function (on, by) {
     on = !!on;
     if (S.annotate === on) return on;
@@ -995,18 +1257,19 @@
      the result is only announced (event + lastMeasure) when announceMeasure() is called, so a Codex reply can announce it when its step line appears */
   api.measure = function (mode, o) {
     o = o || {};
-    mode = mode === 'phone' ? 'phone' : 'desktop';
+    var width = o.width ? clampDev(o.width) : widthFor(mode === 'phone' ? 'phone' : 'desktop');      // cxbrowser-r2: the Device toolbar's width
+    mode = o.width ? (width <= PHONE_MAX ? 'phone' : 'desktop') : (mode === 'phone' ? 'phone' : 'desktop');
     var file = o.file || S.file;
     var src = file ? loadSite(file, o.sheets) : null;
     if (!src) return Promise.reject(new Error('nofile'));
-    return probe(mode, src, function (doc, win) {
+    return probe(width, src, function (doc, win) {
       var m = measureDoc(doc, win);
-      m.mode = mode; m.url = 'file://' + file; m.file = file;
+      m.mode = mode; m.width = width; m.url = 'file://' + file; m.file = file;
       return m;
     }).then(function (m) { if (o.emit) api.announceMeasure(m); return m; });
   };
   api.announceMeasure = function (m, by) {
-    var slim = { mode: m.mode, overflow: m.overflow, items: m.items.map(function (it) { return { selector: it.simple || it.selector, over: it.over }; }), url: m.url, by: by || 'codex' };
+    var slim = { mode: m.mode, width: m.width || widthFor(m.mode), overflow: m.overflow, items: m.items.map(function (it) { return { selector: it.simple || it.selector, over: it.over }; }), url: m.url, by: by || 'codex' };
     S.lastMeasure[m.mode] = slim;
     emit('cxbrowser:measure', slim);
     return slim;

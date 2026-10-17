@@ -154,12 +154,14 @@
       return target(api);
     };
   }
-  /* the width buttons of the browser panel (the same as in the Mac lab): Codex has already been looking at the phone width, so when the panel is at
-     that width the panel's Reload counts (the check takes it); at the desktop width the Phone button is the one */
+  /* a phone's width in the browser panel (the same as in the Mac lab): Codex has already been looking at the phone width (the Device toolbar at 390),
+     so then the panel's reload counts (the check takes it); else ⋯ › Device toolbar › Show device toolbar › the width box (cxbrowser-r2: the
+     practice-only Phone button is gone; LAB.cxbrowser.deviceCue) */
   function widthCue() {
     var mode = null;
     try { mode = LAB.cxbrowser.state().mode; } catch (e) { mode = null; }
-    return document.querySelector(mode === 'phone' ? '[data-lab=cxb-reload]' : '[data-lab=cxb-viewport-btn][data-mode=phone]');
+    if (mode === 'phone') return document.querySelector('[data-lab=cxb-reload]');
+    return LAB.cxbrowser && LAB.cxbrowser.deviceCue ? LAB.cxbrowser.deviceCue() : null;
   }
   /* a text box of the comment card of Annotate: its input until there is a sentence in it, then Send */
   function commentTarget() {
@@ -464,9 +466,9 @@
       },
       {
         id: 's3',
-        text: 'Codex 說修好了，你也自己再看一次：用瀏覽器面板的寬度按鈕切到手機寬度，確認沒有東西超出畫面。',
-        hint: '自己確認，不要只相信它的回報。（這顆寬度按鈕是練習版加的；Codex 剛剛已經是用手機寬度看，所以按瀏覽器面板上的 Reload（重新整理），或切到 Desktop 再切回 Phone。）',
-        answer: '點瀏覽器面板上的寬度按鈕，切到手機寬度（已經是手機寬度的話，按 Reload）。',
+        text: 'Codex 說修好了，你也自己再看一次：在內建瀏覽器用手機的寬度看一遍，確認沒有東西超出畫面。',
+        hint: '自己確認，不要只相信它的回報。Codex 剛剛已經用手機寬度看過（網址列下面那一條 Device toolbar，寬 390），所以按網址列左邊的重新整理就好。那一條不見了的話：按右上的「⋯」› Device toolbar › Show device toolbar，把寬度改成 390。',
+        answer: '按重新整理（Device toolbar 不見了的話：「⋯」› Device toolbar › Show device toolbar，寬度改成 390）。',
         target: K.chain(widthCue, K.dock('codex')),
         check: function (ev, api) {
           var v = api.seen('cxbrowser:viewport', function (x) { return x.mode === 'phone' && x.by === 'user'; }) ||

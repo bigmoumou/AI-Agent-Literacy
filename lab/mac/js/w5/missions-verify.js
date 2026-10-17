@@ -318,11 +318,12 @@
       {
         id: 's7',
         text: '你還是要自己抽查一條：請 Codex 用內建瀏覽器打開網站，再切到手機寬度自己看。[[用內建瀏覽器打開網站]]',
-        hint: '回報表是 Codex 說的；自己點開一兩條確認。寬度的切換在內建瀏覽器上面（Desktop｜Phone，練習版）。',
-        answer: '貼上這句按 Return，瀏覽器打開以後按上面的「Phone」，看標記有沒有變大、頁面會不會左右捲動。',
+        hint: '回報表是 Codex 說的；自己點開一兩條確認。手機的寬度在內建瀏覽器右上的「⋯」› Device toolbar 裡：打開以後網址列下面多一條，可以輸入寬度。',
+        answer: '貼上這句按 Return，瀏覽器打開以後按右上的「⋯」› Device toolbar › Show device toolbar，把寬度改成 390，看標記有沒有變大、頁面會不會左右捲動。',
+        // cxbrowser-r2: once the browser shows the site, ⋯ › Device toolbar › Show device toolbar › the width box (LAB.cxbrowser.deviceCue)
         target: whileIdle(chain(function () {
           var b = LAB.cxbrowser && LAB.cxbrowser.state ? LAB.cxbrowser.state() : null;
-          return b && b.open && b.file && String(b.file).toLowerCase() === W5.HTML.toLowerCase() ? document.querySelector('[data-lab=cxb-viewport-btn][data-mode=phone]') : null;
+          return b && b.open && b.file && String(b.file).toLowerCase() === W5.HTML.toLowerCase() && LAB.cxbrowser.deviceCue ? LAB.cxbrowser.deviceCue() : null;
         }, T_COMPOSER)),
         check: function (ev, api) {
           var b = LAB.cxbrowser && LAB.cxbrowser.state ? LAB.cxbrowser.state() : null;

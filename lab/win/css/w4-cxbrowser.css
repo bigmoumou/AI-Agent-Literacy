@@ -30,56 +30,105 @@
 .cxb button, .cxb input, .cxb textarea { font-family: inherit; }
 .cxb button:focus-visible, .cxb input:focus-visible, .cxb textarea:focus-visible { outline: 2px solid #6aa3ff; outline-offset: -2px; }
 
-.cxb-top { flex: none; display: flex; align-items: center; gap: 8px; padding: 8px 8px 0 10px; height: 42px; }
+.cxb { position: relative; }      /* cxbrowser-r2: the ⋯ menu, its submenu and the Dimensions list are placed inside the panel */
+
+/* cxbrowser-r2 — the bars as in the real Codex browser (the teacher's screenshots): row 1 the tab, 「+」, two small buttons; row 2 ← →, reload,
+   select element, the address capsule, Annotate + Downloads, 「⋯」; row 3 (while it is on) the Device toolbar */
+.cxb-top { flex: none; display: flex; align-items: center; gap: 4px; padding: 7px 8px 0 8px; height: 40px; box-sizing: border-box; }
 .cxb-tab {
-  flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 11px; border: 1px solid #3a3a3a; border-radius: 9px;
-  background: #232323; color: #e6e6e6; font-size: 13px; white-space: nowrap; overflow: hidden;
+  flex: 0 1 auto; min-width: 96px; max-width: 250px; display: flex; align-items: center; gap: 7px; height: 30px; padding: 0 3px 0 10px; border: 1px solid #3a3a3a;
+  border-radius: 9px; background: #262626; color: #e6e6e6; font-size: 13px; white-space: nowrap; overflow: hidden; box-sizing: border-box;
 }
-.cxb-fav { flex: none; width: 11px; height: 11px; border-radius: 50%; background: #5c5c5c; }
-.cxb-tab-title { overflow: hidden; text-overflow: ellipsis; }
+.cxb-fav { flex: none; width: 12px; height: 12px; border-radius: 3px; background: #c98a2b; }
+.cxb-tab-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.cxb-tab-x { flex: none; width: 22px; height: 22px; padding: 0; margin: 0; border: 0; border-radius: 6px; background: none; color: #a8a8a8; display: inline-flex; align-items: center; justify-content: center; cursor: default; }
+.cxb-tab-x:hover { background: #3a3a3a; color: #fff; }
+.cxb-gap { flex: 1; min-width: 0; }
 
 .cxb-ib {
-  flex: none; width: 28px; height: 28px; padding: 0; margin: 0; border: 0; border-radius: 50%; background: none; color: #b4b4b4;
+  flex: none; width: 28px; height: 28px; padding: 0; margin: 0; border: 0; border-radius: 50%; background: none; color: #c4c4c4;
   display: inline-flex; align-items: center; justify-content: center; cursor: default;
 }
-.cxb-ib:hover:not(:disabled) { background: #2c2c2c; color: #fff; }
+.cxb-ib:hover:not(:disabled) { background: #333; color: #fff; }
 .cxb-ib:disabled { color: #555; }
+.cxb-ib.cxb-sm { width: 26px; height: 26px; border-radius: 7px; color: #a8a8a8; }
+.cxb-ib.cxb-round { width: 32px; height: 32px; background: #2a2a2a; }
+.cxb-ib.cxb-round:hover:not(:disabled), .cxb-ib.cxb-round.is-on { background: #383838; color: #fff; }
+.cxb-pill2 { flex: none; display: inline-flex; align-items: center; gap: 2px; height: 32px; padding: 0 2px; border-radius: 16px; background: #2a2a2a; }
+.cxb-ann.is-on { background: #1f3a66 !important; color: #cfe0ff !important; }
 
-.cxb-width { flex: none; display: flex; align-items: center; gap: 0; height: 28px; border: 1px solid #3a3a3a; border-radius: 8px; overflow: hidden; }
-.cxb-width-note { padding: 0 7px 0 8px; font-size: 11px; color: var(--cxb-mute); white-space: nowrap; border-right: 1px solid #333; height: 100%; display: inline-flex; align-items: center; }
-.cxb-seg {
-  display: inline-flex; align-items: center; gap: 5px; height: 100%; padding: 0 9px; margin: 0; border: 0; background: none; color: #b4b4b4;
-  font-size: 12px; cursor: default; white-space: nowrap;
-}
-.cxb-seg + .cxb-seg { border-left: 1px solid #333; }
-.cxb-seg:hover { background: #262626; color: #fff; }
-.cxb-seg.is-on { background: #333; color: #fff; }
-.cxb-ann {
-  flex: none; display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 11px; margin: 0; border: 1px solid #3a3a3a; border-radius: 8px;
-  background: none; color: #d0d0d0; font-size: 12.5px; cursor: default; white-space: nowrap;
-}
-.cxb-ann:hover { background: #262626; color: #fff; }
-.cxb-ann.is-on { background: #1f3a66; border-color: #3b82f6; color: #cfe0ff; }
-
-.cxb-nav { flex: none; display: flex; align-items: center; gap: 2px; padding: 6px 10px 8px 6px; }
+.cxb-nav { flex: none; display: flex; align-items: center; gap: 6px; padding: 6px 8px 8px; }
 .cxb-addr {
-  flex: 1; min-width: 0; height: 30px; margin-left: 6px; padding: 0 14px; border: 0; border-radius: 15px; background: var(--cxb-pill); color: #ececec;
+  flex: 1; min-width: 0; height: 32px; padding: 0 14px; border: 0; border-radius: 16px; background: #2a2a2a; color: #ececec;
   font-size: 13px; text-align: center; outline: none; -webkit-user-select: text; user-select: text; text-overflow: ellipsis;
 }
 .cxb-addr::placeholder { color: #777; }
 .cxb-addr:focus { text-align: left; box-shadow: inset 0 0 0 1.5px var(--cxb-blue); background: #262626; }
-/* a narrow panel (small screens): the tab and the close button on the first row, the width buttons and Annotate on a second row */
-.cxb.is-narrow .cxb-top { flex-wrap: wrap; height: auto; row-gap: 6px; padding-bottom: 2px; }
-.cxb.is-narrow .cxb-tab { order: 1; flex: 1 1 calc(100% - 40px); }
-.cxb.is-narrow .cxb-ib[data-lab=cxb-close] { order: 2; }
-.cxb.is-narrow .cxb-width { order: 3; margin-left: 2px; }
-.cxb.is-narrow .cxb-ann { order: 4; margin-left: auto; }
+
+/* 「⋯」, its Device toolbar submenu, and the Dimensions list (absolute in .cxb; cxbrowser.js places them under their button) */
+.cxb-menu {
+  position: absolute; z-index: 20; min-width: 268px; padding: 6px; box-sizing: border-box; background: #2b2b2b; border: 1px solid #3e3e3e; border-radius: 14px;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, .55); color: #e8e8e8; overflow-y: auto; overscroll-behavior: contain;
+}
+.cxb-menu[hidden] { display: none; }
+.cxb-sub { min-width: 244px; }
+.cxb-presets { min-width: 232px; }
+.cxb-mi {
+  display: flex; align-items: center; gap: 10px; width: 100%; min-height: 34px; padding: 0 10px 0 12px; margin: 0; box-sizing: border-box; border: 0; border-radius: 9px;
+  background: none; color: inherit; font-size: 14px; text-align: left; cursor: default; white-space: nowrap;
+}
+.cxb-mi:hover, .cxb-mi.is-open { background: #3a3a3a; }
+.cxb-mi-l { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.cxb-mi-r { flex: none; color: #9a9a9a; font-size: 12px; }
+.cxb-mi.has-sub svg { color: #a8a8a8; }
+.cxb-msep { height: 1px; margin: 5px 6px; background: #404040; }
+.cxb-mi-zoom:hover { background: none; }
+.cxb-zoom { flex: none; display: inline-flex; align-items: stretch; height: 28px; border: 1px solid #4a4a4a; border-radius: 8px; overflow: hidden; }
+.cxb-zb { flex: none; width: 28px; height: 28px; padding: 0; margin: 0; border: 0; background: none; color: #ddd; display: inline-flex; align-items: center; justify-content: center; cursor: default; }
+.cxb-zoom .cxb-zb { height: 26px; }
+.cxb-zb:hover:not(:disabled) { background: #3d3d3d; }
+.cxb-zb:disabled { color: #666; }
+.cxb-zr { border-radius: 50%; color: #aaa; }
+.cxb-zoom-v { min-width: 48px; padding: 0 2px; border-left: 1px solid #4a4a4a; border-right: 1px solid #4a4a4a; font-size: 13px; line-height: 26px; text-align: center; }
+
+/* the Device toolbar: 「Dimensions: Responsive ⌄    width × height  rotate  100%    ×」 */
+.cxb-devbar {
+  flex: none; display: flex; align-items: center; gap: 6px; height: 40px; padding: 0 6px 0 12px; box-sizing: border-box;
+  border-top: 1px solid #2e2e2e; border-bottom: 1px solid #2e2e2e; background: #202020; color: #bdbdbd; font-size: 13px; white-space: nowrap;
+}
+.cxb-devbar[hidden] { display: none; }
+.cxb-dev-l { flex: none; color: #9a9a9a; }
+.cxb-dev-preset { flex: none; display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 7px; margin: 0; border: 0; border-radius: 7px; background: none; color: #d8d8d8; font-size: 13px; font-weight: 600; cursor: default; }
+.cxb-dev-preset:hover { background: #2e2e2e; }
+.cxb-dev-dims { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.cxb-dev-num {
+  width: 62px; height: 28px; padding: 0 6px; box-sizing: border-box; border: 0; border-radius: 7px; background: #2c2c2c; color: #f0f0f0;
+  font-size: 13.5px; font-weight: 600; text-align: center; outline: none; -webkit-user-select: text; user-select: text;
+}
+.cxb-dev-num:focus { box-shadow: inset 0 0 0 1.5px var(--cxb-blue); }
+.cxb-dev-x { color: #8a8a8a; }
+.cxb-dev-scale { min-width: 38px; color: #cfcfcf; font-weight: 600; }
+
+/* a narrow panel (small screens): the less used buttons go, so the address keeps some room */
+.cxb.is-narrow [data-lab=cxb-popout], .cxb.is-narrow [data-lab=cxb-pick], .cxb.is-narrow [data-lab=cxb-downloads] { display: none; }
+.cxb.is-narrow .cxb-dev-l { display: none; }
+.cxb.is-narrow .cxb-dev-num { width: 54px; }
 
 /* ---------------------------------------------------------------- the page area */
 .cxb-page { position: relative; flex: 1; min-height: 0; overflow: hidden; background: #141414; -webkit-user-select: none; user-select: none; }
 .cxb.is-phone .cxb-page { background: #101010; }
 .cxb-scaler { position: absolute; top: 0; left: 0; transform-origin: 0 0; background: #fff; overflow: hidden; }
 .cxb.is-phone .cxb-scaler { box-shadow: 0 0 0 1px #333; }
+/* the Device toolbar's box: centred on a darker ground, with a handle on the left, right and bottom (drag to change the width or the height) */
+.cxb.is-device .cxb-page { background: #121212; }
+.cxb.is-device .cxb-scaler { box-shadow: 0 0 0 1px #3a3a3a; }
+.cxb-dev-handle { position: absolute; z-index: 3; background: #1c1c1c; cursor: ew-resize; touch-action: none; }
+.cxb-dev-handle[hidden] { display: none; }
+.cxb-dev-handle.is-bottom { cursor: ns-resize; }
+.cxb-dev-handle::after { content: ""; position: absolute; left: 50%; top: 50%; width: 2px; height: 26px; margin: -13px 0 0 -2px; border-left: 1px solid #777; border-right: 1px solid #777; }
+.cxb-dev-handle.is-bottom::after { width: 26px; height: 2px; margin: -2px 0 0 -13px; border: 0; border-top: 1px solid #777; border-bottom: 1px solid #777; }
+.cxb-dev-handle:hover::after, .cxb.is-resizing .cxb-dev-handle::after { border-color: #c8c8c8; }
+.cxb.is-resizing { cursor: ew-resize; }
 .cxb-framehold { position: absolute; top: 0; right: 0; bottom: 0; left: 0; }
 .cxb-frame { display: block; width: 100%; height: 100%; border: 0; background: #fff; }
 .cxb-native { position: absolute; top: 0; right: 0; bottom: 0; left: 0; overflow: auto; background: #fff; color: #222; -webkit-user-select: text; user-select: text; }

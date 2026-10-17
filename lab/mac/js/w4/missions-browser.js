@@ -160,8 +160,10 @@
   /* Annotate is on and nothing is chosen yet: the heading of the page (a transparent box over it, see cxbrowser.js; the page lives in a sandboxed
      frame, so there is no element of it to circle), else the whole page view (the shield) */
   var T_PAGE = chain(trusted(function () { return LAB.cxbrowser && LAB.cxbrowser.cueTarget ? LAB.cxbrowser.cueTarget('h1') : null; }), inWins('codex', 'cxb-shield'), dock('codex'));
-  var T_PHONE = chain('[data-lab=cxb-viewport-btn][data-mode=phone]', dock('codex'));
-  var T_DESKTOP = chain('[data-lab=cxb-viewport-btn][data-mode=desktop]', dock('codex'));
+  /* cxbrowser-r2: no 「Desktop｜Phone」 switch any more (the real Codex browser has none). A phone's width is ⋯ › Device toolbar › Show device toolbar and a
+     width ≤ 430 (LAB.cxbrowser.deviceCue: 「⋯」, Device toolbar, Show device toolbar, then the width box); back to the normal width is the toolbar's × */
+  var T_PHONE = chain(function () { return LAB.cxbrowser && LAB.cxbrowser.deviceCue ? LAB.cxbrowser.deviceCue() : null; }, dock('codex'));
+  var T_DESKTOP = chain(function () { return LAB.cxbrowser && LAB.cxbrowser.deviceCloseCue ? LAB.cxbrowser.deviceCloseCue() : null; }, dock('codex'));
   var T_SAFARI_ADDR = chain('[data-lab=sf-address]', dock('safari'));
 
   /* ================================================================== 1 · 打開內建瀏覽器 */
@@ -322,9 +324,9 @@
       {
         id: 's4',
         optional: true,
-        text: '自己再看一次：按瀏覽器面板上的「Desktop」，切回電腦的寬度，確認電腦上的樣子沒有被改壞。',
-        hint: '修手機的時候，不能把電腦上原本好好的樣子改壞。（這個寬度按鈕是練習版加的。）',
-        answer: '點瀏覽器面板上的「Desktop」。',
+        text: '自己再看一次：按網址列下面那一條 Device toolbar 最右邊的 ×，回到一般的寬度，確認電腦上的樣子沒有被改壞。',
+        hint: '修手機的時候，不能把電腦上原本好好的樣子改壞。Device toolbar 是 Codex 剛剛用手機寬度看網頁時打開的那一條（Dimensions、寬 × 高）；關掉它就回到一般的寬度。',
+        answer: '按 Device toolbar 最右邊的 ×。',
         target: T_DESKTOP,
         check: function (ev, api) {
           return !!api.seen('cxbrowser:viewport', function (d) { return d.mode === 'desktop' && d.by === 'user'; });

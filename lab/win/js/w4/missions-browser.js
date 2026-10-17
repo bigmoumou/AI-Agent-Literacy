@@ -171,8 +171,10 @@
   }, '[data-lab=cxb-annotate]', dock('codex'));
   var T_PROJECT = chain(cxProject, dock('codex'));
   var T_ANNOTATE = chain('[data-lab=cxb-annotate]', dock('codex'));
-  var T_PHONE = chain('[data-lab=cxb-viewport-btn][data-mode=phone]', dock('codex'));
-  var T_DESKTOP = chain('[data-lab=cxb-viewport-btn][data-mode=desktop]', dock('codex'));
+  /* cxbrowser-r2: no 「Desktop｜Phone」 switch any more (the real Codex browser has none). A phone's width is ⋯ › Device toolbar › Show device toolbar and a
+     width ≤ 430 (LAB.cxbrowser.deviceCue: 「⋯」, Device toolbar, Show device toolbar, then the width box); back to the normal width is the toolbar's × */
+  var T_PHONE = chain(function () { return LAB.cxbrowser && LAB.cxbrowser.deviceCue ? LAB.cxbrowser.deviceCue() : null; }, dock('codex'));
+  var T_DESKTOP = chain(function () { return LAB.cxbrowser && LAB.cxbrowser.deviceCloseCue ? LAB.cxbrowser.deviceCloseCue() : null; }, dock('codex'));
   // Edge is not pinned to the practice taskbar: when its window is not open the cue walks the student to the Start button, then to Edge in the Start menu
   var T_EDGE = chain('[data-lab=ed-address]', dock('edge'), '[data-lab=start-item][data-app=edge]', '[data-lab=start-button]');
 
@@ -334,9 +336,9 @@
       {
         id: 's4',
         optional: true,
-        text: '自己再看一次：按瀏覽器面板上的「Desktop」，切回電腦的寬度，確認電腦上的樣子沒有被改壞。',
-        hint: '修手機的時候，不能把電腦上原本好好的樣子改壞。（這個寬度按鈕是練習版加的。）',
-        answer: '點瀏覽器面板上的「Desktop」。',
+        text: '自己再看一次：按網址列下面那一條 Device toolbar 最右邊的 ×，回到一般的寬度，確認電腦上的樣子沒有被改壞。',
+        hint: '修手機的時候，不能把電腦上原本好好的樣子改壞。Device toolbar 是 Codex 剛剛用手機寬度看網頁時打開的那一條（Dimensions、寬 × 高）；關掉它就回到一般的寬度。',
+        answer: '按 Device toolbar 最右邊的 ×。',
         target: T_DESKTOP,
         check: function (ev, api) {
           return !!api.seen('cxbrowser:viewport', function (d) { return d.mode === 'desktop' && d.by === 'user'; });
