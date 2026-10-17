@@ -347,6 +347,17 @@
     const t0 = audio.currentTime + 0.02;
     beep(t0, 0.12, 155, "square", 0.05); beep(t0 + 0.16, 0.16, 130, "square", 0.05);
   }
+  // 帶路的聲音（都很小聲，不用咻聲）：收到通訊兩聲往上、斷線兩聲往下、打字輕輕的滴答、過關兩聲、目標地點亮圈
+  function guideSfx(kind) {
+    if (!audio) return;
+    if (sound && audio === sound.context()) sound.hold(1.2);
+    const t0 = audio.currentTime + 0.01;
+    if (kind === "tick") beep(t0, 0.024, 2300 + Math.random() * 500, "triangle", 0.01);
+    else if (kind === "in") { beep(t0, 0.07, 880, "sine", 0.045); beep(t0 + 0.085, 0.1, 1320, "sine", 0.04); }
+    else if (kind === "out") { beep(t0, 0.07, 1320, "sine", 0.035); beep(t0 + 0.085, 0.11, 880, "sine", 0.03); }
+    else if (kind === "stamp") { beep(t0 + 0.05, 0.3, 988, "sine", 0.06); beep(t0 + 0.2, 0.42, 1480, "sine", 0.05); }
+    else if (kind === "ping") { beep(t0, 0.12, 1760, "sine", 0.025); beep(t0 + 0.32, 0.12, 1760, "sine", 0.018); }
+  }
   function chime() {     // 完成任務、空間穩定：三個往上的清亮音
     if (!audio) return;
     if (sound && audio === sound.context()) sound.hold(1.5);
@@ -521,12 +532,18 @@
     try { L = frame.contentWindow.LAB; doc = frame.contentDocument; } catch (e) { return; }
     if (!L || !L.bus || !L.remote || !doc || !L.missions || !L.codex || !L.terminal || !L.vfs || !doc.getElementById("lab-wall")) { if (tries < 60) setTimeout(() => hookLab(tries + 1), 250); return; }
     if (EXAM_ON && window.ExamLevels) {
+      // 帶路：小安的通訊、任務簡報、目標列（exam-guide.js）
+      const guide = window.ExamGuide ? window.ExamGuide.create({ frame, os: chosen, sfx: guideSfx, onReset: (i) => window.ExamLevels.reset(i) }) : null;
       window.ExamLevels.start({
         frame, os: chosen,
         hooks: {
+          onStart: (n) => { if (guide) guide.resume(n); },
+          onBrief: (i, resumed) => (guide ? guide.brief(i, resumed) : null),
+          onPass: (i) => { if (guide) guide.passed(i); },
+          onEvent: (kind, i) => { if (guide) guide.event(kind, i); },
           onStage: setStage,
-          onUnstable: unstable,
-          onDone: (resumed) => unlock(resumed),
+          onUnstable: () => { unstable(); if (guide) guide.event("unstable"); },
+          onDone: (resumed) => { unlock(resumed); if (guide) guide.finish(resumed); },
           sfx: (k) => { if (k === "no") buzz(); else if (sound) { sound.crackle(0.3, 0.2); sound.zap(0.25, 0.2, 0, 0.8); } },   // 問答：答錯低低的拒絕音、答對一小聲電弧
         },
       });

@@ -7,7 +7,8 @@
    第 2、3 關的世界規則：時空亂流會吃掉對話框裡說的規則（聊天紀錄上被塗成雜訊，Codex 收不到）；
      寫進專案檔案的才算數：AGENTS.md，或 AGENTS.md 叫 Codex 去讀、照著做的其他 .md（VERIFY.md、評分說明.md……）。
      規則有沒有寫到，用 exam-rules.js 判斷（不比對固定句子；測試在 製作/week06/design/levels/）。
-   沒有提示：任務卡片只寫目標，練習電腦的提示、光圈、自動提醒都藏起來。過關與否只看練習電腦裡的狀態（檔案、內容、誰寫的）。
+   沒有提示：練習電腦的任務卡、提示、光圈、自動提醒都藏起來；帶路改由 exam-guide.js（小安的通訊、任務簡報、目標列）。
+     過關與否只看練習電腦裡的狀態（檔案、內容、誰寫的）。
    進度記在 sessionStorage：重新整理會從目前這一關繼續（練習電腦本身不存檔，每一關開始時自己把需要的檔案放好）。 */
 (function () {
   "use strict";
@@ -113,12 +114,15 @@
     const frame = o.frame, os = o.os === "win" ? "win" : "mac", H = o.hooks || {};
     const win = frame.contentWindow, doc = frame.contentDocument, L = win.LAB;
     api._L = L;
-    let passed = loadProgress(os), cleanup = null, intents = [];
+    let passed = loadProgress(os), cleanup = null, intents = [], firstBrief = passed > 0;
+    api._H = H;
+    api.reset = (i) => { try { L.missions.reset(IDS[i]); } catch (e) { /* 沒有就算了 */ } };
+    if (H.onStart) H.onStart(passed);
 
-    // 藏掉提示：任務卡片只留目標、「重來這個任務」
+    // 藏掉提示；任務卡整張看不見（還佔著位置：視窗照樣讓開那一欄，目標列放在那裡）
     const st = doc.createElement("style");
     st.id = "exam-css";
-    st.textContent = "#lab-rail .lab-rail-link,.lab-pickrow,[data-lab=hint-link],.lab-hintbar,[data-lab=rail-hint],[data-lab=rail-answer-link]," +
+    st.textContent = "#lab-rail{visibility:hidden!important;opacity:0!important}#lab-rail *{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}#lab-rail .lab-rail-link,.lab-pickrow,[data-lab=hint-link],.lab-hintbar,[data-lab=rail-hint],[data-lab=rail-answer-link]," +
       "[data-lab=rail-answer],.lab-nudge,.lab-peek,.lab-cue,.lab-ghost,.lab-dim,.lab-dock-attn,[data-lab=rail-next],.lab-msheet-scrim," +
       "[data-lab=rail-reset-all],.lab-sec-cur .lab-eyebrow{display:none!important}";
     doc.head.append(st);
@@ -138,9 +142,16 @@
     L.bus.on("codex:reply", (d) => { if (d && d.exam && d.ok === false && H.onUnstable) H.onUnstable(); });
     setTimeout(next, passed ? 600 : 4600);                       // 第一次進來先讓 WARNING 播完
 
+    // 每一關開始前先播簡報、小安的通訊（重新整理接著考的第一關只有簡報）
+    function brief(i) {
+      const resumed = firstBrief;
+      firstBrief = false;
+      return Promise.resolve(H.onBrief ? H.onBrief(i, resumed) : null).catch(() => {});
+    }
     function next() {
-      if (passed < 3) begin(passed);
-      else if (passed === 3) quiz();
+      const i = passed;
+      if (i < 3) brief(i).then(() => { if (passed === i) begin(i); });
+      else if (i === 3) brief(3).then(quiz);
       else if (H.onDone) H.onDone(true);
     }
     function begin(i) {
@@ -157,7 +168,8 @@
       saveProgress(os, passed);
       if (wall) wall.set(passed, true);
       if (H.onStage) H.onStage(passed, true);
-      setTimeout(next, 2200);                                    // 縫合、桌布恢復的動畫播完再下一關
+      if (H.onPass) H.onPass(i);
+      setTimeout(next, 2400);                                    // 縫合、桌布恢復、「修復完成」播完再下一關
     }
     function quiz() {
       if (!window.ExamQuiz) { finishAll(); return; }
@@ -334,7 +346,7 @@
       },
       run: (ctx) => {
         const g = garble(ctx.rawText, (s) => R.privacyRule(s) || R.referencedFiles(s).length > 0);
-        if (g.hit) eat(ctx, g.text);
+        if (g.hit) eat(ctx, g.text, 1);
         if (!ctx.exists("data/watch.csv")) {
           ctx.say((g.hit ? "（訊息有一部分被亂流干擾，讀不出來。）\n" : "") + "這裡找不到值班資料 data/watch.csv。" + (ctx.project ? "" : "這個對話沒有在任何專案裡。"));
           ctx.meta = { exam: "l2" };
@@ -366,7 +378,7 @@
       },
       run: (ctx) => {
         const g = garble(ctx.rawText, (s) => R.dedupeRule(s) || R.statusRules(s).absent || R.statusRules(s).leave || R.referencedFiles(s).length > 0 || R.privacyRule(s));
-        if (g.hit) eat(ctx, g.text);
+        if (g.hit) eat(ctx, g.text, 2);
         if (!ctx.exists("data/scores.csv")) {
           ctx.say((g.hit ? "（訊息有一部分被亂流干擾，讀不出來。）\n" : "") + "這裡找不到成績資料 data/scores.csv。" + (ctx.project ? "" : "這個對話沒有在任何專案裡。"));
           ctx.meta = { exam: "l3" };
@@ -389,8 +401,9 @@
       },
     };
   }
-  // 聊天紀錄上，使用者剛送出的那則訊息裡的規則被亂流塗掉
-  function eat(ctx, text) {
+  // 聊天紀錄上，使用者剛送出的那則訊息裡的規則被亂流塗掉（小安第一次會說一句）
+  function eat(ctx, text, lv) {
+    if (api._H && api._H.onEvent) api._H.onEvent("eaten", lv);
     try {
       const m = ctx.chat.messages;
       const head = (s) => Array.from(String(s).replace(/\s+/g, " ").trim()).slice(0, 12).join("");
@@ -403,6 +416,6 @@
     } catch (e) { /* 改不了就算了 */ }
   }
 
-  const api = { start, RIGHT, _L: null, average, SCORES, OBS };
+  const api = { start, RIGHT, _L: null, _H: null, reset: () => {}, average, SCORES, OBS };
   window.ExamLevels = api;
 })();

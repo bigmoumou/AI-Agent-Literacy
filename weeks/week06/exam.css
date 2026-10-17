@@ -279,3 +279,116 @@ body:not(.in-remote) #exam-vign { display: none; }
 .quiz-btn:focus-visible { outline: 1px solid #fff; outline-offset: 2px; }
 .quiz-btn:disabled { opacity: .35; cursor: default; }
 @media (prefers-reduced-motion: reduce) { .quiz, .quiz-panel, .quiz-bar i, #exam-vign { transition: none; } .quiz-why.is-on { animation: none; } }
+
+/* 考試的帶路（exam-guide.js）：小安的通訊、任務簡報、目標列、時空穩定度。
+   深色面板、細線、小安的橘色是唯一的強調色，穩定度用紫色；不用發光卡片、不做雜訊或撕裂的效果。 */
+#guide {
+  --g-panel: rgba(8, 9, 16, .88); --g-line: rgba(241, 239, 233, .16); --g-amber: #f0b545; --g-violet: #b9a8ff;
+  --g-bar: clamp(44px, 9.5vh, 92px);
+  position: fixed; inset: 0; z-index: 5; pointer-events: none; color: var(--txt); font-family: var(--font-body);
+}
+body:not(.in-remote) #guide { display: none; }
+#guide .g-k { font-family: var(--font-mono); font-size: 12px; letter-spacing: .2em; color: var(--txt-3); }
+#guide .g-amber { color: var(--g-amber); }
+.g-dim { position: absolute; inset: 0; background: rgba(4, 4, 10, .52); opacity: 0; transition: opacity .5s ease; }
+.g-bar { position: absolute; left: 0; right: 0; height: var(--g-bar); background: #000; transition: transform .5s cubic-bezier(.2, .7, .2, 1); }
+.g-top { top: 0; transform: translateY(-100%); }
+.g-bot { bottom: 0; transform: translateY(100%); }
+.g-catch { position: absolute; inset: 0; }
+#guide.is-cut .g-catch { pointer-events: auto; cursor: default; }
+#guide.is-bars .g-dim { opacity: 1; }
+#guide.is-bars .g-bar { transform: none; }
+
+/* 任務簡報：任務編號、標題、目標、時空穩定度 */
+.g-title {
+  position: absolute; left: 50%; top: 40%; width: min(780px, 90vw); text-align: center;
+  transform: translate(-50%, calc(-50% + 10px)); opacity: 0; transition: opacity .5s ease, transform .6s cubic-bezier(.2, .7, .2, 1);
+}
+#guide.is-title .g-title { opacity: 1; transform: translate(-50%, -50%); }
+.g-title h2 { margin: 12px 0 0; font-size: clamp(32px, 4.4vw, 56px); font-weight: 700; letter-spacing: .06em; line-height: 1.2; }
+.g-rule { width: min(340px, 60%); height: 1px; margin: 20px auto 18px; background: linear-gradient(90deg, transparent, rgba(240, 181, 69, .85), transparent); }
+.g-goal {
+  display: inline-flex; gap: 16px; align-items: baseline; max-width: 100%; padding: 11px 18px; text-align: left;
+  border-top: 1px solid var(--g-line); border-bottom: 1px solid var(--g-line); opacity: 0; transition: opacity .5s ease;
+}
+.g-goal .g-k { flex: none; white-space: nowrap; }
+.g-goal span:last-child { font-size: clamp(15px, 1.5vw, 19px); line-height: 1.6; }
+#guide.is-goal .g-goal { opacity: 1; }
+.g-title .g-stab { justify-content: center; margin-top: 22px; }
+.g-stab { display: flex; align-items: center; gap: 12px; }
+.g-segs { display: inline-flex; gap: 5px; }
+.g-segs i { width: 34px; height: 4px; background: rgba(241, 239, 233, .16); transition: background .6s ease; }
+.g-segs i.on { background: var(--g-violet); }
+#guide .g-pct { color: var(--g-violet); letter-spacing: .1em; min-width: 3.2em; }
+
+/* 小安的通訊：先收到訊號，再接通（面板從中間打開），說完斷線收起來；不會一直留在畫面上 */
+.g-comm { position: absolute; left: 50%; bottom: calc(var(--g-bar) + 20px); width: min(690px, 92vw); transform: translateX(-50%); visibility: hidden; }
+.g-comm.is-call { visibility: visible; }
+.g-comm.is-toast { left: var(--col-x, 12px); bottom: var(--dock, 100px); width: var(--col-w, 330px); transform: none; }
+.g-call { display: flex; align-items: center; gap: 8px; margin: 0 0 8px 2px; font-family: var(--font-mono); font-size: 12px; letter-spacing: .2em; color: var(--g-amber); text-shadow: 0 1px 3px rgba(0, 0, 0, .7); }
+.g-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--g-amber); animation: g-blink 1s steps(2, start) infinite; }
+.g-comm.is-open .g-dot { animation: none; }
+.g-comm.is-end .g-call { color: var(--txt-3); }
+.g-comm.is-end .g-dot { background: var(--txt-3); }
+@keyframes g-blink { to { visibility: hidden; } }
+.g-panel {
+  display: grid; grid-template-columns: 104px 1fr; gap: 20px; padding: 18px 22px 16px 18px;
+  background: var(--g-panel); border-top: 1px solid rgba(240, 181, 69, .5);
+  clip-path: inset(50% 0 50% 0); transition: clip-path .32s cubic-bezier(.2, .7, .2, 1);
+}
+.g-comm.is-open .g-panel { clip-path: inset(0 0 0 0); }
+.g-face { position: relative; width: 104px; height: 104px; overflow: hidden; border: 1px solid var(--g-line); background: radial-gradient(circle at 50% 62%, rgba(240, 181, 69, .14), rgba(0, 0, 0, 0) 70%); }
+.g-face img { position: absolute; left: 50%; top: 52%; width: 92%; transform: translate(-50%, -50%); animation: g-signal 3.2s ease-in-out infinite; }
+/* 遠端傳來的影像：偏一點紫、亮度慢慢起伏（不做掃描線、不抖） */
+.g-face::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(120, 100, 255, .12), rgba(20, 10, 40, .22)); }
+@keyframes g-signal { 0%, 100% { opacity: .95; } 45% { opacity: .82; } 55% { opacity: 1; } }
+.g-who { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.g-lines { min-height: 3.4em; }
+.g-lines p { margin: 0 0 4px; font-size: 18px; line-height: 1.7; }
+.g-lines p.old { color: var(--txt-3); font-size: 15px; }
+.g-foot { display: flex; justify-content: space-between; margin-top: 6px; }
+#guide .g-keys { letter-spacing: .12em; }
+.g-comm.is-toast .g-panel { grid-template-columns: 52px 1fr; gap: 12px; padding: 12px 14px; }
+.g-comm.is-toast .g-face { width: 52px; height: 52px; }
+.g-comm.is-toast .g-lines { min-height: 0; }
+.g-comm.is-toast .g-lines p { font-size: 14.5px; line-height: 1.6; }
+.g-comm.is-toast .g-foot, .g-comm.is-toast .g-who .g-k:first-child { display: none; }
+.g-comm.is-toast .g-who::before { content: "小安"; font-family: var(--font-mono); font-size: 12px; letter-spacing: .2em; color: var(--g-amber); }
+
+/* 目標列：放在原本任務卡的那一欄 */
+.g-hud {
+  position: absolute; left: var(--col-x, 12px); top: var(--col-y, 40px); width: var(--col-w, 330px); padding: 14px 18px 14px;
+  background: var(--g-panel); border-left: 2px solid var(--g-amber);
+  opacity: 0; transform: translateY(-6px); transition: opacity .45s ease, transform .45s ease;
+}
+#guide.is-hud .g-hud { opacity: 1; transform: none; }
+.g-hrow { display: flex; justify-content: space-between; align-items: baseline; }
+.g-reset { pointer-events: auto; border: 0; padding: 0; background: none; cursor: pointer; }
+#guide.is-hud .g-reset:hover { color: var(--txt); text-decoration: underline; text-underline-offset: 4px; }
+.g-reset[hidden] { display: none; }
+.g-htitle { margin-top: 6px; font-size: 17px; font-weight: 700; letter-spacing: .04em; }
+.g-hgoal .g-k { white-space: nowrap; }
+.g-hgoal { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: baseline; margin: 8px 0 12px; font-size: 15px; line-height: 1.65; }
+.g-hud .g-stab { padding-top: 11px; border-top: 1px solid var(--g-line); }
+.g-hud .g-segs i { width: 28px; }
+.g-hud .g-pct { margin-left: auto; }
+
+/* 過關：修復完成，穩定度加一格 */
+.g-stamp { position: absolute; left: 50%; top: 44%; transform: translate(-50%, -50%); text-align: center; opacity: 0; transition: opacity .4s ease; }
+.g-stamp::before { content: ""; position: absolute; left: 50%; top: 50%; width: 180%; height: 260%; transform: translate(-50%, -50%); z-index: -1; background: radial-gradient(closest-side, rgba(4, 4, 12, .62), rgba(4, 4, 12, 0)); }
+#guide.is-stamp .g-stamp { opacity: 1; }
+.g-big { margin-top: 14px; font-size: clamp(34px, 4.6vw, 60px); font-weight: 700; letter-spacing: .32em; text-indent: .32em; text-shadow: 0 2px 18px rgba(0, 0, 0, .6); }
+.g-stamp .g-stab { justify-content: center; margin-top: 22px; }
+.g-stamp .g-segs i { width: 56px; height: 5px; transition: background .9s ease; }
+
+/* 要去的地方亮兩圈 */
+.g-ping { position: absolute; width: 0; height: 0; }
+.g-ping i { position: absolute; left: -40px; top: -40px; width: 80px; height: 80px; border: 1.5px solid var(--g-amber); border-radius: 50%; opacity: 0; }
+.g-ping.is-on i { animation: g-ping 1.25s cubic-bezier(.2, .7, .2, 1) 2; }
+.g-ping.is-on i + i { animation-delay: .32s; }
+@keyframes g-ping { 0% { transform: scale(.45); opacity: 0; } 25% { opacity: .95; } 100% { transform: scale(1.35); opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .g-dim, .g-bar, .g-title, .g-goal, .g-panel, .g-hud, .g-stamp, .g-segs i { transition: none; }
+  .g-face img, .g-dot, .g-ping.is-on i { animation: none; }
+}
