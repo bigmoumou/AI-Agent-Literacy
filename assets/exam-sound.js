@@ -310,6 +310,12 @@
     play(pick(pools.zaps), 0.32 * strength, 1300 * k, 1.4, dur || 0.25, delay, rnd(0.92, 1.08) * k);
     crackle(0.8 * strength, (dur || 0.25) * 0.9, delay, pitch);
   }
+  // 遠端桌面從兩邊合上的那一下：鐵門重重關上（exam-slam.mp3；還沒解碼好就用一聲低沉的電弧代替）
+  function slam(strength) {
+    if (!ok()) return;
+    if (!clips.slam) { zap(0.6, 0.22, 0, 0.7); return; }
+    play(clips.slam, 1.35 * (strength == null ? 1 : strength), 0, 0, clips.slam.duration, 0, 1);
+  }
   // 被吸進去（首頁點「進入考場」那一下）
   function suck(strength) {
     if (!ok() || !clips.suck) return;
@@ -360,7 +366,7 @@
   ["pointerdown", "keydown", "touchstart"].forEach((ev) => window.addEventListener(ev, () => { if (!off && !activated) unlock(); }, { capture: true, passive: true }));
 
   window.ExamSound = {
-    prepare, makeDive, loadClip, unlock, ready, hold, level, quiet, crackle, zap, suck, dive, stopDive, bindButton,
+    prepare, makeDive, loadClip, unlock, ready, hold, level, quiet, crackle, zap, suck, slam, dive, stopDive, bindButton,
     isOff: () => off,
     context: () => init(),
     output: () => (init() ? master : null),

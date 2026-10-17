@@ -273,9 +273,11 @@
     st.plasma = 1.4; st.arcRate = u < 1.25 ? 6 : 0; st.dust = u < 1.1 ? 1.5 : 0;
     st.seam = u < 1.3 ? 0 : 1 - seg(u, 1.3, 2.1);
     st.flash = u < 1.3 ? 0 : 1 - seg(u, 1.3, 1.75);
-    st.shakeX = 4 * bump(u, 1.26, 1.7) * Math.sin(t * 90);
+    // 合上的那一下：像鐵門重重關上，畫面往下一沉、彈一下就停（不左右抖，不會暈）
+    const k = u - 1.3;
+    st.shakeX = 0; st.shakeY = k > 0 ? 7 * Math.exp(-k / 0.09) * Math.cos(k * 48) : 0;
     rift.draw();
-    if (sound && u > 1.28 && !sealed) { sealed = true; sound.zap(0.6, 0.22); sound.level("drone", 0, 1.2); }
+    if (sound && u > 1.28 && !sealed) { sealed = true; sound.slam(); sound.level("drone", 0, 0.25); }   // 碰：關門聲蓋過去，低鳴馬上收掉（壓迫感）
     if (u > 2.15) finish();
   }
   function finish() {
@@ -606,7 +608,7 @@
     connectAt = now || performance.now() / 1000;
     status.textContent = say(0);
     if (reduce) {
-      const go = () => { status.textContent = say(2); setTimeout(() => { canvas.style.transition = "opacity .4s ease"; canvas.style.opacity = "0"; pick.classList.add("is-leaving"); setTimeout(finish, 450); }, 300); };
+      const go = () => { status.textContent = say(2); setTimeout(() => { canvas.style.transition = "opacity .4s ease"; canvas.style.opacity = "0"; pick.classList.add("is-leaving"); if (sound) sound.slam(); setTimeout(finish, 450); }, 300); };
       if (loaded) go(); else frame.addEventListener("load", go, { once: true });
       return;
     }
@@ -679,6 +681,7 @@
   // 開場那一整段的聲音（assets/exam-dive.mp3）先解碼好；最多等 1.5 秒，來不及就用合成的
   let clipOK = !(sound && wantBH);
   if (!clipOK) Promise.race([sound.loadClip("dive"), new Promise((r) => setTimeout(r, 1500))]).then(() => { clipOK = true; });
+  if (sound) sound.loadClip("slam");                               // 合上那一下的關門聲，開場時在背景先載好
   // 黑洞的畫布、著色器（在靜止那張畫上之後、等動畫素材的空檔做）
   function makeBH() {
     if (!wantBH || bh) return;

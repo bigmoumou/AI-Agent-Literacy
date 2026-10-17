@@ -65,6 +65,11 @@ Week 4 影片 01 錄影裡的 Blockbench 介面，以及影片中重現或提到
 - "Wormhole .wav" by doug914, CC0 — https://freesound.org/people/doug914/sounds/423636/
 - "Black hole.wav" by vumseplutten1709, CC0 — https://freesound.org/people/vumseplutten1709/sounds/202877/
 
+`assets/exam-slam.mp3`（連進遠端電腦時，畫面從兩邊合上那一下的關門聲）是用下面兩段 CC0 音效，加上一段合成的低頻悶擊混成的：
+
+- "Metal Door Slam Heavy Reverb 3" by Sheyvan, CC0 — https://freesound.org/people/Sheyvan/sounds/570002/
+- "Iron-Wood Slam" by Hakren, CC0 — https://freesound.org/people/Hakren/sounds/372877/
+
 CC0 不要求標示來源；這裡列出來，方便查核、也謝謝原作者。
 
 ### 製作影片用的工具（不在 repo 裡）
@@ -150,6 +155,11 @@ The Blockbench interface in the recording in Week 4 video 01, and the names and 
 - "Big Scary Portal 2" by CogFireStudios, CC0 — https://freesound.org/people/CogFireStudios/sounds/617762/
 - "Wormhole .wav" by doug914, CC0 — https://freesound.org/people/doug914/sounds/423636/
 - "Black hole.wav" by vumseplutten1709, CC0 — https://freesound.org/people/vumseplutten1709/sounds/202877/
+
+`assets/exam-slam.mp3` (the door slam heard when the two halves of the screen shut as you connect to the remote computer) was mixed from these two CC0 sounds and a synthesized low thump:
+
+- "Metal Door Slam Heavy Reverb 3" by Sheyvan, CC0 — https://freesound.org/people/Sheyvan/sounds/570002/
+- "Iron-Wood Slam" by Hakren, CC0 — https://freesound.org/people/Hakren/sounds/372877/
 
 CC0 does not require attribution; they are listed here for reference and with thanks to the authors.
 

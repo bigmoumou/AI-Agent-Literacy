@@ -259,12 +259,15 @@
   /* ---------- 第 1 關：滑鼠失效，只剩終端機 ---------- */
   function lockTerminal(L, os, win, frame) {
     const doc = win.document, offs = [];
-    // 其他視窗收起來，開一個終端機在家目錄，放大
+    // 其他視窗收起來，開一個終端機在家目錄（一般大小、放在中間偏上；放到最大太假，老師說至少小一半）
     try { L.wm.all().forEach((w) => { if (w.appId !== "terminal") try { w.close(true); } catch (e) { /* 關不掉就算了 */ } }); } catch (e) { /* 沒有就算了 */ }
     let inst = null;
     const open = () => {
       inst = L.terminal.open({ cwd: HOME });
-      try { inst.win.zoom(); } catch (e) { /* 放不大就算了 */ }
+      try {
+        const z = L.stage.zoomRect(), w = Math.round(Math.min(z.w * 0.6, 760)), h = Math.round(Math.min(z.h * 0.62, 470));
+        inst.win.setRect({ x: Math.round(z.x + (z.w - w) / 2), y: Math.round(z.y + (z.h - h) * 0.38), w, h });
+      } catch (e) { /* 調不了就用預設大小 */ }
       setTimeout(() => { try { frame.focus(); inst.win.focus(); inst.focus(); } catch (e) { /* 沒有就算了 */ } }, 60);
     };
     open();
