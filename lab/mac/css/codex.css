@@ -151,3 +151,28 @@ html[data-perf="low"] .cx-modal { animation: none; }
 .cx-fold svg { transition: transform .12s ease; }
 .cx-asst:not(.is-folded) .cx-fold svg { transform: rotate(90deg); }
 .cx-asst.is-folded .cx-step { display: none; }
+
+/* ---- the app's chrome as in the teacher's screenshot of the real Codex (2026-10-17): drawn here, no picture of the app is used ---- */
+.cx-side-head { display: flex; align-items: center; gap: 2px; height: 32px; padding: 0 2px 0 4px; margin-bottom: 6px; }
+.cx-brand { display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 6px; margin: 0; border: 0; border-radius: 7px; background: none; color: #ececec; font-size: 16px; font-weight: 600; cursor: default; }
+.cx-brand svg { color: var(--cx-muted); }
+.cx-brand:hover { background: var(--cx-hover); }
+.cx-side-head .cx-head-btn { display: inline-flex; position: static; width: 26px; height: 26px; }
+.cx-access { display: inline-flex; align-items: center; gap: 4px; height: 26px; padding: 0 7px; margin: 0 0 0 2px; border: 0; border-radius: 8px; background: none; color: #f0a24a; font-size: 12.5px; cursor: default; }
+.cx-access svg { color: #f0a24a; }
+.cx-access:hover { background: #343434; }
+.cx-meta { display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; }
+.cx-meta-model { color: #d6d6d6; }
+.cx-meta-effort { color: #9db4f0; }
+.cx-meta > svg { color: var(--cx-meta); }
+.cx-comp-ico { width: 28px; height: 28px; padding: 0; margin: 0 4px 0 0; border: 0; border-radius: 8px; background: none; color: var(--cx-icon); display: inline-flex; align-items: center; justify-content: center; cursor: default; }
+.cx-comp-ico:hover { background: #343434; color: #fff; }
+.cx-voice { width: 28px; height: 28px; padding: 0; margin: 0; border: 0; border-radius: 50%; background: var(--cx-btn); color: var(--cx-btn-ink); display: inline-flex; align-items: center; justify-content: center; cursor: default; }
+.cx-voice[hidden] { display: none; }
+.cx-voice:hover { background: #fff; }
+/* a finished answer: 「Worked for …」 first (folded), the steps under it when opened, the text, then a row of small buttons */
+.cx-asst > .cx-fold:first-child { margin: 0 0 6px; }
+.cx-msg-tools { display: flex; gap: 2px; margin-top: 6px; }
+.cx-act-ico { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 24px; padding: 0; margin: 0; border: 0; border-radius: 6px; background: none; color: #8a8a8a; cursor: default; }
+.cx-act-ico:hover { background: #2f2f2f; color: #e8e8e8; }
+.cx-copy.is-done { color: #7fd18b; }

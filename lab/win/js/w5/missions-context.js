@@ -11,7 +11,6 @@
   var GROUP = '模型與 context window（影片 02、補充 1、補充 2）';
   var same = K.same, chain = K.chain, dock = K.dock;
   var T_COMPOSER = K.composerIn(GW);
-  var VERIFIED_AGENTS = K.snapshot(F.AGENTS_VERIFIED, { 'VERIFY.md': F.VERIFY_DONE });
 
   function chatId(api, title) {
     if (api.state.chats && api.state.chats[title]) return api.state.chats[title];
@@ -57,7 +56,7 @@
       LAB.codex5.setLastModel('luna');
       K.gwProject(api, false);
       api.state.chats = {};
-      api.state.chats[C2] = K.seedChat({ title: C2, turns: C2_TURNS, fields: { model: 'luna', modelSet: true, ctxPct: 58, agents: VERIFIED_AGENTS, handoff: HANDOFF } });
+      api.state.chats[C2] = K.seedChat({ title: C2, turns: C2_TURNS, fields: { model: 'luna', modelSet: true, ctxPct: 58, handoff: HANDOFF } });
       K.gwProject(api, true);
     },
     steps: [
@@ -193,11 +192,17 @@
       },
       {
         id: 's2',
-        text: '點開回覆上面「Searched the web」那一列，看它查了哪些字。',
-        hint: '回覆上面那幾列灰字就是活動紀錄：讀了哪個檔、搜了什麼、跑了什麼指令。點一下就會展開。',
-        answer: '點回覆上面的「Searched the web 銀杏 行道樹 公開資料」，看展開的查詢字和找到的網址。',
+        text: '點回覆上面的「Worked for …」打開活動紀錄，再點「Searched the web」那一列，看它查了哪些字。',
+        hint: '「Worked for …」收著 Codex 做了哪些事：讀了哪個檔、搜了什麼、跑了什麼指令。點一下打開，再點其中一列看細節。',
+        answer: '點回覆上面的「Worked for …」，再點「Searched the web 銀杏 行道樹 公開資料」，看展開的查詢字和找到的網址。',
         replay: 'mission',
-        target: K.inWinSel('codex', '[data-lab=cx-activity][data-kind=search] .cx-act-btn'),
+        // the search row once its answer is open, else the 「Worked for …」 of that answer
+        target: function () {
+          var row = K.inWinSel('codex', '[data-lab=cx-activity][data-kind=search] .cx-act-btn')();
+          if (!row) return null;
+          var box = row.closest('.cx-asst');
+          return box && box.classList.contains('is-folded') ? box.querySelector('[data-lab=cx-fold]') : row;
+        },
         check: function (ev, api) { return !!api.seen('codex:activity-open', function (d) { return d.kind === 'search'; }); }
       },
       {
@@ -288,7 +293,7 @@
       LAB.codex5.setContextUsage(true);
       K.gwProject(api, false);
       api.state.chats = {};
-      api.state.chats[C4] = K.seedChat({ title: C4, turns: C4_TURNS, fields: { model: 'sol', ctxPct: 92, agents: VERIFIED_AGENTS, facts: { unit: 'm', start: W5.START, photoCase: 'lower' } } });
+      api.state.chats[C4] = K.seedChat({ title: C4, turns: C4_TURNS, fields: { model: 'sol', ctxPct: 92, facts: { unit: 'm', start: W5.START, photoCase: 'lower' } } });
       K.gwProject(api, true);
     },
     steps: [
@@ -307,8 +312,8 @@
       {
         id: 's2',
         text: '在這段對話再請它做一件事，看回覆上面的活動紀錄多了哪一列：[[幫每個景點加上從起點走過去的距離]]',
-        hint: '快滿的時候 Codex 自己會壓縮，你不用按什麼；活動紀錄會多一列「Context automatically compacted」。',
-        answer: '在「規劃散步路線」貼上這句，按 Enter，看回覆上面的灰字。',
+        hint: '快滿的時候 Codex 自己會壓縮，你不用按什麼；回覆上面會多一列「Context automatically compacted」。',
+        answer: '在「規劃散步路線」貼上這句，按 Enter，看回覆上面多了哪一列。',
         replay: 'mission',
         target: function (api) { return K.composerOfChat(function () { return chatId(api, C4); })(api); },
         check: function (ev, api) {
@@ -318,10 +323,10 @@
       },
       {
         id: 's3',
-        text: '它記錯了：前面說好距離用公尺、從銀杏坂公園出發。把三個決定寫進 `AGENTS.md`，存檔：[[- 距離一律用公尺。照片檔名一律小寫。路線從銀杏坂公園出發。]]',
-        hint: '檔案存在你的電腦上，壓縮只動對話、不動檔案；Codex 每段對話一開始都會讀 AGENTS.md。決定很多的時候，也可以寫在 decisions.md，再在 AGENTS.md 加一句「每次開工前，先讀 decisions.md」。',
-        answer: '打開 ginkgo-walk 的 `AGENTS.md`，在最後一行下面貼上這句，按 Ctrl+S。',
-        target: K.editFlow(AGENTS, GW),
+        text: '它記錯了：前面說好距離用公尺、從銀杏坂公園出發。在 VS Code 打開 `AGENTS.md`，把三個決定寫進去，存檔：[[- 距離一律用公尺。照片檔名一律小寫。路線從銀杏坂公園出發。]]',
+        hint: '檔案存在你的電腦上，壓縮只動對話、不動檔案；Codex 每次回答前都會讀專案裡的 AGENTS.md。決定很多的時候，也可以寫在 decisions.md，再在 AGENTS.md 加一句「每次開工前，先讀 decisions.md」。VS Code 還沒打開 ginkgo-walk 的話：在終端機打 `cd ~\\Desktop\\ginkgo-walk`，再打 `code .`。',
+        answer: 'VS Code 左邊點 `AGENTS.md`，在最後一行下面貼上這句，按 Ctrl+S。（VS Code 還沒打開這個資料夾：終端機 `cd ~\\Desktop\\ginkgo-walk`、`code .`。）',
+        target: K.codeFlow(AGENTS),
         check: function (ev, api) {
           var a = api.read(AGENTS) || '';
           if (/公尺/.test(a)) return true;
@@ -342,14 +347,13 @@
       },
       {
         id: 's4',
-        text: '一件事一段對話：在 ginkgo-walk 專案開一段新的對話。',
-        hint: '在專案的頁面輸入，新的對話就會開在這個專案底下；新的對話一開始就會讀 AGENTS.md。',
+        text: '一件事一段對話：舊的那段快滿了、也被壓縮過，在 ginkgo-walk 專案開一段新的對話。',
+        hint: '長對話和多次壓縮可能讓模型比較不準；一件事做完，就開一段新的對話。在專案的頁面輸入，新的對話就會開在這個專案底下。',
         answer: '點 Codex 側邊欄的 ginkgo-walk（或它旁邊的 ＋）。',
         target: K.newChatIn(GW),
         check: function (ev, api) {
           var c = K.info();
-          if (!c || !c.projectPath || !same(api, c.projectPath, GW) || c.id === chatId(api, C4)) return false;
-          return c.turns === 0 || !!(c.agents && /公尺/.test(c.agents.text || ''));
+          return !!(c && c.projectPath && same(api, c.projectPath, GW) && c.id !== chatId(api, C4));
         }
       },
       {
@@ -361,7 +365,7 @@
         check: function (ev, api) { var c4 = chatId(api, C4); return !!api.seen('codex:reply', function (d) { return d.intent === 'w5_distance' && d.correct && d.chatId !== c4; }); },
         trap: function (ev, api) {
           if (!ev || ev.name !== 'codex:reply' || !ev.data || ev.data.intent !== 'w5_distance' || ev.data.correct) return null;
-          return '它又用了公里：' + (ev.data.chatId === chatId(api, C4) ? '你還在舊的那段對話裡，' : '這段對話開始的時候，AGENTS.md 裡還沒有這些決定，') + '它看不到「距離一律用公尺」。';
+          return '它又用了公里：AGENTS.md 裡還沒有「距離一律用公尺」，它只讀得到檔案裡寫的事。';
         }
       }
     ],

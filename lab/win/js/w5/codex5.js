@@ -5,10 +5,10 @@
        messages makes the next answer slower (the new model reads the whole chat again, video 02) — no usage numbers are shown
      · Settings (sidebar button, Ctrl+,) with one working switch: General › Show context window usage
      · the context ring (how full this chat is) and a made-up usage model: every answer adds a little, searches and downloads more
-     · AGENTS.md is read ONCE, when a chat sends its first message (a snapshot, chat.agents); later edits reach new chats only
+     · every message reads the project's AGENTS.md (and the files it names) as it is now: any chat of the project sees the latest rules
      · automatic compaction: a chat at 90 % or more is compacted before the next answer (activity row, chat.facts forgotten)
      · activity rows that open (what was searched, the full command and its output), an Allow / Deny card for commands that need
-       the network, Markdown tables and links in answers, a copy button under every answer.
+       the network, Markdown tables and links in answers, the compaction line kept in sight when an answer is folded.
    Every English word of these screens is in STRINGS below, in one place, so it can be matched against the teacher's screenshots of the
    real app (owner, 2026-10-16: until they arrive, use the words of the practice Codex of Weeks 3 and 4). */
 (function (LAB) {
@@ -21,7 +21,7 @@
   /* ------------------------------------------------------------------ every word of the new screens (check against the real app) */
   var STRINGS = {
     models: [{ id: 'sol', label: 'GPT-6.1 Sol' }, { id: 'luna', label: 'GPT-6 Luna' }, { id: 'mini', label: 'GPT-6 Mini' }],
-    effort: 'High',
+    effort: 'Ultra',
     modelMenu: 'Model',
     settings: 'Settings',
     backToApp: 'Back to app',
@@ -41,12 +41,9 @@
     approveTitle: 'Allow this command?',
     approveNet: 'This command needs network access. The default sandbox has no network.',
     allow: 'Allow',
-    deny: 'Deny',
-    copy: 'Copy',
-    copied: 'Copied'
+    deny: 'Deny'
   };
 
-  LAB.icons.add('cx-copy', '<svg viewBox="0 0 16 16"><rect x="5.5" y="5.5" width="8" height="8" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10.5 3.6V3.5A1.5 1.5 0 0 0 9 2H4A1.5 1.5 0 0 0 2.5 3.5V9A1.5 1.5 0 0 0 4 10.5h.1" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>');
 
   /* ------------------------------------------------------------------ state of this visit (nothing is kept between visits, DESIGN §18) */
   var W = { contextUsage: false, lastModel: 'sol', details: new Map(), settingsOpen: false };
@@ -56,7 +53,7 @@
     return STRINGS.models[0].label;
   }
   function userTurns(c) { return c ? c.messages.filter(function (m) { return m.role === 'user'; }).length : 0; }
-  /* the Week 5 fields of a chat: model, ctxPct (0–100), agents (the AGENTS.md snapshot), facts (things agreed in this chat, not in any file) */
+  /* the Week 5 fields of a chat: model, ctxPct (0–100), agents (the AGENTS.md it read last), facts (things agreed in this chat, not in any file) */
   function initChat(c) {
     if (!c) return c;
     if (c.draft && !c.modelSet) c.model = W.lastModel;
@@ -68,7 +65,7 @@
   function viewRoot() { var v = CX.panels.win(); return v && v.el ? v.el.querySelector('[data-lab=cx-root]') : null; }
 
   /* ------------------------------------------------------------------ the ctx of every answer (codex.js makeCtx) */
-  function snapshotAgents(ctx, chat) {
+  function readAgents(ctx, chat) {
     var snap = { text: null, files: {} };
     if (ctx.project) {
       var t = ctx.read('AGENTS.md');
@@ -100,7 +97,7 @@
       chat.compacts = (chat.compacts || 0) + 1;
       ctx.meta.compacted = true;
     }
-    if (userTurns(chat) === 1 && !chat.agents) snapshotAgents(ctx, chat);
+    readAgents(ctx, chat);              // every message reads the project's AGENTS.md as it is now, in any chat of the project (teacher, 2026-10-17)
     ctx.agents = chat.agents || { text: null, files: {} };
     ctx.facts = chat.facts;
     ctx.chatObj = chat;
@@ -187,18 +184,10 @@
     return node;
   };
 
-  /* ------------------------------------------------------------------ copy button under every answer */
+  /* ------------------------------------------------------------------ the compaction line stays in sight when the answer is folded */
   X.decorateMessage = function (box, m) {
-    if (!m || m.role !== 'assistant' || !m.text) return;
-    var btn = h('button', { type: 'button', class: 'cx-copy', 'aria-label': STRINGS.copy, title: STRINGS.copy, dataset: { lab: 'cx-copy', intent: m.intent || '' } }, LAB.icons.el('cx-copy', { size: 15 }));
-    btn.addEventListener('click', function () {
-      LAB.clipboard.setText(m.text);
-      btn.classList.add('is-done'); btn.title = STRINGS.copied;
-      setTimeout(function () { btn.classList.remove('is-done'); btn.title = STRINGS.copy; }, 1400);
-      var c = X.active();
-      emit('codex:copy', { chatId: c ? c.id : null, intent: m.intent || null });
-    });
-    box.appendChild(h('div', { class: 'cx-msg-tools' }, btn));
+    if (!m || m.role !== 'assistant' || !m.steps || m.steps.indexOf(STRINGS.compacted) < 0) return;
+    box.insertBefore(h('div', { class: 'cx-compacted', dataset: { lab: 'cx-compacted' } }, h('span', null, STRINGS.compacted)), box.firstChild);
   };
 
   /* ------------------------------------------------------------------ tables and links in answers */
@@ -274,10 +263,11 @@
   }
   function buildComposerParts(view) {
     var u = view._w5 = {};
-    u.modelBtn = h('button', { type: 'button', class: 'cx-model', 'aria-haspopup': 'menu', 'aria-expanded': 'false', dataset: { lab: 'cx-model' } },
-      h('span', { class: 'cx-model-name' }), LAB.icons.el('chev-down', { size: 11 }));
-    u.modelBtn.addEventListener('click', function () { openMenu(view); });
+    // 「GPT-6.1 Sol Ultra ⌄」 as in the app: the model, the effort word in a lighter colour, the chevron last; the menu picks the model only
     u.effort = h('span', { class: 'cx-effort' }, STRINGS.effort);
+    u.modelBtn = h('button', { type: 'button', class: 'cx-model', 'aria-haspopup': 'menu', 'aria-expanded': 'false', dataset: { lab: 'cx-model' } },
+      h('span', { class: 'cx-model-name' }), ' ', u.effort, LAB.icons.el('chev-down', { size: 11 }));
+    u.modelBtn.addEventListener('click', function () { openMenu(view); });
     var r = ringSvg();
     u.tip = h('span', { class: 'cx-ring-tip', role: 'tooltip', hidden: true, dataset: { lab: 'cx-context-tip' } });
     u.ring = h('button', { type: 'button', class: 'cx-ring', dataset: { lab: 'cx-context-ring' } }, r.svg);
@@ -298,7 +288,7 @@
     u.ring.addEventListener('focus', show);
     u.ring.addEventListener('blur', hide);
     u.ringWrap = h('span', { class: 'cx-ring-wrap' }, u.ring, u.tip);
-    u.wrap = h('span', { class: 'cx-meta-w5' }, u.ringWrap, u.modelBtn, u.effort);
+    u.wrap = h('span', { class: 'cx-meta-w5' }, u.ringWrap, u.modelBtn);
     view.metaEl.textContent = '';
     view.metaEl.appendChild(u.wrap);
     view.metaEl.classList.add('is-w5');

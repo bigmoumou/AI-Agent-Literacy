@@ -13,7 +13,8 @@
 .cx-model svg { color: var(--cx-meta); }
 .cx-model:hover:not(:disabled), .cx-model[aria-expanded="true"] { background: #343434; color: #f0f0f0; }
 .cx-model:disabled { opacity: .6; }
-.cx-effort { padding: 0 4px 0 2px; font-size: 11.5px; color: var(--cx-meta); }
+.cx-model .cx-model-name { color: #d6d6d6; }
+.cx-effort { padding: 0 1px 0 0; font-size: 11.5px; color: #9db4f0; }
 .cx-model-menu {
   position: absolute; right: 0; bottom: calc(100% + 8px); z-index: 4; min-width: 190px; padding: 6px; border-radius: 12px;
   background: #2b2b2b; box-shadow: 0 10px 30px rgba(0, 0, 0, .5), inset 0 0 0 1px rgba(255, 255, 255, .07);
@@ -61,12 +62,9 @@
 .cx-ap-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; }
 .cx-ap-btns .cx-btn { display: inline-block; width: auto; min-width: 84px; height: 30px; margin: 0; }
 
-/* ---- copy, tables, links in answers */
-.cx-msg-tools { display: flex; gap: 4px; margin-top: 6px; }
-.cx-copy { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 24px; padding: 0; margin: 0; border: 0; border-radius: 6px; background: none; color: #8a8a8a; opacity: .75; cursor: default; }
-.cx-asst:hover .cx-copy, .cx-copy:focus-visible { opacity: 1; }
-.cx-copy:hover { background: #2f2f2f; color: #e8e8e8; }
-.cx-copy.is-done { color: #7fd18b; opacity: 1; }
+/* ---- the compaction line (outside the fold), tables, links in answers */
+.cx-compacted { display: flex; align-items: center; gap: 10px; margin: 0 0 8px; font-size: 12.5px; color: #c9b27a; }
+.cx-compacted::before, .cx-compacted::after { content: ""; flex: 1; height: 1px; background: #3a3a3a; }
 .cx-table-wrap { margin: 6px 0 8px; overflow-x: auto; }
 .cx-table { border-collapse: collapse; font-size: 13px; line-height: 1.45; }
 .cx-table th, .cx-table td { padding: 5px 10px; border: 1px solid #3a3a3a; text-align: left; vertical-align: top; }

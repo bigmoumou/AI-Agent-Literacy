@@ -946,6 +946,18 @@
 
   function icon(name, size) { return LAB.icons.el(name, { size: size || 16 }); }
 
+  /* the chrome of the real app (teacher's screenshot, 2026-10-17; drawn here): Full access, microphone, voice, bell, read aloud, more, copy */
+  LAB.icons.add('cx-access', '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 4.6v4.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="11.2" r=".95" fill="currentColor"/></svg>');
+  LAB.icons.add('cx-mic', '<svg viewBox="0 0 16 16"><rect x="5.6" y="1.8" width="4.8" height="8" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M3.4 7.6a4.6 4.6 0 0 0 9.2 0M8 12.2v2.2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>');
+  LAB.icons.add('cx-voice', '<svg viewBox="0 0 16 16"><path d="M3 6.5v3M5.4 4.5v7M8 2.8v10.4M10.6 4.5v7M13 6.5v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>');
+  LAB.icons.add('cx-bell', '<svg viewBox="0 0 16 16"><path d="M4 11.2V7.4a4 4 0 0 1 8 0v3.8l1.2 1.3H2.8zM6.4 13.6a1.7 1.7 0 0 0 3.2 0" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>');
+  LAB.icons.add('cx-speak', '<svg viewBox="0 0 16 16"><path d="M2.6 6.2h2.2L8 3.4v9.2L4.8 9.8H2.6z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M10.4 6a2.8 2.8 0 0 1 0 4M12.2 4.4a5.2 5.2 0 0 1 0 7.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>');
+  LAB.icons.add('cx-more', '<svg viewBox="0 0 16 16"><circle cx="3.5" cy="8" r="1.2" fill="currentColor"/><circle cx="8" cy="8" r="1.2" fill="currentColor"/><circle cx="12.5" cy="8" r="1.2" fill="currentColor"/></svg>');
+  LAB.icons.add('cx-copy', '<svg viewBox="0 0 16 16"><rect x="5.5" y="5.5" width="8" height="8" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10.5 3.6V3.5A1.5 1.5 0 0 0 9 2H4A1.5 1.5 0 0 0 2.5 3.5V9A1.5 1.5 0 0 0 4 10.5h.1" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>');
+  function soon(what) { return function () { LAB.ui.toast('練習版沒有' + what + '的功能'); }; }
+  /* "Worked for 6s", "Worked for 3m 12s" (as the app writes it) */
+  function workedFor(sec) { sec = Math.max(0, Math.round(sec || 0)); return 'Worked for ' + (sec >= 60 ? Math.floor(sec / 60) + 'm ' + (sec % 60) + 's' : sec + 's'); }
+
   /* original soft-blob logo drawn as an outline (no square), used for the empty state */
   LAB.icons.add('cx-logo', '<svg viewBox="0 0 64 64"><path d="M32 8c13 0 23 8.4 23 21.4C55 43 46 53 31.6 53 18.4 53 9 43.6 9 31 9 17.4 19 8 32 8z" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/></svg>');
 
@@ -1070,12 +1082,16 @@
     bodyEl.appendChild(emptyEl); bodyEl.appendChild(msgsEl); bodyEl.appendChild(pendingEl);
 
     var chipsEl = h('div', { class: 'cx-chips', dataset: { lab: 'cx-chips' } });
-    var ta = h('textarea', { class: 'cx-ta', rows: '1', placeholder: 'Do anything', 'aria-label': 'Message Codex', spellcheck: 'false', autocomplete: 'off', dataset: { lab: 'cx-composer' } });
+    var ta = h('textarea', { class: 'cx-ta', rows: '1', placeholder: 'Work with Codex', 'aria-label': 'Message Codex', spellcheck: 'false', autocomplete: 'off', dataset: { lab: 'cx-composer' } });
     var plusBtn = h('button', { type: 'button', class: 'cx-comp-plus', 'aria-label': 'Add files and more',
       on: { click: function () { LAB.ui.toast('練習版沒有這個功能：把檔案或資料夾拖進 Codex 視窗就可以了'); } } }, icon('plus', 16));
-    var meta = h('span', { class: 'cx-meta' }, 'GPT-6.1 Sol  High');
+    var accessBtn = h('button', { type: 'button', class: 'cx-access', title: 'Full access', dataset: { lab: 'cx-access' },
+      on: { click: function () { LAB.ui.toast('Full access：Codex 可以讀寫這個資料夾、執行指令（練習版不能改這個設定）'); } } }, icon('cx-access', 14), h('span', null, 'Full access'));
+    var meta = h('span', { class: 'cx-meta', dataset: { lab: 'cx-meta' } }, h('span', { class: 'cx-meta-model' }, 'GPT-6.1 Sol'), ' ', h('span', { class: 'cx-meta-effort' }, 'Ultra'), icon('chev-down', 11));
+    var micBtn = h('button', { type: 'button', class: 'cx-comp-ico cx-mic', 'aria-label': 'Dictate', title: 'Dictate', dataset: { lab: 'cx-mic' }, on: { click: soon('語音輸入') } }, icon('cx-mic', 16));
+    var voiceBtn = h('button', { type: 'button', class: 'cx-voice', 'aria-label': 'Voice', title: 'Voice', dataset: { lab: 'cx-voice' }, on: { click: soon('語音對話') } }, icon('cx-voice', 16));
     var sendBtn = h('button', { type: 'button', class: 'cx-send', 'aria-label': 'Send', hidden: true, dataset: { lab: 'cx-send' }, on: { click: doSend } }, icon('send', 16));
-    var compEl = h('div', { class: 'cx-comp' }, ta, h('div', { class: 'cx-comp-row' }, plusBtn, h('span', { class: 'cx-grow' }), meta, sendBtn));
+    var compEl = h('div', { class: 'cx-comp' }, ta, h('div', { class: 'cx-comp-row' }, plusBtn, accessBtn, h('span', { class: 'cx-grow' }), meta, micBtn, voiceBtn, sendBtn));
     var footEl = h('div', { class: 'cx-foot' }, h('div', { class: 'cx-foot-in' }, chipsEl, compEl));
     mainEl.appendChild(headEl); mainEl.appendChild(bodyEl); mainEl.appendChild(footEl);
     var panelEl = h('aside', { class: 'cx-panel', hidden: true, dataset: { lab: 'cx-panel' } });
@@ -1090,6 +1106,7 @@
     function updateSend() {
       var c = activeChat();
       sendBtn.hidden = !(ta.value.replace(/\s/g, '').length) || !!(c && c.busy);
+      voiceBtn.hidden = !sendBtn.hidden;          // the round button is Voice while the box is empty, Send once there is text (as in the app)
     }
     function doSend() {
       var c = activeChat();
@@ -1134,6 +1151,11 @@
       if (ae && ae !== document.body && sideEl.contains(ae) && ae.getAttribute) fk = ae.getAttribute('data-key');
       var st = sideEl.scrollTop;
       sideEl.textContent = '';
+      sideEl.appendChild(h('div', { class: 'cx-side-head' },
+        h('button', { type: 'button', class: 'cx-brand', dataset: { lab: 'cx-brand', key: 'brand' }, on: { click: soon('切換工作區') } }, h('span', null, 'Codex'), icon('chev-down', 12)),
+        h('span', { class: 'cx-grow' }),
+        h('button', { type: 'button', class: 'cx-ico-btn cx-head-btn', 'aria-label': 'Notifications', title: 'Notifications', dataset: { lab: 'cx-bell', key: 'bell' }, on: { click: soon('通知') } }, icon('cx-bell', 15)),
+        h('button', { type: 'button', class: 'cx-ico-btn cx-head-btn', 'aria-label': 'Search', title: 'Search', dataset: { lab: 'cx-search', key: 'search' }, on: { click: soon('搜尋對話') } }, icon('search', 15))));
       sideEl.appendChild(h('button', { type: 'button', class: 'cx-row cx-newchat', dataset: { lab: 'cx-new-chat', key: 'new' }, on: { click: function () { uiNewChat(null); } } },
         icon('pencil', 16), h('span', { class: 'cx-name' }, 'New chat')));
       sideEl.appendChild(h('div', { class: 'cx-gapl' }));
@@ -1194,17 +1216,32 @@
       }
       if (m.role === 'user') return h('div', { class: 'cx-msg cx-user-row' }, h('div', { class: 'cx-user' }, m.text));
       var box = h('div', { class: 'cx-msg cx-asst' });
-      (m.steps || []).forEach(function (s) { box.appendChild(stepNode(s, true)); });
-      var t = h('div', { class: 'cx-text' });
-      richInto(t, m.text);
-      box.appendChild(t);
       if (m.elapsed) {
-        var fold = h('button', { type: 'button', class: 'cx-fold', 'aria-expanded': 'true', dataset: { lab: 'cx-fold' } }, h('span', null, 'Worked for ' + m.elapsed + 's'), icon('chev-right', 12));
+        // teacher's screenshot of the app (2026-10-17): a finished answer starts with 「Worked for 3m 12s ›」, folded; a click shows what it did
+        box.classList.add('is-folded');
+        var fold = h('button', { type: 'button', class: 'cx-fold', 'aria-expanded': 'false', dataset: { lab: 'cx-fold' } }, h('span', null, workedFor(m.elapsed)), icon('chev-right', 12));
         fold.addEventListener('click', function () {
           var folded = box.classList.toggle('is-folded');
           fold.setAttribute('aria-expanded', folded ? 'false' : 'true');
         });
         box.appendChild(fold);
+      }
+      (m.steps || []).forEach(function (s) { box.appendChild(stepNode(s, true)); });
+      var t = h('div', { class: 'cx-text' });
+      richInto(t, m.text);
+      box.appendChild(t);
+      if (m.text) {
+        var copyBtn = h('button', { type: 'button', class: 'cx-act-ico cx-copy', 'aria-label': 'Copy', title: 'Copy', dataset: { lab: 'cx-copy', intent: m.intent || '' } }, icon('cx-copy', 14));
+        copyBtn.addEventListener('click', function () {
+          LAB.clipboard.setText(m.text);
+          copyBtn.classList.add('is-done'); copyBtn.title = 'Copied';
+          setTimeout(function () { copyBtn.classList.remove('is-done'); copyBtn.title = 'Copy'; }, 1400);
+          var ac = activeChat();
+          emit('codex:copy', { chatId: ac ? ac.id : null, intent: m.intent || null });
+        });
+        box.appendChild(h('div', { class: 'cx-msg-tools', dataset: { lab: 'cx-msg-tools' } }, copyBtn,
+          h('button', { type: 'button', class: 'cx-act-ico', 'aria-label': 'Read aloud', title: 'Read aloud', dataset: { lab: 'cx-speak' }, on: { click: soon('朗讀') } }, icon('cx-speak', 14)),
+          h('button', { type: 'button', class: 'cx-act-ico', 'aria-label': 'More', title: 'More', dataset: { lab: 'cx-msg-more' }, on: { click: soon('這個選單') } }, icon('cx-more', 14))));
       }
       if (api.ext.decorateMessage) { try { api.ext.decorateMessage(box, m); } catch (e) { console.error('[codex] decorateMessage failed', e); } }
       return box;

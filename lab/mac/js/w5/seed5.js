@@ -121,7 +121,7 @@
     '1. 地圖上有 12 個景點標記：數 site/index.html 裡 class="spot" 的標記，應該是 12 個。\n' +
     '2. 寬 390 px 時不會左右捲動：用內建瀏覽器切到手機寬度，頁面不能比畫面寬。\n' +
     '3. 照片都打得開：site/index.html 裡每個照片檔名，和 site/photos/ 裡的檔名一字不差（大小寫也要一樣）。\n' +
-    '4. 標記要點得到。\n' +
+    '4. 在手機上，地圖上的景點標記要夠大，手指點得到。\n' +
     '5. 在手機上用手指點標記，會跳出那個景點的照片。\n';
   W5.files = {
     html: html, css: css,
@@ -129,7 +129,7 @@
     AGENTS_VERIFIED: AGENTS_BASE + '- ' + VERIFY_LINE + '\n',
     VERIFY_LINE: VERIFY_LINE,
     VERIFY_DRAFT: VERIFY_DRAFT,
-    VERIFY_DONE: VERIFY_DRAFT.replace('4. 標記要點得到。', '4. 寬 390 px 時，每個標記至少 44 px。')
+    VERIFY_DONE: VERIFY_DRAFT.replace('4. 在手機上，地圖上的景點標記要夠大，手指點得到。', '4. 寬 390 px 時，每個標記至少 44 px。')
   };
 
   /* the homework folder: stand-ins with one sentence (SPEC-w5 §5, owner's decision 6) */

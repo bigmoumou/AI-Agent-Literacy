@@ -34,12 +34,13 @@
   function numbers(t) { return (String(t).match(/\d+/g) || []).map(Number); }
   /* what an item asks for; the numbers come from the student's own sentence */
   function kindOf(t) {
-    if (/(手機上|手指|真的手機|iphone|android)/i.test(t)) return { kind: 'device' };
     var nums = numbers(t).filter(function (n) { return n !== 390; });
+    // the size of the markers first: 「在手機上，…標記要夠大，手指點得到」 is about size (vague without a number), not about trying a real phone
     if (/(標記|spot)/i.test(t) && /(px|像素|至少|大小|點得到|夠大|多大)/i.test(t)) {
       var px = nums.filter(function (n) { return n !== 12; });
-      return px.length ? { kind: 'size', px: px[px.length - 1] } : { kind: 'vague' };
+      return px.length ? { kind: 'size', px: px[px.length - 1] } : { kind: 'vague', big: /夠大/.test(t) };
     }
+    if (/(手機上|手指|真的手機|iphone|android)/i.test(t)) return { kind: 'device' };
     if (/(標記|spot)/i.test(t) && /個/.test(t)) return { kind: 'count', count: nums.length ? nums[0] : 12 };
     if (/(捲動|scroll|超出|比畫面寬|跑版)/i.test(t)) return { kind: 'overflow' };
     if (/(檔名|大小寫|照片)/.test(t)) return { kind: 'photos' };
@@ -124,6 +125,8 @@
         } else if (k.kind === 'device') {
           title = '手機上用手指點';
           ev = '我沒有真的手機，請你用手機試一次';
+        } else if (k.kind === 'vague' && k.big) {
+          ev = '這一條只寫了「夠大」，沒寫多大，我沒辦法檢查';
         } else if (k.kind === 'vague') {
           ev = '這一條沒有寫看什麼、應該看到什麼，我沒辦法判斷過了沒有';
         } else {
@@ -223,7 +226,7 @@
       if (ctx.exists('VERIFY.md')) { ctx.say('專案裡已經有 VERIFY.md 了，我沒有覆蓋它。要我照它驗證，請說「照 VERIFY.md 驗證一次」。'); return; }
       ctx.read('site/index.html');
       ctx.write('VERIFY.md', F.VERIFY_DRAFT);
-      ctx.say('起草好了 `VERIFY.md`，一共 5 條，每一條寫看什麼、怎麼看、應該看到什麼。\n第 4 條我寫得不夠清楚，你可以改成有數字、檢查得了的。');
+      ctx.say('起草好了 `VERIFY.md`，一共 5 條，每一條寫看什麼、怎麼看、應該看到什麼。\n第 4 條只寫了「夠大」，沒寫多大，我沒辦法檢查；你可以改成有數字的。');
       ctx.meta.verifyDraft = true;
     }
   }, { priority: 116 });
