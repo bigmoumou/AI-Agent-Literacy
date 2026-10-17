@@ -427,8 +427,22 @@
     for (let i = 0; i < s.p.n; i++) {
       const P = strand(L * (0.65 + Math.random() * 0.35) * (i ? 0.8 : 1), (i - (s.p.n - 1) / 2) * 7, s.p.tilt + (Math.random() * 2 - 1) * 0.35);
       const line = () => { g.beginPath(); P.forEach(([x, y], k) => (k ? g.lineTo(x, y) : g.moveTo(x, y))); g.stroke(); };
-      [[11, "110,80,255", 0.2], [4, "150,140,255", 0.55], [1.6, "245,245,255", 0.95]].forEach(([w, col, a]) => {
+      // 和桌布上的電流同一種：細細的紫色絲、亮的細芯（老師 2026-10-17 的參考圖）
+      [[5, "120,95,255", 0.14], [2.2, "150,130,255", 0.42], [1.05, "226,220,255", 0.85]].forEach(([w, col, a]) => {
         g.strokeStyle = `rgba(${col},${a})`; g.lineWidth = w; line();
+      });
+      // 星芒亮點：起點和中間幾個轉折
+      [0, Math.floor(P.length * 0.45), Math.floor(P.length * 0.75)].forEach((q, j) => {
+        if (j && Math.random() < 0.4) return;
+        const [x, y] = P[q], rr = j ? 3.2 : 5.5;
+        const gr = g.createRadialGradient(x, y, 0, x, y, rr * 2.4);
+        gr.addColorStop(0, "rgba(255,255,255,1)"); gr.addColorStop(0.18, "rgba(225,215,255,.85)"); gr.addColorStop(0.45, "rgba(140,115,255,.28)"); gr.addColorStop(1, "rgba(0,0,0,0)");
+        g.fillStyle = gr; g.fillRect(x - rr * 2.4, y - rr * 2.4, rr * 4.8, rr * 4.8);
+        [[1, 0], [0, 1]].forEach(([dx, dy]) => {
+          const len = rr * 2.8, lg = g.createLinearGradient(x - dx * len, y - dy * len, x + dx * len, y + dy * len);
+          lg.addColorStop(0, "rgba(200,185,255,0)"); lg.addColorStop(0.5, "rgba(240,235,255,.85)"); lg.addColorStop(1, "rgba(200,185,255,0)");
+          g.strokeStyle = lg; g.lineWidth = 1; g.beginPath(); g.moveTo(x - dx * len, y - dy * len); g.lineTo(x + dx * len, y + dy * len); g.stroke();
+        });
       });
     }
   }

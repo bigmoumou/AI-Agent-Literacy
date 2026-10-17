@@ -2770,7 +2770,7 @@
       probe.style.fontSize = fs + 'px';
       var w = probe.getBoundingClientRect().width / stageScale() / 100;
       if (w > 0.5) cw = w;
-      lh = Math.round(fs * LH * 4) / 4;
+      lh = Math.round(fs * ((LAB.terminal && LAB.terminal.lineHeight) || LH) * 4) / 4;   // Week 6 考試把行距拉開（LAB.terminal.lineHeight）
       screen.style.setProperty('--tm-lh', lh + 'px');
       screen.style.fontSize = fs + 'px';
       ta.style.fontSize = fs + 'px';

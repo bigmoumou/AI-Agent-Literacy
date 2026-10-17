@@ -122,7 +122,9 @@
     // 藏掉提示；任務卡整張看不見（還佔著位置：視窗照樣讓開那一欄，目標列放在那裡）
     const st = doc.createElement("style");
     st.id = "exam-css";
-    st.textContent = "#lab-rail{visibility:hidden!important;opacity:0!important}#lab-rail *{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}#lab-rail .lab-rail-link,.lab-pickrow,[data-lab=hint-link],.lab-hintbar,[data-lab=rail-hint],[data-lab=rail-answer-link]," +
+    st.textContent = (os === "win" ? "" : ".lab-win[data-app=terminal] .lab-win-bar{background:#2a2b33!important;border-bottom-color:#15161b!important}" +
+      ".lab-win[data-app=terminal] .lab-win-title{color:#c9c9cf!important}.lab-win[data-app=terminal] .tm-root{--tm-bg:#1b1e26}") +
+      "#lab-rail{visibility:hidden!important;opacity:0!important}#lab-rail *{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}#lab-rail .lab-rail-link,.lab-pickrow,[data-lab=hint-link],.lab-hintbar,[data-lab=rail-hint],[data-lab=rail-answer-link]," +
       "[data-lab=rail-answer],.lab-nudge,.lab-peek,.lab-cue,.lab-ghost,.lab-dim,.lab-dock-attn,[data-lab=rail-next],.lab-msheet-scrim," +
       "[data-lab=rail-reset-all],.lab-sec-cur .lab-eyebrow{display:none!important}";
     doc.head.append(st);
@@ -259,14 +261,22 @@
   /* ---------- 第 1 關：滑鼠失效，只剩終端機 ---------- */
   function lockTerminal(L, os, win, frame) {
     const doc = win.document, offs = [];
-    // 其他視窗收起來，開一個終端機在家目錄（一般大小、放在中間偏上；放到最大太假，老師說至少小一半）
+    // 其他視窗收起來，開一個終端機在家目錄：照老師的參考圖，一般視窗（約工作區的七成寬、六成高，中間偏上），
+    // 行距拉開（Mac 字 13 px、行高約 1.9 倍）；Mac 的標題列改深色、內容底色暗一點，標題「an — zsh」
     try { L.wm.all().forEach((w) => { if (w.appId !== "terminal") try { w.close(true); } catch (e) { /* 關不掉就算了 */ } }); } catch (e) { /* 沒有就算了 */ }
     let inst = null;
     const open = () => {
+      L.terminal.lineHeight = os === "win" ? 1.4 : 1.9;
       inst = L.terminal.open({ cwd: HOME });
+      try { if (os !== "win") inst.zoom(1); } catch (e) { /* 調不了字就用預設大小 */ }
       try {
-        const z = L.stage.zoomRect(), w = Math.round(Math.min(z.w * 0.6, 760)), h = Math.round(Math.min(z.h * 0.62, 470));
-        inst.win.setRect({ x: Math.round(z.x + (z.w - w) / 2), y: Math.round(z.y + (z.h - h) * 0.38), w, h });
+        const w0 = inst.win, set = w0.setTitle;                          // Mac 的標題「an — -zsh — 90×25」→「an — zsh」
+        w0.setTitle = function (t) { return set.call(this, String(t).replace(/ — -zsh — \d+×\d+$/, " — zsh")); };
+        w0.setTitle(w0.getTitle());
+      } catch (e) { /* 改不了就算了 */ }
+      try {
+        const z = L.stage.zoomRect(), w = Math.round(Math.min(z.w * 0.72, 980)), h = Math.round(Math.min(z.h * 0.58, 500));
+        inst.win.setRect({ x: Math.round(z.x + (z.w - w) / 2), y: Math.round(z.y + (z.h - h) * 0.42), w, h });
       } catch (e) { /* 調不了就用預設大小 */ }
       setTimeout(() => { try { frame.focus(); inst.win.focus(); inst.focus(); } catch (e) { /* 沒有就算了 */ } }, 60);
     };

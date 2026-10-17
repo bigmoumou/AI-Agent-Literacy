@@ -1,6 +1,7 @@
 /* Week 6 考試：遠端桌面的桌布，每過一關恢復一階（exam-levels.js 呼叫 ExamWall.attach(frame, os).set(階段, 要不要動畫)）。
    整張桌布當成一片被撞碎的玻璃：上、左下、右下三個撞擊點，越靠近撞擊點碎得越細，離得遠的是大塊。
-     0 剛連進來：桌布整片不見，只剩黑色的虛空（深紫、星點），三個撞擊點發著光、劈出紫色的閃電裂縫
+     0 剛連進來：桌布整片不見，只剩很暗的藍灰色；畫面四個角落有細細的紫色電流，交叉的地方一顆顆星芒亮點
+       （老師 2026-10-17 給的參考圖：中間乾淨、電流貼著邊緣；左上偏中、右上、左下、右下四叢）
      1 過第 1 關：碎片從外圍一塊塊飛回來拼上，看得出原本的桌布，但整張暗暗的、偏紫；碎片各自歪一點，
        片與片之間是細黑縫；三個撞擊點的中心還是破洞（看得到虛空，洞邊發光）
      2 過第 2 關：外圍的碎片歸位、縫合（只剩幾道細裂紋），桌布亮回來；只剩上、左下、右下三處還是碎的，
@@ -20,7 +21,7 @@
      amt 鬆脫的碎片歪多少、gap 黑縫寬（CSS px）、bevel 碎片邊的亮邊、base 桌布亮度、tint 偏紫、glow 紫色閃電、rim 破洞邊的光、vein 虛空裡的裂紋光、
      under 縫裡看到的是什麼（0 是虛空；1 是暗暗的桌布，像玻璃的斷面，縫才不會是一條條黑線） */
   const STAGES = [
-    { gr: 9, lr: 9, cr: 9, amt: 1, gap: 2.1, bevel: 1, base: 1, tint: 0, glow: 1, rim: 1, vein: 1, under: 0 },
+    { gr: 9, lr: 9, cr: 9, amt: 1, gap: 2.1, bevel: 1, base: 1, tint: 0, glow: 1, rim: 1, vein: 0, under: 0 },
     { gr: 0.3, lr: 1.75, cr: 9, amt: 1, gap: 2.1, bevel: 1, base: 0.58, tint: 0.8, glow: 0.5, rim: 1, vein: 0, under: 0 },
     { gr: -0.3, lr: 0.85, cr: 0.97, amt: 1, gap: 1.6, bevel: 1, base: 0.94, tint: 0.2, glow: 0.16, rim: 0, vein: 0, under: 0.3 },
     { gr: -0.3, lr: 0.85, cr: 0.9, amt: 0.06, gap: 0.8, bevel: 0.55, base: 1, tint: 0, glow: 0.03, rim: 0, vein: 0, under: 0.5 },
@@ -34,10 +35,10 @@
   const st = (reach, h) => { const x = Math.max(0, Math.min(1, (reach - h) / SOFT)); return x * x * (3 - 2 * x); };
   function rng(seed) { let s = seed >>> 0; return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
 
-  // 三個撞擊點（X 先用畫面寬的比例，之後乘 A）：上（中間偏一點）、左下、右下；R 是碎裂區的大小，lobe 讓邊界有起伏
+  // 三個撞擊點（X 先用畫面寬的比例，之後乘 A）：上（偏左，和參考圖左上那叢電流同一處）、左下、右下；R 是碎裂區的大小，lobe 讓邊界有起伏
   function makeImpacts(r, A) {
     return [
-      { x: 0.44 + r() * 0.16, y: 0.05 + r() * 0.03, R: 0.36 + r() * 0.06 },
+      { x: 0.3 + r() * 0.07, y: 0.03 + r() * 0.03, R: 0.36 + r() * 0.06 },
       { x: 0.07 + r() * 0.05, y: 0.82 + r() * 0.06, R: 0.34 + r() * 0.06 },
       { x: 0.86 + r() * 0.07, y: 0.78 + r() * 0.08, R: 0.32 + r() * 0.06 },
     ].map((im) => {
@@ -164,35 +165,40 @@
     });
     return { cells, edges: edgeList, ext };
   }
-  // 紫色閃電：從撞擊點往畫面裡劈出去的折線，每個撞擊點 3 道往不同方向散開（短一點，三個撞擊點的閃電不會在中間連起來），各帶分岔
-  function makeBolts(r, impacts, A) {
-    const out = [];
-    const bolt = (x0, y0, ang, len, depth) => {
-      const pts = [[x0, y0]];
-      const go = (ax, ay, bx, by, rr, d) => {
-        if (d === 0) { pts.push([bx, by]); return; }
-        const nx = -(by - ay), ny = bx - ax, k = (r() * 2 - 1) * rr;
-        const mx = (ax + bx) / 2 + nx * k, my = (ay + by) / 2 + ny * k;
-        go(ax, ay, mx, my, rr * 0.55, d - 1); go(mx, my, bx, by, rr * 0.55, d - 1);
-      };
-      go(x0, y0, x0 + Math.cos(ang) * len, y0 + Math.sin(ang) * len, 0.3, depth);
-      return pts;
-    };
-    impacts.forEach((im) => {
-      const toCenter = Math.atan2(0.5 - im.Y, A / 2 - im.X);
-      for (let i = 0; i < 3; i++) {
-        const a = toCenter + (i - 1) * (0.7 + r() * 0.3) + (r() - 0.5) * 0.3;
-        const main = bolt(im.X, im.Y, a, im.R * (i === 1 ? 0.85 + r() * 0.35 : 0.55 + r() * 0.4), 6);
-        out.push({ pts: main, w: i === 1 ? 1 : 0.8 });
-        const nb = r() < 0.6 ? 1 : 2;
-        for (let q = 0; q < nb; q++) {
-          const at = main[Math.floor(main.length * (0.3 + r() * 0.45))];
-          out.push({ pts: bolt(at[0], at[1], a + (r() < 0.5 ? -1 : 1) * (0.5 + r() * 0.6), im.R * (0.18 + r() * 0.25), 5), w: 0.55 });
+  /* 紫色電流（老師的參考圖）：四叢細絲貼著畫面邊緣，左上偏中、左下、右下跟著撞擊點，右上那叢是單獨的。
+     每叢幾條主幹（像裂縫一樣一小段一小段轉折地爬），沿路長出細枝、細枝再分岔；分岔的地方和沿路有星芒亮點。
+     zone：跟著撞擊點的那幾叢，碎裂區還在時（第 2、3 階段）會留一點；右上那叢第 1 關之後就慢慢沒了。 */
+  function makeFilaments(r, impacts, A) {
+    const top = impacts[0], bl = impacts[1], br = impacts[2];
+    const groups = [
+      { zone: true, x: top.X, y: top.Y, trunks: [[Math.PI + 0.2, 0.13], [0.38, 0.18], [-1.7, 0.04]] },
+      { zone: false, x: A * 0.8, y: 0.065, trunks: [[Math.PI - 0.2, 0.17], [0.45, 0.17], [-1.4, 0.04]] },
+      { zone: true, x: bl.X, y: Math.min(0.97, bl.Y + 0.08), trunks: [[-2.0, 0.3], [-0.7, 0.2], [Math.PI - 0.45, 0.09]] },
+      { zone: true, x: br.X, y: Math.min(0.97, br.Y + 0.06), trunks: [[-1.45, 0.26], [Math.PI + 0.35, 0.2], [-0.4, 0.09]] },
+    ];
+    const lines = [], stars = [];
+    groups.forEach((gp) => {
+      stars.push({ x: gp.x, y: gp.y, s: 1, zone: gp.zone });
+      const walk = (x, y, ang, len, lvl) => {
+        const pts = [[x, y]];
+        let a = ang, d = 0;
+        const step = lvl === 0 ? 0.013 : lvl === 1 ? 0.01 : 0.008;
+        while (d < len) {
+          a += (r() - 0.5) * 0.55 + (ang - a) * 0.3;                          // 轉折，但大致朝原本的方向
+          const sl = step * (0.6 + r() * 0.8);
+          x += Math.cos(a) * sl; y += Math.sin(a) * sl; d += sl;
+          pts.push([x, y]);
+          if (lvl < 2 && r() < (lvl === 0 ? 0.14 : 0.07) && d < len * 0.85) {    // 長出細枝
+            const side = r() < 0.5 ? -1 : 1;
+            walk(x, y, a + side * (0.5 + r() * 0.7), (len - d) * (0.25 + r() * 0.3) + 0.015, lvl + 1);
+            if (r() < 0.6) stars.push({ x, y, s: lvl === 0 ? 0.6 : 0.34, zone: gp.zone });
+          } else if (r() < (lvl === 0 ? 0.13 : 0.06)) stars.push({ x, y, s: lvl === 0 ? 0.3 : 0.16, zone: gp.zone });   // 沿路的小亮點
         }
-      }
+        lines.push({ pts, lvl, zone: gp.zone });
+      };
+      gp.trunks.forEach(([ang, len]) => walk(gp.x, gp.y, ang + (r() - 0.5) * 0.25, len * (0.85 + r() * 0.3), 0));
     });
-    out.forEach((b) => { b.h = b.pts.map((p) => Math.min(...impacts.map((im) => reachOf(im, p[0], p[1])))); });
-    return out;
+    return { lines, stars };
   }
 
   function attach(frame, os) {
@@ -214,8 +220,8 @@
     img.src = new URL("img/wallpaper.jpg", win.location.href).href;
     const focal = os === "win" ? [0.72, 0.5] : [0.6, 0.62];
     const seed = os === "win" ? 61 : 23;
-    let W = 0, H = 0, k = 1, hTop = 9, impacts = null, cells = null, edges = null, ext = null, bolts = null;
-    let voidCv = null, wpCv = null, underCv = null, shardCv = null, wpPat = null, boltCv = null;
+    let W = 0, H = 0, k = 1, hTop = 9, impacts = null, cells = null, edges = null, ext = null, fil = null;
+    let voidCv = null, wpCv = null, underCv = null, shardCv = null, wpPat = null, boltZone = null, boltFree = null;
     let cur = STAGES[0], target = 0, from = STAGES[0], t0 = 0, raf = 0, shown = 0;
     const dims = () => {
       const kk = Math.min(win.devicePixelRatio || 1, 1.5);
@@ -229,26 +235,16 @@
       impacts = makeImpacts(rng(seed), A);
       ({ cells, edges, ext } = makeCells(rng(seed + 7), A, impacts));
       hTop = Math.max(...cells.map((c) => c.h)) + SOFT + 0.02;
-      bolts = makeBolts(rng(seed + 5), impacts, A);
+      fil = makeFilaments(rng(seed + 5), impacts, A);
       const mk = () => { const c = doc.createElement("canvas"); c.width = W; c.height = H; return c; };
-      voidCv = mk(); wpCv = mk(); underCv = mk(); shardCv = mk(); boltCv = mk();
-      drawBolts(boltCv.getContext("2d"), 1, 9);
-      // 虛空：深紫往外變黑、幾團淡淡的星雲、星點
-      const v = voidCv.getContext("2d"), R = rng(seed + 3);
-      const bg = v.createRadialGradient(W * 0.5, H * 0.46, 0, W * 0.5, H * 0.5, Math.hypot(W, H) * 0.6);
-      bg.addColorStop(0, "#120c26"); bg.addColorStop(0.55, "#07051a"); bg.addColorStop(1, "#010103");
+      voidCv = mk(); wpCv = mk(); underCv = mk(); shardCv = mk(); boltZone = mk(); boltFree = mk();
+      drawFilaments(boltZone.getContext("2d"), true); drawFilaments(boltFree.getContext("2d"), false);
+      // 虛空：很暗的藍灰（參考圖取的顏色 #191a21），中間稍微亮一點點、四周稍暗
+      const v = voidCv.getContext("2d");
+      v.fillStyle = "#191a21"; v.fillRect(0, 0, W, H);
+      const bg = v.createRadialGradient(W * 0.55, H * 0.45, 0, W * 0.55, H * 0.45, Math.hypot(W, H) * 0.62);
+      bg.addColorStop(0, "rgba(30,33,43,1)"); bg.addColorStop(0.6, "rgba(25,26,33,0)"); bg.addColorStop(1, "rgba(12,12,17,.55)");
       v.fillStyle = bg; v.fillRect(0, 0, W, H);
-      for (let i = 0; i < 4; i++) {
-        const x = W * (0.15 + R() * 0.7), y = H * (0.15 + R() * 0.7), rr = Math.min(W, H) * (0.2 + R() * 0.25);
-        const ng = v.createRadialGradient(x, y, 0, x, y, rr);
-        ng.addColorStop(0, i % 2 ? "rgba(90,60,200,.16)" : "rgba(40,80,200,.12)"); ng.addColorStop(1, "rgba(0,0,0,0)");
-        v.fillStyle = ng; v.fillRect(0, 0, W, H);
-      }
-      for (let i = 0; i < 260; i++) {
-        const a = 0.25 + R() * 0.65, s = (R() < 0.9 ? 0.6 : 1.3) * k;
-        v.fillStyle = `rgba(${200 + R() * 55 | 0},${200 + R() * 55 | 0},255,${a})`;
-        v.fillRect(R() * W, R() * H, s, s);
-      }
       drawWallpaper();
     }
     function drawWallpaper() {
@@ -382,35 +378,40 @@
         if (strokeGroups(f, fl.map(([pts, a]) => [pts, a * 0.12]), 4 * k, "140,120,255", "lighter", 0, 0)) fxDirty = true;
         strokeGroups(f, fl.map(([pts, a]) => [pts, a * 0.34]), 1.2 * k, "205,195,255", "lighter", 0, 0);
       }
-      /* 撞擊點的光和紫色閃電：整套先畫好在 boltCv（每格重畫很慢），第 0、1 階段直接貼上去；
-         碎裂區縮小時（lr 變小）閃電跟著縮回撞擊點，那時才逐條畫（剩下的已經不多） */
+      // 紫色電流：先畫好在兩張圖（跟著撞擊點的、右上單獨那叢），這裡只照階段調亮暗
       if (p.glow > 0.01) {
-        const all = Math.max(0, Math.min(1, (p.lr - 1.2) / 0.5));
-        if (all > 0.01) { f.globalCompositeOperation = "lighter"; f.globalAlpha = p.glow * all; f.drawImage(boltCv, 0, 0); f.globalAlpha = 1; f.globalCompositeOperation = "source-over"; }
-        if (all < 0.99) drawBolts(f, p.glow * (1 - all), p.lr);
+        const free = Math.max(0, Math.min(1, (p.lr - 1.2) / 0.5));
+        f.globalCompositeOperation = "lighter";
+        f.globalAlpha = Math.min(1, p.glow); f.drawImage(boltZone, 0, 0);
+        if (free > 0.01) { f.globalAlpha = Math.min(1, p.glow) * free; f.drawImage(boltFree, 0, 0); }
+        f.globalAlpha = 1; f.globalCompositeOperation = "source-over";
         fxDirty = true;
       }
     }
-    // 撞擊點中心的光（裂口）和紫色閃電（和遠端畫面上的小裂縫、首頁那張圖同一種：紫藍的光、白芯），靠近撞擊點的那段粗一點
-    function drawBolts(c, glow, lr) {
-      c.globalCompositeOperation = "lighter";
-      impacts.forEach((im) => {
-        const x = im.X * H, y = im.Y * H, rr = im.R * 0.45 * H;
-        const rg = c.createRadialGradient(x, y, 0, x, y, rr);
-        rg.addColorStop(0, `rgba(170,150,255,${0.42 * glow})`); rg.addColorStop(0.3, `rgba(100,70,230,${0.16 * glow})`); rg.addColorStop(1, "rgba(0,0,0,0)");
-        c.fillStyle = rg; c.fillRect(x - rr, y - rr, rr * 2, rr * 2);
+    // 把電流畫進 c（zone：跟著撞擊點的那幾叢，或右上單獨那叢）：外面一層淡紫的光、裡面亮的細芯，再加星芒亮點
+    function drawFilaments(c, zone) {
+      c.globalCompositeOperation = "lighter"; c.lineCap = "round"; c.lineJoin = "round";
+      const px = (v) => v * H;
+      fil.lines.filter((l) => l.zone === zone).forEach((l) => {
+        const wd = [1.15, 0.8, 0.55][l.lvl] * k, al = [1, 0.7, 0.45][l.lvl];
+        const path = () => { c.beginPath(); l.pts.forEach((q, i) => (i ? c.lineTo(px(q[0]), px(q[1])) : c.moveTo(px(q[0]), px(q[1])))); };
+        if (l.lvl < 2) { c.strokeStyle = `rgba(120,95,255,${0.12 * al})`; c.lineWidth = wd * 5; path(); c.stroke(); }
+        c.strokeStyle = `rgba(150,130,255,${0.38 * al})`; c.lineWidth = wd * 2.2; path(); c.stroke();
+        c.strokeStyle = `rgba(222,216,255,${0.72 * al})`; c.lineWidth = wd; path(); c.stroke();
       });
-      c.lineCap = "round"; c.lineJoin = "round";
-      bolts.forEach((b) => {
-        const n = b.pts.length, parts = 3;
-        for (let q = 0; q < parts; q++) {
-          const i0 = Math.floor(q * (n - 1) / parts), seg = b.pts.slice(i0, Math.floor((q + 1) * (n - 1) / parts) + 1);
-          const taper = 1 - q * 0.28, keep = st(lr + 0.35, b.h[i0]);
-          if (keep < 0.01) continue;
-          [[16, "110,80,255", 0.16], [6, "150,140,255", 0.42], [1.8, "245,245,255", 0.85]].forEach(([w, col, a]) => {
-            c.strokeStyle = `rgba(${col},${a * glow * keep * (0.6 + 0.4 * b.w)})`;
-            c.lineWidth = w * (0.6 + 0.4 * b.w) * taper * k;
-            c.beginPath(); path(c, seg); c.stroke();
+      fil.stars.filter((t) => t.zone === zone).forEach((t) => {
+        const x = px(t.x), y = px(t.y), rr = (1.8 + 7 * t.s) * k;
+        const gr = c.createRadialGradient(x, y, 0, x, y, rr * 2.4);
+        gr.addColorStop(0, "rgba(255,255,255,1)"); gr.addColorStop(0.18, "rgba(225,215,255,.85)"); gr.addColorStop(0.45, "rgba(140,115,255,.28)"); gr.addColorStop(1, "rgba(0,0,0,0)");
+        c.fillStyle = gr; c.fillRect(x - rr * 2.4, y - rr * 2.4, rr * 4.8, rr * 4.8);
+        if (t.s >= 0.28) {                                                // 星芒：十字的細光
+          const L = rr * (t.s >= 0.9 ? 3.6 : 2.6);
+          [[1, 0], [0, 1], [0.7, 0.7], [0.7, -0.7]].forEach(([dx, dy], q) => {
+            const len = q < 2 ? L : L * 0.55;
+            const lg = c.createLinearGradient(x - dx * len, y - dy * len, x + dx * len, y + dy * len);
+            lg.addColorStop(0, "rgba(200,185,255,0)"); lg.addColorStop(0.5, `rgba(240,235,255,${q < 2 ? 0.9 : 0.5})`); lg.addColorStop(1, "rgba(200,185,255,0)");
+            c.strokeStyle = lg; c.lineWidth = (q < 2 ? 1.1 : 0.8) * k;
+            c.beginPath(); c.moveTo(x - dx * len, y - dy * len); c.lineTo(x + dx * len, y + dy * len); c.stroke();
           });
         }
       });

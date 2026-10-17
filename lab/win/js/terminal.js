@@ -4336,7 +4336,7 @@
       } catch (eM) { w = 0; }
       if (!(w > 0.5)) w = probe.getBoundingClientRect().width / stageScale() / 100;
       if (w > 0.5) cw = w;
-      lh = Math.max(10, Math.round(fs * LH));
+      lh = Math.max(10, Math.round(fs * ((LAB.terminal && LAB.terminal.lineHeight) || LH)));   // Week 6 考試把行距拉開（LAB.terminal.lineHeight）
       root.style.setProperty('--tm-fs', fs + 'px');
       screen.style.setProperty('--tm-lh', lh + 'px');
       screen.style.setProperty('--tm-cx', Math.floor((cw - 1) / 2) + 'px');           // where the box-drawing lines cross the cell (whole pixels: crisp lines)

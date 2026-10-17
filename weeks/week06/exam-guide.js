@@ -17,7 +17,7 @@
   const LV = [
     {
       title: "散落的座標", signal: "弱",
-      goal: "把三份觀測紀錄 obs-a、obs-b、obs-c 都搬進桌面上的 rescue 資料夾。",
+      goal: "把三份觀測紀錄 `obs-a`、`obs-b`、`obs-c` 都搬進桌面上的 `rescue` 資料夾。",
       intro: [
         ["worried", "……收得到嗎？太好了，我終於聯繫到你了！"],
         ["worried", "這台電腦被時空裂縫吞了進來，滑鼠完全不聽使喚，只剩終端機還能用。"],
@@ -31,7 +31,7 @@
     },
     {
       title: "被吃掉的記憶", signal: "普通", ping: HOME + "/Desktop/rift-log",
-      goal: "請 Codex 在桌面的 rift-log 專案裡產出 output/report.md（值班報告）。報告裡不能出現任何人的名字。",
+      goal: "請 Codex 在桌面的 `rift-log` 專案裡產出 `output/report.md`（值班報告）。報告裡不能出現任何人的名字。",
       intro: [
         ["happy", "收到了，三份都在！畫面也回來一點了。"],
         ["worried", "可是亂流還沒停：你在對話框打的規則，傳到 Codex 之前就會被吃掉。"],
@@ -46,7 +46,7 @@
     },
     {
       title: "時間線上的雜訊", signal: "普通", ping: HOME + "/Desktop/midterm",
-      goal: "請 Codex 算出這次期中考的全班平均，寫進 midterm 專案的 output/summary.md。",
+      goal: "請 Codex 算出這次期中考的全班平均，寫進 `midterm` 專案的 `output/summary.md`。",
       intro: [
         ["happy", "報告收到了，裡面一個名字都沒有！"],
         ["worried", "最後一段時間線還有雜訊：期中考的成績亂掉了。"],
@@ -71,6 +71,9 @@
   ];
   const DONE = { title: "時空穩定了", goal: "按上方的「中斷連線」就能離開。", final: ["happy", "回來了……謝謝你！下次見。"] };
   const pad = (n) => String(n).padStart(2, "0");
+  // 目標文字：`檔名` 變成小標籤（其他字照原樣、不當 HTML）
+  const esc = (t) => t.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const goalHTML = (t) => esc(t).replace(/`([^`]+)`([、，。）]?)/g, '<span class="g-nb"><code class="g-code">$1</code>$2</span>');   // 標點黏著前面的標籤，不會跑到行首
   const segs = (n) => [0, 1, 2, 3].map((k) => `<i class="${k < n ? "on" : ""}"></i>`).join("");
 
   function create(o) {
@@ -222,7 +225,7 @@
       const lv = LV[i];
       $("hk").textContent = i < 4 ? "任務 " + pad(i + 1) + " / 04" : "任務完成";
       $("ht").textContent = lv ? lv.title : DONE.title;
-      $("hg").textContent = lv ? lv.goal : DONE.goal;
+      $("hg").innerHTML = goalHTML(lv ? lv.goal : DONE.goal);
       setStab(stab, [["hs", "hp"]]);
       $("reset").hidden = !(i === 1 || i === 2);
       root.classList.add("is-hud");
@@ -240,7 +243,7 @@
       root.classList.remove("is-hud");
       $("tk").textContent = "任務 " + pad(i + 1) + " / 04";
       $("tt").textContent = lv.title;
-      $("tg").textContent = lv.goal;
+      $("tg").innerHTML = goalHTML(lv.goal);
       setStab(stab, [["ts", "tp"]]);
       root.classList.add("is-cut", "is-bars");
       await c.wait(reduce ? 0 : 480);

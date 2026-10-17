@@ -218,10 +218,10 @@ body.warn-on:not(.warn-short):not(.warn-safe) .warn-vig { animation: warn-pulse4
 }
 
 /* ---------- 考試的四關（exam-levels.js、exam-quiz.js、exam-wall.js） ---------- */
-/* 遠端畫面四周的紫紅暈影：空間還不穩定；每過一關淡一點（exam.js 的 setStage） */
+/* 遠端畫面四周的暗角：空間還不穩定；每過一關淡一點（exam.js 的 setStage）。老師的參考圖是中性的暗，不偏紫紅 */
 #exam-vign {
   position: fixed; inset: 0; z-index: 3; pointer-events: none; opacity: 0; transition: opacity 1.6s ease;
-  background: radial-gradient(ellipse at center, transparent 58%, rgba(70, 18, 110, .34) 86%, rgba(120, 20, 70, .46) 100%);
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(8, 9, 13, .38) 88%, rgba(4, 4, 7, .55) 100%);
 }
 body:not(.in-remote) #exam-vign { display: none; }
 
@@ -283,7 +283,7 @@ body:not(.in-remote) #exam-vign { display: none; }
 /* 考試的帶路（exam-guide.js）：小安的通訊、任務簡報、目標列、時空穩定度。
    深色面板、細線、小安的橘色是唯一的強調色，穩定度用紫色；不用發光卡片、不做雜訊或撕裂的效果。 */
 #guide {
-  --g-panel: rgba(8, 9, 16, .88); --g-line: rgba(241, 239, 233, .16); --g-amber: #f0b545; --g-violet: #b9a8ff;
+  --g-panel: rgba(8, 9, 16, .88); --g-line: rgba(241, 239, 233, .16); --g-amber: #f5b51d; --g-violet: #84a3d6; --g-label: #8b9abc;
   --g-bar: clamp(44px, 9.5vh, 92px);
   position: fixed; inset: 0; z-index: 5; pointer-events: none; color: var(--txt); font-family: var(--font-body);
 }
@@ -357,21 +357,29 @@ body:not(.in-remote) #guide { display: none; }
 
 /* 目標列：放在原本任務卡的那一欄 */
 .g-hud {
-  position: absolute; left: var(--col-x, 12px); top: var(--col-y, 40px); width: var(--col-w, 330px); padding: 14px 18px 14px;
-  background: var(--g-panel); border-left: 2px solid var(--g-amber);
+  position: absolute; left: var(--col-x, 12px); top: var(--col-y, 40px); width: var(--col-w, 330px); padding: 18px 20px 16px 20px;
+  background: rgba(17, 20, 26, .96); border: 1px solid rgba(255, 255, 255, .06); border-left: 3px solid var(--g-amber); border-radius: 10px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, .35);
   opacity: 0; transform: translateY(-6px); transition: opacity .45s ease, transform .45s ease;
 }
+#guide .g-hud .g-hrow .g-amber { font-size: 13px; font-weight: 700; letter-spacing: .14em; }
 #guide.is-hud .g-hud { opacity: 1; transform: none; }
 .g-hrow { display: flex; justify-content: space-between; align-items: baseline; }
 .g-reset { pointer-events: auto; border: 0; padding: 0; background: none; cursor: pointer; }
 #guide.is-hud .g-reset:hover { color: var(--txt); text-decoration: underline; text-underline-offset: 4px; }
 .g-reset[hidden] { display: none; }
-.g-htitle { margin-top: 6px; font-size: 17px; font-weight: 700; letter-spacing: .04em; }
-.g-hgoal .g-k { white-space: nowrap; }
-.g-hgoal { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: baseline; margin: 8px 0 12px; font-size: 15px; line-height: 1.65; }
-.g-hud .g-stab { padding-top: 11px; border-top: 1px solid var(--g-line); }
-.g-hud .g-segs i { width: 28px; }
-.g-hud .g-pct { margin-left: auto; }
+.g-htitle { margin-top: 12px; font-size: 18px; font-weight: 600; letter-spacing: .05em; }
+#guide .g-hgoal .g-k { white-space: nowrap; color: var(--g-label); font-family: var(--font-body); font-size: 14px; font-weight: 700; letter-spacing: .08em; }
+.g-hgoal { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: baseline; margin: 14px 0 16px; font-size: 15px; font-weight: 500; line-height: 2; }
+.g-hud .g-stab { padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, .1); }
+#guide .g-hud .g-stab > .g-k:first-child { color: var(--g-violet); font-family: var(--font-body); font-size: 14px; font-weight: 700; letter-spacing: .08em; }
+.g-hud .g-segs { gap: 6px; }
+.g-hud .g-segs i { width: 28px; height: 3px; border-radius: 2px; background: rgba(160, 166, 176, .32); }
+.g-hud .g-segs i.on { background: var(--g-violet); }
+.g-hud .g-pct { margin-left: auto; font-weight: 700; }
+/* 目標裡的檔名、資料夾名：小標籤 */
+.g-nb { white-space: nowrap; }
+.g-code { display: inline-block; margin: 0 2px; padding: 0 8px; border-radius: 7px; background: rgba(255, 255, 255, .075); font-family: var(--font-mono); font-size: .92em; line-height: 1.75; color: #e5e7eb; white-space: nowrap; }
 
 /* 過關：修復完成，穩定度加一格 */
 .g-stamp { position: absolute; left: 50%; top: 44%; transform: translate(-50%, -50%); text-align: center; opacity: 0; transition: opacity .4s ease; }
