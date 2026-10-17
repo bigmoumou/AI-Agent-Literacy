@@ -752,8 +752,9 @@
     const sk = seg01(t, 0, 0.7);
     suck = sk * sk * (3 - 2 * sk);                           // 一點下去，旁邊的畫格就開始被吸過去
     if (!L.surged && t > 0.55) { L.surged = true; examArt.surge(now / 1000 + 0.27); }   // 交接那一刻（0.82）落雷
-    if (sound && t < 0.8) {                                     // 被吸進去（聲音本身在點下去時就開始播）：邊緣的電流劈啪越來越密
-      if (now - (L.crack || 0) > 75 + Math.random() * (110 - 60 * t)) { L.crack = now; sound.crackle(0.26 + 0.3 * t, 0.1); }
+    if (sound && t < 0.8) {                                     // 被吸進去（聲音本身在點下去時就開始播）：邊緣的電流劈啪越來越密，越劇烈越常「滋」一聲
+      if (now - (L.crack || 0) > 65 + Math.random() * (100 - 60 * t)) { L.crack = now; sound.crackle(0.28 + 0.34 * t, 0.1); }
+      if (t > 0.25 && now - (L.zapAt || 0) > 140 + Math.random() * (150 - 90 * t)) { L.zapAt = now; sound.zap(0.36 + 0.34 * t, 0.16); }
     }
     const a = seg01(t, 0.78, 0.88);
     if (a > 0) drawHandoff(a);

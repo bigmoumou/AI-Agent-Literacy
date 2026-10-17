@@ -293,21 +293,23 @@
     return { s, g };
   }
   const pick = (a) => a[(Math.random() * a.length) | 0];
-  // 一陣劈啪（strength 0..1，dur 秒）
-  function crackle(strength, dur, delay) {
+  // 一陣劈啪（strength 0..1，dur 秒；pitch：小於 1 就變低、變慢，時間膨脹時用）
+  function crackle(strength, dur, delay, pitch) {
     if (!ok() || !makePools()) return;
-    play(pick(pools.crackles), 0.42 * strength, rnd(2400, 4800), 1.1, dur || 0.2, delay, rnd(0.85, 1.2));
+    const k = pitch || 1;
+    play(pick(pools.crackles), 0.42 * strength, rnd(2400, 4800) * k, 1.1, dur || 0.2, delay, rnd(0.85, 1.2) * k);
   }
   // 電弧「滋」的一聲，加一陣劈啪
-  function zap(strength, dur, delay) {
+  function zap(strength, dur, delay, pitch) {
     if (!ok() || !makePools()) return;
-    play(pick(pools.zaps), 0.32 * strength, 1300, 1.4, dur || 0.25, delay, rnd(0.92, 1.08));
-    crackle(0.8 * strength, (dur || 0.25) * 0.9, delay);
+    const k = pitch || 1;
+    play(pick(pools.zaps), 0.32 * strength, 1300 * k, 1.4, dur || 0.25, delay, rnd(0.92, 1.08) * k);
+    crackle(0.8 * strength, (dur || 0.25) * 0.9, delay, pitch);
   }
   // 被吸進去（首頁點「進入考場」那一下）
   function suck(strength) {
     if (!ok() || !clips.suck) return;
-    play(clips.suck, 1.0 * (strength == null ? 1 : strength), 0, 0, clips.suck.duration, 0, 1);
+    play(clips.suck, 1.15 * (strength == null ? 1 : strength), 0, 0, clips.suck.duration, 0, 1);
   }
   // Week 6 開場那一整段：dive 用音檔（還沒解碼好、或是 2D 版的 fall 就用合成的）；stopDive：提早停（跳過時，fade 秒內淡掉）
   function dive(kind) {
@@ -315,7 +317,7 @@
     const b = kind === "dive" && clips.dive ? clips.dive : makeDive(kind);
     if (!b) return;
     stopDive(0.05);
-    const p = play(b, b === clips.dive ? 1.25 : 0.6, 0, 0, b.duration, 0, 1);
+    const p = play(b, b === clips.dive ? 1.4 : 0.6, 0, 0, b.duration, 0, 1);
     if (p) { diveSrc = p.s; diveGain = p.g; }
   }
   function stopDive(fade) {

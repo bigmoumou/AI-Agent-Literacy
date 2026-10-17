@@ -73,6 +73,14 @@
   }
   // 撕開的距離（每邊幾個貼圖像素）：0.16 秒猛亮那一下先被扯開一點，接著慢慢拉開，後半段劈啪抖動
   const splitAt = (u, t) => 36 * out(seg(u, 0.16, 0.95)) + 5 * bump(u, 0.16, 0.42) + Math.sin(t * 57) * 0.9 * seg(u, 0.35, 0.95);
+  /* 劇烈的時候也要有閃電聲（老師 2026-10-17）：I（0..1）越大劈啪越密、越響，0.45 以上再一陣陣「滋」；
+     pitch：時間變慢時閃電聲也跟著變低（和 HUD 的時鐘同一條曲線） */
+  let lastZap = 0;
+  function lightning(t, I, pitch) {
+    if (!sound || warming || seeking || I < 0.15) return;
+    if (t - lastCrack > 0.05 + 0.1 * (1 - I) + Math.random() * 0.05) { lastCrack = t; sound.crackle(0.24 + 0.36 * I, 0.1, 0, pitch); }
+    if (I > 0.45 && t - lastZap > 0.2 + 0.3 * (1 - I) + Math.random() * 0.2) { lastZap = t; sound.zap(0.35 + 0.4 * I, 0.18, 0, pitch); }
+  }
   // 撕開的那張圖畫在 scene：給 WebGL 當黑洞後面的那張（整張被重力彎曲；碎開時也從它剪）
   function drawOpening(t, u) {
     const g = scene.g, k = scene.dpr;
@@ -84,8 +92,7 @@
       g.setTransform(k * c.s, 0, 0, k * c.s, k * c.x, k * c.y);
       const fired = art.step(t, { energy: 1 + 1.8 * seg(u, 0.15, 0.95), auto: false });
       if (sound && !warming) {                                 // 隆隆、爆開、往下塌是事先做好的一整段（開始時 sound.dive）；這裡只跟著電流
-        const carry = 1 - out(seg(u, 0, 0.8));
-        if (carry > 0.2 && t - lastCrack > 0.075 + Math.random() * 0.065) { lastCrack = t; sound.crackle(0.26 + 0.3 * carry, 0.1); }
+        lightning(t, Math.max(1 - out(seg(u, 0, 0.8)), 0.85 * seg(u, 0.45, 0.98)), 1);   // 接著首頁被吸進來；裂痕爬滿時越來越劇烈
         sound.level("fizz", 0.035 + 0.12 * art.activity(), 0.06);
         if (art.takeStrikes()) sound.crackle(0.54, 0.2);
         if (fired) sound.zap(0.84, 0.3);
@@ -166,6 +173,8 @@
     const rate = Math.sqrt(clamp(1 - inn(seg(u, 1.1, 3.45)), 0, 1));
     clock += dt * rate;
     hudShow(u > 1.2 && u < 3.55, rate);
+    // 碎開後的餘電，被吸回中心時越來越劇烈（閃電聲跟著時間變慢變低），越過事件視界前停
+    if (shattered) lightning(t, Math.max(0.6 * (1 - seg(u, 1.0, 1.5)), 0.9 * seg(u, 1.85, 2.8)) * (1 - seg(u, 2.95, 3.25)), 0.55 + 0.45 * rate);
     if (u > 0.6) skipBtn.hidden = false;
     if (sound && shattered) sound.level("fizz", 0.015 * (1 - seg(u, 3.1, 3.5)), 0.4);   // 黑洞的隆隆在那一整段裡
     if (u >= 3.55) toPick(1);
@@ -196,6 +205,7 @@
     const rate = Math.sqrt(clamp(1 - inn(seg(u, 0.6, 2.85)), 0, 1));
     clock += dt * rate;
     hudShow(u > 0.55 && u < 2.95, rate);
+    lightning(t, Math.max(1 - out(seg(u, 0, 0.8)), 0.9 * seg(u, 1.0, 2.2)) * (1 - seg(u, 2.4, 2.7)), 0.55 + 0.45 * rate);
     if (u > 0.4) skipBtn.hidden = false;
     if (u >= 2.95) toPick(1);
     rift.draw();
