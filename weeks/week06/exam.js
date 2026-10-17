@@ -22,9 +22,10 @@
   const bump = (u, a, b) => { const m = (a + b) / 2; return u < a || u > b ? 0 : u < m ? (u - a) / (m - a) : (b - u) / (b - m); };
 
   const params = new URLSearchParams(location.search);
-  /* 考試的四關（exam-levels.js）：網址加 ?exam=1 才開（老師先審；還沒開放前，學生進去還是練習用的遠端電腦，題目不會提早曝光）。
-     要正式開放時，把下面改成 true（或拿掉這個判斷）。 */
-  const EXAM_ON = params.get("exam") === "1";
+  /* 考試的四關（exam-levels.js）：Week 6 一進去就是考試（老師 2026-10-17：「Week6 直接默認考試模式就好」）。
+     網址加 ?exam=0 會回到一般的練習電腦（給老師、助教檢查用，學生看不到這個入口）。 */
+  const EXAM_ON = params.get("exam") !== "0";
+  if (!EXAM_ON) { const n = document.querySelector(".pick-note"); if (n) n.hidden = true; }   // 選電腦畫面那句是講考試的
   const reduce = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   const LANG = (window.I18N && window.I18N.lang) || "zh-Hant";
   const STR = {
