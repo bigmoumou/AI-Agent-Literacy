@@ -8,7 +8,9 @@
      Enter、空白鍵、點一下：下一句；Esc：略過。過場期間鍵盤、滑鼠都不會傳進遠端電腦。
    - 過關：畫面中間「修復完成」，穩定度加一格；第 2、3 關開始時，要去的專案資料夾亮兩圈。
    - 卡太久：小安傳一句短短的通訊，只點方向、不給答案（老師同意）；對話框裡的規則被吃掉、結果不對，第一次也會說一句。
-   - 重新整理從目前這一關繼續時，只有標題和目標，不再播一次通訊。
+   - 重新整理、下次進來從目前這一關繼續時，小安的通訊照樣播（老師 2026-10-18：重新進第二關也要有解說）；
+     從第 1 關重來時，第 1 關換一段「又接上了」的通訊（不再說第一次聯繫上的那句）。
+   - 通訊的文字區一開始就撐到這段最高會到的高度，打字換行、換下一句時面板不會忽高忽低（老師 2026-10-18）。
    - 減少動態效果：不打字、不滑動，直接出現。 */
 (function () {
   "use strict";
@@ -22,6 +24,12 @@
         ["worried", "……收得到嗎？太好了，我終於聯繫到你了！"],
         ["worried", "這台電腦被時空裂縫吞了進來，滑鼠完全不聽使喚，只剩終端機還能用。"],
         ["determined", "我的三份觀測紀錄散在裡面，一份被打包、一份被藏起來了。拜託你，把它們救出來！"],
+      ],
+      // 從第 1 關重來時說的（不再說「終於聯繫到你了」）
+      again: [
+        ["worried", "……又接上了。空間又裂開了，我們從第一關重新來過。"],
+        ["worried", "滑鼠又不聽使喚了，只剩終端機還能用。"],
+        ["determined", "三份觀測紀錄又散回原處，一份被打包、一份被藏起來。再救一次！"],
       ],
       // 老師 2026-10-18：一分鐘就先點「可以叫電腦搜尋」（find、mdfind、ls -Recurse），不給指令
       nudge: [
@@ -186,11 +194,30 @@
         step();
       });
     }
+    /* 先量好這段通訊最高會到多高，一開始就把文字區撐到那個高度（老師 2026-10-18：字多換行時面板上上下下很晃）。
+       每一句打完時，面板上留著這一句和前一句（前一句變小變灰；typeLine 只留兩句），所以一句一句排好量一次，取最高的。
+       量的時候面板還沒出現（同一個 JS 工作裡排好、量完、清掉，不會閃）。 */
+    function reserve(say) {
+      lines.style.minHeight = "";
+      let max = 0;
+      for (let k = 0; k < say.length; k++) {
+        lines.innerHTML = "";
+        for (let j = Math.max(0, k - 1); j <= k; j++) {
+          const p = document.createElement("p");
+          p.textContent = say[j][1];
+          if (j < k) p.className = "old";
+          lines.append(p);
+        }
+        max = Math.max(max, lines.offsetHeight);
+      }
+      lines.innerHTML = "";
+      lines.style.minHeight = max + "px";
+    }
     async function talk(c, say, signal, toast) {
       comm.classList.toggle("is-toast", !!toast);
       $("sig").textContent = "訊號 " + signal;
       $("call").textContent = "收到通訊 · 小安";
-      lines.innerHTML = "";
+      reserve(say);
       comm.classList.add("is-call");
       sfx("in");
       await c.wait(reduce ? 0 : 700);
@@ -244,7 +271,8 @@
       $("note").textContent = (lv && lv.note) || ""; $("note").hidden = !(lv && lv.note);
       $("hg").innerHTML = goalHTML(lv ? lv.goal : DONE.goal);
       setStab(stab, [["hs", "hp"]]);
-      $("reset").hidden = !(i === 1 || i === 2 || i === 4);          // 第 1 關不給（滑鼠只能拖終端機、按中斷連線），問答時也不給
+      $("reset").hidden = !(i === 1 || i === 2 || i === 4);
+      root.classList.toggle("is-sel", i >= 1);                      // 第 2 關起，目標列的字可以用滑鼠選取、複製（第 1 關滑鼠鎖著）          // 第 1 關不給（滑鼠只能拖終端機、按中斷連線），問答時也不給
       root.classList.add("is-hud");
     }
     /* 從第 1 關重來（老師 2026-10-18：按了要回到第 1 關）：按一下先變成「再按一次確定重來」（會丟掉做到一半的東西，不要誤按），
@@ -286,7 +314,7 @@
       await c.wait(reduce ? 0 : 480);
       root.classList.add("is-title");
       await c.wait(reduce ? 400 : 1500);
-      if (!resumed) await talk(c, lv.intro, lv.signal, false);
+      await talk(c, resumed === "restart" && lv.again ? lv.again : lv.intro, lv.signal, false);
       root.classList.add("is-goal");
       await c.wait(c.skipped ? 0 : reduce ? 900 : 2000);
       root.classList.remove("is-title", "is-goal", "is-bars");
@@ -296,7 +324,6 @@
       showHud(i);
       if (lv.ping) setTimeout(() => ping(lv.ping), reduce ? 0 : 500);
       armNudges(i);
-      if (resumed === "restart") setTimeout(() => { if (level === i) toast(["worried", "空間又裂開了……沒關係，我們從第一關重新來過。"]); }, reduce ? 0 : 700);
     }
     // 要去的專案資料夾亮兩圈
     function ping(path) {

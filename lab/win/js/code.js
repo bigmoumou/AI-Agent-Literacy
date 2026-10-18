@@ -586,6 +586,22 @@
         openTab(p, 'tree');
       }
     });
+    // right-click a file or folder in the tree: Copy Path / Copy Relative Path, as in the real VS Code (Windows paths)
+    // (Week 6 exam: students copy a file's path to give it to Codex)
+    treeScroll.addEventListener('contextmenu', function (e) {
+      var row = e.target.closest ? e.target.closest('.cd-row, .cd-section') : null;
+      if (!row || !rootDir) return;
+      e.preventDefault();
+      e.stopPropagation();
+      var p = row.dataset.path || rootDir;
+      if (row.dataset.path) { selected = p; markSelected(); }
+      var rel = p !== rootDir && vfs.isUnder(p, rootDir) ? p.slice(rootDir.length + 1) : '';
+      var pt = LAB.stage.toStage(e.clientX, e.clientY);
+      LAB.menu.contextMenu(pt.x, pt.y, [
+        { label: 'Copy Path', action: function () { LAB.clipboard.setText(toWin(p)); } },
+        { label: 'Copy Relative Path', enabled: !!rel, action: function () { LAB.clipboard.setText(rel.replace(/\//g, '\\')); } }
+      ]);
+    });
 
     /* -------------------------------------------------------------- tabs */
     function findTab(p) {

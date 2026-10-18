@@ -393,6 +393,10 @@ body:not(.in-remote) #guide { display: none; }
 }
 #guide .g-hud .g-hrow .g-amber { font-size: 13px; font-weight: 700; letter-spacing: .14em; }
 #guide.is-hud .g-hud { opacity: 1; transform: none; }
+/* 第 2 關起，目標列的字可以用滑鼠選取、複製（老師 2026-10-18）；第 1 關滑鼠鎖著，不給選 */
+#guide.is-hud.is-sel .g-hud { pointer-events: auto; cursor: text; -webkit-user-select: text; user-select: text; }
+#guide.is-hud.is-sel .g-hud .g-reset { cursor: pointer; -webkit-user-select: none; user-select: none; }
+#guide .g-hud ::selection { background: rgba(245, 181, 29, .38); color: #fff; }
 .g-hrow { display: flex; justify-content: space-between; align-items: baseline; }
 /* 重來這一關：字小，所以點擊範圍往外多留一圈；按一下變成「再按一次確定重來」（紅字），4 秒內再按才重來 */
 .g-reset { pointer-events: auto; border: 0; margin: -8px -10px; padding: 8px 10px; background: none; cursor: pointer; text-decoration: underline; text-decoration-color: rgba(255, 255, 255, .22); text-underline-offset: 4px; }
