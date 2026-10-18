@@ -105,8 +105,19 @@
     ["worried", "determined", "happy", "surprised", "thinking"].forEach((n) => { const im = new Image(); im.src = faceSrc(n); });   // 先載好，換表情不會閃
 
     let level = -1, stab = 0, cut = null, timers = [], said = {}, toastBusy = false, toastQ = [], toastCut = null, toastDone = Promise.resolve();
-    const setStab = (n, where) => {
-      where.forEach(([s, p]) => { $(s).innerHTML = segs(n); $(p).textContent = n * 25 + "%"; });
+    // 時空穩定度：修好的格子是綠色的 LED 刻度（老師 2026-10-18：成功後改綠色、要有科技感）；fresh：最新那一格從左往右填滿
+    const setStab = (n, where, fresh) => {
+      where.forEach(([s, p]) => {
+        const el = $(s);
+        el.innerHTML = segs(fresh && !reduce ? n - 1 : n);
+        $(p).textContent = n * 25 + "%";
+        $(p).classList.toggle("is-on", n > 0);
+        if (fresh && !reduce && n > 0) {
+          const seg = el.children[n - 1];
+          seg.classList.add("is-new");
+          requestAnimationFrame(() => requestAnimationFrame(() => seg.classList.add("on")));
+        }
+      });
     };
 
     /* ---------- 版面：目標列、通訊放在原本任務卡的那一欄（練習電腦會讓開那一欄，視窗不會被蓋住） ---------- */
@@ -293,7 +304,7 @@
       setStab(stab - 1, [["ss", "sp"]]);
       root.classList.add("is-stamp");
       sfx("stamp");
-      setTimeout(() => { setStab(stab, [["ss", "sp"], ["hs", "hp"]]); }, reduce ? 0 : 450);   // 新的一格亮起來
+      setTimeout(() => { setStab(stab, [["ss", "sp"], ["hs", "hp"]], true); }, reduce ? 0 : 450);   // 新的一格從左往右亮起來
       setTimeout(() => root.classList.remove("is-stamp"), reduce ? 1300 : 2000);
     }
     // 對話框裡的規則被吃掉、結果不對：每關第一次才說

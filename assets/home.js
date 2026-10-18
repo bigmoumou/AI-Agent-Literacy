@@ -727,6 +727,8 @@
     document.body.classList.add("is-leaving");
     if (toExam) {
       document.body.classList.add("is-to-exam");
+      // 衝到位（0.78）的那一刻記下來：Week 6 照同一個時間接著往裡推（ExamArt.push）
+      try { sessionStorage.setItem("exam-arrive", String(Date.now() + EXAM_LEAVE * 0.78)); } catch (e) { /* 存不了就從頭開始推 */ }
       examArt.surge(performance.now() / 1000 + 0.12);   // 一點下去：裂縫先暗一下、再猛亮
       if (sound) { sound.unlock(); sound.suck(); sound.zap(0.54, 0.22, 0.12); }   // 被吸進去（整片聲音往低處塌）＋裂縫猛亮時「滋」
     }
@@ -746,6 +748,9 @@
     const I = examArt.img, s = Math.max(vw / I.w, vh / I.h);
     const zEnd = ((vw / 2) * R * TH) / (TEX_W * lens.tanH * s) - R;
     cam[2] = CAM_BACK + back + (zEnd - CAM_BACK) * e;
+    // 衝到位之後不停：帶著慣性繼續往裡推（和 Week 6 同一條曲線，換頁後接著推）
+    const zp = window.ExamArt.push((now - L.t0) / 1000 - 0.78 * EXAM_LEAVE / 1000);
+    if (zp > 1) cam[2] = (zEnd + R) / zp - R;
     cam[1] = L.camY + (0 - L.camY) * sm;
     fr.t = L.frT + (NEAR * lens.tanV - L.frT) * sm; fr.b = fr.t - 2 * NEAR * lens.tanV;
     buildProj();
@@ -757,7 +762,7 @@
       if (t > 0.25 && now - (L.zapAt || 0) > 140 + Math.random() * (150 - 90 * t)) { L.zapAt = now; sound.zap(0.36 + 0.34 * t, 0.16); }
     }
     const a = seg01(t, 0.78, 0.88);
-    if (a > 0) drawHandoff(a);
+    if (a > 0) drawHandoff(a, zp);
   }
   // 交接用的全螢幕畫布：先建好；1 倍解析度就夠（那張圖的畫面區本來只有 944 像素寬）
   function prepHandoff() {
@@ -769,10 +774,10 @@
     const w = Math.round(vw), h = Math.round(vh);
     if (handoff.width !== w || handoff.height !== h) { handoff.width = w; handoff.height = h; }
   }
-  function drawHandoff(alpha) {
+  function drawHandoff(alpha, zoom) {
     prepHandoff();
     const k = 1;
-    const g = handoff.getContext("2d"), I = examArt.img, s = Math.max(vw / I.w, vh / I.h);
+    const g = handoff.getContext("2d"), I = examArt.img, s = Math.max(vw / I.w, vh / I.h) * (zoom || 1);
     g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, handoff.width, handoff.height);
     g.setTransform(k * s, 0, 0, k * s, k * (vw / 2 - (I.x + I.w / 2) * s), k * (vh / 2 - (I.y + I.h / 2) * s));
     examArt.paint(g);

@@ -302,6 +302,10 @@
     if (under) this.drawUnder(g);
   };
 
+  /* 首頁衝進那一格之後鏡頭不停：帶著慣性繼續往裡推、越來越慢，跨過換頁一路接到 Week 6 撕開
+     （老師 2026-10-18：點進去會停一下）。tau：衝到位之後幾秒；回傳放大倍率（1 ＝ 剛好鋪滿）。
+     首頁（home.js）和 Week 6（index.html 開頭那段、exam.js）用同一條；時間用 Date.now，換頁前後接得起來。 */
+  ExamArt.push = (tau) => (tau <= 0 ? 1 : 1 + 0.07 * (1 - Math.exp(-tau / 0.32)) + 0.06 * (1 - Math.exp(-tau / 1.6)));
   ExamArt.TEX_W = TEX_W; ExamArt.TEX_H = TEX_H; ExamArt.strikeEnv = strikeEnv;
   window.ExamArt = ExamArt;
 })();

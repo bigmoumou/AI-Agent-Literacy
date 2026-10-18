@@ -316,10 +316,34 @@ body:not(.in-remote) #guide { display: none; }
 #guide.is-goal .g-goal { opacity: 1; }
 .g-title .g-stab { justify-content: center; margin-top: 22px; }
 .g-stab { display: flex; align-items: center; gap: 12px; }
+/* 時空穩定度：一格一格的 LED 刻度（每格裡再分成 3 px 的小刻）。修好的格子是綠色的：從左往右填滿，
+   之後每隔幾秒有一道光從第一格掃到最後一格（老師 2026-10-18：成功後改綠色、要有科技感）。 */
+#guide { --g-ok: #4be3a3; --g-ok-hi: #b8ffe0; }
 .g-segs { display: inline-flex; gap: 5px; }
-.g-segs i { width: 34px; height: 4px; background: rgba(241, 239, 233, .16); transition: background .6s ease; }
-.g-segs i.on { background: var(--g-violet); }
-#guide .g-pct { color: var(--g-violet); letter-spacing: .1em; min-width: 3.2em; }
+.g-segs i {
+  position: relative; overflow: hidden; width: 34px; height: 5px; border-radius: 1px;
+  background: repeating-linear-gradient(90deg, rgba(170, 176, 188, .3) 0 3px, transparent 3px 4px);
+  transition: box-shadow .6s ease;
+}
+.g-segs i::before {
+  content: ""; position: absolute; inset: 0;
+  background: repeating-linear-gradient(90deg, var(--g-ok) 0 3px, rgba(75, 227, 163, .25) 3px 4px);
+  transform: scaleX(0); transform-origin: left center; transition: transform .75s cubic-bezier(.2, .7, .2, 1);
+}
+.g-segs i.on::before { transform: scaleX(1); }
+.g-segs i.on { box-shadow: 0 0 6px rgba(75, 227, 163, .45), 0 0 1px rgba(184, 255, 224, .6); }
+.g-segs i::after {
+  content: ""; position: absolute; top: 0; bottom: 0; left: -60%; width: 60%; opacity: 0;
+  background: linear-gradient(90deg, transparent, rgba(220, 255, 240, .95), transparent);
+}
+.g-segs i.on::after { animation: g-sweep 3.2s cubic-bezier(.4, 0, .2, 1) infinite; }
+.g-segs i:nth-child(2)::after { animation-delay: .14s; }
+.g-segs i:nth-child(3)::after { animation-delay: .28s; }
+.g-segs i:nth-child(4)::after { animation-delay: .42s; }
+.g-segs i.is-new.on::after { animation: g-sweep .9s .55s cubic-bezier(.4, 0, .2, 1) 1, g-sweep 3.2s 1.6s cubic-bezier(.4, 0, .2, 1) infinite; }
+@keyframes g-sweep { 0% { left: -60%; opacity: 0; } 10% { opacity: 1; } 32% { left: 100%; opacity: 1; } 33%, 100% { left: 100%; opacity: 0; } }
+#guide .g-pct { color: var(--g-violet); letter-spacing: .1em; min-width: 3.2em; transition: color .6s ease; }
+#guide .g-pct.is-on { color: var(--g-ok); }
 
 /* 小安的通訊：先收到訊號，再接通（面板從中間打開），說完斷線收起來；不會一直留在畫面上 */
 .g-comm { position: absolute; left: 50%; bottom: calc(var(--g-bar) + 20px); width: min(690px, 92vw); transform: translateX(-50%); visibility: hidden; }
@@ -378,8 +402,7 @@ body:not(.in-remote) #guide { display: none; }
 .g-hud .g-stab { padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, .1); }
 #guide .g-hud .g-stab > .g-k:first-child { white-space: nowrap; color: var(--g-violet); font-family: var(--font-body); font-size: 14px; font-weight: 700; letter-spacing: .08em; }
 .g-hud .g-segs { flex: 1 1 auto; min-width: 0; gap: 6px; }
-.g-hud .g-segs i { flex: 0 1 28px; min-width: 12px; height: 3px; border-radius: 2px; background: rgba(160, 166, 176, .32); }
-.g-hud .g-segs i.on { background: var(--g-violet); }
+.g-hud .g-segs i { flex: 0 1 28px; min-width: 12px; height: 4px; }
 .g-hud .g-pct { margin-left: auto; font-weight: 700; }
 /* 目標裡的檔名、資料夾名：小標籤 */
 .g-nb { white-space: nowrap; }
@@ -391,7 +414,7 @@ body:not(.in-remote) #guide { display: none; }
 #guide.is-stamp .g-stamp { opacity: 1; }
 .g-big { margin-top: 14px; font-size: clamp(34px, 4.6vw, 60px); font-weight: 700; letter-spacing: .32em; text-indent: .32em; text-shadow: 0 2px 18px rgba(0, 0, 0, .6); }
 .g-stamp .g-stab { justify-content: center; margin-top: 22px; }
-.g-stamp .g-segs i { width: 56px; height: 5px; transition: background .9s ease; }
+.g-stamp .g-segs i { width: 56px; height: 6px; }
 
 /* 要去的地方亮兩圈 */
 .g-ping { position: absolute; width: 0; height: 0; }
@@ -401,6 +424,7 @@ body:not(.in-remote) #guide { display: none; }
 @keyframes g-ping { 0% { transform: scale(.45); opacity: 0; } 25% { opacity: .95; } 100% { transform: scale(1.35); opacity: 0; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .g-dim, .g-bar, .g-title, .g-goal, .g-panel, .g-hud, .g-stamp, .g-segs i { transition: none; }
+  .g-dim, .g-bar, .g-title, .g-goal, .g-panel, .g-hud, .g-stamp, .g-segs i, .g-segs i::before, #guide .g-pct { transition: none; }
+  .g-segs i.on::after, .g-segs i.is-new.on::after { animation: none; }
   .g-face img, .g-dot, .g-ping.is-on i, .g-note { animation: none; }
 }

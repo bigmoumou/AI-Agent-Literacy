@@ -51,6 +51,25 @@
 <body class="exam is-diving is-loading" data-root="../../">
 <canvas id="bh" aria-hidden="true" style="display:none"></canvas>
 <canvas id="rift" aria-hidden="true"></canvas>
+<script>
+/* 從首頁衝進來之後鏡頭不停：頁面一出現就讓那張圖接著慢慢放大（和 assets/exam-art.js 的 ExamArt.push 同一條曲線，
+   時間接著首頁記下的「衝到位」那一刻）。用 Web Animations 在合成執行緒上跑，載入、解析程式時也不會停。
+   exam.js 撕開時讀現在的倍率，讓黑洞的鏡頭從同一個大小接下去（window.__w6push）。 */
+(function () {
+  try {
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var a = +sessionStorage.getItem("exam-arrive") || 0, now = Date.now();
+    sessionStorage.removeItem("exam-arrive");
+    var tau0 = a && now - a > -1000 && now - a < 4000 ? Math.max(0, (now - a) / 1000) : 0;
+    var push = function (t) { return 1 + 0.07 * (1 - Math.exp(-t / 0.32)) + 0.06 * (1 - Math.exp(-t / 1.6)); };
+    var el = document.getElementById("rift"), D = 8, K = [];
+    for (var i = 0; i <= 32; i++) K.push({ transform: "scale(" + push(i / 32 * D).toFixed(5) + ")", offset: i / 32 });
+    var anim = el.animate(K, { duration: D * 1000, fill: "forwards", easing: "linear" });
+    anim.currentTime = tau0 * 1000;
+    window.__w6push = { t0: now - tau0 * 1000, anim: anim };
+  } catch (e) { /* 不支援就不推 */ }
+})();
+</script>
 <iframe id="remote" title="遠端電腦" hidden allow="fullscreen"></iframe>
 <!-- 進到遠端電腦之後：畫面上還留著幾道小裂縫（空間還沒穩定），完成任務才會封起來、才能離開（exam.js 的 scars） -->
 <canvas id="scar" aria-hidden="true"></canvas>

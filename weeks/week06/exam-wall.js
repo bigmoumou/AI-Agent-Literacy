@@ -21,11 +21,12 @@
      amt 鬆脫的碎片歪多少、gap 黑縫寬（CSS px）、bevel 碎片邊的亮邊、base 桌布亮度、tint 偏紫、glow 紫色閃電、rim 破洞邊的光、vein 虛空裡的裂紋光、
      under 縫裡看到的是什麼（0 是虛空；1 是暗暗的桌布，像玻璃的斷面，縫才不會是一條條黑線） */
   const STAGES = [
-    { gr: 9, lr: 9, cr: 9, amt: 1, gap: 2.1, bevel: 1, base: 1, tint: 0, glow: 1, rim: 1, vein: 0, under: 0 },
-    { gr: 0.3, lr: 1.75, cr: 9, amt: 1, gap: 2.1, bevel: 1, base: 0.58, tint: 0.8, glow: 0.5, rim: 1, vein: 0, under: 0 },
-    { gr: -0.3, lr: 0.85, cr: 0.97, amt: 1, gap: 1.6, bevel: 1, base: 0.94, tint: 0.2, glow: 0.16, rim: 0, vein: 0, under: 0.3 },
-    { gr: -0.3, lr: 0.85, cr: 0.9, amt: 0.06, gap: 0.8, bevel: 0.55, base: 1, tint: 0, glow: 0.03, rim: 0, vein: 0, under: 0.5 },
-    { gr: -0.3, lr: -0.3, cr: -0.3, amt: 0, gap: 0, bevel: 0, base: 1, tint: 0, glow: 0, rim: 0, vein: 0, under: 1 },
+    // 第 1 階段（第 2 關的畫面）：老師 2026-10-18 說撞擊點那幾處電流和破洞疊在一起太繁複 → 破洞縮小、洞邊的光和電流都淡很多，右上那叢收掉
+    { gr: 9, lr: 9, cr: 9, amt: 1, gap: 2.1, bevel: 1, base: 1, tint: 0, glow: 1, rim: 1, vein: 0, under: 0, free: 1 },
+    { gr: 0.12, lr: 1.75, cr: 9, amt: 1, gap: 2.1, bevel: 1, base: 0.58, tint: 0.8, glow: 0.2, rim: 0.4, vein: 0, under: 0, free: 0 },
+    { gr: -0.3, lr: 0.85, cr: 0.97, amt: 1, gap: 1.6, bevel: 1, base: 0.94, tint: 0.2, glow: 0.1, rim: 0, vein: 0, under: 0.3, free: 0 },
+    { gr: -0.3, lr: 0.85, cr: 0.9, amt: 0.06, gap: 0.8, bevel: 0.55, base: 1, tint: 0, glow: 0.03, rim: 0, vein: 0, under: 0.5, free: 0 },
+    { gr: -0.3, lr: -0.3, cr: -0.3, amt: 0, gap: 0, bevel: 0, base: 1, tint: 0, glow: 0, rim: 0, vein: 0, under: 1, free: 0 },
   ];
   const KEYS = Object.keys(STAGES[0]);
   const SOFT = 0.2;                                   // 範圍的邊是軟的：碎片在 h 差 0.2 之內慢慢變過去
@@ -380,7 +381,7 @@
       }
       // 紫色電流：先畫好在兩張圖（跟著撞擊點的、右上單獨那叢），這裡只照階段調亮暗
       if (p.glow > 0.01) {
-        const free = Math.max(0, Math.min(1, (p.lr - 1.2) / 0.5));
+        const free = p.free;
         f.globalCompositeOperation = "lighter";
         f.globalAlpha = Math.min(1, p.glow); f.drawImage(boltZone, 0, 0);
         if (free > 0.01) { f.globalAlpha = Math.min(1, p.glow) * free; f.drawImage(boltFree, 0, 0); }

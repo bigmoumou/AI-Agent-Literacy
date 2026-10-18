@@ -112,7 +112,50 @@
       scene.drawCracks(g, ss, "source-atop");
       g.restore();
       art.drawUnder(g);                                  // 兩半底下墊著圖裡延伸的深空（裂縫張開也還是同一片星空）
+      g.setTransform(k * c.s, 0, 0, k * c.s, k * c.x, k * c.y);
+      // 光點被吸向黑洞：蓄勢時慢慢變多變快，撕開時被猛吸
+      if (pre != null) drawMotes(g, t, 0.25 + 0.55 * pre, 0.35 + 0.65 * pre, pre);
+      else drawMotes(g, t, 0.8 + 2.4 * seg(u, 0, 0.9), 1, 1);
     }
+  }
+  /* 蓄勢到碎開之前：一顆顆光點從畫面四周被吸向裂縫中間那個黑洞，越靠近越快、拖出短短的尾巴，繞一點點弧線
+     （老師 2026-10-18：整個動畫更酷一點）。畫在 scene（貼圖座標）上，撕開時跟著被黑洞彎曲。
+     黑洞那一圈也慢慢亮起來。sp：速度倍數；amt：亮度；glow：黑洞那圈光 */
+  const HOLE = [511, 377], motes = [];
+  let moteT = 0;
+  function newMote(first) {
+    const a = Math.random() * Math.PI * 2;
+    return { a, r: first ? 160 + Math.random() * 460 : 560 + Math.random() * 120, k: 0.6 + Math.random() * 0.8, w: 0.6 + Math.random() * 0.9, spin: (Math.random() < 0.5 ? -1 : 1) * (0.4 + Math.random() * 0.6), born: first ? 1 : 0 };
+  }
+  function drawMotes(g, t, sp, amt, glow) {
+    const dt = moteT && t > moteT ? Math.min(0.05, t - moteT) : 0;
+    moteT = t;
+    if (!motes.length) for (let i = 0; i < 90; i++) motes.push(newMote(true));
+    const px = 1 / Math.max(0.2, cover(1).s);                     // 一個螢幕像素在貼圖座標是多長
+    g.globalCompositeOperation = "lighter"; g.lineCap = "round";
+    if (glow > 0.01) {
+      const rg = g.createRadialGradient(HOLE[0], HOLE[1], 0, HOLE[0], HOLE[1], 150);
+      rg.addColorStop(0, `rgba(170,150,255,${0.2 * glow})`); rg.addColorStop(0.45, `rgba(110,80,240,${0.08 * glow})`); rg.addColorStop(1, "rgba(0,0,0,0)");
+      g.fillStyle = rg; g.fillRect(HOLE[0] - 150, HOLE[1] - 150, 300, 300);
+    }
+    for (let i = 0; i < motes.length; i++) {
+      const m = motes[i];
+      const v = (70 + 160 * m.k) * sp * (1 + 2.2 * Math.max(0, 1 - m.r / 520));   // 越靠近越快
+      m.r -= v * dt;
+      m.a += m.spin * dt * sp * 22 / Math.max(m.r, 40);
+      m.born = Math.min(1, m.born + dt * 2.5);
+      if (m.r < 10) { motes[i] = newMote(false); continue; }
+      const ca = Math.cos(m.a), sa = Math.sin(m.a);
+      const x = HOLE[0] + ca * m.r, y = HOLE[1] + sa * m.r * 0.8;
+      const L = Math.min(m.r * 0.5, 6 + v * 0.07);                  // 尾巴：往外拖
+      const fade = Math.min(1, (640 - m.r) / 110) * Math.min(1, m.r / 45) * m.born;
+      const a = amt * fade * (0.45 + 0.4 * m.k);
+      if (a < 0.02) continue;
+      g.beginPath(); g.moveTo(x, y); g.lineTo(x + ca * L, y + sa * L * 0.8);
+      g.strokeStyle = `rgba(150,130,255,${0.35 * a})`; g.lineWidth = 3.2 * m.w * px; g.stroke();
+      g.strokeStyle = `rgba(240,236,255,${0.85 * a})`; g.lineWidth = 1.1 * m.w * px; g.stroke();
+    }
+    g.globalCompositeOperation = "source-over";
   }
   const gateHole = () => Math.min(W, H) * 0.03;
 
@@ -149,6 +192,7 @@
     // 鏡頭從第一格就被往前吸（接著首頁衝進那一格的動作），一路不停，最後衝過事件視界
     const pull = seg(u, 0, 2.55), ps = pull * pull * (3 - 2 * pull);
     bs.camZ = Z0 - 0.9 * out(seg(u, 0, 0.7)) - (Z0 - 0.9 - 7) * (0.6 * ps + 0.4 * pull) - 5.7 * inn(seg(u, 2.45, 3.45));   // 一開始就有一股往前拉的力道（接住首頁衝進來的動作）
+    bs.camZ -= diveZoff * (1 - inOut(seg(u, 0, 1.2)));            // 蓄勢時那張圖已經被推近（ExamArt.push）：從同一個大小接下去，1.2 秒內併回原本的路線
     bs.incl = 0.13 * inOut(seg(u, 1.0, 2.5)) + 0.012 * Math.sin(t * 37) * seg(u, 0.6, 1.1) * (1 - seg(u, 1.1, 1.5));
     bs.chroma = 0.12 + 0.3 * seg(u, 0.3, 1.0) + 0.25 * seg(u, 1.0, 2.4) + 1.1 * seg(u, 2.6, 3.4);
     bs.glitch = 0;                                                 // 不用橫向錯位的條紋：看起來像顯示卡出錯
@@ -175,6 +219,8 @@
     if (shattered) { ss.pullIn = seg(u, 1.9, 3.0); scene.draw(); }
     bh.setScene(sceneCv);
     bh.render(bs, seeking ? 0 : dt * 1000);
+    // 黑洞第一格畫好（背景那張圖已經傳上去）才換過去：以前先換、下一格才畫，中間會閃一格只有星空的深色畫面
+    if (bhPending) { bhPending = false; bhCanvas.style.display = ""; canvas.style.display = "none"; stopPush(); }
     // 時間膨脹：越靠近事件視界，時鐘走得越慢
     const rate = Math.sqrt(clamp(1 - inn(seg(u, 1.1, 3.45)), 0, 1));
     clock += dt * rate;
@@ -229,6 +275,7 @@
   function toPick(dark) {
     if (phase === "pick" || phase === "connect" || phase === "reveal" || phase === "done") return;
     phase = "pick";
+    stopPush();
     skipBtn.hidden = true; hudShow(false);
     bhCanvas.style.display = "none";
     canvas.style.display = "";
@@ -745,12 +792,26 @@
     if (jobs.length && jobs[0](p)) jobs.shift();
     if ((!jobs.length && clipOK && p >= PRE_MIN) || p >= PRE_MAX) startOpening(t);
   }
+  // 首頁衝進來之後一路往裡推（index.html 開頭那段）：撕開時讀現在的倍率，換算成黑洞鏡頭要往前多少（看起來一樣大）
+  let diveZoff = 0, bhPending = false;
+  function pushNow() {
+    const P = window.__w6push;
+    return P && window.ExamArt && window.ExamArt.push ? window.ExamArt.push((Date.now() - P.t0) / 1000) : 1;
+  }
+  function stopPush() {
+    const P = window.__w6push;
+    if (P && P.anim) { try { P.anim.cancel(); } catch (e) { /* 已經停了 */ } P.anim = null; }
+  }
   function startOpening(t) {
     phase = bh ? "dive" : "fall";
     T0 = t;
     preC = ss.cracks;
+    if (bh) {                                                      // 推近改由黑洞的鏡頭接手（換畫布在 setDive 第一格畫好之後）
+      const z = pushNow();
+      diveZoff = Math.max(0, Z0 - ((SCENE_Z + Z0) / z - SCENE_Z));
+    }
     if (bh) {
-      bhCanvas.style.display = ""; canvas.style.display = "none";   // 光線追蹤的解析度在熱身時已經設成 0.8（太慢會自己降）
+      bhPending = true;                                            // 光線追蹤的解析度在熱身時已經設成 0.8（太慢會自己降）
       bs.waveT0 = T0 + 0.16;
     }
     if (art) art.surge(T0 + 0.16);                                 // 先暗一下，再落雷般猛亮（打出第一圈重力波）
