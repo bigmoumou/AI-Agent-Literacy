@@ -107,12 +107,13 @@
       // 回到原本的時空：衝一下（0–0.55 秒）→ 亮白 → 淡出
       if (arriving >= 0) {
         const u = t - arriving;
-        aI = I + 0.5 * smooth(seg(u, 0, 0.55));
+        aI = I + 0.3 * smooth(seg(u, 0, 0.55));
         if (u > 0.55 && fadeTo > 0) { fadeTo = 0; bloom = 1; flash = 0.6; if (sound) { sound.zap(0.8, 0.32, 0, 0.8); sound.level("drone", 0, 1.2); sound.level("fizz", 0, 0.8); } }
         if (u > 2.6 && fade < 0.01) { stop(); return; }
       }
       const frozen = t < freezeUntil;
-      const speed = frozen ? 0 : (0.3 + 3.1 * aI * aI) * (1 + 1.6 * boost) - 2.2 * recoil;
+      // 速度（老師 2026-10-18：7–10 題太快會暈）：劇烈的感覺交給光束的數量、閃電、紅邊，往前的速度只加到原本的一半左右
+      const speed = frozen ? 0 : (0.28 + 1.2 * aI * aI) * (1 + 0.8 * boost) - 1.2 * recoil;
 
       g.setTransform(dpr, 0, 0, dpr, 0, 0);
       g.globalCompositeOperation = "source-over";
@@ -128,10 +129,10 @@
 
       // 時間波紋：一圈圈往外擴（越劇烈越密、越快）
       ringClock -= dt * (frozen ? 0 : 1);
-      if (!reduce && ringClock <= 0) { rings.push({ age: 0 }); ringClock = 1.5 - 1.05 * aI; }
+      if (!reduce && ringClock <= 0) { rings.push({ age: 0 }); ringClock = 1.6 - 0.75 * aI; }
       for (let k = rings.length - 1; k >= 0; k--) {
         const r = rings[k];
-        if (!frozen) r.age += dt * (0.55 + 1.6 * aI) * (1 + boost) * (recoil > 0.3 ? -0.4 : 1);
+        if (!frozen) r.age += dt * (0.5 + 0.6 * aI) * (1 + 0.6 * boost) * (recoil > 0.3 ? -0.4 : 1);
         const rad = m * 0.05 * Math.exp(r.age * 2.1);
         if (rad > maxR * 1.2 || r.age < -0.5) { rings.splice(k, 1); continue; }
         const al = fade * 0.32 * seg(r.age, 0, 0.25) * (1 - seg(rad, maxR * 0.5, maxR * 1.2));
@@ -149,7 +150,7 @@
 
       // 星光拉成光束
       const n = Math.round(340 + 480 * clamp(aI, 0, 1.2) / 1.2);
-      const tail = 0.03 + 0.07 * aI + 0.06 * boost;
+      const tail = 0.05 + 0.12 * aI + 0.06 * boost;            // 速度放慢了，光束拉長一點（看起來一樣在衝，但移動得比較慢）
       for (let k = 0; k < n; k++) {
         const s = stars[k];
         if (!reduce) s.z -= speed * dt;

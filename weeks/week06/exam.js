@@ -633,20 +633,30 @@
     xc.id = "exitCv"; glow.id = "exitGlow";
     xc.setAttribute("aria-hidden", "true"); glow.setAttribute("aria-hidden", "true");
     xc.style.visibility = "hidden";
-    document.body.append(xc, glow);
+    // 準星框（四個角）和字幕：疊在遠端桌面上面
+    const hudEl = document.createElement("div"), cap = document.createElement("div");
+    hudEl.id = "exitHud"; cap.id = "exitCap";
+    hudEl.setAttribute("aria-hidden", "true");
+    hudEl.innerHTML = '<i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i>';
+    cap.setAttribute("role", "status");
+    cap.innerHTML = '<span class="t">RETURNING TO REALITY</span><span class="bar"><i></i></span>';
+    document.body.append(xc, glow, hudEl, cap);
     const g = xc.getContext("2d"), dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-    const fit = () => { xc.width = Math.round(W * dpr); xc.height = Math.round(H * dpr); };
+    const sc = document.createElement("canvas"), sg = sc.getContext("2d");   // 震波折射用：上一層畫面的半解析度複本
+    const fit = () => { xc.width = Math.round(W * dpr); xc.height = Math.round(H * dpr); sc.width = Math.round(xc.width / 2); sc.height = Math.round(xc.height / 2); };
     fit(); window.addEventListener("resize", fit);
-    try { const c = cover(4); g.setTransform(dpr * c.s, 0, 0, dpr * c.s, dpr * c.x, dpr * c.y); art.paint(g); } catch (e) { /* 試畫失敗也沒關係 */ }
+    try { const c = cover(4); g.setTransform(dpr * c.s, 0, 0, dpr * c.s, dpr * c.x, dpr * c.y); art.paint(g); sg.drawImage(xc, 0, 0, sc.width, sc.height); } catch (e) { /* 試畫失敗也沒關係 */ }
+    if (sound) { try { sound.loadClip("suck"); } catch (e) { /* 沒有就算了 */ } }
     frame.style.willChange = "transform";
-    exitPrep = { xc, glow, g, dpr };
+    exitPrep = { xc, glow, g, dpr, sc, sg, hudEl, cap };
     return exitPrep;
   }
   function exitHome(fallback) {
     if (exiting) return;
     if (reduce || !art) { fallback(); return; }
     exiting = true;
-    const { xc, glow, g, dpr } = prepExit();
+    const { xc, glow, g, dpr, sc, sg, hudEl, cap } = prepExit();
+    const capT = cap.querySelector(".t"), capBar = cap.querySelector(".bar i");
     xc.style.visibility = "";
     body.classList.add("is-exiting");
     frame.style.pointerEvents = "none"; frame.style.transformOrigin = "50% 50%";
@@ -654,10 +664,12 @@
     if (sound) { sound.crackle(0.4, 0.25); sound.level("drone", 0.32, 0.6); sound.level("fizz", 0.05, 0.4); }
     const streaks = [];
     for (let k = 0; k < 150; k++) streaks.push({ a: Math.random() * Math.PI * 2, r: 0.55 + Math.random() * 0.75, v: 0.6 + Math.random() * 0.9, c: Math.random() < 0.8 ? "225,218,255" : "150,182,240" });
+    const motes = [];                                               // 黑洞合上時往外噴的光點（進來時被吸進去的那些，倒過來）
     const t0 = performance.now() / 1000;
-    let sealed = false, gone = false, lastCrk = 0;
+    let sealed = false, gone = false, lastCrk = 0, sucked = false, welcomed = false;
     const loop = () => {
       const now = performance.now() / 1000, T = now - t0;
+      const m = Math.min(W, H), D = Math.hypot(W, H);
       // 鏡頭：概念圖的放大倍數，從 4 倍（黑洞附近那一小塊）退到 1（剛好鋪滿）；最後慢一點但不停（首頁接著往後拉）
       const p = seg(T, 0.2, EXIT_END), zoom = Math.exp(Math.log(4) * (1 - p * (1.45 - 0.45 * p)));
       const c = cover(zoom), hx = c.x + HOLE[0] * c.s, hy = c.y + HOLE[1] * c.s;
@@ -666,9 +678,22 @@
       const mv = inOut(seg(T, 0.3, 0.9)), dx = (hx - W / 2) * mv, dy = (hy - H / 2) * mv;
       const tf = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) scale(${s.toFixed(4)})`;
       frame.style.transform = tf; glow.style.transform = tf;
-      frame.style.borderRadius = glow.style.borderRadius = Math.min(14 / s, Math.min(W, H) * 0.4).toFixed(1) + "px";
+      frame.style.borderRadius = glow.style.borderRadius = Math.min(14 / s, m * 0.4).toFixed(1) + "px";
       frame.style.opacity = String(1 - seg(T, 0.9, EXIT_SEAL + 0.02));
       glow.style.opacity = String(Math.max(0.16 * bump(T, 0, 0.6), 0.9 * seg(T, 0.7, EXIT_SEAL)) * (1 - seg(T, EXIT_SEAL, EXIT_SEAL + 0.08)));
+      // 遠端桌面在螢幕上的範圍（準星框、邊緣的光用）
+      const rw = W * s, rh = H * s, rx = W / 2 + dx - rw / 2, ry = H / 2 + dy - rh / 2;
+      // 準星框：一開始在外面一點，鎖定（收緊）到桌面邊上，跟著它縮小；合上前淡掉
+      const lock = out(seg(T, 0.02, 0.32)), pad = 8 + 46 * (1 - lock);
+      const cs = Math.max(10, Math.min(30, Math.min(rw, rh) * 0.12));
+      hudEl.style.transform = `translate(${(rx - pad).toFixed(1)}px, ${(ry - pad).toFixed(1)}px)`;
+      hudEl.style.width = (rw + pad * 2).toFixed(1) + "px"; hudEl.style.height = (rh + pad * 2).toFixed(1) + "px";
+      hudEl.style.setProperty("--c", cs.toFixed(1) + "px");
+      hudEl.style.opacity = String(seg(T, 0.02, 0.14) * (1 - seg(T, 0.86, 0.98)));
+      // 字幕：RETURNING TO REALITY（細線跟著進度走到合上那一刻）→ 合上之後 WELCOME BACK，換頁前淡掉
+      if (!welcomed && T >= EXIT_SEAL + 0.06) { welcomed = true; capT.textContent = "WELCOME BACK"; cap.classList.add("is-back"); }
+      cap.style.opacity = String(welcomed ? seg(T, EXIT_SEAL + 0.06, EXIT_SEAL + 0.22) * (1 - seg(T, EXIT_GO - 0.22, EXIT_GO - 0.04)) : seg(T, 0.3, 0.45) * (1 - seg(T, 0.92, EXIT_SEAL + 0.02)));   // 等遠端桌面縮小一點再出來（才不會疊在它的 Dock 上）
+      capBar.style.width = (100 * seg(T, 0.15, EXIT_SEAL)).toFixed(1) + "%";
       // 概念圖（電流照樣在動）
       const k = dpr;
       g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = "source-over";
@@ -678,7 +703,7 @@
       art.paint(g);
       // 星光往黑洞收（蓄力時淡淡的，被拉回去時拖成光束），黑洞合上之後就沒了
       g.setTransform(k, 0, 0, k, 0, 0); g.globalCompositeOperation = "lighter";
-      const sk = bump(T, 0.05, EXIT_SEAL + 0.1) * 1.2, R0 = Math.hypot(W, H) * 0.6;
+      const sk = bump(T, 0.05, EXIT_SEAL + 0.1) * 1.2, R0 = D * 0.6;
       if (sk > 0) streaks.forEach((q) => {
         const u = ((T * q.v * (0.6 + 1.6 * seg(T, 0.3, EXIT_SEAL)) + q.r) % 1.2) / 1.2;   // 從外面一直往裡收
         const r1 = R0 * Math.pow(1 - u, 1.6), r0 = r1 + (20 + 160 * seg(T, 0.3, EXIT_SEAL)) * (1 - u * 0.5);
@@ -686,29 +711,68 @@
         g.strokeStyle = `rgba(${q.c},${(0.15 + 0.7 * u) * sk})`; g.lineWidth = 0.6 + 1.6 * u;
         g.beginPath(); g.moveTo(hx + ca * r0, hy + sa * r0); g.lineTo(hx + ca * r1, hy + sa * r1); g.stroke();
       });
-      // 黑洞合上：白光、往外擴的一圈光
+      // 遠端桌面邊緣的光（畫在它後面，從邊緣透出來）：蓄力時亮起，被拉進去時越來越亮
+      const rim = Math.max(0.55 * bump(T, 0, 0.5), 0.9 * seg(T, 0.3, 0.95)) * (1 - seg(T, 0.95, EXIT_SEAL + 0.02));
+      if (rim > 0.01 && rw > 2) {
+        const rr = Math.min(14, Math.min(rw, rh) * 0.4);
+        [[26, 0.1], [12, 0.22], [4, 0.6]].forEach(([wd, al]) => {
+          g.strokeStyle = `rgba(200,188,255,${al * rim})`; g.lineWidth = wd;
+          g.beginPath(); if (g.roundRect) g.roundRect(rx, ry, rw, rh, rr); else g.rect(rx, ry, rw, rh); g.stroke();
+        });
+      }
+      g.globalCompositeOperation = "source-over";
+      // 黑洞合上：往外擴的震波（圈內的畫面被推開一點，像透鏡）、白光、往外噴的光點
       const a2 = T - EXIT_SEAL;
+      if (a2 > 0 && a2 < 0.8) {
+        const e = 1 - Math.pow(1 - Math.min(1, a2 / 0.75), 3), rr = m * 0.05 + D * 0.62 * e, wd = m * (0.05 + 0.05 * (1 - e));
+        sg.setTransform(1, 0, 0, 1, 0, 0); sg.drawImage(xc, 0, 0, sc.width, sc.height);
+        const z = 1 + 0.07 * (1 - e), HX = hx * k, HY = hy * k;
+        g.save(); g.setTransform(1, 0, 0, 1, 0, 0);
+        g.beginPath(); g.arc(HX, HY, (rr + wd) * k, 0, Math.PI * 2); g.arc(HX, HY, Math.max(1, rr - wd) * k, 0, Math.PI * 2, true); g.clip();
+        g.drawImage(sc, HX - HX * z, HY - HY * z, xc.width * z, xc.height * z);
+        g.fillStyle = `rgba(210,200,255,${0.1 * (1 - e)})`; g.fillRect(0, 0, xc.width, xc.height);
+        g.restore();
+      }
+      g.setTransform(k, 0, 0, k, 0, 0); g.globalCompositeOperation = "lighter";
       if (a2 > -0.12 && a2 < 0.9) {
-        const m = Math.min(W, H), fl = a2 < 0 ? 1 + a2 / 0.12 : Math.exp(-a2 / 0.22);
+        const fl = a2 < 0 ? 1 + a2 / 0.12 : Math.exp(-a2 / 0.22);
         const fr2 = m * (0.06 + 0.4 * Math.max(0, Math.min(1, a2 / 0.3))), rg = g.createRadialGradient(hx, hy, 0, hx, hy, fr2);
         rg.addColorStop(0, `rgba(255,255,255,${0.95 * fl})`); rg.addColorStop(0.4, `rgba(200,185,255,${0.5 * fl})`); rg.addColorStop(1, "rgba(120,90,255,0)");
         g.fillStyle = rg; g.fillRect(hx - fr2, hy - fr2, fr2 * 2, fr2 * 2);
         if (a2 > 0) {
-          const e = 1 - Math.pow(1 - Math.min(1, a2 / 0.75), 3), rr = m * 0.05 + Math.hypot(W, H) * 0.6 * e;
-          g.strokeStyle = `rgba(220,210,255,${0.7 * (1 - e)})`; g.lineWidth = 2.5 * (1 - e) + 0.5;
-          g.beginPath(); g.ellipse(hx, hy, rr, rr * 0.9, 0, 0, Math.PI * 2); g.stroke();
-          g.strokeStyle = `rgba(160,140,255,${0.18 * (1 - e)})`; g.lineWidth = 14 * (1 - e); g.stroke();
+          const e = 1 - Math.pow(1 - Math.min(1, a2 / 0.75), 3), rr = m * 0.05 + D * 0.62 * e;
+          g.strokeStyle = `rgba(230,222,255,${0.75 * (1 - e)})`; g.lineWidth = 2.5 * (1 - e) + 0.5;
+          g.beginPath(); g.ellipse(hx, hy, rr, rr, 0, 0, Math.PI * 2); g.stroke();
+          g.strokeStyle = `rgba(160,140,255,${0.2 * (1 - e)})`; g.lineWidth = 16 * (1 - e); g.stroke();
+        }
+      }
+      if (sealed) {
+        for (let j = motes.length - 1; j >= 0; j--) {
+          const q = motes[j], u = (now - q.t0) / q.life;
+          if (u >= 1) { motes.splice(j, 1); continue; }
+          if (u < 0) continue;
+          const e = 1 - Math.pow(1 - u, 2.6), r = q.r0 + q.v * e, tl = 6 + q.v * 0.12 * (1 - u);
+          const ca = Math.cos(q.a), sa = Math.sin(q.a), al = (1 - u) * (u < 0.08 ? u / 0.08 : 1);
+          g.strokeStyle = `rgba(${q.c},${al})`; g.lineWidth = q.w * (1 - 0.5 * u);
+          g.beginPath(); g.moveTo(hx + ca * (r - tl), hy + sa * (r - tl) * 0.9); g.lineTo(hx + ca * r, hy + sa * r * 0.9); g.stroke();
         }
       }
       g.globalCompositeOperation = "source-over";
+      if (!sucked && T >= 0.32) { sucked = true; if (sound) { try { sound.suck(0.75); } catch (e) { /* 沒有就算了 */ } } }   // 被拉進黑洞：整片聲音往低處塌
       if (!sealed && T >= EXIT_SEAL) {
         sealed = true;
         art.surge(now + 0.02);
-        if (sound) { sound.slam(0.7); sound.zap(0.75, 0.3, 0.02); sound.level("drone", 0, 0.35); }
+        for (let j = 0; j < 150; j++) {
+          const cc = Math.random();
+          motes.push({ a: Math.random() * Math.PI * 2, r0: m * 0.02, v: D * (0.08 + Math.pow(Math.random(), 1.6) * 0.5), t0: now + Math.random() * 0.12, life: 0.7 + Math.random() * 0.8,
+            w: 0.8 + Math.random() * 1.8, c: cc < 0.6 ? "240,236,255" : cc < 0.88 ? "175,160,255" : "255,200,120" });
+        }
+        if (sound) { sound.slam(0.75); sound.zap(0.8, 0.32, 0.02); sound.level("drone", 0, 0.35); }
       }
       if (sound) {
         if (!sealed && T > 0.15 && T - lastCrk > 0.16 - 0.1 * seg(T, 0.2, EXIT_SEAL)) { lastCrk = T; sound.crackle(0.25 + 0.35 * seg(T, 0.2, EXIT_SEAL), 0.1); }
         if (sealed) sound.level("fizz", 0.03 + 0.1 * art.activity(), 0.06);
+        if (sealed && T - lastCrk > 0.12 && T < EXIT_SEAL + 0.6) { lastCrk = T; sound.crackle(0.3 * (1 - seg(T, EXIT_SEAL, EXIT_SEAL + 0.6)), 0.08, 0, 1.3); }   // 光點噴出去的細碎劈啪
         if (fired && sealed) sound.zap(0.5, 0.25);
       }
       if (!gone && T >= EXIT_GO) {

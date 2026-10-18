@@ -124,7 +124,28 @@
       if (onKey) onKey(e);
     };
     document.addEventListener("keydown", trap, true);
-    let onKey = null, i = -1;
+    let onKey = null, i = -1, cur = null;
+    /* 老師測試用的隱藏按鈕（老師 2026-10-18：第 4 關打不到終端機的 skip）：畫面最右下角一小塊看不見的地方，
+       0.9 秒內連點 3 下 → 這一題直接答對、跳到下一題（開場時是「開始」；最後一題就是「回到原本的時空」）。
+       看不見、游標不變、不在 Tab 的順序裡、讀屏軟體也不唸；只點一兩下什麼都不會發生。 */
+    const ghost = $$("div", "quiz-ghost");
+    ghost.setAttribute("aria-hidden", "true");
+    let taps = [];
+    ghost.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      const t = performance.now();
+      taps = taps.filter((x) => t - x < 900); taps.push(t);
+      if (taps.length < 3) return;
+      taps = [];
+      skipOne();
+    });
+    root.append(ghost);
+    function skipOne() {
+      if (!onKey) return;                                         // 已經在回到原本的時空
+      if (i < 0) { ask(0); return; }
+      if (cur && cur.right()) { setTimeout(() => { if (onKey && !btn.disabled) btn.click(); }, 450); return; }
+      if (!btn.disabled) btn.click();
+    }
     requestAnimationFrame(() => root.classList.add("is-in"));
     intro();
 
@@ -190,6 +211,8 @@
       };
       setTimeout(() => opts[0].focus(), 60);
       onStep(n, "ask");
+      // 隱藏按鈕用：這一題直接選對、確認（已經答對就回傳 false）
+      cur = { right: () => { if (done) return false; choose(opts.findIndex((b) => +b.dataset.k === 0)); confirm(); return true; } };
 
       function choose(j) {
         if (done || opts[j].disabled) return;

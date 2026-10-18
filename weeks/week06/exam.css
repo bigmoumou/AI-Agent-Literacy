@@ -455,6 +455,8 @@ body.in-quiz #guide .g-comm.is-toast { top: var(--col-y, 40px); bottom: auto; }
   30%, 50%, 70% { transform: translateX(-7px); } 40%, 60% { transform: translateX(7px); }
 }
 .quiz-panel.is-right { border-color: rgba(126, 240, 192, .8); transition: border-color .08s ease; }
+/* 老師測試用的隱藏按鈕（exam-quiz.js）：最右下角，看不見、游標不變 */
+.quiz-ghost { position: absolute; right: 0; bottom: 0; width: 44px; height: 44px; z-index: 1; }
 
 /* 四關都過了、按「中斷連線」：時空回歸（exam.js 的 exitHome）。遠端桌面縮進概念圖的黑洞，概念圖畫在它後面 */
 body.is-exiting #remote { z-index: 3; }
@@ -464,3 +466,18 @@ body.is-exiting #remote { z-index: 3; }
   background: radial-gradient(ellipse at center, rgba(255, 255, 255, .96), rgba(214, 206, 255, .88));
 }
 body.is-exiting :is(#guide, #scar, #exam-vign, .warn, .warn-vig, #warp, .sound-btn) { opacity: 0 !important; transition: opacity .3s ease; pointer-events: none; }
+/* 時空回歸的準星框（四個角跟著遠端桌面縮小、鎖定）和字幕（RETURNING TO REALITY → WELCOME BACK）；只用細線和字，不做發光卡片 */
+#exitHud { position: fixed; left: 0; top: 0; z-index: 5; pointer-events: none; opacity: 0; --c: 24px; }
+#exitHud i { position: absolute; width: var(--c); height: var(--c); border: 0 solid rgba(226, 220, 255, .95); }
+#exitHud .tl { left: 0; top: 0; border-left-width: 2px; border-top-width: 2px; }
+#exitHud .tr { right: 0; top: 0; border-right-width: 2px; border-top-width: 2px; }
+#exitHud .bl { left: 0; bottom: 0; border-left-width: 2px; border-bottom-width: 2px; }
+#exitHud .br { right: 0; bottom: 0; border-right-width: 2px; border-bottom-width: 2px; }
+#exitCap {
+  position: fixed; left: 50%; bottom: 12vh; z-index: 5; transform: translateX(-50%); pointer-events: none; opacity: 0; text-align: center; white-space: nowrap;
+  font-family: var(--font-mono); font-size: 13px; font-weight: 700; letter-spacing: .52em; color: #eeeaff; text-shadow: 0 1px 8px rgba(4, 3, 10, .8);
+}
+#exitCap .bar { display: block; width: 240px; height: 1px; margin: 12px auto 0; background: rgba(255, 255, 255, .2); }
+#exitCap .bar i { display: block; width: 0; height: 100%; background: #d6ceff; }
+#exitCap.is-back { font-size: 15px; }
+#exitCap.is-back .bar { visibility: hidden; }
