@@ -476,6 +476,13 @@
   };
 
   /* ================================================================= UI */
+  function copyGlyph() {
+    var span = document.createElement('span');
+    span.className = 'lab-copy-g';
+    span.setAttribute('aria-hidden', 'true');
+    span.innerHTML = '<svg viewBox="0 0 16 16" width="13" height="13"><rect x="5.2" y="5.2" width="8.3" height="8.8" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10.8 3.6V3.4a1.5 1.5 0 0 0-1.5-1.5H4a1.5 1.5 0 0 0-1.5 1.5v6.2A1.5 1.5 0 0 0 4 11.1h.3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>';
+    return span;
+  }
   function inline(str, labHook) {
     var out = [];
     var re = /\[\[([\s\S]+?)\]\]|`([^`]+)`/g, last = 0, m;
@@ -484,16 +491,20 @@
       if (m.index > last) out.push(document.createTextNode(str.slice(last, m.index)));
       if (m[1] !== undefined) {
         var sentence = m[1];
-        var link = h('button', { type: 'button', class: 'lab-linkbtn lab-copy', dataset: { lab: labHook || 'rail-copy' }, 'data-fk': 'copy:' + sentence.slice(0, 8) }, ui.copied === sentence ? '已複製' : '複製');
-        link.addEventListener('click', function (s, el) {
+        // teacher 2026-10-18: the sentence to copy and its button stand apart from the step's plain text (amber marker, a copy glyph, bold amber 「複製」)
+        var done0 = ui.copied === sentence;
+        var label = h('span', { class: 'lab-copy-l' }, done0 ? '已複製' : '複製');
+        var link = h('button', { type: 'button', class: 'lab-linkbtn lab-copy' + (done0 ? ' is-done' : ''), dataset: { lab: labHook || 'rail-copy' }, 'data-fk': 'copy:' + sentence.slice(0, 8) }, copyGlyph(), label);
+        link.addEventListener('click', function (s, el, lb) {
           return function () {
             LAB.clipboard.setText(s).then(function (ok) {
               ui.copied = ok ? s : null;
-              el.textContent = ok ? '已複製' : '沒複製成功：請自己選取旁邊這句，按 Ctrl+C';
+              el.classList.toggle('is-done', !!ok);
+              lb.textContent = ok ? '已複製' : '沒複製成功：請自己選取旁邊這句，按 Ctrl+C';
             });
           };
-        }(sentence, link));
-        out.push(h('span', { class: 'lab-copyline' }, h('span', { class: 'lab-mono' }, sentence), ' ', link));
+        }(sentence, link, label));
+        out.push(h('span', { class: 'lab-copyline' }, h('span', { class: 'lab-mono lab-copytext' }, sentence), ' ', link));
       } else out.push(h('span', { class: 'lab-mono' }, m[2]));
       last = re.lastIndex;
     }

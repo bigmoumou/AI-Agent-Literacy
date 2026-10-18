@@ -124,9 +124,31 @@
     return screen;
   });
   var T_TERM = chain(termShown, dock('terminal'));
-  /* editing a file the way it is done for real (teacher, 2026-10-17): VS Code on the project folder — the editor that shows the file, else the file's row in
-     VS Code's file list, else the Terminal (`cd` to the folder, `code .`); TextEdit / Notepad still counts in the checks (they read the disk) */
-  function codeFlow(path) { return chain(editorOf(path), inWins('code', 'cd-explorer-row', path), T_TERM); }
+  /* editing a file the way it is done for real (teacher, 2026-10-17): VS Code on the project folder. The cue (teacher, 2026-10-18: VS Code, not the
+     Terminal): the editor that shows the file, else the file's row in VS Code's file list, else VS Code's Open Folder panel (the project folder,
+     then the open button), else the Open Folder button of an empty VS Code window, else the Dock icon of VS Code. Only when every VS Code window
+     already shows another folder: the Terminal (`cd` to the folder, `code .`). TextEdit / Notepad still counts in the checks (they read the disk) */
+  function panelTo(folder) {
+    return trusted(function () {
+      var l = liveWins('code'), i, pn = null, want = String(folder).toLowerCase(), row;
+      for (i = l.length - 1; i >= 0 && !pn; i--) pn = l[i].el.querySelector('[data-lab=cd-op-panel]');
+      if (!pn) return null;
+      if (String(pn.getAttribute('data-path') || '').toLowerCase() === want) return pn.querySelector('[data-lab=cd-op-open]');
+      row = byPath(pn, 'cd-op-item', folder);
+      if (row) return row.classList.contains('is-sel') ? pn.querySelector('[data-lab=cd-op-open]') : row;
+      return byPath(pn, 'cd-op-side', folder.replace(/\/[^\/]+$/, '')) || pn.querySelector('[data-lab=cd-op-side]');
+    });
+  }
+  function codeElsewhere(api) {
+    var l = [];
+    try { l = LAB.code.windows(); } catch (e) { l = []; }
+    if (!l.length) return null;
+    for (var i = 0; i < l.length; i++) if (!l[i].folder || String(l[i].folder).toLowerCase() === String(GW).toLowerCase()) return null;
+    return T_TERM(api);
+  }
+  function codeFlow(path) {
+    return chain(editorOf(path), inWins('code', 'cd-explorer-row', path), panelTo(GW), inWinSel('code', '[data-lab=cd-open-folder]'), codeElsewhere, dock('code'));
+  }
 
   /* ---- Codex */
   function info() { try { return LAB.codex5.activeInfo(); } catch (e) { return null; } }
@@ -256,8 +278,8 @@
       {
         id: 's2',
         text: '第 4 條只寫「要夠大」，沒寫多大，Codex 沒辦法檢查。在 VS Code 打開 `VERIFY.md`，把第 4 條換成 [[寬 390 px 時，每個標記至少 44 px]]，存檔。',
-        hint: '手指點得準的大小大約是 44 px，寬 390 px 是手機的寬度；寫成數字，看得出對錯，Codex 才檢查得了。用 VS Code 打開整個 ginkgo-walk 資料夾：在終端機打 `cd ~\\Desktop\\ginkgo-walk`，再打 `code .`（也可以在檔案總管對 ginkgo-walk 按右鍵 › 開啟檔案 › Visual Studio Code），然後點 VS Code 左邊的 VERIFY.md。',
-        answer: '終端機：`cd ~\\Desktop\\ginkgo-walk`，Enter；`code .`，Enter。VS Code 左邊點 `VERIFY.md`，把第 4 條「在手機上，地圖上的景點標記要夠大，手指點得到。」換成「寬 390 px 時，每個標記至少 44 px。」，按 Ctrl+S。',
+        hint: '手指點得準的大小大約是 44 px，寬 390 px 是手機的寬度；寫成數字，看得出對錯，Codex 才檢查得了。用 VS Code 打開整個 ginkgo-walk 資料夾：點工作列上的 VS Code，按左邊的「Open Folder」，在「桌面」點 ginkgo-walk，按「選擇資料夾」。也可以在終端機打 `cd ~\\Desktop\\ginkgo-walk`，再打 `code .`。打開以後點 VS Code 左邊的 VERIFY.md。',
+        answer: '工作列點 VS Code › Open Folder › 桌面 › 點 ginkgo-walk › 選擇資料夾（或在終端機打 `cd ~\\Desktop\\ginkgo-walk`、`code .`）。VS Code 左邊點 `VERIFY.md`，把第 4 條「在手機上，地圖上的景點標記要夠大，手指點得到。」換成「寬 390 px 時，每個標記至少 44 px。」，按 Ctrl+S。',
         target: codeFlow(VERIFY),
         check: function (ev, api) { var r = markerItem(api); return !r.missing && !r.vague && r.px >= 40; },
         trap: function (ev, api) {

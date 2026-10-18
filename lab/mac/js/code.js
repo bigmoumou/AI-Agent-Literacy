@@ -9,7 +9,6 @@
   var HOME = vfs.HOME;
   var TRASH = HOME + '/.Trash';
   var BINARY_MSG = 'The file is not displayed in the text editor because it is either binary or uses an unsupported text encoding.';
-  var OPEN_FOLDER_TOAST = '請把資料夾拖進這個視窗，或在 Finder 對資料夾按右鍵 › 打開方式 › Code';
 
   /* ------------------------------------------------------------- icons */
   function g(inner) {
@@ -293,7 +292,7 @@
         treeEl.textContent = '';
         rowRecs.forEach(function (r) { r.dispose(); });
         rowRecs.clear();
-        var btn = h('button', { type: 'button', class: 'cd-openfolder', dataset: { lab: 'cd-open-folder' }, on: { click: function () { toast(OPEN_FOLDER_TOAST); } } }, 'Open Folder');
+        var btn = h('button', { type: 'button', class: 'cd-openfolder', dataset: { lab: 'cd-open-folder' }, on: { click: function () { openPanel(ctl); } } }, 'Open Folder');
         treeScroll.appendChild(h('div', { class: 'cd-nofolder' }, h('p', null, 'You have not yet opened a folder.'), btn));
         return;
       }
@@ -689,6 +688,91 @@
     return out;
   }
 
+  /* ---- Open Folder (teacher 2026-10-18: it works too, besides `code .` and a drag): the macOS open panel on the window, folders only.
+     A click selects a folder, a double click goes into it, 打開 opens the selected folder (or the one shown when nothing is selected) in this
+     window. Files are listed greyed out, as in the real panel. Hooks: cd-op-panel / -side (data-path) / -item (data-path, data-type) / -back /
+     -where / -open / -cancel */
+  var OP_SIDE = [[HOME + '/Desktop', '桌面', 'desktop'], [HOME + '/Documents', '文件', 'doc-sm'], [HOME + '/Downloads', '下載項目', 'download'], [HOME, 'an', 'folder-sm']];
+  function openPanel(c) {
+    if (!c || !c.win || !c.win.el || !c.win.el.parentNode || c.win.el.querySelector('.cd-op')) return false;
+    var win = c.win, prev = document.activeElement, done = false, back = [], sel = null;
+    var cur = vfs.isDir(HOME + '/Desktop') ? HOME + '/Desktop' : HOME;
+    var where = h('span', { class: 'cd-op-where', dataset: { lab: 'cd-op-where' } });
+    var backBtn = h('button', { type: 'button', class: 'cd-op-nav', 'aria-label': '上一頁', dataset: { lab: 'cd-op-back' }, on: { click: function () { if (back.length) go(back.pop(), true); } } }, LAB.icons.el('chev-left', { size: 15 }));
+    var side = h('div', { class: 'cd-op-side' }, h('div', { class: 'cd-op-sidehead' }, '個人收藏'));
+    OP_SIDE.forEach(function (d) {
+      if (!vfs.isDir(d[0])) return;
+      side.appendChild(h('button', { type: 'button', class: 'cd-op-sideitem', dataset: { lab: 'cd-op-side', path: d[0] }, on: { click: function () { go(d[0]); } } },
+        LAB.icons.el(d[2], { size: 15 }), h('span', null, d[1])));
+    });
+    var list = h('div', { class: 'cd-op-list', role: 'listbox', 'aria-label': '檔案夾', dataset: { lab: 'cd-op-list' } });
+    var cancelBtn = h('button', { type: 'button', class: 'lab-sheet-btn', dataset: { lab: 'cd-op-cancel' }, on: { click: function () { finish(null); } } }, '取消');
+    var openBtn = h('button', { type: 'button', class: 'lab-sheet-btn is-default', dataset: { lab: 'cd-op-open' }, on: { click: function () { finish(sel || cur); } } }, '打開');
+    var panel = h('div', { class: 'lab-sheet is-attached cd-op', role: 'dialog', 'aria-modal': 'true', 'aria-label': '打開資料夾', dataset: { lab: 'cd-op-panel' } },
+      h('div', { class: 'cd-op-bar' }, backBtn, where),
+      h('div', { class: 'cd-op-body' }, side, list),
+      h('div', { class: 'cd-op-btns' }, cancelBtn, openBtn));
+    var scrim = h('div', { class: 'lab-sheet-scrim is-window' }, panel);
+    win.el.appendChild(scrim);
+    requestAnimationFrame(function () { scrim.classList.add('is-in'); });
+
+    function render() {
+      panel.setAttribute('data-path', cur);
+      where.textContent = '';
+      where.appendChild(LAB.icons.el('folder-sm', { size: 15 }));
+      where.appendChild(h('span', null, vfs.displayName(cur)));
+      backBtn.disabled = !back.length;
+      [].forEach.call(side.querySelectorAll('[data-lab=cd-op-side]'), function (b) { b.classList.toggle('is-on', vfs.same(b.dataset.path, cur)); });
+      list.textContent = '';
+      var items = [];
+      try { items = vfs.list(cur).filter(function (s) { return !s.hidden && s.name.charAt(0) !== '.'; }); } catch (e) { items = []; }
+      items.sort(function (a, b) { return (a.type === 'dir' ? 0 : 1) - (b.type === 'dir' ? 0 : 1) || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0); });
+      if (!items.length) list.appendChild(h('div', { class: 'cd-op-empty' }, '沒有項目'));
+      items.forEach(function (st) {
+        var isDir = st.type === 'dir';
+        var row = h('div', { class: 'cd-op-row' + (isDir ? '' : ' is-off') + (sel && vfs.same(sel, st.path) ? ' is-sel' : ''), role: 'option',
+          'aria-disabled': isDir ? 'false' : 'true', dataset: { lab: 'cd-op-item', path: st.path, type: st.type } },
+          h('span', { class: 'cd-op-ico' + (isDir ? ' is-dir' : '') }, LAB.icons.el(isDir ? 'folder-sm' : 'doc-sm', { size: 16 })),
+          h('span', { class: 'cd-op-name' }, st.name),
+          isDir ? h('span', { class: 'cd-op-chev' }, LAB.icons.el('chev-right', { size: 11 })) : null);
+        if (isDir) {
+          row.addEventListener('click', function () { sel = st.path; mark(); });
+          row.addEventListener('dblclick', function () { go(st.path); });
+        }
+        list.appendChild(row);
+      });
+    }
+    function mark() { [].forEach.call(list.querySelectorAll('[data-lab=cd-op-item]'), function (r) { r.classList.toggle('is-sel', !!sel && vfs.same(r.dataset.path, sel)); }); }
+    function go(p, fromBack) {
+      if (!vfs.isDir(p)) return;
+      if (!fromBack && !vfs.same(p, cur)) back.push(cur);
+      cur = vfs.canon(p);
+      sel = null;
+      render();
+    }
+    var offFs = LAB.bus.on('fs:change', function () { if (!done) { if (!vfs.isDir(cur)) cur = HOME; if (sel && !vfs.isDir(sel)) sel = null; render(); } });
+    var offModal = LAB.keys.modal(function (e) {
+      if (LAB.ui.isImeEnter(e)) return false;
+      if (e.key === 'Escape') { finish(null); return true; }
+      if (e.key === 'Enter') { finish(sel || cur); return true; }
+      return false;
+    });
+    var offClose = win.on ? win.on('close', function () { finish(null); }) : null;
+    function finish(p) {
+      if (done) return;
+      done = true;
+      offFs(); offModal(); if (offClose) offClose();
+      scrim.classList.remove('is-in');
+      setTimeout(function () { if (scrim.parentNode) scrim.parentNode.removeChild(scrim); }, 160);
+      if (p && vfs.isDir(p)) { win.focus(); c.openFolder(p, 'open-folder'); }
+      else { try { if (prev && prev.focus && document.contains(prev)) prev.focus(); } catch (e) { /* ignore */ } }
+    }
+    render();
+    setTimeout(function () { try { openBtn.focus({ preventScroll: true }); } catch (e) { /* ignore */ } }, 0);
+    LAB.bus.emit('code:openpanel', { winId: win.id });
+    return true;
+  }
+
   function openFolder(path, via) {
     var p = vfs.canon(path);
     if (!vfs.isDir(p)) { toast('找不到這個資料夾'); return null; }
@@ -728,6 +812,7 @@
   LAB.code = {
     openFolder: openFolder,
     openFile: openFile,
+    openPanel: function () { var c = activeCtl() || allCtls()[0] || createWindow(null); return openPanel(c); },
     windows: function () { return allCtls().map(function (c) { return { winId: c.win.id, folder: c.root() || '', path: c.win.state.path || '' }; }); }
   };
 
@@ -783,7 +868,7 @@
     return [
       { label: '檔案', items: [
         off('新增文字檔案', '⌘N'),
-        { label: '打開資料夾⋯', action: function () { toast(OPEN_FOLDER_TOAST); } },
+        { label: '打開資料夾⋯', action: function () { if (c) openPanel(c); else openPanel(createWindow(null)); } },
         { separator: true },
         { label: '儲存', shortcut: '⌘S', enabled: !!(c && c.hasActive()), action: function () { if (c) c.saveActive(); } },
         { label: '關閉編輯器', shortcut: '⌘W', enabled: !!(c && c.hasActive()), action: function () { if (c) c.closeActive(); } }
