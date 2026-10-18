@@ -432,7 +432,7 @@
     const word = kind === "lock" ? "LOCKED" : kind === "safe" ? "STABILIZED" : "WARNING";
     $("#warnWord").textContent = word; $("#warnWord").dataset.text = word;
     $("#warnSub").textContent = kind === "lock" ? "ESCAPE DENIED" : kind === "safe" ? "ESCAPE UNLOCKED" : "NO HINTS · ONLY MISSIONS";
-    $("#warnSub2").textContent = kind === "safe" ? ban(2) : "";   // WARNING、LOCKED 只有英文（老師 2026-10-18：LOCKED 拿掉中文那行）
+    $("#warnSub2").textContent = "";                            // 帶子上只有英文（老師 2026-10-18：LOCKED、STABILIZED 都拿掉中文那行；讀屏軟體照樣唸中文）
     $("#warnSay").textContent = word + "：" + ban(kind === "lock" ? 1 : kind === "safe" ? 2 : 0);
     clearTimeout(bannerTimer);
     w.classList.remove("is-on", "is-short", "is-safe");
@@ -804,7 +804,11 @@
           onEvent: (kind, i) => { if (guide) guide.event(kind, i); },
           onStage: setStage,
           onUnstable: () => { unstable(); if (guide) guide.event("unstable"); },
-          onDone: (resumed) => { unlock(resumed); if (guide) guide.finish(resumed); },
+          onDone: (resumed) => {
+            unlock(resumed); if (guide) guide.finish(resumed);
+            // 通關：STABILIZED、小安道謝之後自動回到現實（老師 2026-10-18：不要停在桌面）；這段時間內按「從第 1 關重來」就不走
+            if (!resumed) setTimeout(() => { if (escaped && !exiting) exitHome(() => { window.location.href = "../../"; }); }, reduce ? 3000 : 7200);
+          },
           onRestart: () => { rewind(); if (warp) warp.stop(); if (guide) guide.restart(); },
           // 問答：答錯低低的拒絕音；答對的聲音交給時空轉移（沒有時空轉移才用一小聲電弧）
           sfx: (k) => { if (k === "no") buzz(); else if (!warp && sound) { sound.crackle(0.3, 0.2); sound.zap(0.25, 0.2, 0, 0.8); } },

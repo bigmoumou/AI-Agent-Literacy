@@ -2884,6 +2884,10 @@
     }
 
     // ---- live line
+    function commitInput(text, tail) {
+      var ls = String(text).split('\n');
+      ls.forEach(function (l, k) { commitLine((k ? '' : promptStr()) + l + (k === ls.length - 1 ? (tail || '') : ''), false); });
+    }
     function promptStr() {
       if (session.prompt) return session.prompt.text;
       if (session.pending !== null) return session.ps2 || '> ';
@@ -2907,11 +2911,12 @@
         pushUnits(units, promptStr(), 'p');
         for (var i = 0; i <= buf.length; i++) {
           if (i === cur) { if (comp) pushUnits(units, comp, 'c'); curIdx = units.length; }
-          if (i < buf.length) pushUnits(units, buf[i], 'b');
+          if (i < buf.length) { if (buf[i] === '\n') units.push({ ch: '', w: 0, nl: true, cls: 'b' }); else pushUnits(units, buf[i], 'b'); }
         }
       }
       var rowsArr = [[]], col = 0, pos = [];
       units.forEach(function (u) {
+        if (u.nl) { pos.push({ r: rowsArr.length - 1, c: col }); rowsArr[rowsArr.length - 1].push(u); rowsArr.push([]); col = 0; return; }   // 貼上的換行
         if (col + u.w > cols && col > 0) { rowsArr.push([]); col = 0; }
         pos.push({ r: rowsArr.length - 1, c: col });
         rowsArr[rowsArr.length - 1].push(u);
@@ -2933,6 +2938,7 @@
         ru.forEach(function (u) {
           var isCur = curIdx >= 0 && gi === curIdx;
           gi++;
+          if (u.nl) { if (isCur) { flush(); rowEl.appendChild(h('span', { class: 'tm-cursor' }, ' ')); } return; }
           if (isCur || u.w === 2) {
             flush();
             var cls = (isCur ? 'tm-cursor ' : '') + (u.w === 2 ? 'tm-w ' : '') + (u.cls === 'c' ? 'tm-comp' : '');
@@ -2980,7 +2986,7 @@
 
     // ---- editing
     function setBuf(text) {
-      buf = Array.from(String(text).replace(/[\r\n]+/g, ' '));
+      buf = Array.from(session.prompt ? String(text).replace(/[\r\n]+/g, ' ') : String(text).replace(/\r\n?/g, '\n'));
       cur = buf.length;
       renderLive();
     }
@@ -2993,9 +2999,14 @@
       if (busy || dead || waitingLib) return;
       if (rs) rs = null;
       var chars = [];
+      // 一次貼上好幾行：和真的 macOS 終端機（zsh 的 bracketed paste）一樣，整段先放進輸入列（換行照樣換行），
+      // 按 Enter 才一行一行執行；最後面多出來的換行不要。回答問題（session.prompt）時照舊把換行當空格
+      var keepNl = !session.prompt && /[\r\n]/.test(String(str));
+      if (keepNl) str = String(str).replace(/\r\n?/g, '\n').replace(/\n+$/, '');
       for (var ch of String(str)) {
         var cp = ch.codePointAt(0);
-        if (ch === '\n' || ch === '\r' || ch === '\t') chars.push(' ');
+        if (ch === '\n' && keepNl) chars.push('\n');
+        else if (ch === '\n' || ch === '\r' || ch === '\t') chars.push(' ');
         else if (cp < 0x20 || cp === 0x7f) continue;
         else chars.push(ch);
       }
@@ -3161,7 +3172,7 @@
     function submit() {
       if (busy || dead || app || waitingLib) return;
       var line = buf.join('');
-      commitLine(promptStr() + line, false);
+      commitInput(line);
       buf = []; cur = 0; comp = ''; histPos = -1; stash = null; tabState = null; rs = null;
       if (lib.state === 'ready' || lib.state === 'failed' || !needsLibrary(line)) { runNow(line); return; }
       // the command library is still on its way: wait for it (Ctrl+C gives up)
@@ -3184,7 +3195,7 @@
         handleResult(LAB.shell.cancel(session));
         return;
       }
-      commitLine(promptStr() + buf.join('') + '^C', false);
+      commitInput(buf.join(''), '^C');
       buf = []; cur = 0; comp = '';
       if (session.gen) { handleResult(LAB.shell.cancel(session)); return; }
       if (session.pending !== null) LAB.shell.cancel(session);
@@ -3339,6 +3350,7 @@
     // ---- Tab
     function doTab() {
       if (!editable() || session.prompt) return;
+      if (buf.indexOf('\n') >= 0) return;                         // 貼上好幾行還沒執行：練習版先不補完
       var text = buf.join('');
       if (tabState && tabState.items) {
         // later Tabs cycle through the listed candidates

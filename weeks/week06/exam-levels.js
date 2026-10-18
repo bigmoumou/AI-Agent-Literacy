@@ -71,6 +71,9 @@
     return { avg: Math.round(avg * 10) / 10, n: used.length };
   }
   const RIGHT = average(SCORES, { dedupe: true, absent: "zero", leave: "excl" });   // 68.1 分、10 人
+  // 缺考「不列入」也算對（老師 2026-10-18）：補交取較晚、請假不算、缺考不列入 → 75.7 分、9 人
+  const RIGHT_EXCL = average(SCORES, { dedupe: true, absent: "excl", leave: "excl" });
+  const isRight = (avg, n) => (avg === RIGHT.avg && n === RIGHT.n) || (avg === RIGHT_EXCL.avg && n === RIGHT_EXCL.n);
 
   /* ---------- 小工具 ---------- */
   const csv = (head, rows) => head + "\n" + rows.map((r) => r.join(",")).join("\n") + "\n";
@@ -308,7 +311,8 @@
           const p = L3DIR + "/output/summary.md";
           if (!a.same(ev.data.path, p)) return false;
           const t = a.read(p);
-          return t != null && new RegExp("全班平均[^\\n]*?" + RIGHT.avg.toFixed(1).replace(".", "\\.") + "\\s*分").test(t);
+          // 缺考算 0 分（68.1 分、10 筆）或不列入（75.7 分、9 筆）都算對（老師 2026-10-18）
+          return t != null && [RIGHT, RIGHT_EXCL].some((r) => new RegExp("全班平均[^\\n]*?" + r.avg.toFixed(1).replace(".", "\\.") + "\\s*分[\\s\\S]*?列入計算：" + r.n + " 筆").test(t));
         },
       }],
     });
@@ -497,7 +501,7 @@
         if (!ctx.exists("output")) ctx.mkdir("output");
         ctx.write("output/summary.md", md);
         ctx.say((g.hit ? "（訊息有一部分被亂流干擾，讀不出來。）\n" : "") + "已算好，寫進 `output/summary.md`：全班平均 " + res.avg.toFixed(1) + " 分（" + res.n + " 筆）。");
-        ctx.meta = { exam: "l3", ok: res.avg === RIGHT.avg && res.n === RIGHT.n };
+        ctx.meta = { exam: "l3", ok: isRight(res.avg, res.n) };
       },
     };
   }
@@ -516,6 +520,6 @@
     } catch (e) { /* 改不了就算了 */ }
   }
 
-  const api = { start, RIGHT, _L: null, _H: null, restart: () => false, average, SCORES, OBS, progress: loadProgress, resetProgress, LEVELS };
+  const api = { start, RIGHT, RIGHT_EXCL, _L: null, _H: null, restart: () => false, average, SCORES, OBS, progress: loadProgress, resetProgress, LEVELS };
   window.ExamLevels = api;
 })();

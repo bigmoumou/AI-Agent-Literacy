@@ -4183,6 +4183,7 @@
   function unitsToRows(units, cols) {
     var rows = [[]], col = 0;
     units.forEach(function (u) {
+      if (u.nl) { rows[rows.length - 1].push(u); rows.push([]); col = 0; return; }   // 貼上的換行（輸入列）
       if (col + u.w > cols && col > 0) { rows.push([]); col = 0; }
       rows[rows.length - 1].push(u);
       col += u.w;
@@ -4204,6 +4205,7 @@
     for (var i = 0; i < units.length; i++) {
       var u = units[i];
       var cls = u.cls || '';
+      if (u.nl) { if (i === cursorAt) { flush(); frag.appendChild(h('span', { class: 'tm-cur' }, ' ')); } continue; }
       if (i === cursorAt) {
         flush();
         frag.appendChild(h('span', { class: 'tm-cur' + (u.w === 2 ? ' tm-w' : '') + (cls ? ' tm-c-' + cls : '') }, u.ch));
@@ -4455,11 +4457,16 @@
       var curIdx = -1;
       if (!busy && !waitingLib) {
         segsToUnits([[promptStr(), '']]).forEach(function (u) { units.push(u); });
-        var hl = highlight(buf);
+        var hl = highlight(nlAsSemi(buf));
         for (var i = 0; i <= buf.length; i++) {
           if (i === cur) {
             if (comp) segsToUnits([[comp, 'comp']]).forEach(function (u) { units.push(u); });
             curIdx = units.length;
+          }
+          if (i < buf.length && buf[i] === '\n') {
+            units.push({ ch: '', w: 0, nl: true, cls: '' });
+            segsToUnits([[CONT, '']]).forEach(function (u) { units.push(u); });
+            continue;
           }
           if (i < buf.length) {
             var w = charWidth(buf[i].codePointAt(0));
@@ -4522,17 +4529,34 @@
     }
 
     // ---- editing
+    var CONT = '>> ';                                              // PSReadLine 的續行提示
+    function nlAsSemi(chars) { return chars.indexOf('\n') < 0 ? chars : chars.map(function (c) { return c === '\n' ? ';' : c; }); }
+    // 輸入列寫進紀錄：多行時一行一列，第一行接在提示字元後面，後面幾行前面是「>> 」
+    function commitInput(chars, tail) {
+      var hl = highlight(nlAsSemi(chars)), segs = [[promptStr(), '']];
+      chars.forEach(function (c, i) {
+        if (c === '\n') { commitLine(segs); segs = [[CONT, '']]; return; }
+        var l = segs[segs.length - 1]; if (l[1] === hl[i]) l[0] += c; else segs.push([c, hl[i]]);
+      });
+      if (tail) segs.push([tail, '']);
+      commitLine(segs);
+    }
     function setBuf(text) {
-      buf = Array.from(String(text).replace(/[\r\n]+/g, ' '));
+      buf = Array.from(session.prompt ? String(text).replace(/[\r\n]+/g, ' ') : String(text).replace(/\r\n?/g, '\n'));
       cur = buf.length;
       renderLive();
     }
     function insertText(str) {
       if (busy || dead || waitingLib) return;
       var chars = [];
+      // 一次貼上好幾行：和真的 PowerShell（PSReadLine）一樣，整段先放進輸入列（後面幾行前面是「>> 」），
+      // 按 Enter 才依序執行；最後面多出來的換行不要。回答問題（session.prompt）時照舊把換行當空格
+      var keepNl = !session.prompt && /[\r\n]/.test(String(str));
+      if (keepNl) str = String(str).replace(/\r\n?/g, '\n').replace(/\n+$/, '');
       for (var ch of String(str)) {
         var cp = ch.codePointAt(0);
-        if (ch === '\n' || ch === '\r' || ch === '\t') chars.push(' ');
+        if (ch === '\n' && keepNl) chars.push('\n');
+        else if (ch === '\n' || ch === '\r' || ch === '\t') chars.push(' ');
         else if (cp < 0x20 || cp === 0x7f) continue;
         else chars.push(ch);
       }
@@ -4645,10 +4669,7 @@
     function submit() {
       if (busy || dead || waitingLib) return;
       var line = buf.join('');
-      var segs = [[promptStr(), '']];
-      var hl = highlight(buf);
-      buf.forEach(function (c, i) { var l = segs[segs.length - 1]; if (l[1] === hl[i]) l[0] += c; else segs.push([c, hl[i]]); });
-      commitLine(segs);
+      commitInput(buf);
       buf = []; cur = 0; comp = ''; histPos = -1; stash = null; tabState = null;
       if (line.trim() !== '' && session.pending === null && !session.prompt) {
         var hs = termState.history, at = hs.indexOf(line);
@@ -4675,7 +4696,7 @@
         handleResult(LAB.shell.cancel(session));
         return;
       }
-      commitLine([[promptStr() + buf.join('') + '^C', '']]);
+      commitInput(buf, '^C');
       buf = []; cur = 0; comp = '';
       if (session.gen && session.prompt && session.prompt.kind === 'python') { commitLine([['KeyboardInterrupt', '']]); showPrompt(); return; }
       if (session.gen) { handleResult(LAB.shell.cancel(session)); return; }
@@ -4686,6 +4707,7 @@
     // ---- Tab: the first Tab fills the first match, further Tabs cycle (Shift+Tab goes back)
     function doTab(back) {
       if (!editable() || session.prompt) return;
+      if (buf.indexOf('\n') >= 0) return;                         // 貼上好幾行還沒執行：練習版先不補完
       var text = buf.join('');
       function apply() {
         var it = tabState.items[tabState.idx];
