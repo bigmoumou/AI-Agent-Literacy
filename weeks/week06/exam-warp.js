@@ -7,10 +7,11 @@
      答對：停格 70 ms → 往前猛衝；中間爆出兩圈薄荷綠的震波（第二圈晚一點跟上），火花往外噴，一聲清亮的「滋」。
      答錯：停格 90 ms → 光束倒退一下（被亂流往回扯），一圈紅色的波紋從畫面邊緣往中間收，邊緣紅光一閃，
        一道閃電，低沉的劈啪；問答窗本身左右晃一下（exam-quiz.js）。
-   最後一題答完、按「回到原本的時空」：再衝一次、整片亮白、淡出，露出穩定下來的遠端桌面。
+   最後一題答完、按「回到原本的時空」：隧道再衝一次、變成不透明（不再露出遠端桌面），小安在隧道裡說話；
+     exam.js 的 tunnelHome 叫 out()：整片亮白、隧道很快淡掉，露出概念圖的黑洞，直接回首頁（老師 2026-10-18）。
    聲音只用虛空（低鳴 drone）和閃電（劈啪 crackle、滋 zap），不用咻聲；低鳴、電流嘶嘶跟著強度變大。
    減少動態效果：不動，只換亮度，沒有閃電、沒有晃動。
-   ExamWarp.create({ sound }) → { start(), step(n, kind), stop() }
+   ExamWarp.create({ sound }) → { start(), step(n, kind), out(), stop() }
      kind："intro"（問答窗的開場）、"ask"（第 n 題出現）、"right"、"wrong"、"end"（回到原本的時空） */
 (function () {
   "use strict";
@@ -33,7 +34,8 @@
     let I = 0, target = 0, fade = 0, fadeTo = 0;       // I：強度；fade：整層的透明度
     let boost = 0, recoil = 0, freezeUntil = 0;           // 答對往前衝、答錯往後扯、停格到什麼時候
     let flash = 0, flashCol = "235,232,255", red = 0, bloom = 0;
-    let arriving = -1;                                     // 回到原本的時空：開始的時間（秒）
+    let arriving = -1;                                     // 衝出隧道（out）：開始的時間（秒）
+    let solid = false;                                     // 回到原本的時空之後：整層不透明（遠端桌面不再露出來）
     const rings = [], waves = [], sparks = [], bolts = [];
     let ringClock = 0, boltClock = 1.5;
 
@@ -100,16 +102,16 @@
       clock += dt;
       const t = clock, m = Math.min(W, H), cx = W / 2, cy = H / 2, F = m * 0.5, maxR = Math.hypot(W, H) * 0.55;
       I += (target - I) * (1 - Math.exp(-dt * 1.4));
-      fade += (fadeTo - fade) * (1 - Math.exp(-dt * (fadeTo > fade ? 1.1 : 2.2)));
+      fade += (fadeTo - fade) * (1 - Math.exp(-dt * (fadeTo > fade ? 1.1 : arriving >= 0 ? 7 : 2.2)));
       boost *= Math.exp(-dt * 2.6); recoil *= Math.exp(-dt * 3.2);
-      flash *= Math.exp(-dt * 5); red *= Math.exp(-dt * 3); bloom *= Math.exp(-dt * 1.6);
+      flash *= Math.exp(-dt * 5); red *= Math.exp(-dt * 3); bloom *= Math.exp(-dt * (arriving >= 0 ? 2.8 : 1.6));
       let aI = I;
-      // 回到原本的時空：衝一下（0–0.55 秒）→ 亮白 → 淡出
+      // 衝出隧道（out）：衝一下 → 0.12 秒時整片亮白、隧道很快淡掉，露出後面的概念圖（exam.js 的 tunnelHome）
       if (arriving >= 0) {
         const u = t - arriving;
-        aI = I + 0.3 * smooth(seg(u, 0, 0.55));
-        if (u > 0.55 && fadeTo > 0) { fadeTo = 0; bloom = 1; flash = 0.6; if (sound) { sound.zap(0.8, 0.32, 0, 0.8); sound.level("drone", 0, 1.2); sound.level("fizz", 0, 0.8); } }
-        if (u > 2.6 && fade < 0.01) { stop(); return; }
+        aI = I + 0.3 * smooth(seg(u, 0, 0.2));
+        if (u > 0.12 && fadeTo > 0) { fadeTo = 0; bloom = 1; flash = 0.6; if (sound) { sound.zap(0.8, 0.32, 0, 0.8); sound.level("drone", 0, 0.8); sound.level("fizz", 0, 0.6); } }
+        if (u > 1.4 && fade < 0.01 && bloom < 0.03) { stop(); return; }
       }
       const frozen = t < freezeUntil;
       // 速度（老師 2026-10-18：7–10 題太快會暈）：劇烈的感覺交給光束的數量、閃電、紅邊，往前的速度只加到原本的一半左右
@@ -121,9 +123,9 @@
       if (fade < 0.004 && bloom < 0.01) return;
       // 底：中間深紫、四周近黑（整層越來越不透明，遠端桌面慢慢看不見）
       const bg = g.createRadialGradient(cx, cy, 0, cx, cy, maxR);
-      bg.addColorStop(0, `rgba(${Math.round(26 + 30 * aI)},${Math.round(16 + 8 * aI)},${Math.round(62 + 30 * aI)},${0.9 * fade})`);
-      bg.addColorStop(0.55, `rgba(9,7,24,${0.93 * fade})`);
-      bg.addColorStop(1, `rgba(3,2,9,${0.96 * fade})`);
+      bg.addColorStop(0, `rgba(${Math.round(26 + 30 * aI)},${Math.round(16 + 8 * aI)},${Math.round(62 + 30 * aI)},${(solid ? 1 : 0.9) * fade})`);
+      bg.addColorStop(0.55, `rgba(9,7,24,${(solid ? 1 : 0.93) * fade})`);
+      bg.addColorStop(1, `rgba(3,2,9,${(solid ? 1 : 0.96) * fade})`);
       g.fillStyle = bg; g.fillRect(0, 0, W, H);
       g.globalCompositeOperation = "lighter";
 
@@ -239,7 +241,7 @@
 
     function start() {
       if (on) return;
-      on = true; arriving = -1; I = 0.05; target = 0.2; fade = 0; fadeTo = 1; clock = 0;
+      on = true; arriving = -1; solid = false; I = 0.05; target = 0.2; fade = 0; fadeTo = 1; clock = 0;
       document.body.classList.add("in-warp");
       cv.style.display = "block";
       size();
@@ -277,11 +279,18 @@
           setTimeout(levels, 450);
         }
       } else if (kind === "end") {
-        target = 1; arriving = clock; boost = 1; flash = 0.6; flashCol = "235,232,255";
-        if (sound) { sound.crackle(0.6, 0.4); sound.zap(0.7, 0.3, 0.2); setTimeout(() => { try { sound.suck(0.9); } catch (e) { /* 沒有就算了 */ } }, 380); }
-        if (reduce) { fadeTo = 0; setTimeout(stop, 600); }
+        // 回到原本的時空（老師 2026-10-18：不要再回到桌面）：問答窗收起來，隧道不淡掉、再衝一次，整層變成不透明（遠端桌面看不到），
+        // 小安在隧道裡說話；等 exam.js 叫 out() 才衝出隧道
+        target = 0.85; boost = 1; flash = 0.6; flashCol = "235,232,255"; solid = true;
+        if (sound) { sound.crackle(0.6, 0.4); sound.zap(0.7, 0.3, 0.2); }
       }
       still();
+    }
+    // 衝出隧道：亮白、很快淡掉（露出後面 exam.js 畫的概念圖）
+    function out() {
+      if (!on) return;
+      if (reduce) { stop(); return; }
+      arriving = clock; boost = 1;
     }
     function stop() {
       on = false;
@@ -293,7 +302,7 @@
       rings.length = waves.length = sparks.length = bolts.length = 0;
       if (sound && arriving < 0) { sound.level("drone", 0, 0.5); sound.level("fizz", 0, 0.5); }
     }
-    return { start, step, stop, el: cv, get active() { return on; } };
+    return { start, step, out, stop, el: cv, get active() { return on; } };
   }
   window.ExamWarp = { create };
 })();

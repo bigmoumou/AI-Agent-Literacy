@@ -393,7 +393,7 @@
       stab = 4; level = 4;
       DONE.goal = quiet ? GOAL_LEAVE : GOAL_AUTO;
       showHud(4);
-      if (!quiet) setTimeout(() => toast(DONE.final, "穩定"), reduce ? 600 : 1800);   // STABILIZED 還在的時候就說（說完就回到現實）
+      if (!quiet) setTimeout(() => toast(DONE.final, "穩定"), reduce ? 200 : 150);    // 在時空隧道裡就說（老師 2026-10-18），說完隧道直接接回首頁
     }
     // 重新整理後接著考：穩定度先回到已過的關數
     function resume(passedN) { stab = Math.max(0, Math.min(4, passedN)); }

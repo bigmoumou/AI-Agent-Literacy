@@ -466,6 +466,9 @@ body.is-exiting #remote { z-index: 3; }
   background: radial-gradient(ellipse at center, rgba(255, 255, 255, .96), rgba(214, 206, 255, .88));
 }
 body.is-exiting :is(#guide, #scar, #exam-vign, .warn, .warn-vig, #warp, .sound-btn) { opacity: 0 !important; transition: opacity .3s ease; pointer-events: none; }
+/* 通關、時空隧道直接接回首頁（exam.js 的 tunnelHome）：小安的通訊留著（蓋在隧道和概念圖上面），其他的收起來 */
+body.is-tunneling #guide { z-index: 9; }
+body.is-tunneling :is(#guide .g-hud, #scar, #exam-vign, .warn, .warn-vig, .sound-btn) { opacity: 0 !important; transition: opacity .3s ease; pointer-events: none; }
 /* 時空回歸的準星框（四個角跟著遠端桌面縮小、鎖定）和字幕（RETURNING TO REALITY → WELCOME BACK）；只用細線和字，不做發光卡片 */
 #exitHud { position: fixed; left: 0; top: 0; z-index: 5; pointer-events: none; opacity: 0; --c: 24px; }
 #exitHud i { position: absolute; width: var(--c); height: var(--c); border: 0 solid rgba(226, 220, 255, .95); }

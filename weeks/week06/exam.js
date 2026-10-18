@@ -651,6 +651,104 @@
     exitPrep = { xc, glow, g, dpr, sc, sg, hudEl, cap };
     return exitPrep;
   }
+  // 黑洞那裡的爆發（時空回歸時黑洞合上、衝出時空隧道時）：往外擴的震波（圈內的畫面被推開一點，像透鏡）、白光、往外噴的光點。
+  // a2：爆發後幾秒（負的是爆發前那一下變亮）
+  function burstMotes(motes, now) {
+    const m = Math.min(W, H), D = Math.hypot(W, H);
+    for (let j = 0; j < 150; j++) {
+      const cc = Math.random();
+      motes.push({ a: Math.random() * Math.PI * 2, r0: m * 0.02, v: D * (0.08 + Math.pow(Math.random(), 1.6) * 0.5), t0: now + Math.random() * 0.12, life: 0.7 + Math.random() * 0.8,
+        w: 0.8 + Math.random() * 1.8, c: cc < 0.6 ? "240,236,255" : cc < 0.88 ? "175,160,255" : "255,200,120" });
+    }
+  }
+  function drawBurst(P, hx, hy, a2, motes, now) {
+    const { g, xc, sc, sg } = P, k = P.dpr, m = Math.min(W, H), D = Math.hypot(W, H);
+    if (a2 > 0 && a2 < 0.8) {
+      const e = 1 - Math.pow(1 - Math.min(1, a2 / 0.75), 3), rr = m * 0.05 + D * 0.62 * e, wd = m * (0.05 + 0.05 * (1 - e));
+      sg.setTransform(1, 0, 0, 1, 0, 0); sg.drawImage(xc, 0, 0, sc.width, sc.height);
+      const z = 1 + 0.07 * (1 - e), HX = hx * k, HY = hy * k;
+      g.save(); g.setTransform(1, 0, 0, 1, 0, 0);
+      g.beginPath(); g.arc(HX, HY, (rr + wd) * k, 0, Math.PI * 2); g.arc(HX, HY, Math.max(1, rr - wd) * k, 0, Math.PI * 2, true); g.clip();
+      g.drawImage(sc, HX - HX * z, HY - HY * z, xc.width * z, xc.height * z);
+      g.fillStyle = `rgba(210,200,255,${0.1 * (1 - e)})`; g.fillRect(0, 0, xc.width, xc.height);
+      g.restore();
+    }
+    g.setTransform(k, 0, 0, k, 0, 0); g.globalCompositeOperation = "lighter";
+    if (a2 > -0.12 && a2 < 0.9) {
+      const fl = a2 < 0 ? 1 + a2 / 0.12 : Math.exp(-a2 / 0.22);
+      const fr2 = m * (0.06 + 0.4 * Math.max(0, Math.min(1, a2 / 0.3))), rg = g.createRadialGradient(hx, hy, 0, hx, hy, fr2);
+      rg.addColorStop(0, `rgba(255,255,255,${0.95 * fl})`); rg.addColorStop(0.4, `rgba(200,185,255,${0.5 * fl})`); rg.addColorStop(1, "rgba(120,90,255,0)");
+      g.fillStyle = rg; g.fillRect(hx - fr2, hy - fr2, fr2 * 2, fr2 * 2);
+      if (a2 > 0) {
+        const e = 1 - Math.pow(1 - Math.min(1, a2 / 0.75), 3), rr = m * 0.05 + D * 0.62 * e;
+        g.strokeStyle = `rgba(230,222,255,${0.75 * (1 - e)})`; g.lineWidth = 2.5 * (1 - e) + 0.5;
+        g.beginPath(); g.ellipse(hx, hy, rr, rr, 0, 0, Math.PI * 2); g.stroke();
+        g.strokeStyle = `rgba(160,140,255,${0.2 * (1 - e)})`; g.lineWidth = 16 * (1 - e); g.stroke();
+      }
+    }
+    for (let j = motes.length - 1; j >= 0; j--) {
+      const q = motes[j], u = (now - q.t0) / q.life;
+      if (u >= 1) { motes.splice(j, 1); continue; }
+      if (u < 0) continue;
+      const e = 1 - Math.pow(1 - u, 2.6), r = q.r0 + q.v * e, tl = 6 + q.v * 0.12 * (1 - u);
+      const ca = Math.cos(q.a), sa = Math.sin(q.a), al = (1 - u) * (u < 0.08 ? u / 0.08 : 1);
+      g.strokeStyle = `rgba(${q.c},${al})`; g.lineWidth = q.w * (1 - 0.5 * u);
+      g.beginPath(); g.moveTo(hx + ca * (r - tl), hy + sa * (r - tl) * 0.9); g.lineTo(hx + ca * r, hy + sa * r * 0.9); g.stroke();
+    }
+    g.globalCompositeOperation = "source-over";
+  }
+  const goHome = () => {
+    try { sessionStorage.setItem("exam-return", String(Date.now())); } catch (e) { /* 存不了，首頁就照平常開場 */ }
+    window.location.href = "../../";
+  };
+  /* 通關：時空隧道直接接回首頁（老師 2026-10-18：不要再回到桌面，直接回到首頁；隧道裡小安就說話；快一點）。
+     問答窗收起來之後隧道繼續衝（整層不透明，遠端桌面不再露出來），小安說「回來了……謝謝你！下次見。」；
+     1.9 秒時隧道盡頭一片白光（warp.out），從概念圖裡那個黑洞衝出來：震波、光點往外噴、整道裂縫猛亮，
+     鏡頭從黑洞那一小塊往後拉到那張圖剛好鋪滿（約 1.1 秒），換頁，首頁接著往後拉回膠捲（home.js 的 examReturn）。
+     按「回到原本的時空」到首頁大約 3.5 秒。減少動態效果、或那張圖沒載到：小安說完就直接回首頁。 */
+  const TUN_OUT = 1.9, TUN_GO = 2.95, TUN_END = 3.15;
+  function tunnelHome(warp) {
+    if (exiting) return;
+    exiting = true;
+    const P = !reduce && art && warp ? prepExit() : null;
+    if (!P) { setTimeout(goHome, reduce ? 2600 : 1600); return; }
+    const { xc, g, dpr, cap } = P;
+    cap.querySelector(".t").textContent = "WELCOME BACK"; cap.classList.add("is-back");
+    frame.style.visibility = "hidden"; frame.style.pointerEvents = "none";   // 遠端桌面不再出現
+    xc.style.visibility = "";
+    body.classList.add("is-tunneling");
+    const motes = [], t0 = performance.now() / 1000;
+    let burst = false, gone = false, lastCrk = 0;
+    const loop = () => {
+      const now = performance.now() / 1000, T = now - t0;
+      if (T < TUN_OUT - 0.15) { requestAnimationFrame(loop); return; }   // 被隧道整個蓋著的時候不用畫（省下來給隧道和小安）
+      // 鏡頭：衝出來之前停在黑洞附近那一小塊（4 倍，被隧道蓋著）；衝出來之後往後拉到 1（最後慢一點但不停，首頁接著拉）
+      const p = seg(T, TUN_OUT, TUN_END), zoom = Math.exp(Math.log(4) * (1 - p * (1.45 - 0.45 * p)));
+      const c = cover(zoom), hx = c.x + HOLE[0] * c.s, hy = c.y + HOLE[1] * c.s, k = dpr;
+      g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = "source-over";
+      g.fillStyle = "#04030a"; g.fillRect(0, 0, xc.width, xc.height);
+      g.setTransform(k * c.s, 0, 0, k * c.s, k * c.x, k * c.y);
+      const fired = art.step(now, { energy: 1.5 - 0.5 * seg(T, TUN_OUT, TUN_END), auto: false });
+      art.paint(g);
+      drawBurst(P, hx, hy, T - TUN_OUT, motes, now);
+      cap.style.opacity = String(seg(T, TUN_OUT + 0.1, TUN_OUT + 0.3) * (1 - seg(T, TUN_GO - 0.25, TUN_GO - 0.05)));
+      if (!burst && T >= TUN_OUT) {
+        burst = true;
+        warp.out();
+        art.surge(now + 0.02);
+        burstMotes(motes, now);
+        if (sound) { sound.slam(0.6); sound.zap(0.8, 0.32, 0.03); }
+      }
+      if (sound && burst) {
+        sound.level("fizz", 0.03 + 0.1 * art.activity(), 0.06);
+        if (T - lastCrk > 0.12 && T < TUN_OUT + 0.6) { lastCrk = T; sound.crackle(0.3 * (1 - seg(T, TUN_OUT, TUN_OUT + 0.6)), 0.08, 0, 1.3); }
+        if (fired) sound.zap(0.5, 0.25);
+      }
+      if (!gone && T >= TUN_GO) { gone = true; goHome(); }
+      requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+  }
   function exitHome(fallback) {
     if (exiting) return;
     if (reduce || !art) { fallback(); return; }
@@ -721,52 +819,13 @@
         });
       }
       g.globalCompositeOperation = "source-over";
-      // 黑洞合上：往外擴的震波（圈內的畫面被推開一點，像透鏡）、白光、往外噴的光點
-      const a2 = T - EXIT_SEAL;
-      if (a2 > 0 && a2 < 0.8) {
-        const e = 1 - Math.pow(1 - Math.min(1, a2 / 0.75), 3), rr = m * 0.05 + D * 0.62 * e, wd = m * (0.05 + 0.05 * (1 - e));
-        sg.setTransform(1, 0, 0, 1, 0, 0); sg.drawImage(xc, 0, 0, sc.width, sc.height);
-        const z = 1 + 0.07 * (1 - e), HX = hx * k, HY = hy * k;
-        g.save(); g.setTransform(1, 0, 0, 1, 0, 0);
-        g.beginPath(); g.arc(HX, HY, (rr + wd) * k, 0, Math.PI * 2); g.arc(HX, HY, Math.max(1, rr - wd) * k, 0, Math.PI * 2, true); g.clip();
-        g.drawImage(sc, HX - HX * z, HY - HY * z, xc.width * z, xc.height * z);
-        g.fillStyle = `rgba(210,200,255,${0.1 * (1 - e)})`; g.fillRect(0, 0, xc.width, xc.height);
-        g.restore();
-      }
-      g.setTransform(k, 0, 0, k, 0, 0); g.globalCompositeOperation = "lighter";
-      if (a2 > -0.12 && a2 < 0.9) {
-        const fl = a2 < 0 ? 1 + a2 / 0.12 : Math.exp(-a2 / 0.22);
-        const fr2 = m * (0.06 + 0.4 * Math.max(0, Math.min(1, a2 / 0.3))), rg = g.createRadialGradient(hx, hy, 0, hx, hy, fr2);
-        rg.addColorStop(0, `rgba(255,255,255,${0.95 * fl})`); rg.addColorStop(0.4, `rgba(200,185,255,${0.5 * fl})`); rg.addColorStop(1, "rgba(120,90,255,0)");
-        g.fillStyle = rg; g.fillRect(hx - fr2, hy - fr2, fr2 * 2, fr2 * 2);
-        if (a2 > 0) {
-          const e = 1 - Math.pow(1 - Math.min(1, a2 / 0.75), 3), rr = m * 0.05 + D * 0.62 * e;
-          g.strokeStyle = `rgba(230,222,255,${0.75 * (1 - e)})`; g.lineWidth = 2.5 * (1 - e) + 0.5;
-          g.beginPath(); g.ellipse(hx, hy, rr, rr, 0, 0, Math.PI * 2); g.stroke();
-          g.strokeStyle = `rgba(160,140,255,${0.2 * (1 - e)})`; g.lineWidth = 16 * (1 - e); g.stroke();
-        }
-      }
-      if (sealed) {
-        for (let j = motes.length - 1; j >= 0; j--) {
-          const q = motes[j], u = (now - q.t0) / q.life;
-          if (u >= 1) { motes.splice(j, 1); continue; }
-          if (u < 0) continue;
-          const e = 1 - Math.pow(1 - u, 2.6), r = q.r0 + q.v * e, tl = 6 + q.v * 0.12 * (1 - u);
-          const ca = Math.cos(q.a), sa = Math.sin(q.a), al = (1 - u) * (u < 0.08 ? u / 0.08 : 1);
-          g.strokeStyle = `rgba(${q.c},${al})`; g.lineWidth = q.w * (1 - 0.5 * u);
-          g.beginPath(); g.moveTo(hx + ca * (r - tl), hy + sa * (r - tl) * 0.9); g.lineTo(hx + ca * r, hy + sa * r * 0.9); g.stroke();
-        }
-      }
-      g.globalCompositeOperation = "source-over";
+      // 黑洞合上：往外擴的震波、白光、往外噴的光點（drawBurst）
+      drawBurst(exitPrep, hx, hy, T - EXIT_SEAL, motes, now);
       if (!sucked && T >= 0.32) { sucked = true; if (sound) { try { sound.suck(0.75); } catch (e) { /* 沒有就算了 */ } } }   // 被拉進黑洞：整片聲音往低處塌
       if (!sealed && T >= EXIT_SEAL) {
         sealed = true;
         art.surge(now + 0.02);
-        for (let j = 0; j < 150; j++) {
-          const cc = Math.random();
-          motes.push({ a: Math.random() * Math.PI * 2, r0: m * 0.02, v: D * (0.08 + Math.pow(Math.random(), 1.6) * 0.5), t0: now + Math.random() * 0.12, life: 0.7 + Math.random() * 0.8,
-            w: 0.8 + Math.random() * 1.8, c: cc < 0.6 ? "240,236,255" : cc < 0.88 ? "175,160,255" : "255,200,120" });
-        }
+        burstMotes(motes, now);
         if (sound) { sound.slam(0.75); sound.zap(0.8, 0.32, 0.02); sound.level("drone", 0, 0.35); }
       }
       if (sound) {
@@ -798,16 +857,25 @@
         frame, os: chosen,
         hooks: {
           onStart: (n) => { if (guide) guide.resume(n); },
-          onBrief: (i, resumed) => { if (i === 3 && warp) setTimeout(() => warp.start(), 500); return guide ? guide.brief(i, resumed) : null; },
+          onBrief: (i, resumed) => {
+            if (i === 3 && warp) {
+              setTimeout(() => warp.start(), 500);
+              setTimeout(() => (window.requestIdleCallback ? requestIdleCallback(() => prepExit(), { timeout: 3000 }) : prepExit()), 2500);   // 衝出隧道時要畫的概念圖，先準備好
+            }
+            return guide ? guide.brief(i, resumed) : null;
+          },
           onQuiz: (n, kind) => { if (warp) warp.step(n, kind); if (kind === "ask" && guide) guide.quizLine(n); },
           onPass: (i) => { if (guide) guide.passed(i); },
           onEvent: (kind, i) => { if (guide) guide.event(kind, i); },
           onStage: setStage,
           onUnstable: () => { unstable(); if (guide) guide.event("unstable"); },
           onDone: (resumed) => {
-            unlock(resumed); if (guide) guide.finish(resumed);
-            // 通關：STABILIZED、小安道謝之後自動回到現實（老師 2026-10-18：不要停在桌面）；這段時間內按「從第 1 關重來」就不走
-            if (!resumed) setTimeout(() => { if (escaped && !exiting) exitHome(() => { window.location.href = "../../"; }); }, reduce ? 3000 : 7200);
+            if (resumed) { unlock(true); if (guide) guide.finish(true); return; }   // 重新整理才進來（已經過完）：等學生按「中斷連線」
+            // 通關（老師 2026-10-18：不要再回到桌面，直接回首頁；隧道裡小安就說話；快一點）：不播 STABILIZED，三聲清亮的音，
+            // 小安在隧道裡道謝，隧道直接接回首頁（tunnelHome）
+            unlock(true); chime();
+            if (guide) guide.finish(false);
+            tunnelHome(warp);
           },
           onRestart: () => { rewind(); if (warp) warp.stop(); if (guide) guide.restart(); },
           // 問答：答錯低低的拒絕音；答對的聲音交給時空轉移（沒有時空轉移才用一小聲電弧）
