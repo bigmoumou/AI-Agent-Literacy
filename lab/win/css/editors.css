@@ -285,3 +285,40 @@
   .cd-row.is-new { animation: none; }
 }
 html[data-perf="low"] .te-ql { box-shadow: 0 4px 12px rgba(0, 0, 0, .3); }
+
+/* Code › 開啟資料夾 (teacher 2026-10-18): the Windows 11 folder picker over the window — title, back / up and the path, 桌面 下載 文件 an on the
+   left, the folders on the right, 資料夾： + 選擇資料夾 / 取消 */
+.lab-sheet.cd-op { width: 640px; padding: 0; border-radius: 8px; font: 13px var(--win-font); color: #1a1a1a; }
+.cd-op-title { display: flex; align-items: center; justify-content: space-between; height: 34px; padding: 0 4px 0 14px; font-size: 12px; background: #f3f3f3; }
+.cd-op-x { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 30px; border: 0; border-radius: 4px; background: transparent; color: #1a1a1a; cursor: default; }
+.cd-op-x:hover { background: #c42b1c; color: #fff; }
+.cd-op-bar { display: flex; align-items: center; gap: 4px; height: 40px; padding: 0 10px; background: #f9f9f9; border-bottom: 1px solid #e5e5e5; }
+.cd-op-nav { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 28px; padding: 0; border: 0; border-radius: 4px; background: transparent; color: #1a1a1a; cursor: default; }
+.cd-op-nav:hover:not(:disabled) { background: rgba(0, 0, 0, .06); }
+.cd-op-nav:disabled { opacity: .35; }
+.cd-op-where { display: flex; align-items: center; flex: 1; min-width: 0; height: 28px; margin-left: 6px; padding: 0 6px; border: 1px solid #e0e0e0; border-radius: 4px; background: #fff; overflow: hidden; }
+.cd-op-crumb { flex: none; height: 22px; padding: 0 6px; border: 0; border-radius: 3px; background: transparent; color: #1a1a1a; font: 12px var(--win-font); cursor: default; }
+.cd-op-crumb:hover { background: rgba(0, 0, 0, .06); }
+.cd-op-sep { display: inline-flex; color: #8a8a8a; }
+.cd-op-body { display: flex; height: 260px; background: #fff; }
+.cd-op-side { flex: none; width: 150px; padding: 6px 4px; overflow: auto; border-right: 1px solid #ececec; }
+.cd-op-sideitem { display: flex; align-items: center; gap: 8px; width: 100%; height: 30px; padding: 0 10px; border: 0; border-radius: 4px; background: transparent;
+  color: #1a1a1a; font: 13px var(--win-font); text-align: left; cursor: default; }
+.cd-op-sideitem:hover { background: rgba(0, 0, 0, .05); }
+.cd-op-sideitem.is-on { background: #e5f1fb; }
+.cd-op-main { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.cd-op-head { display: flex; height: 28px; align-items: center; padding: 0 12px; border-bottom: 1px solid #f0f0f0; color: #5f5f5f; font-size: 12px; }
+.cd-op-head span:first-child { flex: 1; }
+.cd-op-head span:last-child, .cd-op-kind { width: 110px; flex: none; }
+.cd-op-list { flex: 1; padding: 2px 4px; overflow: auto; }
+.cd-op-row { display: flex; align-items: center; gap: 8px; height: 28px; padding: 0 8px; border: 1px solid transparent; border-radius: 4px; cursor: default; }
+.cd-op-row:hover { background: #f5f9fd; }
+.cd-op-row.is-sel { background: #cce8ff; border-color: #99d1ff; }
+.cd-op-ico { display: inline-flex; }
+.cd-op-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cd-op-kind { color: #5f5f5f; font-size: 12px; }
+.cd-op-empty { padding: 24px; text-align: center; color: #5f5f5f; }
+.cd-op-foot { display: flex; align-items: center; gap: 8px; padding: 14px 16px; background: #f3f3f3; border-top: 1px solid #e5e5e5; }
+.cd-op-name-l { flex: none; color: #1a1a1a; }
+.cd-op-name-in { flex: 1; min-width: 0; height: 30px; padding: 0 8px; border: 1px solid #e0e0e0; border-bottom-color: #868686; border-radius: 4px; background: #fbfbfb; color: #1a1a1a; font: 13px var(--win-font); }
+.cd-op-foot .lab-sheet-btn { min-width: 96px; }

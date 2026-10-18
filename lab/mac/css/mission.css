@@ -261,7 +261,19 @@ body.lab-card-dragging, body.lab-card-dragging * { cursor: grabbing !important; 
 .lab-hinttext + .lab-linkbtn { margin-top: 6px; font-size: 13px; }
 .lab-nudge { margin: 8px 0 0; color: var(--lab-ink-2); font-size: 12.5px; line-height: 1.55; }
 .lab-copyline { display: inline; }
-.lab-copy { font-size: 12px; margin-left: 2px; }
+/* teacher 2026-10-18: the sentence to copy reads as something to take, not as part of the explanation — an amber marker under it and darker
+   amber ink; its 「複製」 is bold amber with a copy glyph (green once copied). No box, no glow: a highlighter stroke, like on paper */
+.lab-copy { display: inline-flex; align-items: center; gap: 3px; margin-left: 3px; font-size: 12.5px; font-weight: 600; color: var(--lab-accent);
+  text-decoration-color: rgba(107, 63, 0, .45); white-space: nowrap; vertical-align: baseline; }
+.lab-copy:hover { color: #4a2b00; text-decoration-color: var(--lab-accent); }
+.lab-copy.is-done { color: #1f6b38; text-decoration-color: rgba(31, 107, 56, .4); }
+.lab-copy-g { display: inline-flex; transform: translateY(1px); }
+.lab-copy.is-done .lab-copy-g { opacity: .55; }
+.lab-copyline .lab-mono.lab-copytext {
+  color: #4a2b00; font-weight: 500; border-radius: 2px; padding: 0 .3em;
+  background: linear-gradient(transparent 8%, rgba(245, 176, 66, .34) 8%, rgba(245, 176, 66, .34) 94%, transparent 94%);
+  -webkit-box-decoration-break: clone; box-decoration-break: clone;
+}
 .lab-step .lab-mono, .lab-intro .lab-mono, .lab-hinttext .lab-mono, .lab-answertext .lab-mono, .lab-mapline .lab-mono {
   font-family: var(--lab-font-mono); font-size: .9em; background: rgba(0, 0, 0, .06); padding: 0 .3em; border-radius: 4px;
 }

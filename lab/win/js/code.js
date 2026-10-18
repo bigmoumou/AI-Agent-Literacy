@@ -11,7 +11,6 @@
   var TRASH = HOME + '/.Trash';
   var APP_TITLE = 'Visual Studio Code';
   var BINARY_MSG = 'The file is not displayed in the text editor because it is either binary or uses an unsupported text encoding.';
-  var OPEN_FOLDER_TOAST = '請把資料夾拖進這個視窗，或在檔案總管對資料夾按右鍵 › 開啟檔案 › Visual Studio Code';
   var COMPACT_W = 900;           // below this window width the menu row folds into one 「≡」 button (the real one does the same)
 
   function toWin(p) {
@@ -511,7 +510,7 @@
         treeEl.textContent = '';
         rowRecs.forEach(function (r) { r.dispose(); });
         rowRecs.clear();
-        var btn = h('button', { type: 'button', class: 'cd-openfolder', dataset: { lab: 'cd-open-folder' }, on: { click: function () { toast(OPEN_FOLDER_TOAST); } } }, 'Open Folder');
+        var btn = h('button', { type: 'button', class: 'cd-openfolder', dataset: { lab: 'cd-open-folder' }, on: { click: function () { openPanel(ctl); } } }, 'Open Folder');
         treeScroll.appendChild(h('div', { class: 'cd-nofolder' }, h('p', null, 'You have not yet opened a folder.'), btn));
         return;
       }
@@ -864,7 +863,7 @@
           off('新增視窗', 'Ctrl+Shift+N'),
           { separator: true },
           off('開啟檔案…', 'Ctrl+O'),
-          { label: '開啟資料夾…', shortcut: 'Ctrl+K Ctrl+O', action: function () { toast(OPEN_FOLDER_TOAST); } },
+          { label: '開啟資料夾…', shortcut: 'Ctrl+K Ctrl+O', action: function () { openPanel(c); } },
           { separator: true },
           { label: '儲存', shortcut: 'Ctrl+S', enabled: c.hasActive(), action: function () { c.saveActive(); } },
           off('另存新檔…', 'Ctrl+Shift+S'),
@@ -975,6 +974,103 @@
     return out;
   }
 
+  /* ---- Open Folder (teacher 2026-10-18: it works too, besides `code .` and a drag): the Windows 11 folder picker over the window, folders only.
+     A click selects a folder (its name goes into 資料夾), a double click goes into it, 選擇資料夾 opens the selected folder (or the one shown when
+     nothing is selected) in this window. Hooks: cd-op-panel / -side (data-path) / -item (data-path, data-type) / -back / -up / -where / -open /
+     -cancel */
+  var OP_SIDE = [[HOME + '/Desktop', '桌面', 'desktop'], [HOME + '/Downloads', '下載', 'download'], [HOME + '/Documents', '文件', 'doc'], [HOME, 'an', 'home']];
+  function openPanel(c) {
+    if (!c || !c.win || !c.win.el || !c.win.el.parentNode || c.win.el.querySelector('.cd-op')) return false;
+    var win = c.win, prev = document.activeElement, done = false, back = [], sel = null;
+    var cur = vfs.isDir(HOME + '/Desktop') ? HOME + '/Desktop' : HOME;
+    function nav(lab, label, icon, fn) {
+      return h('button', { type: 'button', class: 'cd-op-nav', 'aria-label': label, title: label, dataset: { lab: lab }, on: { click: fn } }, LAB.icons.el(icon, { size: 15 }));
+    }
+    var backBtn = nav('cd-op-back', '上一頁', 'back-arrow', function () { if (back.length) go(back.pop(), true); });
+    var upBtn = nav('cd-op-up', '上移一層', 'fl-up', function () { var p = vfs.dirname(cur); if (p && p !== cur && vfs.isUnder(p, HOME)) go(p); else if (!vfs.same(cur, HOME)) go(HOME); });
+    var where = h('div', { class: 'cd-op-where', dataset: { lab: 'cd-op-where' } });
+    var side = h('div', { class: 'cd-op-side' });
+    OP_SIDE.forEach(function (d) {
+      if (!vfs.isDir(d[0])) return;
+      side.appendChild(h('button', { type: 'button', class: 'cd-op-sideitem', dataset: { lab: 'cd-op-side', path: d[0] }, on: { click: function () { go(d[0]); } } },
+        LAB.icons.el(d[2], { size: 16 }), h('span', null, d[1])));
+    });
+    var list = h('div', { class: 'cd-op-list', role: 'listbox', 'aria-label': '資料夾', dataset: { lab: 'cd-op-list' } });
+    var nameBox = h('input', { type: 'text', class: 'cd-op-name-in', readonly: 'readonly', 'aria-label': '資料夾', dataset: { lab: 'cd-op-name' } });
+    var openBtn = h('button', { type: 'button', class: 'lab-sheet-btn is-default', dataset: { lab: 'cd-op-open' }, on: { click: function () { finish(sel || cur); } } }, '選擇資料夾');
+    var cancelBtn = h('button', { type: 'button', class: 'lab-sheet-btn', dataset: { lab: 'cd-op-cancel' }, on: { click: function () { finish(null); } } }, '取消');
+    var closeX = h('button', { type: 'button', class: 'cd-op-x', 'aria-label': '關閉', dataset: { lab: 'cd-op-close' }, on: { click: function () { finish(null); } } }, LAB.icons.el('x', { size: 14 }));
+    var panel = h('div', { class: 'lab-sheet is-attached cd-op', role: 'dialog', 'aria-modal': 'true', 'aria-label': '開啟資料夾', dataset: { lab: 'cd-op-panel' } },
+      h('div', { class: 'cd-op-title' }, h('span', null, '開啟資料夾'), closeX),
+      h('div', { class: 'cd-op-bar' }, backBtn, upBtn, where),
+      h('div', { class: 'cd-op-body' }, side, h('div', { class: 'cd-op-main' }, h('div', { class: 'cd-op-head' }, h('span', null, '名稱'), h('span', null, '類型')), list)),
+      h('div', { class: 'cd-op-foot' }, h('label', { class: 'cd-op-name-l' }, '資料夾：'), nameBox, openBtn, cancelBtn));
+    var scrim = h('div', { class: 'lab-sheet-scrim is-window' }, panel);
+    win.el.appendChild(scrim);
+    requestAnimationFrame(function () { scrim.classList.add('is-in'); });
+
+    function crumbs(p) {
+      var out = [], q = vfs.canon(p);
+      while (q && vfs.isUnder(q, HOME)) { out.unshift(q); if (vfs.same(q, HOME)) break; q = vfs.dirname(q); }
+      return out;
+    }
+    function render() {
+      panel.setAttribute('data-path', cur);
+      where.textContent = '';
+      crumbs(cur).forEach(function (q, i) {
+        if (i) where.appendChild(h('span', { class: 'cd-op-sep' }, LAB.icons.el('chev-right', { size: 10 })));
+        where.appendChild(h('button', { type: 'button', class: 'cd-op-crumb', dataset: { lab: 'cd-op-crumb', path: q }, on: { click: function () { go(q); } } }, vfs.same(q, HOME) ? 'an' : vfs.displayName(q)));
+      });
+      backBtn.disabled = !back.length;
+      upBtn.disabled = vfs.same(cur, HOME);
+      [].forEach.call(side.querySelectorAll('[data-lab=cd-op-side]'), function (b) { b.classList.toggle('is-on', vfs.same(b.dataset.path, cur)); });
+      nameBox.value = vfs.displayName(sel || cur);
+      list.textContent = '';
+      var items = [];
+      try { items = vfs.list(cur).filter(function (s) { return s.type === 'dir' && !s.hidden && !s.attrHidden && s.name.charAt(0) !== '.'; }); } catch (e) { items = []; }
+      if (!items.length) list.appendChild(h('div', { class: 'cd-op-empty' }, '沒有符合搜尋條件的項目。'));
+      items.forEach(function (st) {
+        var row = h('div', { class: 'cd-op-row' + (sel && vfs.same(sel, st.path) ? ' is-sel' : ''), role: 'option', dataset: { lab: 'cd-op-item', path: st.path, type: st.type } },
+          h('span', { class: 'cd-op-ico' }, LAB.icons.el('folder', { size: 16 })), h('span', { class: 'cd-op-name' }, st.name), h('span', { class: 'cd-op-kind' }, '檔案資料夾'));
+        row.addEventListener('click', function () { sel = st.path; mark(); });
+        row.addEventListener('dblclick', function () { go(st.path); });
+        list.appendChild(row);
+      });
+    }
+    function mark() {
+      [].forEach.call(list.querySelectorAll('[data-lab=cd-op-item]'), function (r) { r.classList.toggle('is-sel', !!sel && vfs.same(r.dataset.path, sel)); });
+      nameBox.value = vfs.displayName(sel || cur);
+    }
+    function go(p, fromBack) {
+      if (!vfs.isDir(p)) return;
+      if (!fromBack && !vfs.same(p, cur)) back.push(cur);
+      cur = vfs.canon(p);
+      sel = null;
+      render();
+    }
+    var offFs = LAB.bus.on('fs:change', function () { if (!done) { if (!vfs.isDir(cur)) cur = HOME; if (sel && !vfs.isDir(sel)) sel = null; render(); } });
+    var offModal = LAB.keys.modal(function (e) {
+      if (LAB.ui.isImeEnter(e)) return false;
+      if (e.key === 'Escape') { finish(null); return true; }
+      if (e.key === 'Enter') { finish(sel || cur); return true; }
+      return false;
+    });
+    var offClose = win.on ? win.on('close', function () { finish(null); }) : null;
+    function finish(p) {
+      if (done) return;
+      done = true;
+      offFs(); offModal(); if (offClose) offClose();
+      scrim.classList.remove('is-in');
+      setTimeout(function () { if (scrim.parentNode) scrim.parentNode.removeChild(scrim); }, 160);
+      if (p && vfs.isDir(p)) { win.focus(); c.openFolder(p, 'open-folder'); }
+      else { try { if (prev && prev.focus && document.contains(prev)) prev.focus(); } catch (e) { /* ignore */ } }
+    }
+    render();
+    setTimeout(function () { try { openBtn.focus({ preventScroll: true }); } catch (e) { /* ignore */ } }, 0);
+    LAB.bus.emit('code:openpanel', { winId: win.id });
+    return true;
+  }
+
   function openFolder(path, via) {
     var p = vfs.canon(path);
     if (!vfs.isDir(p)) { toast('找不到這個資料夾'); return null; }
@@ -1014,6 +1110,7 @@
   LAB.code = {
     openFolder: openFolder,
     openFile: openFile,
+    openPanel: function () { var c = activeCtl() || allCtls()[0] || createWindow(null); return openPanel(c); },
     windows: function () { return allCtls().map(function (c) { return { winId: c.win.id, folder: c.root() || '', path: c.win.state.path || '' }; }); }
   };
 

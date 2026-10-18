@@ -324,8 +324,8 @@
       {
         id: 's3',
         text: '它記錯了：前面說好距離用公尺、從銀杏坂公園出發。在 VS Code 打開 `AGENTS.md`，把三個決定寫進去，存檔：[[- 距離一律用公尺。照片檔名一律小寫。路線從銀杏坂公園出發。]]',
-        hint: '檔案存在你的電腦上，壓縮只動對話、不動檔案；Codex 每次回答前都會讀專案裡的 AGENTS.md。決定很多的時候，也可以寫在 decisions.md，再在 AGENTS.md 加一句「每次開工前，先讀 decisions.md」。VS Code 還沒打開 ginkgo-walk 的話：在終端機打 `cd ~\\Desktop\\ginkgo-walk`，再打 `code .`。',
-        answer: 'VS Code 左邊點 `AGENTS.md`，在最後一行下面貼上這句，按 Ctrl+S。（VS Code 還沒打開這個資料夾：終端機 `cd ~\\Desktop\\ginkgo-walk`、`code .`。）',
+        hint: '檔案存在你的電腦上，壓縮只動對話、不動檔案；Codex 每次回答前都會讀專案裡的 AGENTS.md。決定很多的時候，也可以寫在 decisions.md，再在 AGENTS.md 加一句「每次開工前，先讀 decisions.md」。VS Code 還沒打開 ginkgo-walk 的話：點工作列上的 VS Code › Open Folder › 桌面的 ginkgo-walk › 選擇資料夾（或在終端機打 `cd ~\\Desktop\\ginkgo-walk`、`code .`）。',
+        answer: 'VS Code 左邊點 `AGENTS.md`，在最後一行下面貼上這句，按 Ctrl+S。（VS Code 還沒打開這個資料夾：Open Folder › 桌面 › ginkgo-walk › 選擇資料夾，或終端機 `cd ~\\Desktop\\ginkgo-walk`、`code .`。）',
         target: K.codeFlow(AGENTS),
         check: function (ev, api) {
           var a = api.read(AGENTS) || '';
