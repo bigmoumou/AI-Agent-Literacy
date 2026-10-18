@@ -83,6 +83,11 @@ body.in-remote .page { display: none; }
 .pick-os:hover .lap-lid, .pick-os:focus-visible .lap-lid { border-color: rgba(120, 185, 255, .7); }
 .pick-os:focus-visible { outline: none; }
 .pick-os:focus-visible .pick-name { text-decoration: underline; text-underline-offset: .3em; }
+.pick-prog { display: block; margin-top: .3rem; font-family: var(--font-mono); font-size: .78rem; letter-spacing: .1em; color: #f5b51d; }
+.pick-prog[hidden] { display: none; }
+.pick-again { margin: 0; padding: .2rem .4rem; border: 0; background: none; color: var(--txt-3); font: inherit; font-size: .8rem; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; pointer-events: auto; }
+.pick-again:hover, .pick-again:focus-visible { color: var(--txt); }
+.pick-again[hidden] { display: none; }
 .pick-status { margin: 0; min-height: 1.6em; font-family: var(--font-mono); font-size: .9rem; letter-spacing: .06em; color: #9fc8ff; }
 
 /* 兩台筆電從深空裡慢慢凝聚出來 */

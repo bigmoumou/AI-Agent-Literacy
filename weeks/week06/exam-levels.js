@@ -9,7 +9,10 @@
      規則有沒有寫到，用 exam-rules.js 判斷（不比對固定句子；測試在 製作/week06/design/levels/）。
    沒有提示：練習電腦的任務卡、提示、光圈、自動提醒都藏起來；帶路改由 exam-guide.js（小安的通訊、任務簡報、目標列）。
      過關與否只看練習電腦裡的狀態（檔案、內容、誰寫的）。
-   進度記在 sessionStorage：重新整理會從目前這一關繼續（練習電腦本身不存檔，每一關開始時自己把需要的檔案放好）。 */
+   進度記在這台瀏覽器（localStorage，Mac、Windows 分開記）：關掉、換分頁、改天再來都從上次那一關接著考
+     （老師 2026-10-18：每次都要回到第一關）；四關都過了，下次進來就從頭再玩一次。選電腦的畫面可以「從頭開始」。
+     sessionStorage 也寫一份同樣的（測試腳本用它直接從第 n 關開始；同一個分頁裡它優先）。
+     練習電腦本身不存檔，每一關開始時自己把需要的檔案放好。 */
 (function () {
   "use strict";
   const R = window.ExamRules;
@@ -70,8 +73,22 @@
 
   /* ---------- 小工具 ---------- */
   const csv = (head, rows) => head + "\n" + rows.map((r) => r.join(",")).join("\n") + "\n";
-  function loadProgress(os) { try { const p = JSON.parse(sessionStorage.getItem(KEY) || "{}"); return p.os === os ? Math.max(0, Math.min(LEVELS, p.passed | 0)) : 0; } catch (e) { return 0; } }
-  function saveProgress(os, n) { try { sessionStorage.setItem(KEY, JSON.stringify({ os, passed: n })); } catch (e) { /* 存不了就算了 */ } }
+  const LKEY = "exam-progress-v2";                                  // localStorage：{ mac: 0..4, win: 0..4 }
+  const clampN = (n) => Math.max(0, Math.min(LEVELS, n | 0));
+  function stored() { try { return JSON.parse(localStorage.getItem(LKEY) || "{}") || {}; } catch (e) { return {}; } }
+  function loadProgress(os) {
+    try { const p = JSON.parse(sessionStorage.getItem(KEY) || "{}"); if (p.os === os) return clampN(p.passed); } catch (e) { /* 讀不到就看 localStorage */ }
+    const n = clampN(stored()[os]);
+    return n >= LEVELS ? 0 : n;                                    // 四關都過了：下次從頭再玩一次
+  }
+  function saveProgress(os, n) {
+    try { sessionStorage.setItem(KEY, JSON.stringify({ os, passed: n })); } catch (e) { /* 存不了就算了 */ }
+    try { const m = stored(); m[os] = n; localStorage.setItem(LKEY, JSON.stringify(m)); } catch (e) { /* 存不了就算了 */ }
+  }
+  function resetProgress() {
+    try { sessionStorage.removeItem(KEY); sessionStorage.removeItem("exam-quiz-seed"); } catch (e) { /* 沒有就算了 */ }
+    try { localStorage.removeItem(LKEY); } catch (e) { /* 沒有就算了 */ }
+  }
   // 練習電腦裡的檔案：建資料夾、寫檔（都標成系統放的）
   function put(V, path, text) {
     const dir = path.slice(0, path.lastIndexOf("/"));
@@ -115,6 +132,7 @@
     const win = frame.contentWindow, doc = frame.contentDocument, L = win.LAB;
     api._L = L;
     let passed = loadProgress(os), cleanup = null, intents = [], firstBrief = passed > 0;
+    saveProgress(os, passed);
     api._H = H;
     api.reset = (i) => { try { L.missions.reset(IDS[i]); } catch (e) { /* 沒有就算了 */ } };
     if (H.onStart) H.onStart(passed);
@@ -460,6 +478,6 @@
     } catch (e) { /* 改不了就算了 */ }
   }
 
-  const api = { start, RIGHT, _L: null, _H: null, reset: () => {}, average, SCORES, OBS };
+  const api = { start, RIGHT, _L: null, _H: null, reset: () => {}, average, SCORES, OBS, progress: loadProgress, resetProgress, LEVELS };
   window.ExamLevels = api;
 })();

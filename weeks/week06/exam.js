@@ -336,7 +336,7 @@
     try { frame.focus(); } catch (e) { /* 不能聚焦也沒關係 */ }
     // 重新整理後接著考（已經過了幾關）：不再播一次 WARNING
     let resumed = false;
-    try { const p = JSON.parse(sessionStorage.getItem("exam-progress") || "{}"); resumed = EXAM_ON && p.os === chosen && p.passed > 0; } catch (e) { /* 讀不到就當第一次 */ }
+    try { resumed = EXAM_ON && !!window.ExamLevels && window.ExamLevels.progress(chosen) > 0; } catch (e) { /* 讀不到就當第一次 */ }
     if (!resumed) setTimeout(() => banner("warn"), 250);
     startScars();
     hookLab(0);
@@ -646,8 +646,37 @@
     if (document.hidden) { cancelAnimationFrame(raf); raf = 0; } else if (!reduce) run();
   });
 
+  /* 選電腦的畫面：這台瀏覽器之前考到哪一關（Mac、Windows 分開），有進度的話可以「從頭開始」 */
+  const PROG = {
+    "zh-Hant": ["接著第 ", " 關", "從頭開始"], "zh-Hans": ["接着第 ", " 关", "从头开始"],
+    en: ["Resume at level ", "", "Start over"], vi: ["Tiếp tục màn ", "", "Làm lại từ đầu"],
+  };
+  const prog = (i) => (PROG[LANG] || PROG["zh-Hant"])[i];
+  function paintProgress() {
+    const E = window.ExamLevels;
+    if (!EXAM_ON || !E || !E.progress) return;
+    let any = false;
+    pick.querySelectorAll(".pick-os").forEach((b) => {
+      const n = E.progress(b.dataset.os);
+      let tag = b.querySelector(".pick-prog");
+      if (!tag) { tag = document.createElement("span"); tag.className = "pick-prog"; b.append(tag); }
+      tag.textContent = n > 0 ? prog(0) + (n + 1) + prog(1) : "";
+      tag.hidden = !(n > 0);
+      if (n > 0) any = true;
+    });
+    let again = pick.querySelector(".pick-again");
+    if (!again) {
+      again = document.createElement("button");
+      again.type = "button"; again.className = "pick-again";
+      again.addEventListener("click", () => { if (chosen) return; E.resetProgress(); paintProgress(); });
+      pick.append(again);
+    }
+    again.textContent = prog(2);
+    again.hidden = !any;
+  }
   function showPick() {
     pickShown = true;
+    paintProgress();
     pick.hidden = false;
     requestAnimationFrame(() => pick.classList.add("is-in"));
     const first = pick.querySelector(".pick-os");
