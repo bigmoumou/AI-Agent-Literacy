@@ -384,16 +384,16 @@
       });
     });
   }
-  // 想逃卻被擋下（LOCKED，按「中斷連線」等）：WARNING 的警報只響一聲（老師 2026-10-18；第一聲在 0–1.0 秒，尾巴收掉）。
+  // 想逃卻被擋下（LOCKED，按「中斷連線」等）：WARNING 的警報響兩聲（老師 2026-10-18；一聲約 1 秒，取 0–2.0 秒，尾巴收掉）。
   // 警報還沒載好就用兩聲低低的拒絕音
-  function alarmOnce() {
+  function alarmTwice() {
     if (!audio) return;
     if (!warnBuf) { buzz(); return; }
-    if (sound && audio === sound.context()) sound.hold(1.5);
+    if (sound && audio === sound.context()) sound.hold(2.5);
     const src = audio.createBufferSource(), g = audio.createGain(), t = audio.currentTime + 0.02;
     src.buffer = warnBuf; src.connect(g); g.connect(dest());
-    g.gain.setValueAtTime(0.9, t); g.gain.setValueAtTime(0.9, t + 0.8); g.gain.linearRampToValueAtTime(0, t + 1.0);
-    src.start(t, 0, 1.02);
+    g.gain.setValueAtTime(0.9, t); g.gain.setValueAtTime(0.9, t + 1.82); g.gain.linearRampToValueAtTime(0, t + 2.0);
+    src.start(t, 0, 2.02);
   }
   function beep(at, dur, f, type, vol) {
     const o = audio.createOscillator(), g = audio.createGain();
@@ -432,7 +432,7 @@
     const word = kind === "lock" ? "LOCKED" : kind === "safe" ? "STABILIZED" : "WARNING";
     $("#warnWord").textContent = word; $("#warnWord").dataset.text = word;
     $("#warnSub").textContent = kind === "lock" ? "ESCAPE DENIED" : kind === "safe" ? "ESCAPE UNLOCKED" : "NO HINTS · ONLY MISSIONS";
-    $("#warnSub2").textContent = kind === "warn" ? "" : ban(kind === "lock" ? 1 : 2);   // WARNING 只有英文
+    $("#warnSub2").textContent = kind === "safe" ? ban(2) : "";   // WARNING、LOCKED 只有英文（老師 2026-10-18：LOCKED 拿掉中文那行）
     $("#warnSay").textContent = word + "：" + ban(kind === "lock" ? 1 : kind === "safe" ? 2 : 0);
     clearTimeout(bannerTimer);
     w.classList.remove("is-on", "is-short", "is-safe");
@@ -440,7 +440,7 @@
     void w.offsetWidth;                                  // 重新播一次動畫
     w.classList.add("is-on");
     body.classList.add("warn-on");
-    if (kind === "lock") { w.classList.add("is-short"); body.classList.add("warn-short"); alarmOnce(); }
+    if (kind === "lock") { w.classList.add("is-short"); body.classList.add("warn-short"); alarmTwice(); }
     else if (kind === "safe") { w.classList.add("is-safe"); body.classList.add("warn-safe"); chime(); }
     else alarm();
     bannerTimer = setTimeout(() => { w.classList.remove("is-on", "is-short", "is-safe"); body.classList.remove("warn-on", "warn-short", "warn-safe"); }, kind === "lock" ? 2000 : kind === "safe" ? 3000 : 4400);

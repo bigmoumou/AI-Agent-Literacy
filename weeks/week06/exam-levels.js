@@ -159,7 +159,7 @@
     });
     // Codex 寫出來的報告、摘要不對：空間還不穩定（裂縫閃一下、低低的嗡一聲；不說哪裡錯）
     L.bus.on("codex:reply", (d) => { if (d && d.exam && d.ok === false && H.onUnstable) H.onUnstable(); });
-    let nextT = setTimeout(next, passed ? 600 : 4600), fresh = new Set();   // 第一次進來先讓 WARNING 播完
+    let nextT = setTimeout(next, passed ? 600 : 4600), fresh = new Set(), active = -1;   // active：正在考的關（簡報播完、開始之後）   // 第一次進來先讓 WARNING 播完
 
     // 每一關開始前先播簡報、小安的通訊（重新整理接著考的第一關只有簡報）
     function brief(i) {
@@ -174,6 +174,7 @@
       else if (H.onDone) H.onDone(true);
     }
     function begin(i) {
+      active = i;
       intents.forEach((off) => off()); intents = [];
       if (i === 0) cleanup = lockTerminal(L, os, win, frame);
       if (i === 1) intents.push(L.codex.registerIntent(writeFileIntent(), { priority: 1001 }), L.codex.registerIntent(reportIntent(os), { priority: 1000 }));
@@ -198,11 +199,26 @@
       fresh = new Set([0, 1, 2]);
       if (wall) wall.set(0, true);
       if (H.onRestart) H.onRestart();
+      active = -1;
       firstBrief = "restart";
       nextT = setTimeout(next, 900);
       return true;
     };
+    /* 測試用（老師 2026-10-18）：在終端機打 skip，直接過目前這一關（第 1–3 關；第 4 關是問答窗，碰不到終端機）。
+       不寫在 help 裡。過場、過關動畫播放中打的不算（那時還沒開始下一關）。 */
+    const skip = (ctx) => {
+      const i = passed;
+      if (active !== i || i > 2) { ctx.out("skip: 現在沒有可以跳過的關卡\n"); return 1; }
+      ctx.out("（測試用）跳過第 " + (i + 1) + " 關\n");
+      setTimeout(() => { if (passed === i && active === i) pass(i); }, 0);
+      return 0;
+    };
+    try {
+      if (os === "win") L.shell.commands.skip = { id: "skip", canon: "skip", native: true, nopaths: true, name: "skip", run: skip };
+      else L.shell.commands.skip = (args, ctx) => skip(ctx);
+    } catch (e) { /* 沒有終端機就算了 */ }
     function pass(i) {
+      active = -1;
       if (cleanup) { cleanup(); cleanup = null; }
       intents.forEach((off) => off()); intents = [];
       passed = i + 1;
