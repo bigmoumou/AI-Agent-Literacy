@@ -394,8 +394,11 @@ body:not(.in-remote) #guide { display: none; }
 #guide .g-hud .g-hrow .g-amber { font-size: 13px; font-weight: 700; letter-spacing: .14em; }
 #guide.is-hud .g-hud { opacity: 1; transform: none; }
 .g-hrow { display: flex; justify-content: space-between; align-items: baseline; }
-.g-reset { pointer-events: auto; border: 0; padding: 0; background: none; cursor: pointer; }
-#guide.is-hud .g-reset:hover { color: var(--txt); text-decoration: underline; text-underline-offset: 4px; }
+/* 重來這一關：字小，所以點擊範圍往外多留一圈；按一下變成「再按一次確定重來」（紅字），4 秒內再按才重來 */
+.g-reset { pointer-events: auto; border: 0; margin: -8px -10px; padding: 8px 10px; background: none; cursor: pointer; text-decoration: underline; text-decoration-color: rgba(255, 255, 255, .22); text-underline-offset: 4px; }
+#guide.is-hud .g-reset:hover { color: var(--txt); text-decoration-color: currentColor; }
+#guide .g-reset.is-armed, #guide.is-hud .g-reset.is-armed:hover { color: #ff8f7e; letter-spacing: .12em; text-decoration-color: currentColor; }
+.g-reset:focus-visible { outline: 1px solid var(--g-amber); outline-offset: -2px; border-radius: 4px; }
 .g-reset[hidden] { display: none; }
 .g-htitle { margin-top: 12px; font-size: 18px; font-weight: 600; letter-spacing: .05em; }
 /* 第 1 關：目前僅能使用鍵盤打字（一亮一暗地閃，不是硬切的閃爍） */

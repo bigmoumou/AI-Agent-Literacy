@@ -233,7 +233,10 @@
     }
 
     /* ---------- 目標列 ---------- */
+    let armT = 0;
+    const disarm = () => { clearTimeout(armT); $("reset").classList.remove("is-armed"); $("reset").textContent = "重來這一關"; };
     function showHud(i) {
+      disarm();
       layout();
       const lv = LV[i];
       $("hk").textContent = i < 4 ? "任務 " + pad(i + 1) + " / 04" : "任務完成";
@@ -244,7 +247,21 @@
       $("reset").hidden = !(i === 1 || i === 2);
       root.classList.add("is-hud");
     }
-    $("reset").addEventListener("click", () => { if (o.onReset && level >= 0) o.onReset(level); });
+    /* 重來這一關：按一下先變成「再按一次確定重來」（會丟掉這一關做到一半的東西，不要誤按），4 秒內再按才重來；
+       重來之後小安說一聲，學生才知道真的重來了（老師 2026-10-18：原本按了畫面沒反應，像按不下去）。 */
+    $("reset").addEventListener("click", async () => {
+      if (!o.onReset || level < 0 || level > 3 || cut) return;
+      const b = $("reset");
+      if (!b.classList.contains("is-armed")) {
+        b.classList.add("is-armed"); b.textContent = "再按一次確定重來";
+        clearTimeout(armT); armT = setTimeout(disarm, 4000);
+        return;
+      }
+      disarm();
+      const i = level, ok = o.onReset(i) !== false;
+      await hush();
+      if (level === i && ok) toast(["determined", "收到。這一關的檔案已經放回一開始的樣子，Codex 那邊的對話也清掉了，重新來一次。"]);
+    });
 
     /* ---------- 每一關開始 ---------- */
     async function brief(i, resumed) {

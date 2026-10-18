@@ -134,7 +134,21 @@
     let passed = loadProgress(os), cleanup = null, intents = [], firstBrief = passed > 0;
     saveProgress(os, passed);
     api._H = H;
-    api.reset = (i) => { try { L.missions.reset(IDS[i]); } catch (e) { /* 沒有就算了 */ } };
+    /* 重來這一關（第 2、3 關）：只把檔案放回去，學生看到的畫面不會變（VS Code 還開著舊的內容、Codex 的對話也還在），
+       看起來像沒按到（老師 2026-10-18）。所以先關掉編輯的視窗（不存檔）、清掉這個專案在 Codex 裡的對話，再把檔案放回去。 */
+    api.reset = (i) => {
+      const dir = [null, L2DIR, L3DIR][i];
+      try { L.wm.all().forEach((w) => { if (w.appId !== "codex" && w.appId !== "terminal") try { w.close(true); } catch (e) { /* 關不掉就算了 */ } }); } catch (e) { /* 沒有就算了 */ }
+      if (dir) {
+        try {
+          const same = (p) => { try { return L.vfs.canon(p) === L.vfs.canon(dir); } catch (e) { return p === dir; } };
+          const had = L.codex.state().projects.some((p) => same(p.path));
+          L.codex.removeProject(dir);                            // 連同這個專案的對話（還在回覆的也停掉）
+          if (had) L.codex.addProject(dir, { select: false });
+        } catch (e) { /* 沒有 Codex 就算了 */ }
+      }
+      try { return L.missions.reset(IDS[i]) !== false; } catch (e) { return false; }
+    };
     if (H.onStart) H.onStart(passed);
 
     // 藏掉提示；任務卡整張看不見（還佔著位置：視窗照樣讓開那一欄，目標列放在那裡）
