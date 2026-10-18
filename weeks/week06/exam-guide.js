@@ -93,7 +93,7 @@
       '<div class="g-panel"><div class="g-face"><img alt="" data-g="face"></div><div class="g-body">' +
       '<div class="g-who"><span class="g-k g-amber">小安 ── 從裂縫的另一頭</span><span class="g-k" data-g="sig"></span></div>' +
       '<div class="g-lines" data-g="lines"></div><div class="g-foot"><span class="g-k" data-g="page"></span><span class="g-k g-keys">Enter 下一句　Esc 略過</span></div></div></div></div>' +
-      '<div class="g-hud" data-g="hud"><div class="g-hrow"><span class="g-k g-amber" data-g="hk"></span><button type="button" class="g-k g-reset" data-g="reset">重來這一關</button></div>' +
+      '<div class="g-hud" data-g="hud"><div class="g-hrow"><span class="g-k g-amber" data-g="hk"></span><button type="button" class="g-k g-reset" data-g="reset">從第 1 關重來</button></div>' +
       '<div class="g-htitle" data-g="ht"></div><div class="g-note" data-g="note" hidden></div><p class="g-hgoal"><span class="g-k">目標</span><span data-g="hg"></span></p>' +
       '<div class="g-stab"><span class="g-k">時空穩定度</span><span class="g-segs" data-g="hs"></span><span class="g-k g-pct" data-g="hp"></span></div></div>' +
       '<div class="g-stamp"><div class="g-k g-amber" data-g="sk"></div><div class="g-big">修復完成</div>' +
@@ -234,7 +234,7 @@
 
     /* ---------- 目標列 ---------- */
     let armT = 0;
-    const disarm = () => { clearTimeout(armT); $("reset").classList.remove("is-armed"); $("reset").textContent = "重來這一關"; };
+    const disarm = () => { clearTimeout(armT); $("reset").classList.remove("is-armed"); $("reset").textContent = "從第 1 關重來"; };
     function showHud(i) {
       disarm();
       layout();
@@ -244,13 +244,13 @@
       $("note").textContent = (lv && lv.note) || ""; $("note").hidden = !(lv && lv.note);
       $("hg").innerHTML = goalHTML(lv ? lv.goal : DONE.goal);
       setStab(stab, [["hs", "hp"]]);
-      $("reset").hidden = !(i === 1 || i === 2);
+      $("reset").hidden = !(i === 1 || i === 2 || i === 4);          // 第 1 關不給（滑鼠只能拖終端機、按中斷連線），問答時也不給
       root.classList.add("is-hud");
     }
-    /* 重來這一關：按一下先變成「再按一次確定重來」（會丟掉這一關做到一半的東西，不要誤按），4 秒內再按才重來；
-       重來之後小安說一聲，學生才知道真的重來了（老師 2026-10-18：原本按了畫面沒反應，像按不下去）。 */
-    $("reset").addEventListener("click", async () => {
-      if (!o.onReset || level < 0 || level > 3 || cut) return;
+    /* 從第 1 關重來（老師 2026-10-18：按了要回到第 1 關）：按一下先變成「再按一次確定重來」（會丟掉做到一半的東西，不要誤按），
+       4 秒內再按才重來；接著第 1 關的簡報重新播，簡報完小安說一句。 */
+    $("reset").addEventListener("click", () => {
+      if (!o.onRestart || level < 1 || cut) return;
       const b = $("reset");
       if (!b.classList.contains("is-armed")) {
         b.classList.add("is-armed"); b.textContent = "再按一次確定重來";
@@ -258,10 +258,16 @@
         return;
       }
       disarm();
-      const i = level, ok = o.onReset(i) !== false;
-      await hush();
-      if (level === i && ok) toast(["determined", "收到。這一關的檔案已經放回一開始的樣子，Codex 那邊的對話也清掉了，重新來一次。"]);
+      o.onRestart();
     });
+    // 從第 1 關重來：穩定度歸零、提醒和說過的話都重來，目標列先收起來（接著播第 1 關的簡報）
+    function restart() {
+      stopNudges();
+      hush();
+      disarm();
+      stab = 0; said = {}; level = -1;
+      root.classList.remove("is-hud");
+    }
 
     /* ---------- 每一關開始 ---------- */
     async function brief(i, resumed) {
@@ -290,6 +296,7 @@
       showHud(i);
       if (lv.ping) setTimeout(() => ping(lv.ping), reduce ? 0 : 500);
       armNudges(i);
+      if (resumed === "restart") setTimeout(() => { if (level === i) toast(["worried", "空間又裂開了……沒關係，我們從第一關重新來過。"]); }, reduce ? 0 : 700);
     }
     // 要去的專案資料夾亮兩圈
     function ping(path) {
@@ -343,7 +350,7 @@
     function resume(passedN) { stab = Math.max(0, Math.min(4, passedN)); }
 
     layout();
-    const api = { brief, passed, event, finish, resume, layout, toast, el: root, LV };
+    const api = { brief, passed, event, finish, resume, restart, layout, toast, el: root, LV };
     window.ExamGuide.last = api;                                 // 測試用
     return api;
   }

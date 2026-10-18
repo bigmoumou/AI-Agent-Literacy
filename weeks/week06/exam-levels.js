@@ -134,21 +134,6 @@
     let passed = loadProgress(os), cleanup = null, intents = [], firstBrief = passed > 0;
     saveProgress(os, passed);
     api._H = H;
-    /* 重來這一關（第 2、3 關）：只把檔案放回去，學生看到的畫面不會變（VS Code 還開著舊的內容、Codex 的對話也還在），
-       看起來像沒按到（老師 2026-10-18）。所以先關掉編輯的視窗（不存檔）、清掉這個專案在 Codex 裡的對話，再把檔案放回去。 */
-    api.reset = (i) => {
-      const dir = [null, L2DIR, L3DIR][i];
-      try { L.wm.all().forEach((w) => { if (w.appId !== "codex" && w.appId !== "terminal") try { w.close(true); } catch (e) { /* 關不掉就算了 */ } }); } catch (e) { /* 沒有就算了 */ }
-      if (dir) {
-        try {
-          const same = (p) => { try { return L.vfs.canon(p) === L.vfs.canon(dir); } catch (e) { return p === dir; } };
-          const had = L.codex.state().projects.some((p) => same(p.path));
-          L.codex.removeProject(dir);                            // 連同這個專案的對話（還在回覆的也停掉）
-          if (had) L.codex.addProject(dir, { select: false });
-        } catch (e) { /* 沒有 Codex 就算了 */ }
-      }
-      try { return L.missions.reset(IDS[i]) !== false; } catch (e) { return false; }
-    };
     if (H.onStart) H.onStart(passed);
 
     // 藏掉提示；任務卡整張看不見（還佔著位置：視窗照樣讓開那一欄，目標列放在那裡）
@@ -174,7 +159,7 @@
     });
     // Codex 寫出來的報告、摘要不對：空間還不穩定（裂縫閃一下、低低的嗡一聲；不說哪裡錯）
     L.bus.on("codex:reply", (d) => { if (d && d.exam && d.ok === false && H.onUnstable) H.onUnstable(); });
-    setTimeout(next, passed ? 600 : 4600);                       // 第一次進來先讓 WARNING 播完
+    let nextT = setTimeout(next, passed ? 600 : 4600), fresh = new Set();   // 第一次進來先讓 WARNING 播完
 
     // 每一關開始前先播簡報、小安的通訊（重新整理接著考的第一關只有簡報）
     function brief(i) {
@@ -193,8 +178,30 @@
       if (i === 0) cleanup = lockTerminal(L, os, win, frame);
       if (i === 1) intents.push(L.codex.registerIntent(writeFileIntent(), { priority: 1001 }), L.codex.registerIntent(reportIntent(os), { priority: 1000 }));
       if (i === 2) intents.push(L.codex.registerIntent(writeFileIntent(), { priority: 1001 }), L.codex.registerIntent(summaryIntent(os), { priority: 1000 }));
+      if (fresh.delete(i)) { try { L.missions.reset(IDS[i]); } catch (e) { /* 沒有就算了 */ } }   // 從頭重來過：上一輪的紀錄不算，檔案重新放好
       L.missions.start(IDS[i]);
     }
+    /* 從第 1 關重來（老師 2026-10-18：按了要回到第 1 關）：進度歸零、桌布和裂縫回到最碎的樣子、
+       三關的檔案和 Codex 對話都清掉、視窗全關，接著播第 1 關的簡報（不重播第一次聯繫上的那段，小安改說一句重新來過）。
+       問答窗開著的時候不行（passed === 3）。 */
+    api.restart = () => {
+      if (passed === 3) return false;
+      clearTimeout(nextT);
+      if (cleanup) { cleanup(); cleanup = null; }
+      intents.forEach((off) => off()); intents = [];
+      try { L.wm.all().forEach((w) => { try { w.close(true); } catch (e) { /* 關不掉就算了 */ } }); } catch (e) { /* 沒有就算了 */ }
+      try { [L2DIR, L3DIR].forEach((d) => L.codex.removeProject(d)); L.codex.resetChats(); } catch (e) { /* 沒有 Codex 就算了 */ }
+      [L2DIR, L3DIR].forEach((d) => rm(L.vfs, d));
+      passed = 0;
+      saveProgress(os, 0);
+      try { sessionStorage.removeItem("exam-quiz-seed"); } catch (e) { /* 沒有就算了 */ }
+      fresh = new Set([0, 1, 2]);
+      if (wall) wall.set(0, true);
+      if (H.onRestart) H.onRestart();
+      firstBrief = "restart";
+      nextT = setTimeout(next, 900);
+      return true;
+    };
     function pass(i) {
       if (cleanup) { cleanup(); cleanup = null; }
       intents.forEach((off) => off()); intents = [];
@@ -203,7 +210,7 @@
       if (wall) wall.set(passed, true);
       if (H.onStage) H.onStage(passed, true);
       if (H.onPass) H.onPass(i);
-      setTimeout(next, 2400);                                    // 縫合、桌布恢復、「修復完成」播完再下一關
+      nextT = setTimeout(next, 2400);                            // 縫合、桌布恢復、「修復完成」播完再下一關
     }
     function quiz() {
       if (!window.ExamQuiz) { finishAll(); return; }
@@ -492,6 +499,6 @@
     } catch (e) { /* 改不了就算了 */ }
   }
 
-  const api = { start, RIGHT, _L: null, _H: null, reset: () => {}, average, SCORES, OBS, progress: loadProgress, resetProgress, LEVELS };
+  const api = { start, RIGHT, _L: null, _H: null, restart: () => false, average, SCORES, OBS, progress: loadProgress, resetProgress, LEVELS };
   window.ExamLevels = api;
 })();

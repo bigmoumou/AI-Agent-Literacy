@@ -582,6 +582,18 @@
     }
     if (!scarRaf && scarLoop) scarRaf = requestAnimationFrame(scarLoop);
   }
+  // 從第 1 關重來：裂縫全部回來、暈影回到最暗、「中斷連線」重新鎖住（劈啪一聲，空間又裂開）
+  function rewind() {
+    escaped = false; sealAt = 0; stage = 0;
+    const t = performance.now() / 1000;
+    for (let k = 0; k < 3; k++) scarSeal[k] = 0;
+    scars.forEach((s, k) => { s.sealAt = 0; s.strikeT = t; s.next = t + 4 + k * 3; });
+    scarCv.style.display = "";
+    vign.style.opacity = "0.85";
+    if (sound) { sound.crackle(0.5, 0.35); sound.zap(0.35, 0.3, 0.25, 0.6); }
+    if (!scarLoop) startScars();
+    else { if (reduce) drawScars(t); if (!scarRaf) scarRaf = requestAnimationFrame(scarLoop); }
+  }
   // Codex 寫出來的不對：空間還不穩定（剩下的裂縫一起閃一下、低低的嗡一聲；不說哪裡錯）
   function unstable() {
     const t = performance.now() / 1000;
@@ -597,7 +609,7 @@
     if (!L || !L.bus || !L.remote || !doc || !L.missions || !L.codex || !L.terminal || !L.vfs || !doc.getElementById("lab-wall")) { if (tries < 60) setTimeout(() => hookLab(tries + 1), 250); return; }
     if (EXAM_ON && window.ExamLevels) {
       // 帶路：小安的通訊、任務簡報、目標列（exam-guide.js）
-      const guide = window.ExamGuide ? window.ExamGuide.create({ frame, os: chosen, sfx: guideSfx, onReset: (i) => window.ExamLevels.reset(i) }) : null;
+      const guide = window.ExamGuide ? window.ExamGuide.create({ frame, os: chosen, sfx: guideSfx, onRestart: () => window.ExamLevels.restart() }) : null;
       window.ExamLevels.start({
         frame, os: chosen,
         hooks: {
@@ -608,6 +620,7 @@
           onStage: setStage,
           onUnstable: () => { unstable(); if (guide) guide.event("unstable"); },
           onDone: (resumed) => { unlock(resumed); if (guide) guide.finish(resumed); },
+          onRestart: () => { rewind(); if (guide) guide.restart(); },
           sfx: (k) => { if (k === "no") buzz(); else if (sound) { sound.crackle(0.3, 0.2); sound.zap(0.25, 0.2, 0, 0.8); } },   // 問答：答錯低低的拒絕音、答對一小聲電弧
         },
       });
