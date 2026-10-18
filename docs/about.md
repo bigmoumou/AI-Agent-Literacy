@@ -112,7 +112,7 @@ An AI teaching-video demonstration site for the Learning Analytics Tools course 
 | Week 6（考試） | 入口已公開，考試模式準備中 |
 | Week 7 到 Week 16 | 依課程進度陸續開放 |
 | 學生作品展示（作品集） | 已上線，陸續加入學生同意公開的作品；著作權屬於各作者 |
-| 練習用的模擬電腦（課堂練習） | Mac 版、Windows 版都已上線，每週同一台電腦、換那週的任務：Week 3 有 10 個任務（終端機、Finder、Codex），Week 4 有 11 個（內建瀏覽器、GitHub、Mermaid、作業） |
+| 練習用的模擬電腦（課堂練習） | Mac 版、Windows 版都已上線，每週同一台電腦、換那週的任務：Week 3 有 10 個任務（終端機、Finder、Codex），Week 4 有 11 個（內建瀏覽器、GitHub、Mermaid、作業），Week 5 有 5 個（驗證清單 `VERIFY.md`、選模型、看活動紀錄、對話滿了、作業前的準備） |
 | 教學影片生成 prompt：每支影片的 `brief.md`、動態素材規格、三方案提案 | 規劃中，整理後公開 |
 | 製作經驗：逐輪審查紀錄與整理過的教訓 | 規劃中，整理後公開 |
 | 製作專案（場景程式、音訊腳本）與 mp4 原檔 | 目前不在這個 repo；repo 只放要公開的成品 |
@@ -304,7 +304,7 @@ The visuals are mainly animated web pages written in HTML, CSS and JavaScript an
 | Week 6 (test) | Entrance published, test mode in progress |
 | Weeks 7 to 16 | Opening one by one as the course goes on |
 | Student work showcase | Live; more work is added as students agree to publish it; copyright stays with each author |
-| Practice environment: a simulated computer (in-class practice) | Mac and Windows versions live (10 missions for Week 3, pick any; the terminal, settings and file managers really work) |
+| Practice environment: a simulated computer (in-class practice) | Mac and Windows versions live; every week uses the same computer with that week's missions: 10 for Week 3 (terminal, Finder, Codex), 11 for Week 4 (built-in browser, GitHub, Mermaid, homework) and 5 for Week 5 (a `VERIFY.md` checklist, picking the model, the activity log, a full chat, homework set-up) |
 | Teaching-video prompts: each video's `brief.md`, the specs for the animated materials, and the three-plan proposals | Planned, to be released once cleaned up |
 | Production experience: round-by-round review logs and the lessons drawn from them | Planned, to be released once cleaned up |
 | Production projects (scene code, audio scripts) and master mp4 files | Not in this repository for now; it holds only the published results |
