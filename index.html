@@ -17,6 +17,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
 <link rel="stylesheet" href="assets/home.css">
+<script>
+  // 從 Week 6 考完、時空回歸回來（weeks/week06/exam.js）：第一格就先鋪上 Week 6 那張圖，和 Week 6 最後一格一樣（assets/home.js 的 examReturn 接手）
+  try { var examBack = +sessionStorage.getItem("exam-return"); if (examBack && Date.now() - examBack < 8000 && !(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)) document.documentElement.classList.add("exam-return"); } catch (e) { /* 讀不到就照平常開場 */ }
+</script>
 <!-- 多語系要比其他程式先載入（不要 defer） -->
 <script src="assets/i18n-strings.js"></script>
 <script src="assets/i18n.js"></script>

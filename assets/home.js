@@ -687,6 +687,18 @@
     const saved = Number(sessionStorage.getItem("film-frame"));
     if (saved > 0 && saved < N) { start = saved; spin = 0.6; }
   } catch (e) { /* 無法讀取也沒關係 */ }
+  /* 從 Week 6 考完、按「中斷連線」回來（weeks/week06/exam.js 的時空回歸）：停在 Week 6 那一格，
+     從它剛好鋪滿畫面的大小往後拉回整圈膠捲（examReturn）。index.html 開頭的小程式先把那張圖鋪在最上面（html.exam-return），
+     這裡準備好之後接手。 */
+  let returning = null;
+  try {
+    const at = Number(sessionStorage.getItem("exam-return"));
+    sessionStorage.removeItem("exam-return");
+    const ei = frames.findIndex((f) => f.kind === "ready" && f.w.exam);
+    if (at && Date.now() - at < 8000 && ei > 0 && !reduceMotion && window.ExamArt) { returning = { t0: 0 }; start = ei; spin = 0; }
+  } catch (e) { /* 讀不到就照平常開場 */ }
+  if (returning) document.body.classList.add("is-returning");
+  else document.documentElement.classList.remove("exam-return");
   let pos = start - (reduceMotion ? 0 : spin); // 目前轉到第幾格（可以是小數，會一直累加）
   let target = start;
   let vel = 0, bend = 0;
@@ -782,6 +794,48 @@
     g.setTransform(k * s, 0, 0, k * s, k * (vw / 2 - (I.x + I.w / 2) * s), k * (vh / 2 - (I.y + I.h / 2) * s));
     examArt.paint(g);
     handoff.style.opacity = String(alpha);
+  }
+  /* 從 Week 6 時空回歸回來：Week 6 那一格先鋪滿畫面（和 Week 6 最後一格、和進去時衝到最近那一刻一樣大），
+     鏡頭從那裡往後拉，旁邊的畫格從中間被放回原位（examLeave 倒過來）；一開始就在動（接著 Week 6 那邊的速度），越來越慢地停好。
+     最上面先蓋著同一張圖（交接畫布），鏡頭開始動的那一格直接拿掉（不慢慢淡：鏡頭在動，兩層會對不齊、疊出重影）。 */
+  const EXAM_RETURN = 1700;
+  function beginReturn() {
+    const go = (art) => {
+      if (!returning || fellBack) return;
+      if (!art) { returning = null; document.body.classList.remove("is-returning"); document.documentElement.classList.remove("exam-return"); loadStudio(); wake(); return; }
+      imgs[examI] = art.artCv; paint(examI);                   // 那一格先換成那張圖（還沒做好動畫）
+      drawHandoff(1, 1);
+      requestAnimationFrame(() => {
+        document.documentElement.classList.remove("exam-return");
+        returning.t0 = performance.now();
+        wake();
+      });
+    };
+    (examArtP || Promise.resolve(null)).then(go, () => go(null));
+  }
+  function examReturn(now) {
+    const u = clamp((now - returning.t0) / EXAM_RETURN, 0, 1);
+    const e = 1 - Math.pow(1 - u, 2.2);
+    const I = examArt.img, s = Math.max(vw / I.w, vh / I.h);
+    const zEnd = ((vw / 2) * R * TH) / (TEX_W * lens.tanH * s) - R;
+    cam[2] = zEnd + (CAM_BACK - zEnd) * e;
+    cam[1] = CAM_Y * e;
+    const t0 = NEAR * lens.tanV;
+    fr.t = t0 + (lens.frT - t0) * e; fr.b = fr.t - 2 * NEAR * lens.tanV;
+    buildProj();
+    const sk = seg01(u, 0.08, 0.8);
+    suck = 1 - sk * sk * (3 - 2 * sk);                       // 旁邊的畫格從中間被放回原位
+    if (handoff && handoff.style.opacity !== "0") handoff.style.opacity = "0";   // 這一格膠捲已經畫在同一個位置（同一張圖、同樣大），直接換掉；慢慢淡會因為鏡頭在動而疊出兩層
+    if (u >= 1) {
+      returning = null; suck = 0;
+      cam[2] = CAM_BACK; cam[1] = CAM_Y;
+      fr.t = lens.frT; fr.b = fr.t - 2 * NEAR * lens.tanV;
+      buildProj();
+      if (studio) studio.layout(proj, cam, vw, vh, canvas.width, canvas.height);   // 不呼叫 layout()：重設畫布大小會清掉畫面，閃一格
+      else loadStudio();
+      document.body.classList.add("was-returning");                 // 上下的字慢慢浮出來
+      document.body.classList.remove("is-returning");
+    }
   }
   function activate(i) {
     const f = frames[i];
@@ -1035,6 +1089,7 @@
       if (Math.abs(goal - hover[i]) < 0.003) hover[i] = goal; else hoverMoving = true;
     }
     if (leaving && leaving.exam) examLeave(now);
+    else if (returning && returning.t0) examReturn(now);
     else if (leaving) {
       const t = clamp((now - leaving.t0) / 650, 0, 1);
       cam[2] = CAM_BACK - t * t * t * R * 0.55;
@@ -1050,7 +1105,7 @@
     draw();
     if (mouse && !drag && !leaving && Math.abs(target - pos) > 1e-3) setHover(pick(mouse.x, mouse.y), mouse.x, mouse.y);
 
-    const moving = pos !== target || vel !== 0 || hoverMoving || !!leaving || now < introUntil || (studioT0 > 0 && now - studioT0 < STUDIO_FADE) || examOn ||
+    const moving = pos !== target || vel !== 0 || hoverMoving || !!leaving || !!returning || now < introUntil || (studioT0 > 0 && now - studioT0 < STUDIO_FADE) || examOn ||
       !near(col.fog[0], want.fog[0]) || !near(col.alpha, want.alpha);
 
     // 太慢就降解析度（只在連續動畫時量，睡醒的第一格不算）
@@ -1134,8 +1189,10 @@
         layout(); // 字型載入後文字高度可能改變，重新量一次
         introUntil = performance.now() + 2400;
         touch();
-        loadStudio();
+        if (returning) introUntil = performance.now() + 2400 + EXAM_RETURN;   // Week 6 那一格的動畫素材等往後拉完再準備（建的時候會卡一下）
+        if (!returning) loadStudio();                       // 時空回歸時，攝影棚道具等往後拉完才載入、淡入（道具跟著版面的鏡頭位置畫）
         setupExam();
+        if (returning) beginReturn();
       } else {
         wake();
       }

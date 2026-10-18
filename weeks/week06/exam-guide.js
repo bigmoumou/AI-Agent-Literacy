@@ -62,11 +62,15 @@
         ["worried", "最後一段時間線還有雜訊：期中考的成績亂掉了。"],
         ["determined", "幫我算出正確的全班平均。數字要對，時空才會穩定。"],
       ],
+      // VERIFY.md 只寫了請假怎麼算（老師 2026-10-18），補交、缺考要自己發現：提醒只點方向
       nudge: [
-        [180, "thinking", "專案資料夾裡，除了成績，還有別的說明檔，打開看看。"],
-        [360, "thinking", "說明寫得再清楚，Codex 沒讀到也沒用。"],
+        [150, "thinking", "專案裡有一份 VERIFY.md，打開看看寫了什麼、還少了什麼。"],
+        [300, "thinking", "成績表裡，有人出現了兩次，有人沒有分數……這些要怎麼算？"],
+        [450, "thinking", "VERIFY.md 寫得再清楚，Codex 沒讀到也沒用。"],
       ],
-      eaten: ["surprised", "規則又被亂流吃掉了……"],
+      // 老師 2026-10-18：學生把規則打在對話框時，小安要提醒「亂流吃得掉對話框，硬碟裡的檔案是安全的」；每次都說（隔 40 秒以上）
+      eaten: ["surprised", "規則又被亂流吃掉了！亂流吃得掉對話框裡的字，但硬碟裡的檔案是安全的。"],
+      repeat: { eaten: 40 },
       unstable: ["worried", "平均好像不對，時間線還在晃。"],
     },
     {
@@ -74,9 +78,16 @@
       goal: "答對 10 題選擇題（選錯可以再選）。",
       intro: [
         ["happy", "平均對了！時空裝置修好了。"],
-        ["determined", "最後一關我幫不上忙，要靠你自己記得那段時間發生的事。"],
+        ["determined", "準備好……時空轉移要開始了！"],
+        ["worried", "轉移的時候我幫不上忙，要靠你自己記得那段時間發生的事。"],
       ],
       nudge: [],
+      // 時空轉移中（問答窗開著）：第幾題出現時小安說的話（老師 2026-10-18：8～10 題變得劇烈，小安也能說話）
+      quiz: {
+        0: ["determined", "轉移開始了！每答對一題，裝置就把我們往回推一段。"],
+        7: ["surprised", "轉移加速了，亂流在拉扯……最後三題，撐住！"],
+        9: ["worried", "快到了……最後一題！"],
+      },
     },
   ];
   const DONE = { title: "時空穩定了", goal: "按上方的「中斷連線」就能離開。", final: ["happy", "回來了……謝謝你！下次見。"] };
@@ -361,9 +372,16 @@
     // 對話框裡的規則被吃掉、結果不對：每關第一次才說
     function event(kind, i) {
       const lv = LV[i == null ? level : i];
-      if (!lv || !lv[kind] || said[kind + i]) return;
-      said[kind + i] = true;
+      if (!lv || !lv[kind]) return;
+      const gap = lv.repeat && lv.repeat[kind], at = said[kind + i];   // repeat：隔幾秒可以再說一次
+      if (at && !(gap && performance.now() - at > gap * 1000)) return;
+      said[kind + i] = performance.now();
       toast(lv[kind]);
+    }
+    // 時空轉移中（第 4 關的問答）：第 n 題出現時，小安說一句（有的話）
+    function quizLine(n) {
+      const l = LV[3].quiz && LV[3].quiz[n];
+      if (l) toast(l);
     }
     // 四關都過了：目標列寫「可以離開了」，STABILIZED 之後小安說最後一句
     function finish(quiet) {
@@ -377,7 +395,7 @@
     function resume(passedN) { stab = Math.max(0, Math.min(4, passedN)); }
 
     layout();
-    const api = { brief, passed, event, finish, resume, restart, layout, toast, el: root, LV };
+    const api = { brief, passed, event, quizLine, finish, resume, restart, layout, toast, el: root, LV };
     window.ExamGuide.last = api;                                 // 測試用
     return api;
   }

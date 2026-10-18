@@ -1055,7 +1055,7 @@
 
     function composite(which, alpha) {
       if (!ready) return;
-      if (dirty) render();
+      if (dirty) { render(); gl.viewport(0, 0, pxW, pxH); }   // render 會把畫布範圍改成 3/4；道具還沒淡入就提早返回時，膠捲那一格會被畫成 3/4 大（擠在左下角）
       if (!lt || alpha <= 0.001) return;
       gl.viewport(0, 0, pxW, pxH);
       gl.useProgram(copy.p);

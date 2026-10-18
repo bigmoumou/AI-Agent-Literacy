@@ -241,7 +241,7 @@ body:not(.in-remote) #exam-vign { display: none; }
   width: min(760px, 100%); max-height: calc(100svh - 32px); overflow: auto;
   background: rgba(10, 9, 20, .96); border: 1px solid rgba(255, 255, 255, .12); border-radius: 6px;
   padding: clamp(18px, 3.2vw, 34px) clamp(18px, 3.6vw, 40px) clamp(16px, 2.6vw, 26px);
-  color: var(--txt); transform: translateY(8px); transition: transform .45s ease;
+  color: var(--txt); transform: translateY(8px); transition: transform .45s ease, border-color .6s ease;
 }
 .quiz.is-in .quiz-panel { transform: none; }
 .quiz-head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; font-family: var(--font-mono); font-size: .78rem; letter-spacing: .14em; color: var(--txt-3); }
@@ -440,3 +440,27 @@ body:not(.in-remote) #guide { display: none; }
   .g-segs i.on::after, .g-segs i.is-new.on::after { animation: none; }
   .g-face img, .g-dot, .g-ping.is-on i, .g-note { animation: none; }
 }
+
+/* 第 4 關的時空轉移（exam-warp.js）：畫在問答窗後面；問答窗的底色調淡，看得到後面的轉移 */
+#warp { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 4; pointer-events: none; display: none; opacity: 0; }
+body.in-warp .quiz { background: rgba(3, 3, 10, .2); }
+/* 問答時小安照樣能說話：帶路那層移到問答窗上面，通訊放在左上（目標列先藏起來，免得蓋到題目） */
+body.in-quiz #guide { z-index: 9; }
+body.in-quiz #guide .g-hud { visibility: hidden; }
+body.in-quiz #guide .g-comm.is-toast { top: var(--col-y, 40px); bottom: auto; }
+/* 答錯：問答窗左右晃一下（很小、很短）；答對：邊框亮一下薄荷綠 */
+.quiz-panel.is-shake { animation: quiz-shake .42s cubic-bezier(.36, .07, .19, .97) both; }
+@keyframes quiz-shake {
+  10%, 90% { transform: translateX(-2px); } 20%, 80% { transform: translateX(4px); }
+  30%, 50%, 70% { transform: translateX(-7px); } 40%, 60% { transform: translateX(7px); }
+}
+.quiz-panel.is-right { border-color: rgba(126, 240, 192, .8); transition: border-color .08s ease; }
+
+/* 四關都過了、按「中斷連線」：時空回歸（exam.js 的 exitHome）。遠端桌面縮進概念圖的黑洞，概念圖畫在它後面 */
+body.is-exiting #remote { z-index: 3; }
+#exitCv { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
+#exitGlow {
+  position: fixed; inset: 0; z-index: 4; pointer-events: none; opacity: 0; transform-origin: 50% 50%;
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, .96), rgba(214, 206, 255, .88));
+}
+body.is-exiting :is(#guide, #scar, #exam-vign, .warn, .warn-vig, #warp, .sound-btn) { opacity: 0 !important; transition: opacity .3s ease; pointer-events: none; }

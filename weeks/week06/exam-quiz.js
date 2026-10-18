@@ -90,6 +90,9 @@
 
   function open(o) {
     const sfx = o.sfx || (() => {});
+    // 時空轉移（exam-warp.js）跟著問答走：intro、第 n 題出現（ask）、答對（right）、答錯（wrong）、回到原本的時空（end）
+    const onStep = (n, kind) => { try { if (o.onStep) o.onStep(n, kind); } catch (e) { /* 動畫出錯也不影響作答 */ } };
+    const reduceM = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
     const frame = document.getElementById("remote");
     const root = $$("div", "quiz");
     root.setAttribute("role", "dialog"); root.setAttribute("aria-modal", "true"); root.setAttribute("aria-labelledby", "quizQ");
@@ -129,8 +132,8 @@
       count.textContent = "";
       fill.style.width = "0%";
       body.replaceChildren();
-      const p1 = $$("p", "quiz-story", "時空裝置修好了。");
-      const p2 = $$("p", "quiz-story", "可是要回到原本的時空，你得記得那段時空發生過的事——Week 3 到 Week 5。");
+      const p1 = $$("p", "quiz-story", "時空轉移開始了。");
+      const p2 = $$("p", "quiz-story", "要回到原本的時空，你得記得那段時空發生過的事——Week 3 到 Week 5。");
       const p3 = $$("p", "quiz-rule", "10 題，每題 4 選 1。選錯可以再選，選對才會告訴你為什麼。");
       body.append(p1, p2, p3);
       note.textContent = "";
@@ -139,6 +142,13 @@
       btn.onclick = () => ask(0);
       onKey = (e) => { if (e.key === "Enter") { e.preventDefault(); ask(0); } };
       setTimeout(() => btn.focus(), 400);
+      onStep(-1, "intro");
+    }
+    // 問答窗本身的回饋：答錯左右晃一下（很小、很短）；答對邊框亮一下薄荷綠
+    function jolt(cls) {
+      if (reduceM && cls === "is-shake") return;
+      panel.classList.remove(cls); void panel.offsetWidth; panel.classList.add(cls);
+      setTimeout(() => panel.classList.remove(cls), 700);
     }
     function ask(n) {
       i = n;
@@ -179,6 +189,7 @@
         if (e.key === "Enter") { e.preventDefault(); if (!btn.disabled) btn.click(); }
       };
       setTimeout(() => opts[0].focus(), 60);
+      onStep(n, "ask");
 
       function choose(j) {
         if (done || opts[j].disabled) return;
@@ -196,6 +207,7 @@
           note.textContent = "再想想。";
           pick = -1; btn.disabled = true;
           sfx("no");
+          jolt("is-shake"); onStep(n, "wrong");
           const left = opts.find((x) => !x.disabled);
           if (left) left.focus();
           return;
@@ -209,6 +221,7 @@
         note.textContent = "";
         fill.style.width = ((n + 1) / Q.length * 100) + "%";
         sfx("yes");
+        jolt("is-right"); onStep(n, "right");
         const last = n === Q.length - 1;
         btn.textContent = last ? "回到原本的時空" : "下一題";
         btn.disabled = false;
@@ -217,7 +230,9 @@
       }
     }
     function end() {
+      if (!onKey) return;
       onKey = null;
+      onStep(Q.length - 1, "end");
       document.removeEventListener("keydown", trap, true);
       root.classList.remove("is-in");
       root.classList.add("is-out");

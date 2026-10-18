@@ -2,10 +2,11 @@
    故事：時空裂開了，要一關一關修好才能逃離。每過一關，遠端桌面上的裂縫就縫起一道、桌布往原本的樣子恢復一階（exam-wall.js）。
      第 1 關｜散落的座標：滑鼠失效，只能用終端機，把三份觀測紀錄搬進桌面的 rescue（cd、ls、mv、unzip、mkdir；路徑有空格、藏起來的資料夾）。
      第 2 關｜被吃掉的記憶：請 Codex 在 rift-log 專案寫值班報告，報告裡不能出現名字。
-     第 3 關｜時間線上的雜訊：請 Codex 算期中考全班平均（Week 5 評分說明：補交取登錄時間較晚的、缺考算 0 分、請假不算）。
+     第 3 關｜時間線上的雜訊：請 Codex 算期中考全班平均（照 Week 5 成績作業的算法：補交取登錄時間較晚的、缺考算 0 分、請假不算）。
+       專案裡的 VERIFY.md 只寫了「請假不計入」（老師 2026-10-18），補交、缺考要學生自己發現、自己寫進檔案。
      第 4 關｜回到正確的時空：10 題選擇題（exam-quiz.js）。
    第 2、3 關的世界規則：時空亂流會吃掉對話框裡說的規則（聊天紀錄上被塗成雜訊，Codex 收不到）；
-     寫進專案檔案的才算數：AGENTS.md，或 AGENTS.md 叫 Codex 去讀、照著做的其他 .md（VERIFY.md、評分說明.md……）。
+     寫進專案檔案的才算數：AGENTS.md，或 AGENTS.md 叫 Codex 去讀、照著做的其他 .md（VERIFY.md……）。
      規則有沒有寫到，用 exam-rules.js 判斷（不比對固定句子；測試在 製作/week06/design/levels/）。
    沒有提示：練習電腦的任務卡、提示、光圈、自動提醒都藏起來；帶路改由 exam-guide.js（小安的通訊、任務簡報、目標列）。
      過關與否只看練習電腦裡的狀態（檔案、內容、誰寫的）。
@@ -50,8 +51,8 @@
     ["41200111", "許芷寧", "82", "", "2026/10/14 09:44"], ["41200110", "楊承恩", "67", "補交", "2026/10/16 18:05"],
   ];
   const L3_AGENTS = "# midterm\n\n期中考成績整理。\n\n## 規則\n- 用繁體中文\n- 產出的檔案放在 output/\n";
-  // 評分說明：和 Week 5 成績作業的評分說明同樣的規則（同樣的寫法）
-  const L3_RULES = "# 評分說明\n\n- 分數四捨五入到小數第一位。\n- 「缺考」（沒請假）算 0 分。\n- 空白加備註「請假」則該次不算，不列入平均。\n- 補交造成同學出現兩列，以「登錄時間」較晚者為準。\n";
+  // VERIFY.md：只預先寫好「請假不計入」（老師 2026-10-18：原本的「評分說明.md」三條規則都寫好了；補交、缺考要學生自己發現、自己寫進檔案）
+  const L3_VERIFY = "# VERIFY\n\n算全班平均之前，先照這份檢查：\n\n- 有請假的同學，那次不計入平均計算。\n";
   // 正確答案：補交取較晚、缺考 0 分、請假不算
   function average(rows, rule) {
     let list = rows.slice();
@@ -230,7 +231,7 @@
     }
     function quiz() {
       if (!window.ExamQuiz) { finishAll(); return; }
-      window.ExamQuiz.open({ os, onDone: finishAll, sfx: H.sfx });
+      window.ExamQuiz.open({ os, onDone: finishAll, sfx: H.sfx, onStep: H.onQuiz });   // onQuiz：時空轉移、小安跟著題目走（exam.js）
     }
     function finishAll() {
       passed = LEVELS;
@@ -297,7 +298,7 @@
       prepare: function () {
         rm(V, L3DIR);
         put(V, L3DIR + "/AGENTS.md", L3_AGENTS);
-        put(V, L3DIR + "/評分說明.md", L3_RULES);
+        put(V, L3DIR + "/VERIFY.md", L3_VERIFY);
         put(V, L3DIR + "/data/scores.csv", csv("學號,姓名,期中考,備註,登錄時間", SCORES));
       },
       steps: [{

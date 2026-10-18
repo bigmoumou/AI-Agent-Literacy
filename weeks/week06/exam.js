@@ -568,6 +568,7 @@
   function unlock(quiet) {
     if (escaped) return;
     escaped = true;
+    setTimeout(() => (window.requestIdleCallback ? requestIdleCallback(() => prepExit(), { timeout: 2000 }) : prepExit()), 4000);   // 時空回歸的畫布先準備好（STABILIZED 播完之後）
     sealAt = performance.now() / 1000;
     scars.forEach((s, k) => { if (!s.sealAt) s.sealAt = scarSeal[k] = sealAt; });
     if (!scarRaf && scarLoop) scarRaf = requestAnimationFrame(scarLoop);   // 減少動態效果時迴圈是停著的，封起來要再跑一下
@@ -613,6 +614,112 @@
     buzz();
     if (!scarRaf && scarLoop) scarRaf = requestAnimationFrame(scarLoop);
   }
+  /* ---------- 5. 四關都過了、按「中斷連線」：時空回歸，回到首頁（老師 2026-10-18：成功後也要有酷炫動畫，回到首頁） ----------
+     倒過來走一次進來的路（約 1.9 秒）：
+       0–0.3 秒  蓄力：遠端桌面輕輕往後一縮、亮一點，四周的星光開始往中間收；
+       0.3–1.0  被拉回去：鏡頭往後退，遠端桌面越縮越小，縮進概念圖（首頁 Week 6 那一格）裂縫中間的小黑洞，
+                星光拖成光束往黑洞收；概念圖從黑洞附近那一小塊，慢慢退成整張；
+       1.0      黑洞「碰」一聲合上（進來時那個關門聲），整道裂縫猛亮，一圈光往外擴；
+       1.0–1.9  鏡頭繼續往後拉，直到那張圖剛好鋪滿畫面（和 Week 6 開場第一格、首頁衝進那一格最近時一樣大）；
+       1.72 秒換頁：首頁先用同一張圖蓋著，接著從這個大小往後拉回整圈膠捲（assets/home.js 的 examReturn）。
+     圖層：概念圖和星光畫在 #exitCv（遠端桌面後面），遠端桌面（iframe）本身縮小、移動，白光蓋在它上面（#exitGlow）。
+     減少動態效果、或那張圖沒載到：照原本的（練習電腦的「已中斷連線」，再回首頁）。 */
+  const EXIT_SEAL = 1.0, EXIT_GO = 1.72, EXIT_END = 1.95;
+  let exiting = false, exitPrep = null;
+  // 解鎖之後（四關都過了）趁空檔先把畫布建好、試畫一次，按下去的第一格才不會卡
+  function prepExit() {
+    if (exitPrep || reduce || !art) return exitPrep;
+    const xc = document.createElement("canvas"), glow = document.createElement("div");
+    xc.id = "exitCv"; glow.id = "exitGlow";
+    xc.setAttribute("aria-hidden", "true"); glow.setAttribute("aria-hidden", "true");
+    xc.style.visibility = "hidden";
+    document.body.append(xc, glow);
+    const g = xc.getContext("2d"), dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    const fit = () => { xc.width = Math.round(W * dpr); xc.height = Math.round(H * dpr); };
+    fit(); window.addEventListener("resize", fit);
+    try { const c = cover(4); g.setTransform(dpr * c.s, 0, 0, dpr * c.s, dpr * c.x, dpr * c.y); art.paint(g); } catch (e) { /* 試畫失敗也沒關係 */ }
+    frame.style.willChange = "transform";
+    exitPrep = { xc, glow, g, dpr };
+    return exitPrep;
+  }
+  function exitHome(fallback) {
+    if (exiting) return;
+    if (reduce || !art) { fallback(); return; }
+    exiting = true;
+    const { xc, glow, g, dpr } = prepExit();
+    xc.style.visibility = "";
+    body.classList.add("is-exiting");
+    frame.style.pointerEvents = "none"; frame.style.transformOrigin = "50% 50%";
+    try { frame.contentWindow.document.activeElement.blur(); } catch (e) { /* 沒有就算了 */ }
+    if (sound) { sound.crackle(0.4, 0.25); sound.level("drone", 0.32, 0.6); sound.level("fizz", 0.05, 0.4); }
+    const streaks = [];
+    for (let k = 0; k < 150; k++) streaks.push({ a: Math.random() * Math.PI * 2, r: 0.55 + Math.random() * 0.75, v: 0.6 + Math.random() * 0.9, c: Math.random() < 0.8 ? "225,218,255" : "150,182,240" });
+    const t0 = performance.now() / 1000;
+    let sealed = false, gone = false, lastCrk = 0;
+    const loop = () => {
+      const now = performance.now() / 1000, T = now - t0;
+      // 鏡頭：概念圖的放大倍數，從 4 倍（黑洞附近那一小塊）退到 1（剛好鋪滿）；最後慢一點但不停（首頁接著往後拉）
+      const p = seg(T, 0.2, EXIT_END), zoom = Math.exp(Math.log(4) * (1 - p * (1.45 - 0.45 * p)));
+      const c = cover(zoom), hx = c.x + HOLE[0] * c.s, hy = c.y + HOLE[1] * c.s;
+      // 遠端桌面：先輕輕一縮，再越縮越快地被拉進黑洞
+      const s = T < 0.3 ? 1 - 0.045 * inOut(seg(T, 0, 0.3)) : 0.955 * Math.exp(-3.3 * Math.pow(seg(T, 0.3, EXIT_SEAL), 1.5));
+      const mv = inOut(seg(T, 0.3, 0.9)), dx = (hx - W / 2) * mv, dy = (hy - H / 2) * mv;
+      const tf = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) scale(${s.toFixed(4)})`;
+      frame.style.transform = tf; glow.style.transform = tf;
+      frame.style.borderRadius = glow.style.borderRadius = Math.min(14 / s, Math.min(W, H) * 0.4).toFixed(1) + "px";
+      frame.style.opacity = String(1 - seg(T, 0.9, EXIT_SEAL + 0.02));
+      glow.style.opacity = String(Math.max(0.16 * bump(T, 0, 0.6), 0.9 * seg(T, 0.7, EXIT_SEAL)) * (1 - seg(T, EXIT_SEAL, EXIT_SEAL + 0.08)));
+      // 概念圖（電流照樣在動）
+      const k = dpr;
+      g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = "source-over";
+      g.fillStyle = "#04030a"; g.fillRect(0, 0, xc.width, xc.height);
+      g.setTransform(k * c.s, 0, 0, k * c.s, k * c.x, k * c.y);
+      const fired = art.step(now, { energy: 1.5 - 0.5 * seg(T, EXIT_SEAL, EXIT_END), auto: false });
+      art.paint(g);
+      // 星光往黑洞收（蓄力時淡淡的，被拉回去時拖成光束），黑洞合上之後就沒了
+      g.setTransform(k, 0, 0, k, 0, 0); g.globalCompositeOperation = "lighter";
+      const sk = bump(T, 0.05, EXIT_SEAL + 0.1) * 1.2, R0 = Math.hypot(W, H) * 0.6;
+      if (sk > 0) streaks.forEach((q) => {
+        const u = ((T * q.v * (0.6 + 1.6 * seg(T, 0.3, EXIT_SEAL)) + q.r) % 1.2) / 1.2;   // 從外面一直往裡收
+        const r1 = R0 * Math.pow(1 - u, 1.6), r0 = r1 + (20 + 160 * seg(T, 0.3, EXIT_SEAL)) * (1 - u * 0.5);
+        const ca = Math.cos(q.a), sa = Math.sin(q.a);
+        g.strokeStyle = `rgba(${q.c},${(0.15 + 0.7 * u) * sk})`; g.lineWidth = 0.6 + 1.6 * u;
+        g.beginPath(); g.moveTo(hx + ca * r0, hy + sa * r0); g.lineTo(hx + ca * r1, hy + sa * r1); g.stroke();
+      });
+      // 黑洞合上：白光、往外擴的一圈光
+      const a2 = T - EXIT_SEAL;
+      if (a2 > -0.12 && a2 < 0.9) {
+        const m = Math.min(W, H), fl = a2 < 0 ? 1 + a2 / 0.12 : Math.exp(-a2 / 0.22);
+        const fr2 = m * (0.06 + 0.4 * Math.max(0, Math.min(1, a2 / 0.3))), rg = g.createRadialGradient(hx, hy, 0, hx, hy, fr2);
+        rg.addColorStop(0, `rgba(255,255,255,${0.95 * fl})`); rg.addColorStop(0.4, `rgba(200,185,255,${0.5 * fl})`); rg.addColorStop(1, "rgba(120,90,255,0)");
+        g.fillStyle = rg; g.fillRect(hx - fr2, hy - fr2, fr2 * 2, fr2 * 2);
+        if (a2 > 0) {
+          const e = 1 - Math.pow(1 - Math.min(1, a2 / 0.75), 3), rr = m * 0.05 + Math.hypot(W, H) * 0.6 * e;
+          g.strokeStyle = `rgba(220,210,255,${0.7 * (1 - e)})`; g.lineWidth = 2.5 * (1 - e) + 0.5;
+          g.beginPath(); g.ellipse(hx, hy, rr, rr * 0.9, 0, 0, Math.PI * 2); g.stroke();
+          g.strokeStyle = `rgba(160,140,255,${0.18 * (1 - e)})`; g.lineWidth = 14 * (1 - e); g.stroke();
+        }
+      }
+      g.globalCompositeOperation = "source-over";
+      if (!sealed && T >= EXIT_SEAL) {
+        sealed = true;
+        art.surge(now + 0.02);
+        if (sound) { sound.slam(0.7); sound.zap(0.75, 0.3, 0.02); sound.level("drone", 0, 0.35); }
+      }
+      if (sound) {
+        if (!sealed && T > 0.15 && T - lastCrk > 0.16 - 0.1 * seg(T, 0.2, EXIT_SEAL)) { lastCrk = T; sound.crackle(0.25 + 0.35 * seg(T, 0.2, EXIT_SEAL), 0.1); }
+        if (sealed) sound.level("fizz", 0.03 + 0.1 * art.activity(), 0.06);
+        if (fired && sealed) sound.zap(0.5, 0.25);
+      }
+      if (!gone && T >= EXIT_GO) {
+        gone = true;
+        try { sessionStorage.setItem("exam-return", String(Date.now())); } catch (e) { /* 存不了，首頁就照平常開場 */ }
+        window.location.href = "../../";
+      }
+      requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+  }
   // 接上練習電腦（同一個網站，所以讀得到它的 LAB）：任務完成就解鎖；還沒解鎖時擋住離開
   function hookLab(tries) {
     let L = null, doc = null;
@@ -621,23 +728,29 @@
     if (EXAM_ON && window.ExamLevels) {
       // 帶路：小安的通訊、任務簡報、目標列（exam-guide.js）
       const guide = window.ExamGuide ? window.ExamGuide.create({ frame, os: chosen, sfx: guideSfx, onRestart: () => window.ExamLevels.restart() }) : null;
+      // 時空轉移（exam-warp.js）：第 4 關的簡報一開始就啟動，畫在 10 題的背後
+      const warp = window.ExamWarp ? window.ExamWarp.create({ sound }) : null;
       window.ExamLevels.start({
         frame, os: chosen,
         hooks: {
           onStart: (n) => { if (guide) guide.resume(n); },
-          onBrief: (i, resumed) => (guide ? guide.brief(i, resumed) : null),
+          onBrief: (i, resumed) => { if (i === 3 && warp) setTimeout(() => warp.start(), 500); return guide ? guide.brief(i, resumed) : null; },
+          onQuiz: (n, kind) => { if (warp) warp.step(n, kind); if (kind === "ask" && guide) guide.quizLine(n); },
           onPass: (i) => { if (guide) guide.passed(i); },
           onEvent: (kind, i) => { if (guide) guide.event(kind, i); },
           onStage: setStage,
           onUnstable: () => { unstable(); if (guide) guide.event("unstable"); },
           onDone: (resumed) => { unlock(resumed); if (guide) guide.finish(resumed); },
-          onRestart: () => { rewind(); if (guide) guide.restart(); },
-          sfx: (k) => { if (k === "no") buzz(); else if (sound) { sound.crackle(0.3, 0.2); sound.zap(0.25, 0.2, 0, 0.8); } },   // 問答：答錯低低的拒絕音、答對一小聲電弧
+          onRestart: () => { rewind(); if (warp) warp.stop(); if (guide) guide.restart(); },
+          // 問答：答錯低低的拒絕音；答對的聲音交給時空轉移（沒有時空轉移才用一小聲電弧）
+          sfx: (k) => { if (k === "no") buzz(); else if (!warp && sound) { sound.crackle(0.3, 0.2); sound.zap(0.25, 0.2, 0, 0.8); } },
         },
       });
     } else L.bus.on("mission:complete", () => unlock());
     const leave = L.remote.disconnect;
-    L.remote.disconnect = function () { if (escaped) return leave.apply(this, arguments); locked(); };
+    const self = L.remote;
+    // 四關都過了：時空回歸（動畫）回到首頁；還沒過：LOCKED
+    L.remote.disconnect = function () { if (escaped) return EXAM_ON ? exitHome(() => leave.apply(self)) : leave.apply(self); locked(); };
     // 逃出來之後回到課程首頁（練習電腦原本會「回上一頁」，在這裡會退回空白的 iframe）
     L.remote.go = function () { window.location.href = "../../"; };
     doc.addEventListener("click", (e) => {

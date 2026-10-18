@@ -311,6 +311,22 @@ body.is-leaving .curtain { opacity: 1; pointer-events: auto; }
 body.is-to-exam .curtain { opacity: 0; }
 body.is-to-exam :is(.hud-top, .hud-bottom) { opacity: 0; transition: opacity .25s ease; pointer-events: none; }
 .exam-handoff { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 41; pointer-events: none; opacity: 0; background: #000; }
+/* 從 Week 6 時空回歸回來（home.js 的 examReturn）：第一格先鋪上 Week 6 那張圖（和 weeks/week06/exam.css 的 body.is-loading #rift 同一種鋪法：
+   貼圖座標 1024x768，畫面區 40,118,944,532 蓋滿螢幕），膠捲準備好再接手；接手之前和往後拉的時候，上下的字和攝影棚道具先藏起來 */
+html.exam-return::after {
+  content: ""; position: fixed; inset: 0; z-index: 60; pointer-events: none;
+  --s: max(calc(100vw / 944), calc(100vh / 532));
+  --s: max(calc(100vw / 944), calc(100dvh / 532));
+  background: #04030a url(../weeks/week06/frame.jpg) no-repeat;
+  background-size: calc(var(--s) * 1024) calc(var(--s) * 768);
+  background-position: calc(50vw - var(--s) * 512) calc(50vh - var(--s) * 384);
+  background-position: calc(50vw - var(--s) * 512) calc(50dvh - var(--s) * 384);
+}
+body.is-returning :is(.hud-top, .hud-bottom) { opacity: 0; pointer-events: none; }
+body.was-returning :is(.hud-top, .hud-bottom) { transition: opacity .6s ease; }
+body.is-returning :is(.studio-fx, .studio-cam, .studio-mon, .studio-ball) { opacity: 0; }
+body.is-returning .stage, body.is-returning .loader { transition: none; }   /* 舞台不要從透明淡進來（一接手就是滿的），轉圈的載入記號也不要出現 */
+body.is-returning .loader { opacity: 0; }
 
 /* ---------- 全部週次 ---------- */
 .index-view {
