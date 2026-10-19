@@ -24,8 +24,8 @@
 <td width="50%"><img src="docs/images/exam.webp" alt="Week 6 考試的入口：從首頁按「進入考場」，畫面撕開掉進黑洞，選 Mac，連上遠端桌面後跳出 WARNING"></td>
 </tr>
 <tr>
-<td><b>練習電腦</b>：選任務，照任務卡在終端機走一遍，做對的步驟打綠勾</td>
-<td><b>Week 6 考試</b>：進入考場、掉進黑洞、選一台電腦，然後 WARNING</td>
+<td align="center"><b>Virtual Remote Practice</b></td>
+<td align="center"><b>Scenario-Based Exam Practice</b></td>
 </tr>
 </table>
 
@@ -107,8 +107,8 @@ Course site for Learning Analytics Tools at National Taiwan Normal University: a
 <td width="50%"><img src="docs/images/exam.webp" alt="The Week 6 test entrance: from the homepage into the test, the screen tears into a black hole, Mac is picked, and WARNING appears on the remote desktop"></td>
 </tr>
 <tr>
-<td><b>Practice computer</b>: pick a mission and follow the card in the terminal; each step done gets a green tick</td>
-<td><b>Week 6 test</b>: enter the test, fall into a black hole, pick a computer, then WARNING</td>
+<td align="center"><b>Virtual Remote Practice</b></td>
+<td align="center"><b>Scenario-Based Exam Practice</b></td>
 </tr>
 </table>
 
