@@ -18,6 +18,10 @@
 - **作品集**：學生同意公開的作業網頁。
 - 不用登入、不用 cookie，觀看進度只存在自己的瀏覽器。網站只用 Cloudflare Web Analytics 統計各頁的瀏覽次數，不辨識個人。介面有繁中、简中、English、Tiếng Việt，深淺色都可以。
 
+| 練習電腦：選任務、照任務卡在終端機走一遍，做對的步驟打綠勾 | Week 6 考試：進入考場、掉進黑洞、選一台電腦，WARNING |
+|---|---|
+| ![練習電腦的操作過程：連線、選「cd 走路」任務、打開終端機輸入 cd 和 ls，任務卡上的步驟打綠勾](docs/images/lab.gif) | ![Week 6 考試的入口：從首頁按「進入考場」，畫面撕開掉進黑洞，選 Mac，連上遠端桌面後跳出 WARNING](docs/images/exam.gif) |
+
 ## 影片
 
 | 週 | 影片 | 長度 |
@@ -89,6 +93,10 @@ Course site for Learning Analytics Tools at National Taiwan Normal University: a
 - **Practice computers**: a simulated Mac or Windows PC in the browser, with step-by-step missions.
 - **Showcase**: student homework pages shared with their permission.
 - No login and no cookies; watch progress stays in your own browser. The site uses Cloudflare Web Analytics only to count page views, without identifying anyone.
+
+| Practice computer: pick a mission and follow the card in the terminal; each step done gets a green tick | Week 6 test: enter the test, fall into a black hole, pick a computer, WARNING |
+|---|---|
+| ![The practice computer: connecting, picking the "cd" mission, typing cd and ls in the terminal, and the steps ticked off on the mission card](docs/images/lab.gif) | ![The Week 6 test entrance: from the homepage into the test, the screen tears into a black hole, Mac is picked, and WARNING appears on the remote desktop](docs/images/exam.gif) |
 
 **How it is made**: the visuals are written in HTML, CSS and JavaScript and rendered frame by frame; the music and sound effects are synthesized in code too, and no video-generation model is used. Codex and Claude review each other's videos, and the teacher gives the final approval.
 
