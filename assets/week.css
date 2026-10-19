@@ -185,6 +185,7 @@ body::after {
 @media (max-width: 720px) { .hw-duo { grid-template-columns: 1fr; } }
 .hw-pane { background: #121417; }
 .hw-pane img.still { position: absolute; inset: 0; }
+.hw-pane.is-playing .hw-tag { display: none; }
 .hw-tag { position: absolute; left: .6rem; top: .55rem; z-index: 2; padding: .12rem .55rem; border-radius: 999px; background: rgba(0, 0, 0, .55); color: #fff; font-size: .76rem; font-weight: 700; pointer-events: none; }
 .hw-soon { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .35rem; padding: 1rem 1.2rem; text-align: center; background: linear-gradient(160deg, #23262c, #121417); }
 .hw-soon strong { color: #f1efe9; font-size: 1.02rem; }

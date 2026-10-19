@@ -37,7 +37,7 @@
     const pane = btn.closest(".hw-pane"), f = document.createElement("iframe");
     f.className = "hw-frame"; f.src = btn.dataset.src; f.title = btn.textContent.replace("▶", "").trim(); f.allow = "fullscreen";
     const still = pane.querySelector("img.still"); if (still) still.remove();
-    btn.remove(); pane.append(f); f.focus();
+    btn.remove(); pane.append(f); pane.classList.add("is-playing"); f.focus();
     const full = pane.querySelector(".hw-full");
     if (full && f.requestFullscreen) { full.hidden = false; full.addEventListener("click", () => f.requestFullscreen()); }
   }));
