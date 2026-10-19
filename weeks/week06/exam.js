@@ -639,7 +639,7 @@
     hudEl.setAttribute("aria-hidden", "true");
     hudEl.innerHTML = '<i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i>';
     cap.setAttribute("role", "status");
-    cap.innerHTML = '<span class="t">RETURNING TO REALITY</span><span class="bar"><i></i></span>';
+    cap.innerHTML = '<span class="t">RETURNING TO REALITY</span><span class="bar"><i></i></span><span class="s"></span>';
     document.body.append(xc, glow, hudEl, cap);
     const g = xc.getContext("2d"), dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     const sc = document.createElement("canvas"), sg = sc.getContext("2d");   // 震波折射用：上一層畫面的半解析度複本
@@ -703,21 +703,27 @@
   };
   /* 通關：時空隧道直接接回首頁（老師 2026-10-18：不要再回到桌面，直接回到首頁；隧道裡小安就說話；快一點）。
      問答窗收起來之後隧道繼續衝（整層不透明，遠端桌面不再露出來），小安說「回來了……謝謝你！下次見。」；
-     1.9 秒時隧道盡頭一片白光（warp.out），從概念圖裡那個黑洞衝出來：震波、光點往外噴、整道裂縫猛亮，
-     鏡頭從黑洞那一小塊往後拉到那張圖剛好鋪滿（約 1.1 秒），換頁，首頁接著往後拉回膠捲（home.js 的 examReturn）。
-     按「回到原本的時空」到首頁大約 3.5 秒。減少動態效果、或那張圖沒載到：小安說完就直接回首頁。 */
-  const TUN_OUT = 1.9, TUN_GO = 2.95, TUN_END = 3.15;
-  function tunnelHome(warp) {
+     3.2 秒時隧道盡頭一片白光（warp.out），從概念圖裡那個黑洞衝出來：震波、光點往外噴、整道裂縫猛亮，
+     鏡頭從黑洞那一小塊往後拉到那張圖剛好鋪滿（約 2.4 秒），換頁，首頁接著往後拉回膠捲（home.js 的 examReturn）。
+     按「回到原本的時空」到首頁大約 6 秒（老師 2026-10-19：再長一點；原本 3.5 秒）。減少動態效果、或那張圖沒載到：小安說完就直接回首頁。 */
+  const TUN_OUT = 3.2, TUN_GO = 5.4, TUN_END = 5.6;
+  /* 衝出隧道之後（老師 2026-10-19：動畫再長一點，多一些特效）：
+     - 鏡頭從黑洞那一小塊慢慢往後拉（約 2.4 秒），字幕 WELCOME BACK，底下一行小字 TIMELINE RESTORED；
+     - 一道光從左到右斜斜地掃過整張圖（TEST 的大字、玻璃）；
+     - 細碎的星塵從黑洞往外慢慢飄、一閃一閃；
+     - 小安在衝出來的那一刻說「回來了……謝謝你！下次見。」（隧道裡說的是「抓緊了——前面就是出口！」）。 */
+  function tunnelHome(warp, onBurst) {
     if (exiting) return;
     exiting = true;
     const P = !reduce && art && warp ? prepExit() : null;
     if (!P) { setTimeout(goHome, reduce ? 2600 : 1600); return; }
     const { xc, g, dpr, cap } = P;
     cap.querySelector(".t").textContent = "WELCOME BACK"; cap.classList.add("is-back");
+    const sub = cap.querySelector(".s"); if (sub) sub.textContent = "TIMELINE RESTORED";
     frame.style.visibility = "hidden"; frame.style.pointerEvents = "none";   // 遠端桌面不再出現
     xc.style.visibility = "";
     body.classList.add("is-tunneling");
-    const motes = [], t0 = performance.now() / 1000;
+    const motes = [], dust = [], t0 = performance.now() / 1000;
     let burst = false, gone = false, lastCrk = 0;
     const loop = () => {
       const now = performance.now() / 1000, T = now - t0;
@@ -731,13 +737,45 @@
       const fired = art.step(now, { energy: 1.5 - 0.5 * seg(T, TUN_OUT, TUN_END), auto: false });
       art.paint(g);
       drawBurst(P, hx, hy, T - TUN_OUT, motes, now);
-      cap.style.opacity = String(seg(T, TUN_OUT + 0.1, TUN_OUT + 0.3) * (1 - seg(T, TUN_GO - 0.25, TUN_GO - 0.05)));
+      // 一道光斜斜地掃過整張圖（衝出來 0.9 秒後，0.9 秒掃完）
+      const sw = seg(T, TUN_OUT + 0.9, TUN_OUT + 1.8);
+      if (sw > 0 && sw < 1) {
+        const bw = W * 0.22, x = -bw + (W + bw * 2) * inOut(sw), tilt = H * 0.35;
+        g.setTransform(k, 0, 0, k, 0, 0); g.globalCompositeOperation = "lighter";
+        const lg = g.createLinearGradient(x - bw / 2, 0, x + bw / 2, tilt);
+        lg.addColorStop(0, "rgba(255,255,255,0)"); lg.addColorStop(0.5, `rgba(235,230,255,${0.2 * Math.sin(sw * Math.PI)})`); lg.addColorStop(1, "rgba(255,255,255,0)");
+        g.fillStyle = lg; g.fillRect(0, 0, W, H);
+        g.globalCompositeOperation = "source-over";
+      }
+      // 星塵：慢慢往外飄、一閃一閃
+      if (dust.length) {
+        g.setTransform(k, 0, 0, k, 0, 0); g.globalCompositeOperation = "lighter";
+        for (let j = dust.length - 1; j >= 0; j--) {
+          const q = dust[j], u = (now - q.t0) / q.life;
+          if (u >= 1) { dust.splice(j, 1); continue; }
+          if (u < 0) continue;
+          const r = q.r0 + q.v * (1 - Math.pow(1 - u, 1.8)) * q.life;
+          const al = Math.sin(u * Math.PI) * (0.55 + 0.45 * Math.sin(now * q.tw + q.ph));
+          g.fillStyle = `rgba(${q.c},${al})`;
+          g.beginPath(); g.arc(hx + Math.cos(q.a) * r, hy + Math.sin(q.a) * r * 0.9, q.s, 0, Math.PI * 2); g.fill();
+        }
+        g.globalCompositeOperation = "source-over";
+      }
+      cap.style.opacity = String(seg(T, TUN_OUT + 0.15, TUN_OUT + 0.45) * (1 - seg(T, TUN_GO - 0.3, TUN_GO - 0.05)));
       if (!burst && T >= TUN_OUT) {
         burst = true;
         warp.out();
         art.surge(now + 0.02);
         burstMotes(motes, now);
+        const m = Math.min(W, H);
+        for (let j = 0; j < 70; j++) {
+          const cc = Math.random();
+          dust.push({ a: Math.random() * Math.PI * 2, r0: m * (0.02 + Math.random() * 0.1), v: m * (0.05 + Math.random() * 0.22), t0: now + 0.1 + Math.random() * 0.6,
+            life: 1.6 + Math.random() * 1.2, s: 0.6 + Math.random() * 1.4, tw: 6 + Math.random() * 10, ph: Math.random() * 6,
+            c: cc < 0.65 ? "245,242,255" : cc < 0.9 ? "190,175,255" : "255,215,150" });
+        }
         if (sound) { sound.slam(0.6); sound.zap(0.8, 0.32, 0.03); }
+        if (onBurst) onBurst();
       }
       if (sound && burst) {
         sound.level("fizz", 0.03 + 0.1 * art.activity(), 0.06);
@@ -875,7 +913,7 @@
             // 小安在隧道裡道謝，隧道直接接回首頁（tunnelHome）
             unlock(true); chime();
             if (guide) guide.finish(false);
-            tunnelHome(warp);
+            tunnelHome(warp, () => { if (guide) guide.finale(); });   // 衝出黑洞那一刻小安道謝
           },
           onRestart: () => { rewind(); if (warp) warp.stop(); if (guide) guide.restart(); },
           // 問答：答錯低低的拒絕音；答對的聲音交給時空轉移（沒有時空轉移才用一小聲電弧）

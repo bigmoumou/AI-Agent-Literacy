@@ -798,7 +798,35 @@
   /* 從 Week 6 時空回歸回來：Week 6 那一格先鋪滿畫面（和 Week 6 最後一格、和進去時衝到最近那一刻一樣大），
      鏡頭從那裡往後拉，旁邊的畫格從中間被放回原位（examLeave 倒過來）；一開始就在動（接著 Week 6 那邊的速度），越來越慢地停好。
      最上面先蓋著同一張圖（交接畫布），鏡頭開始動的那一格直接拿掉（不慢慢淡：鏡頭在動，兩層會對不齊、疊出重影）。 */
-  const EXAM_RETURN = 1700;
+  const EXAM_RETURN = 2200;                                      // 老師 2026-10-19：動畫再長一點（原本 1.7 秒）
+  // Week 6 衝出黑洞時噴出來的光點，在首頁接著往外飄一下（只在時空回歸時，畫完就拿掉）
+  function returnSparks() {
+    const cv = document.createElement("canvas"), d = Math.min(window.devicePixelRatio || 1, 1.5);
+    cv.className = "exam-sparks"; cv.setAttribute("aria-hidden", "true");
+    cv.width = Math.round(vw * d); cv.height = Math.round(vh * d);
+    document.body.append(cv);
+    const g = cv.getContext("2d"), t0 = performance.now(), m = Math.min(vw, vh), ps = [];
+    for (let i = 0; i < 90; i++) {
+      const c = Math.random();
+      ps.push({ a: Math.random() * Math.PI * 2, r0: m * (0.05 + Math.random() * 0.25), v: m * (0.15 + Math.random() * 0.45), life: 900 + Math.random() * 900,
+        s: 0.7 + Math.random() * 1.6, c: c < 0.6 ? "236,230,255" : c < 0.88 ? "170,150,255" : "255,205,130" });
+    }
+    const step = (now) => {
+      const t = now - t0;
+      g.setTransform(d, 0, 0, d, 0, 0); g.clearRect(0, 0, vw, vh);
+      let alive = 0;
+      ps.forEach((p) => {
+        const u = t / p.life;
+        if (u >= 1) return;
+        alive++;
+        const r = p.r0 + p.v * (1 - Math.pow(1 - u, 2)), al = (1 - u) * (u < 0.1 ? u / 0.1 : 1);
+        g.fillStyle = `rgba(${p.c},${al})`;
+        g.beginPath(); g.arc(vw / 2 + Math.cos(p.a) * r, vh / 2 + Math.sin(p.a) * r * 0.9, p.s, 0, Math.PI * 2); g.fill();
+      });
+      if (alive) requestAnimationFrame(step); else cv.remove();
+    };
+    requestAnimationFrame(step);
+  }
   function beginReturn() {
     const go = (art) => {
       if (!returning || fellBack) return;
@@ -808,6 +836,7 @@
       requestAnimationFrame(() => {
         document.documentElement.classList.remove("exam-return");
         returning.t0 = performance.now();
+        returnSparks();
         wake();
       });
     };

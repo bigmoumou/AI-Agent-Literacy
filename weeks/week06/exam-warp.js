@@ -36,6 +36,17 @@
     let flash = 0, flashCol = "235,232,255", red = 0, bloom = 0;
     let arriving = -1;                                     // 衝出隧道（out）：開始的時間（秒）
     let solid = false;                                     // 回到原本的時空之後：整層不透明（遠端桌面不再露出來）
+    let endAt = -1, fragClock = 0;                         // 回到原本的時空的時間；記憶碎片多久飛出一片
+    const frags = [];
+    // 記憶碎片：這門課 Week 3–5、這次考試裡出現過的東西
+    const MEM = ["AGENTS.md", "VERIFY.md", "cd ~/Desktop", "ls -a", "mv obs-c.csv", "unzip obs-a.zip", "rift-log/", "midterm/", "output/report.md",
+      "git commit", "git push", "Mermaid", "Playwright", "Codex", "New chat", "WEEK 03", "WEEK 04", "WEEK 05", "68.1 分", "補交", "請假", "缺考", "~/.rift", "rescue/"];
+    let memI = Math.floor(Math.random() * MEM.length);
+    function spawnFrag() {
+      const c = Math.random();
+      frags.push({ text: MEM[memI++ % MEM.length], a: Math.random() * Math.PI * 2, d: 0.28 + Math.random() * 0.5, z: 4, v: 1.1 + Math.random() * 0.5,
+        size: 18 + Math.random() * 6, c: c < 0.7 ? "236,232,255" : c < 0.86 ? "190,255,225" : "255,214,140" });
+    }
     const rings = [], waves = [], sparks = [], bolts = [];
     let ringClock = 0, boltClock = 1.5;
 
@@ -192,6 +203,33 @@
         g.beginPath(); g.moveTo(cx + Math.cos(p.a) * r0, cy + Math.sin(p.a) * r0); g.lineTo(cx + Math.cos(p.a) * r, cy + Math.sin(p.a) * r); g.stroke();
       }
 
+      // 回到原本的時空之後（老師 2026-10-19：動畫再長一點、多一些特效）：
+      // 隧道盡頭的出口越來越亮、越來越大；這門課的記憶碎片（檔名、指令、週次）從深處一片片飛過身邊
+      if (endAt >= 0) {
+        const ue = t - endAt, grow = smooth(seg(ue, 0.3, 3.2));
+        const er = m * (0.04 + 0.42 * grow) * (1 + 0.04 * Math.sin(t * 9)), eg = g.createRadialGradient(cx, cy, 0, cx, cy, er);
+        eg.addColorStop(0, `rgba(255,255,255,${(0.1 + 0.85 * grow) * fade})`);
+        eg.addColorStop(0.45, `rgba(225,215,255,${0.45 * grow * fade})`);
+        eg.addColorStop(1, "rgba(150,120,255,0)");
+        g.fillStyle = eg; g.fillRect(cx - er, cy - er, er * 2, er * 2);
+        fragClock -= dt;
+        if (!reduce && fragClock <= 0 && ue < 3.0 && arriving < 0) { spawnFrag(); fragClock = rnd(0.12, 0.22); }
+      }
+      if (frags.length) {
+        g.textAlign = "center"; g.textBaseline = "middle";
+        for (let k = frags.length - 1; k >= 0; k--) {
+          const f = frags[k];
+          f.z -= dt * f.v;
+          if (f.z < 0.35) { frags.splice(k, 1); continue; }
+          const r = (f.d / f.z) * F, px = Math.min(64, f.size / f.z);
+          const al = Math.min(1, (4 - f.z) / 1.2) * Math.min(1, (f.z - 0.35) / 0.5) * 0.85 * fade;
+          if (al < 0.02 || px < 6) continue;
+          g.font = `700 ${px.toFixed(1)}px "JetBrains Mono", "Noto Sans TC", monospace`;
+          g.fillStyle = `rgba(${f.c},${al})`;
+          g.fillText(f.text, cx + Math.cos(f.a) * r, cy + Math.sin(f.a) * r * 0.9);
+        }
+      }
+
       // 閃電：第 8–10 題（強度 0.6 以上）才有，越劇烈越常打
       const hot = seg(aI, 0.6, 1);
       if (!reduce && hot > 0 && arriving < 0) {
@@ -241,7 +279,7 @@
 
     function start() {
       if (on) return;
-      on = true; arriving = -1; solid = false; I = 0.05; target = 0.2; fade = 0; fadeTo = 1; clock = 0;
+      on = true; arriving = -1; solid = false; endAt = -1; frags.length = 0; I = 0.05; target = 0.2; fade = 0; fadeTo = 1; clock = 0;
       document.body.classList.add("in-warp");
       cv.style.display = "block";
       size();
@@ -281,8 +319,9 @@
       } else if (kind === "end") {
         // 回到原本的時空（老師 2026-10-18：不要再回到桌面）：問答窗收起來，隧道不淡掉、再衝一次，整層變成不透明（遠端桌面看不到），
         // 小安在隧道裡說話；等 exam.js 叫 out() 才衝出隧道
-        target = 0.85; boost = 1; flash = 0.6; flashCol = "235,232,255"; solid = true;
-        if (sound) { sound.crackle(0.6, 0.4); sound.zap(0.7, 0.3, 0.2); }
+        target = 0.85; boost = 1; flash = 0.6; flashCol = "235,232,255"; solid = true; endAt = clock; fragClock = 0.3;
+        // 聲音：虛空的低鳴、電流嘶嘶慢慢湧上來（3 秒；只是變大聲，不是往上滑的咻聲）
+        if (sound) { sound.crackle(0.6, 0.4); sound.zap(0.7, 0.3, 0.2); sound.level("drone", 0.58, 3); sound.level("fizz", 0.13, 3); }
       }
       still();
     }
@@ -299,7 +338,7 @@
       g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, cv.width, cv.height);
       cv.style.display = "none"; cv.style.opacity = "0";
       document.body.classList.remove("in-warp");
-      rings.length = waves.length = sparks.length = bolts.length = 0;
+      rings.length = waves.length = sparks.length = bolts.length = frags.length = 0;
       if (sound && arriving < 0) { sound.level("drone", 0, 0.5); sound.level("fizz", 0, 0.5); }
     }
     return { start, step, out, stop, el: cv, get active() { return on; } };

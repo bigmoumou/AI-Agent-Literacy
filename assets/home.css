@@ -327,6 +327,7 @@ body.was-returning :is(.hud-top, .hud-bottom) { transition: opacity .6s ease; }
 body.is-returning :is(.studio-fx, .studio-cam, .studio-mon, .studio-ball) { opacity: 0; }
 body.is-returning .stage, body.is-returning .loader { transition: none; }   /* 舞台不要從透明淡進來（一接手就是滿的），轉圈的載入記號也不要出現 */
 body.is-returning .loader { opacity: 0; }
+.exam-sparks { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 42; pointer-events: none; }
 
 /* ---------- 全部週次 ---------- */
 .index-view {

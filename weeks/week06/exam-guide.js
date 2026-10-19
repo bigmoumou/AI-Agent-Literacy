@@ -92,7 +92,7 @@
   ];
   // 四關都過了：幾秒後自動回到現實（exam.js 的 exitHome，老師 2026-10-18：通關後要回到首頁 Week 6 那一格，不是停在桌面）；
   // 重新整理後才看到的（quiet）就等學生自己按「中斷連線」
-  const DONE = { title: "時空穩定了", goal: "", final: ["happy", "回來了……謝謝你！下次見。"] };
+  const DONE = { title: "時空穩定了", goal: "", rush: ["determined", "抓緊了——前面就是出口！"], final: ["happy", "回來了……謝謝你！下次見。"] };
   const GOAL_AUTO = "正在帶你回到現實……（也可以直接按上方的「中斷連線」）", GOAL_LEAVE = "按上方的「中斷連線」就能離開。";
   const pad = (n) => String(n).padStart(2, "0");
   // 目標文字：`檔名` 變成小標籤（其他字照原樣、不當 HTML）
@@ -393,13 +393,18 @@
       stab = 4; level = 4;
       DONE.goal = quiet ? GOAL_LEAVE : GOAL_AUTO;
       showHud(4);
-      if (!quiet) setTimeout(() => toast(DONE.final, "穩定"), reduce ? 200 : 150);    // 在時空隧道裡就說（老師 2026-10-18），說完隧道直接接回首頁
+      if (!quiet) setTimeout(() => toast(reduce ? DONE.final : DONE.rush, "穩定"), reduce ? 200 : 150);   // 在時空隧道裡就說話（老師 2026-10-18）
+    }
+    // 衝出時空隧道的那一刻（exam.js 的 tunnelHome）：隧道裡那句先斷掉，接著道謝
+    async function finale() {
+      await hush();
+      toast(DONE.final, "穩定");
     }
     // 重新整理後接著考：穩定度先回到已過的關數
     function resume(passedN) { stab = Math.max(0, Math.min(4, passedN)); }
 
     layout();
-    const api = { brief, passed, event, quizLine, finish, resume, restart, layout, toast, el: root, LV };
+    const api = { brief, passed, event, quizLine, finish, finale, resume, restart, layout, toast, el: root, LV };
     window.ExamGuide.last = api;                                 // 測試用
     return api;
   }

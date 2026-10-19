@@ -483,4 +483,6 @@ body.is-tunneling :is(#guide .g-hud, #scar, #exam-vign, .warn, .warn-vig, .sound
 #exitCap .bar { display: block; width: 240px; height: 1px; margin: 12px auto 0; background: rgba(255, 255, 255, .2); }
 #exitCap .bar i { display: block; width: 0; height: 100%; background: #d6ceff; }
 #exitCap.is-back { font-size: 15px; }
-#exitCap.is-back .bar { visibility: hidden; }
+#exitCap.is-back .bar { display: none; }
+#exitCap .s { display: none; margin-top: 10px; font-size: 11px; font-weight: 400; letter-spacing: .46em; color: #cfc8f2; }
+#exitCap.is-back .s:not(:empty) { display: block; }
