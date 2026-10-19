@@ -21,7 +21,7 @@
 <table>
 <tr>
 <td width="50%"><img src="docs/images/lab.gif" alt="練習電腦的操作過程：連線、選「cd 走路」任務、打開終端機輸入 cd 和 ls，任務卡上的步驟打綠勾"></td>
-<td width="50%"><img src="docs/images/exam.gif" alt="Week 6 考試的入口：從首頁按「進入考場」，畫面撕開掉進黑洞，選 Mac，連上遠端桌面後跳出 WARNING"></td>
+<td width="50%"><img src="docs/images/exam.webp" alt="Week 6 考試的入口：從首頁按「進入考場」，畫面撕開掉進黑洞，選 Mac，連上遠端桌面後跳出 WARNING"></td>
 </tr>
 <tr>
 <td><b>練習電腦</b>：選任務，照任務卡在終端機走一遍，做對的步驟打綠勾</td>
@@ -104,7 +104,7 @@ Course site for Learning Analytics Tools at National Taiwan Normal University: a
 <table>
 <tr>
 <td width="50%"><img src="docs/images/lab.gif" alt="The practice computer: connecting, picking the cd mission, typing cd and ls in the terminal, and the steps ticked off on the mission card"></td>
-<td width="50%"><img src="docs/images/exam.gif" alt="The Week 6 test entrance: from the homepage into the test, the screen tears into a black hole, Mac is picked, and WARNING appears on the remote desktop"></td>
+<td width="50%"><img src="docs/images/exam.webp" alt="The Week 6 test entrance: from the homepage into the test, the screen tears into a black hole, Mac is picked, and WARNING appears on the remote desktop"></td>
 </tr>
 <tr>
 <td><b>Practice computer</b>: pick a mission and follow the card in the terminal; each step done gets a green tick</td>
