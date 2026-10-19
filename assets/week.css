@@ -192,7 +192,7 @@ body::after {
 .hw-soon span { color: #b9b6ae; font-size: .84rem; line-height: 1.6; }
 .hw-play { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 2; display: inline-flex; align-items: center; gap: .5rem; padding: .62rem 1.25rem; border: 0; border-radius: 999px; background: #3f7d4e; color: #fff; font: inherit; font-weight: 700; cursor: pointer; box-shadow: 0 6px 18px rgba(0, 0, 0, .3); }
 .hw-play:hover, .hw-play:focus-visible { background: #4a9160; }
-.hw-acts { position: absolute; right: .55rem; bottom: .5rem; z-index: 2; display: flex; gap: .35rem; }
+.hw-acts { position: absolute; right: .55rem; top: .5rem; z-index: 2; display: flex; gap: .35rem; }
 .hw-acts > * { padding: .14rem .6rem; border: 0; border-radius: 999px; background: rgba(0, 0, 0, .55); color: #fff; font: inherit; font-size: .76rem; font-weight: 700; text-decoration: none; cursor: pointer; }
 .hw-acts > *:hover { background: rgba(0, 0, 0, .75); }
 .hw-acts > [hidden] { display: none; }
