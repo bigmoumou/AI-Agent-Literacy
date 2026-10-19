@@ -180,6 +180,23 @@ body::after {
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .hw-dl { --dl: #ffa64d; --dl-bg: rgba(255, 166, 77, .18); } }
 :root[data-theme="dark"] .hw-dl { --dl: #ffa64d; --dl-bg: rgba(255, 166, 77, .18); }
 
+/* ---------- 作業（section.unit-hw，2026-10-19）：膠捲裡左右兩格，左邊說明影片、右邊可以直接玩的範例（按「在這裡玩」才載入 iframe） ---------- */
+.hw-duo { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(8px, 1.4vw, 14px); }
+@media (max-width: 720px) { .hw-duo { grid-template-columns: 1fr; } }
+.hw-pane { background: #121417; }
+.hw-pane img.still { position: absolute; inset: 0; }
+.hw-tag { position: absolute; left: .6rem; top: .55rem; z-index: 2; padding: .12rem .55rem; border-radius: 999px; background: rgba(0, 0, 0, .55); color: #fff; font-size: .76rem; font-weight: 700; pointer-events: none; }
+.hw-soon { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .35rem; padding: 1rem 1.2rem; text-align: center; background: linear-gradient(160deg, #23262c, #121417); }
+.hw-soon strong { color: #f1efe9; font-size: 1.02rem; }
+.hw-soon span { color: #b9b6ae; font-size: .84rem; line-height: 1.6; }
+.hw-play { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 2; display: inline-flex; align-items: center; gap: .5rem; padding: .62rem 1.25rem; border: 0; border-radius: 999px; background: #3f7d4e; color: #fff; font: inherit; font-weight: 700; cursor: pointer; box-shadow: 0 6px 18px rgba(0, 0, 0, .3); }
+.hw-play:hover, .hw-play:focus-visible { background: #4a9160; }
+.hw-acts { position: absolute; right: .55rem; bottom: .5rem; z-index: 2; display: flex; gap: .35rem; }
+.hw-acts > * { padding: .14rem .6rem; border: 0; border-radius: 999px; background: rgba(0, 0, 0, .55); color: #fff; font: inherit; font-size: .76rem; font-weight: 700; text-decoration: none; cursor: pointer; }
+.hw-acts > *:hover { background: rgba(0, 0, 0, .75); }
+.hw-acts > [hidden] { display: none; }
+.hw-frame { position: absolute; inset: 0; display: block; width: 100%; height: 100%; border: 0; }
+
 /* ---------- 課堂練習（section.unit-lab）：不是影片，膠捲裡是左右兩台筆電（Mac｜Windows），點哪一台就進哪一個練習 ----------
    版面和影片段落一樣（標題、膠捲、重點），清單上它也是一格（video.js 用 data-thumb 當縮圖）。
    筆電外框是這裡用 CSS 畫的，螢幕裡放練習環境的截圖。video.js 的 labDuo 依滑鼠位置在 .lab-side 加 is-on / is-off：

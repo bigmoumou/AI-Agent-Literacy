@@ -28,6 +28,20 @@
     return abs.startsWith(SITE) ? MEDIA + abs.slice(SITE.length) : abs;
   };
 
+  /* 預覽中的段落（<section class="unit" data-preview hidden>，例如老師還在看的作業）：網址有 ?preview 才顯示，否則整段拿掉 */
+  const PREVIEW = /[?&]preview(=|&|$)/.test(location.search);
+  document.querySelectorAll("section.unit[data-preview]").forEach((u) => { if (PREVIEW) u.hidden = false; else u.remove(); });
+
+  /* 作業段落（section.unit-hw）：右邊的範例先放一張圖，按「在這裡玩」才載入（iframe，同一個網站），載入後多一顆「全螢幕」 */
+  document.querySelectorAll(".hw-play[data-src]").forEach((btn) => btn.addEventListener("click", () => {
+    const pane = btn.closest(".hw-pane"), f = document.createElement("iframe");
+    f.className = "hw-frame"; f.src = btn.dataset.src; f.title = btn.textContent.replace("▶", "").trim(); f.allow = "fullscreen";
+    const still = pane.querySelector("img.still"); if (still) still.remove();
+    btn.remove(); pane.append(f); f.focus();
+    const full = pane.querySelector(".hw-full");
+    if (full && f.requestFullscreen) { full.hidden = false; full.addEventListener("click", () => f.requestFullscreen()); }
+  }));
+
   const vids = Array.from(document.querySelectorAll("video[data-hls]"));
   const units = Array.from(document.querySelectorAll("section.unit"));
   const reduceMotion = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);

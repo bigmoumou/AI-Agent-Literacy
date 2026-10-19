@@ -10,7 +10,7 @@
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sky Island</title>
-<!-- Week 7 範例「空中之島」（測試版，隱藏連結，2026-10-19）：原始碼在 製作/week07/sky-island（src/island.js），用 build.sh 打包成 island.js。 -->
+<!-- Week 7 作業的範例「空中之島」（2026-10-19；作業段落在 weeks/week07 的 #03-homework-island）：原始碼在 製作/week07/sky-island（src/island.js），用 build.sh 打包成 island.js。 -->
 <meta name="robots" content="noindex, nofollow">
 <meta name="author" content="JUNHAO CHEN">
 <meta name="copyright" content="© 2026 JUNHAO CHEN">
@@ -47,6 +47,17 @@
   .copy { margin-top: 12px; font-size: 11px; color: #9a907f; }
   .msg { position: fixed; inset: 0; display: grid; place-items: center; background: #bfe0f4; padding: 16px; text-align: center; font-size: 18px; color: #24221e; }
   .msg[hidden] { display: none; }
+  /* 放在作業頁的小框裡（半個欄寬）：說明卡和方塊欄縮小 */
+  @media (max-height: 560px) {
+    .card { padding: 14px 18px 10px; } .kicker { font-size: 11px; } h1 { font-size: 22px; margin: 2px 0 8px; }
+    .keys { gap: 3px; font-size: 12px; margin-bottom: 10px; } kbd { font-size: 11px; padding: 0 4px; min-width: 14px; }
+    .go { padding: 8px 0; font-size: 15px; } .note { margin: 6px 0 2px; font-size: 11px; } #reset { font-size: 11px; } .copy { margin-top: 6px; font-size: 10px; }
+  }
+  @media (max-height: 380px) { .keys li:nth-child(n+3) { display: none; } .note, .copy { display: none; } }
+  @media (max-width: 640px), (max-height: 420px) {
+    #bar { bottom: 6px; gap: 2px; padding: 2px; } .slot { width: 34px; height: 34px; } .slot canvas { width: 28px; height: 28px; } .slot span { font-size: 9px; left: 2px; }
+    #name { bottom: 48px; font-size: 14px; }
+  }
 </style>
 </head>
 <body>
@@ -58,7 +69,7 @@
 <div id="fps" hidden></div>
 <div id="start">
   <div class="card">
-    <div class="kicker">Week 7 · Block world · test build</div>
+    <div class="kicker">Week 7 · Homework example</div>
     <h1>Sky Island</h1>
     <ul class="keys">
       <li><span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span> Move</li>
