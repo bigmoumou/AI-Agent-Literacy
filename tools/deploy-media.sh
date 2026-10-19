@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # 把影片站（和 repo 同一層的 media-site/public/）上傳到 Cloudflare。
 # 平常不用單獨跑：tools/publish-video.sh 做完會自動呼叫；一次發好幾支時用 --no-deploy，最後再跑這一支。
+# 上傳完會呼叫 tools/backup-media.sh，把影片站備份到 Mac Studio 的 T7。
 #
 # 用法：tools/deploy-media.sh
 #
@@ -20,3 +21,6 @@ export CLOUDFLARE_ACCOUNT_ID="${CLOUDFLARE_ACCOUNT_ID:-3f9c3f272cfe61cb306b14e1d
 echo "上傳影片站……"
 (cd "$media" && npx --no-install wrangler deploy 2>&1 | grep -vE "^\s*$|Notice to agents" | tail -6)
 echo "影片站：$MEDIA_URL"
+
+# 正本只有 ultra7 這一份，上傳完順便備份到 Mac Studio 的 T7；連不上時只提醒，不算上傳失敗
+"$repo/tools/backup-media.sh" || echo "注意：這次沒有備份到 Mac Studio，連得上時跑 tools/backup-media.sh 補做" >&2
