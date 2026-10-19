@@ -6,7 +6,7 @@
 /weeks/week03/lesson   /weeks/week03/   301
 /weeks/week03/lesson/* /weeks/week03/   301
 # Week 3 的影片檔搬到 video/01-report-journey/（2026-10-01）：已經開著的舊頁面還讀得到
-/weeks/week03/video/hls/*      /weeks/week03/video/01-report-journey/hls/:splat   301
+/weeks/week03/video/hls/*      https://learning-analytics-media.o1r2g3a4n5i6z7e8.workers.dev/weeks/week03/video/01-report-journey/hls/:splat   301
 /weeks/week03/video/poster.jpg /weeks/week03/video/01-report-journey/poster.jpg   301
 /weeks/week03/video/thumb.jpg  /weeks/week03/video/01-report-journey/thumb.jpg    301
 # 作品集的學號改成露出後 3 碼（2026-10-03）：舊的作品網址轉到新代號
@@ -22,3 +22,5 @@
 /weeks/week05/video/01-model-switch/*  /weeks/week05/video/02-model-switch/:splat  301
 # Mermaid 補充從 Week 3 補充 3 搬到 Week 4 補充 2（2026-10-11）
 /weeks/week03/video/s3-mermaid/*  /weeks/week04/video/s2-mermaid/:splat  301
+# 影片串流檔搬到影片站（2026-10-19，見 docs/維護說明.md「影片放在哪裡」）：還開著舊頁面、或舊連結直接讀 hls/ 的，轉過去
+/weeks/:week/video/:slug/hls/*  https://learning-analytics-media.o1r2g3a4n5i6z7e8.workers.dev/weeks/:week/video/:slug/hls/:splat  302

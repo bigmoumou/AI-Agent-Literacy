@@ -12,7 +12,7 @@ Copyright © 2026 JUNHAO CHEN
 
 ### 適用範圍
 
-- `weeks/*/video/` 裡的 AI 教學影片（HLS 串流檔：`index.m3u8`、`init.mp4`、`segNN.m4s`）、封面 `poster.jpg` 與縮圖 `thumb.jpg`。
+- AI 教學影片：`weeks/*/video/` 裡的封面 `poster.jpg` 與縮圖 `thumb.jpg`，以及網站播放的 HLS 串流檔（`index.m3u8`、`init.mp4`、`segNN.m4s`；2026-10-19 起放在課程的影片站 learning-analytics-media，路徑相同，不在這個 repo）。
 - 網頁上的教學文字：週次頁（`weeks/*/index.html`）的標題、說明、章節名稱、重點，以及它們的簡體中文、英文、越南文翻譯。
 - `assets/course.js` 裡每週的標題、摘要與說明（`WEEKS`）及其翻譯。
 - `docs/images/` 裡的網站截圖。
@@ -72,7 +72,7 @@ The website's code and documentation (`README.md`, `docs/維護說明.md`) are l
 
 ### Scope
 
-- The AI teaching videos in `weeks/*/video/` (HLS streams: `index.m3u8`, `init.mp4`, `segNN.m4s`), the posters `poster.jpg` and the thumbnails `thumb.jpg`.
+- The AI teaching videos: the posters `poster.jpg` and thumbnails `thumb.jpg` in `weeks/*/video/`, and the HLS streams the site plays (`index.m3u8`, `init.mp4`, `segNN.m4s`; since 2026-10-19 they are hosted on the course's media site, learning-analytics-media, under the same paths, not in this repository).
 - The teaching text on the web pages: titles, descriptions, chapter names and key points on the week pages (`weeks/*/index.html`), and their Simplified Chinese, English and Vietnamese translations.
 - The weekly titles, summaries and descriptions in `assets/course.js` (`WEEKS`) and their translations.
 - The screenshots of the site in `docs/images/`.

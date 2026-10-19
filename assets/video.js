@@ -18,6 +18,16 @@
 (function () {
   "use strict";
 
+  /* 影片串流檔（hls/）不放在這個 repo：放在另一個 Cloudflare 專案「影片站」（2026-10-19 起，見 docs/維護說明.md「影片放在哪裡」），
+     路徑和這裡一模一樣。頁面照舊寫 data-hls="video/NN-slug/hls/index.m3u8"，這裡換成影片站上的同一個路徑；
+     封面 poster.jpg、縮圖 thumb.jpg 還在這個 repo。 */
+  const MEDIA = "https://learning-analytics-media.o1r2g3a4n5i6z7e8.workers.dev/";
+  const SITE = new URL("..", (document.currentScript && document.currentScript.src) || location.href).href; // assets/ 的上一層＝網站根目錄
+  const hlsUrl = (vid) => {
+    const abs = new URL(vid.dataset.hls, location.href).href;
+    return abs.startsWith(SITE) ? MEDIA + abs.slice(SITE.length) : abs;
+  };
+
   const vids = Array.from(document.querySelectorAll("video[data-hls]"));
   const units = Array.from(document.querySelectorAll("section.unit"));
   const reduceMotion = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
@@ -75,7 +85,7 @@
   function attach(vid) {
     if (vid.dataset.attached) return;
     vid.dataset.attached = "1";
-    const src = new URL(vid.dataset.hls, location.href).href;
+    const src = hlsUrl(vid);
     const Hls = window.Hls;
     if (Hls && Hls.isSupported()) {
       const hls = new Hls();
@@ -176,7 +186,7 @@
   const fmt = (s) => { s = Math.round(s); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; };
   // 長度從播放清單（.m3u8）的各段秒數加起來，不用先下載影片
   function showLength(vid, el) {
-    fetch(new URL(vid.dataset.hls, location.href).href)
+    fetch(hlsUrl(vid))
       .then((r) => (r.ok ? r.text() : ""))
       .then((txt) => {
         let s = 0;

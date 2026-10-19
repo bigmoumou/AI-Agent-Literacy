@@ -6,7 +6,7 @@
 #
 # 會建立：
 #   ../製作/weekNN/NN-slug/{source,previews,audio,qa,out,assets}   做影片用的 HTML/CSS/JS 和素材（不公開）
-#   weeks/weekNN/video/NN-slug/                                    網站上的影片檔（tools/publish-video.sh 產生）
+#   weeks/weekNN/video/NN-slug/                                    封面和縮圖（tools/publish-video.sh 產生；影片串流檔在影片站）
 #   weeks/weekNN/index.html                                        這週還沒有頁面時，從 tools/template/week.html.tmpl 建立
 # 並在週次頁的「其他週次」前面加上這支影片的段落（tools/template/video-section.html.tmpl）。
 # 頁面裡標「待填」的地方要再補；node tools/check.mjs 會提醒還沒填的。
@@ -59,6 +59,7 @@ cat <<EOF
 接下來：
   1. 在 製作/week$w2/$slug/ 做影片（opus-video），成品放在 out/final.mp4
   2. tools/publish-video.sh "../製作/week$w2/$slug/out/final.mp4" weeks/week$w2/video/$slug [封面秒數]
+     （只能在 ultra7 上跑：串流檔放進 ../media-site/public/ 並上傳影片站，封面和縮圖放進 repo）
   3. 補完 weeks/week$w2/index.html 裡「待填」的地方（含简中、英文、越南文翻譯）和片段時間
   4. 這週第一次開放時，在 assets/course.js 的 WEEKS 加上 $week（i18n 三種語言都要有）
   5. node tools/check.mjs，通過再 commit、push

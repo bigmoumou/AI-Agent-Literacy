@@ -4,10 +4,12 @@
 // 檢查項目：
 //   1. 每個檔案都小於 25 MiB（Cloudflare Pages 的上限，超過時整個部署會失敗）
 //   2. 每個 .html 都有 github.io 轉址程式（舊網址才轉得過來）和版權聲明
-//   3. HTML 裡的本機連結（href、src、poster、data-hls、data-thumb）都找得到檔案
-//   4. HLS 播放清單（.m3u8）列出的小段都在
+//   3. HTML 裡的本機連結（href、src、poster、data-hls、data-thumb）都找得到檔案；data-hls 到影片站的本機資料夾找
+//      （影片串流檔不在這個 repo，放在 ../media-site/public/，見 docs/維護說明.md「影片放在哪裡」；別台電腦沒有這個資料夾時只提醒）
+//   4. HLS 播放清單（.m3u8）列出的小段都在（同樣在影片站的資料夾裡）
 //   5. assets/course.js 的 WEEKS 裡的 href、thumb、still 都找得到
-//   6. 每個影片資料夾（weeks/weekNN/video/NN-slug/，補充教材是 sN-slug/）都有 hls/index.m3u8、poster.jpg、thumb.jpg，而且週次頁有用到
+//   6. 每個影片資料夾（weeks/weekNN/video/NN-slug/，補充教材是 sN-slug/）在 repo 裡有 poster.jpg、thumb.jpg、在影片站有 hls/index.m3u8，
+//      而且週次頁有用到；repo 裡不能再有 hls/（影片放進 git 會讓 repo 越來越大）
 //   7. _redirects 轉去的目的地存在
 //   8. 多語系：assets/i18n-strings.js 四種語言的 key 一樣、沒有空的；每頁都載入 i18n；
 //      data-ui 用到的 key 都存在；data-i18n、data-i18n-attr 的元素都有 data-zh-hans、data-en、data-vi；
@@ -22,6 +24,10 @@ import vm from "node:vm";
 import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+// 影片站（影片串流檔）的本機資料夾：和 repo 同一層的 media-site/public/，路徑和網站一樣（weeks/weekNN/video/slug/hls/）
+const MEDIA_DIR = process.env.MEDIA_DIR ? path.resolve(process.env.MEDIA_DIR) : path.resolve(ROOT, "..", "media-site", "public");
+const HAS_MEDIA = fs.existsSync(path.join(MEDIA_DIR, "weeks"));
+const toMedia = (p) => path.join(MEDIA_DIR, path.relative(ROOT, p));
 const MAX_FILE = 25 * 1024 * 1024;
 const BUDGET = 800 * 1024 * 1024;
 const SKIP_DIRS = new Set([".git", "node_modules", ".wrangler"]);
@@ -127,9 +133,15 @@ for (const page of pages) {
   for (const m of html.matchAll(/\s(href|src|poster|data-hls|data-thumb)="([^"]*)"/g)) {
     const ref = m[2];
     if (/^(https?:|mailto:|data:|javascript:|#)/.test(ref) || ref === "") continue;
-    const target = resolveRef(page, ref);
+    let target = resolveRef(page, ref);
+    if (m[1] === "data-hls" && target) {
+      if (!HAS_MEDIA) continue;                     // 這台電腦沒有影片站的資料夾：最後提醒一次
+      target = toMedia(target);
+      if (!fs.existsSync(target)) { error(`${rel(page)}：data-hls="${ref}" 在影片站的資料夾（${MEDIA_DIR}）找不到（用 tools/publish-video.sh 發布）`); continue; }
+      playlists.add(target);
+      continue;
+    }
     if (target && !exists(target)) error(`${rel(page)}：${m[1]}="${ref}" 找不到檔案`);
-    if (m[1] === "data-hls" && target) playlists.add(target);
   }
 }
 for (const pl of playlists) {
@@ -138,7 +150,7 @@ for (const pl of playlists) {
   const parts = text.split(/\r?\n/).filter((l) => l && !l.startsWith("#"));
   for (const m of text.matchAll(/URI="([^"]+)"/g)) parts.push(m[1]);
   for (const part of parts) {
-    if (!fs.existsSync(path.resolve(path.dirname(pl), part))) error(`${rel(pl)} 列出的 ${part} 不存在`);
+    if (!fs.existsSync(path.resolve(path.dirname(pl), part))) error(`影片站 ${path.relative(MEDIA_DIR, pl).split(path.sep).join("/")} 列出的 ${part} 不存在`);
   }
 }
 
@@ -178,8 +190,12 @@ for (const week of fs.existsSync(weeksDir) ? fs.readdirSync(weeksDir) : []) {
     const d = path.join(videoDir, slug);
     if (!fs.statSync(d).isDirectory()) continue;
     if (!/^(\d{2}|s\d)-[a-z0-9-]+$/.test(slug)) warn(`weeks/${week}/video/${slug}：資料夾名稱建議是「兩位數字-英文小寫」（補充教材用 s1-、s2-），例如 02-relative-path、s1-terminal-mac`);
-    for (const need of ["hls/index.m3u8", "poster.jpg", "thumb.jpg"]) {
+    for (const need of ["poster.jpg", "thumb.jpg"]) {
       if (!fs.existsSync(path.join(d, need))) error(`weeks/${week}/video/${slug}/ 少了 ${need}（用 tools/publish-video.sh 產生）`);
+    }
+    if (fs.existsSync(path.join(d, "hls"))) error(`weeks/${week}/video/${slug}/hls/ 不能放在 repo 裡：影片串流檔放影片站（tools/publish-video.sh 會放對地方），把這個資料夾刪掉`);
+    if (HAS_MEDIA && !fs.existsSync(path.join(MEDIA_DIR, "weeks", week, "video", slug, "hls", "index.m3u8"))) {
+      error(`影片站沒有 weeks/${week}/video/${slug}/hls/index.m3u8（用 tools/publish-video.sh 發布）`);
     }
     if (!pageHtml.includes(`video/${slug}/hls/index.m3u8`)) warn(`weeks/${week}/index.html 沒有用到 video/${slug}/`);
   }
@@ -245,7 +261,8 @@ for (const f of published) {
     warn(`${rel(f)}：mp4 不放進 repo（留在 製作/ 裡），網站只用 HLS`);
   }
 }
-if (total > BUDGET) warn(`網站總共 ${(total / 1048576).toFixed(0)} MB，接近 GitHub Pages 1 GB 的上限`);
+if (total > BUDGET) warn(`網站總共 ${(total / 1048576).toFixed(0)} MB，repo 太大了（GitHub 建議 1 GB 以下）`);
+if (!HAS_MEDIA) warn(`這台電腦沒有影片站的資料夾（${MEDIA_DIR}），影片串流檔沒有檢查；影片只在 ultra7 上發布`);
 
 console.log(`檢查了 ${published.length} 個檔案、${pages.length} 個頁面、${playlists.size} 支影片；網站總共 ${(total / 1048576).toFixed(1)} MB。`);
 for (const w of warnings) console.log(`提醒：${w}`);

@@ -2,3 +2,6 @@
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# 影片串流檔放影片站，不進 git（2026-10-19，見 docs/維護說明.md「影片放在哪裡」）
+weeks/*/video/*/hls/
