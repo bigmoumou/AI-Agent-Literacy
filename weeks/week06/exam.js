@@ -904,7 +904,7 @@
           },
           onQuiz: (n, kind) => { if (warp) warp.step(n, kind); if (kind === "ask" && guide) guide.quizLine(n); },
           onPass: (i) => { if (guide) guide.passed(i); },
-          onEvent: (kind, i) => { if (guide) guide.event(kind, i); },
+          onEvent: (kind, i, arg) => { if (guide) guide.event(kind, i, arg); },
           onStage: setStage,
           onUnstable: () => { unstable(); if (guide) guide.event("unstable"); },
           onDone: (resumed) => {

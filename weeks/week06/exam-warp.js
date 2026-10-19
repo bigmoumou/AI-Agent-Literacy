@@ -40,7 +40,7 @@
     const frags = [];
     // 記憶碎片：這門課 Week 3–5、這次考試裡出現過的東西
     const MEM = ["AGENTS.md", "VERIFY.md", "cd ~/Desktop", "ls -a", "mv obs-c.csv", "unzip obs-a.zip", "rift-log/", "midterm/", "output/report.md",
-      "git commit", "git push", "Mermaid", "Playwright", "Codex", "New chat", "WEEK 03", "WEEK 04", "WEEK 05", "68.1 分", "補交", "請假", "缺考", "~/.rift", "rescue/"];
+      "git commit", "git push", "Mermaid", "Playwright", "Codex", "New chat", "WEEK 03", "WEEK 04", "WEEK 05"];   // 老師 2026-10-19：拿掉 68.1 分、補交、請假、缺考、~/.rift、rescue/
     let memI = Math.floor(Math.random() * MEM.length);
     function spawnFrag() {
       const c = Math.random();

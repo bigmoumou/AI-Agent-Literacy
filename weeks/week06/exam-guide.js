@@ -15,6 +15,8 @@
 (function () {
   "use strict";
   const HOME = "/Users/an";
+  // 第 2、3 關：叫 Codex 的時候，專案裡的 .md 還沒存檔（老師 2026-10-19）；隔 30 秒以上才再說一次
+  const UNSAVED = (f, os) => ["surprised", "等等！" + f + " 好像還沒存檔？Codex 讀的是存進硬碟的檔案，要先存檔（" + (os === "win" ? "Ctrl+S" : "⌘S") + "）。"];
   // 每一關：標題、目標、訊號、小安開頭的通訊、卡住時的提醒（秒數、表情、話）、規則被吃掉、結果不對時說的話、要亮的資料夾
   const LV = [
     {
@@ -52,6 +54,8 @@
         [360, "thinking", "亂流吃得掉對話框，可是吃不掉硬碟裡的檔案。"],
       ],
       eaten: ["surprised", "啊！你打的規則被亂流吃掉了。"],
+      unsaved: UNSAVED,
+      repeat: { unsaved: 30 },
       unstable: ["worried", "空間又晃了一下……報告好像還不對。"],
     },
     {
@@ -70,7 +74,8 @@
       ],
       // 老師 2026-10-18：學生把規則打在對話框時，小安要提醒「亂流吃得掉對話框，硬碟裡的檔案是安全的」；每次都說（隔 40 秒以上）
       eaten: ["surprised", "規則又被亂流吃掉了！亂流吃得掉對話框裡的字，但硬碟裡的檔案是安全的。"],
-      repeat: { eaten: 40 },
+      unsaved: UNSAVED,
+      repeat: { eaten: 40, unsaved: 30 },
       unstable: ["worried", "平均好像不對，時間線還在晃。"],
     },
     {
@@ -372,14 +377,14 @@
       setTimeout(() => { setStab(stab, [["ss", "sp"], ["hs", "hp"]], true); }, reduce ? 0 : 450);   // 新的一格從左往右亮起來
       setTimeout(() => root.classList.remove("is-stamp"), reduce ? 1300 : 2000);
     }
-    // 對話框裡的規則被吃掉、結果不對：每關第一次才說
-    function event(kind, i) {
+    // 對話框裡的規則被吃掉、結果不對：每關第一次才說；沒存檔（unsaved）的話裡要帶檔名（arg）
+    function event(kind, i, arg) {
       const lv = LV[i == null ? level : i];
       if (!lv || !lv[kind]) return;
       const gap = lv.repeat && lv.repeat[kind], at = said[kind + i];   // repeat：隔幾秒可以再說一次
       if (at && !(gap && performance.now() - at > gap * 1000)) return;
       said[kind + i] = performance.now();
-      toast(lv[kind]);
+      toast(typeof lv[kind] === "function" ? lv[kind](arg, os) : lv[kind]);
     }
     // 時空轉移中（第 4 關的問答）：第 n 題出現時，小安說一句（有的話）
     function quizLine(n) {

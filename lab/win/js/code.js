@@ -939,6 +939,7 @@
       hasActive: function () { return !!active && !active.binary; },
       activeTextarea: function () { return active && !active.binary ? active.ta : null; },
       isDirty: function () { return !!(active && active.dirty); },
+      dirtyPaths: function () { return tabs.filter(function (t) { return t.dirty && t.path; }).map(function (t) { return t.path; }); },
       togglePreview: togglePreview,
       canPreview: function () { return !!LAB.markdown && isMd(active); },
       previewOpen: function () { return previewOn(active); }
@@ -1127,7 +1128,9 @@
     openFolder: openFolder,
     openFile: openFile,
     openPanel: function () { var c = activeCtl() || allCtls()[0] || createWindow(null); return openPanel(c); },
-    windows: function () { return allCtls().map(function (c) { return { winId: c.win.id, folder: c.root() || '', path: c.win.state.path || '' }; }); }
+    windows: function () { return allCtls().map(function (c) { return { winId: c.win.id, folder: c.root() || '', path: c.win.state.path || '' }; }); },
+    // every open tab with unsaved changes, in every window (Week 6 exam: 小安 warns when Codex is asked while AGENTS.md is unsaved)
+    dirtyFiles: function () { return allCtls().reduce(function (a, c) { return a.concat(c.dirtyPaths()); }, []); }
   };
 
   LAB.apps.register('code', {

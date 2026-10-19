@@ -126,6 +126,15 @@
       try { return ctx.read(hit.slice(root.length + 1)); } catch (e) { return null; }
     };
   }
+  // 專案資料夾裡還沒存檔的 .md（VS Code 每個分頁；文字編輯／記事本看視窗目前的檔案）；有 AGENTS.md 就先說它
+  function unsavedMd(L, dir) {
+    const all = new Set();
+    try { (L.code && L.code.dirtyFiles ? L.code.dirtyFiles() : []).forEach((p) => all.add(p)); } catch (e) { /* 沒有 VS Code 就算了 */ }
+    try { L.wm.all().forEach((w) => { if (w.appId !== "code" && w.state && w.state.dirty && w.state.path) all.add(w.state.path); }); } catch (e) { /* 沒有就算了 */ }
+    const root = dir.toLowerCase() + "/";
+    const md = [...all].filter((p) => /\.md$/i.test(p) && String(p).toLowerCase().startsWith(root)).map((p) => p.slice(p.lastIndexOf("/") + 1));
+    return md.find((n) => /^agents\.md$/i.test(n)) || md[0] || "";
+  }
   const MD = /[\w一-鿿\-.\/]+\.md\b/gi;
   const otherMd = (raw) => (raw.match(MD) || []).filter((f) => !/(?:^|\/)(?:agents|report|summary)\.md$/i.test(f));
   const mentionsAgents = (raw) => /agents\.md/i.test(raw);
@@ -163,6 +172,12 @@
     });
     // Codex 寫出來的報告、摘要不對：空間還不穩定（裂縫閃一下、低低的嗡一聲；不說哪裡錯）
     L.bus.on("codex:reply", (d) => { if (d && d.exam && d.ok === false && H.onUnstable) H.onUnstable(); });
+    // 第 2、3 關：叫 Codex 的時候，專案裡還有沒存檔的 .md（老師 2026-10-19）：Codex 讀的是硬碟上的檔案，小安提醒一句
+    L.bus.on("codex:send", () => {
+      if (active !== 1 && active !== 2) return;
+      const f = unsavedMd(L, active === 1 ? L2DIR : L3DIR);
+      if (f && H.onEvent) H.onEvent("unsaved", active, f);
+    });
     let nextT = setTimeout(next, passed ? 600 : 4600), fresh = new Set(), active = -1;   // active：正在考的關（簡報播完、開始之後）   // 第一次進來先讓 WARNING 播完
 
     // 每一關開始前先播簡報、小安的通訊（重新整理接著考的第一關只有簡報）
