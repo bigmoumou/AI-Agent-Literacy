@@ -170,6 +170,15 @@ body::after {
 .hw-lead { max-width: 46rem; margin-top: 1.4rem; font-size: clamp(1.02rem, 1.7vw, 1.14rem); line-height: 1.8; color: var(--ink-2); text-wrap: pretty; }
 .hw-credit { max-width: 46rem; margin-top: 1rem; font-size: .8rem; line-height: 1.6; color: var(--ink-3); }
 .hw-credit a { color: inherit; }
+/* 作業的下載位置（2026-10-19 老師：「用顏色醒目下載位置」）：作業段落裡去哪裡拿作業檔案、作業資料的連結加 class="hw-dl"
+   （四種語言的 data-* 裡也要加）：橘色粗體＋淡淡的螢光筆底，和一般說明文字分開。淺色底 #c2410c、深色底 #ffa64d，對比都 ≥ 4.5。 */
+.hw-dl { --dl: #c2410c; --dl-bg: rgba(251, 146, 60, .24);
+  color: var(--dl); font-weight: 700; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: .22em;
+  background: linear-gradient(transparent 56%, var(--dl-bg) 56%); padding: 0 .08em;
+  -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.hw-dl:hover, .hw-dl:focus-visible { background: var(--dl-bg); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .hw-dl { --dl: #ffa64d; --dl-bg: rgba(255, 166, 77, .18); } }
+:root[data-theme="dark"] .hw-dl { --dl: #ffa64d; --dl-bg: rgba(255, 166, 77, .18); }
 
 /* ---------- 課堂練習（section.unit-lab）：不是影片，膠捲裡是左右兩台筆電（Mac｜Windows），點哪一台就進哪一個練習 ----------
    版面和影片段落一樣（標題、膠捲、重點），清單上它也是一格（video.js 用 data-thumb 當縮圖）。
