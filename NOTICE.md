@@ -13,6 +13,10 @@
   - 授權：Apache License 2.0。授權聲明見 `assets/vendor/hls.LICENSE.txt`，條款全文見 `assets/vendor/LICENSE-Apache-2.0.txt`（原文：https://www.apache.org/licenses/LICENSE-2.0.txt）
   - Copyright (c) 2017 Dailymotion；部分程式衍生自 videojs-contrib-hls，Copyright (c) 2013-2015 Brightcove
   - 原始碼：https://github.com/video-dev/hls.js
+- three.js r186（打包進「空中之島」範例，只留用到的部分）
+  - 檔案：`weeks/week07/island-7k2q/island.js`（檔案結尾附授權聲明）
+  - 授權：MIT License，Copyright 2010-2026 Three.js Authors
+  - 原始碼：https://github.com/mrdoob/three.js
 
 ### 字型（不在 repo 裡）
 
@@ -104,6 +108,10 @@ The code of this project is licensed under the MIT License ([LICENSE](LICENSE)),
   - License: Apache License 2.0. The license notice is in `assets/vendor/hls.LICENSE.txt`; the full text is in `assets/vendor/LICENSE-Apache-2.0.txt` (original: https://www.apache.org/licenses/LICENSE-2.0.txt)
   - Copyright (c) 2017 Dailymotion; parts are derived from videojs-contrib-hls, Copyright (c) 2013-2015 Brightcove
   - Source: https://github.com/video-dev/hls.js
+- three.js r186 (bundled into the "Sky Island" example, only the parts it uses)
+  - File: `weeks/week07/island-7k2q/island.js` (the license notice is at the end of the file)
+  - License: MIT License, Copyright 2010-2026 Three.js Authors
+  - Source: https://github.com/mrdoob/three.js
 
 ### Fonts (not in this repository)
 

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script>
+  // 課程網址已改成 Cloudflare Pages（GitHub Pages 在台灣太慢）：舊的 github.io 網址轉到同一頁，保留 #t= 等片段
+  if (location.hostname.endsWith("github.io")) {
+    location.replace("https://learning-analytics-tools.pages.dev" + (location.pathname.replace(/^\/Learning-Analytics-Tools(?=\/|$)/, "") || "/") + location.search + location.hash);
+  }
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sky Island</title>
+<!-- Week 7 範例「空中之島」（測試版，隱藏連結，2026-10-19）：原始碼在 製作/week07/sky-island（src/island.js），用 build.sh 打包成 island.js。 -->
+<meta name="robots" content="noindex, nofollow">
+<meta name="author" content="JUNHAO CHEN">
+<meta name="copyright" content="© 2026 JUNHAO CHEN">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 3 29 10 16 17 3 10z' fill='%2368a84c'/%3E%3Cpath d='M3 10 16 17v12L3 22z' fill='%238c6442'/%3E%3Cpath d='M29 10 16 17v12l13-7z' fill='%23735236'/%3E%3C/svg%3E">
+<script src="../../../assets/i18n-strings.js"></script>
+<script src="../../../assets/i18n.js"></script>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #bfe0f4; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; user-select: none; }
+  #cv { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; image-rendering: pixelated; }
+  #cross { position: fixed; left: 50%; top: 50%; width: 18px; height: 18px; margin: -9px 0 0 -9px; pointer-events: none; display: none; }
+  #cross::before, #cross::after { content: ""; position: absolute; background: rgba(255,255,255,.9); box-shadow: 0 0 0 1px rgba(0,0,0,.25); }
+  #cross::before { left: 8px; top: 0; width: 2px; height: 18px; } #cross::after { left: 0; top: 8px; width: 18px; height: 2px; }
+  body.playing #cross { display: block; }
+  #bar { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 4px; padding: 4px; background: rgba(20,24,28,.55); border-radius: 6px; }
+  .slot { position: relative; width: 52px; height: 52px; display: grid; place-items: center; border: 2px solid rgba(255,255,255,.18); border-radius: 4px; box-sizing: border-box; }
+  .slot.on { border-color: #fff; background: rgba(255,255,255,.12); }
+  .slot canvas { image-rendering: pixelated; }
+  .slot span { position: absolute; left: 4px; top: 1px; font: 700 12px system-ui, sans-serif; color: #fff; text-shadow: 0 1px 0 #000; }
+  #name, #toast { position: fixed; left: 50%; transform: translateX(-50%); font: 700 18px system-ui, sans-serif; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.7); opacity: 0; pointer-events: none; white-space: nowrap; }
+  #name { bottom: 84px; } #toast { top: 22%; font-size: 22px; }
+  #name.show, #toast.show { animation: fade 1.8s ease forwards; }
+  @keyframes fade { 0%, 70% { opacity: 1; } 100% { opacity: 0; } }
+  #fps { position: fixed; left: 8px; top: 6px; font: 600 13px ui-monospace, Consolas, monospace; color: #10202c; background: rgba(255,255,255,.6); padding: 2px 6px; border-radius: 3px; }
+  #start { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(16,24,32,.38); cursor: pointer; }
+  body.playing #start { display: none; }
+  .card { width: min(440px, calc(100vw - 32px)); box-sizing: border-box; padding: 26px 28px 18px; background: rgba(250,248,242,.96); color: #24221e; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.25); cursor: default; }
+  .kicker { font: 600 13px system-ui, sans-serif; color: #7a6a52; letter-spacing: .02em; }
+  h1 { margin: 4px 0 14px; font-size: 34px; letter-spacing: .01em; }
+  .keys { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 7px; font-size: 15px; }
+  kbd { display: inline-block; min-width: 20px; padding: 1px 6px; margin-right: 3px; border: 1px solid #b9ae9a; border-bottom-width: 2px; border-radius: 4px; background: #fff; font: 600 13px ui-monospace, Consolas, monospace; text-align: center; }
+  .go { display: block; padding: 11px 0; border-radius: 6px; background: #3f7d4e; color: #fff; text-align: center; font-weight: 700; font-size: 17px; cursor: pointer; }
+  .note { margin: 10px 0 4px; font-size: 13px; color: #6d6455; }
+  #reset { border: 0; background: none; padding: 0; font-size: 13px; color: #8a5a3c; text-decoration: underline; cursor: pointer; }
+  .copy { margin-top: 12px; font-size: 11px; color: #9a907f; }
+  .msg { position: fixed; inset: 0; display: grid; place-items: center; background: #bfe0f4; padding: 16px; text-align: center; font-size: 18px; color: #24221e; }
+  .msg[hidden] { display: none; }
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div id="cross"></div>
+<div id="bar"></div>
+<div id="name"></div>
+<div id="toast"></div>
+<div id="fps" hidden></div>
+<div id="start">
+  <div class="card">
+    <div class="kicker">Week 7 · Block world · test build</div>
+    <h1>Sky Island</h1>
+    <ul class="keys">
+      <li><span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span> Move</li>
+      <li><span><kbd>Space</kbd></span> Jump</li>
+      <li>Mouse: look around</li>
+      <li>Left click: break a block · Right click: place a block</li>
+      <li><span><kbd>1</kbd>–<kbd>8</kbd></span> or mouse wheel: choose a block</li>
+      <li><span><kbd>Esc</kbd></span> Pause</li>
+    </ul>
+    <div class="go">Click to start</div>
+    <p class="note">What you build is saved in this browser.</p>
+    <button id="reset" type="button">Reset the island</button>
+    <div class="copy">Copyright © 2026 JUNHAO CHEN</div>
+  </div>
+</div>
+<div id="nogl" class="msg" hidden>This browser can’t show 3D graphics.<br>Please try the latest Chrome or Edge, with hardware acceleration turned on.</div>
+<div id="touch" class="msg" hidden>Sky Island needs a keyboard and a mouse.<br>Please open it on a computer.</div>
+<script src="island.js"></script>
+</body>
+</html>
