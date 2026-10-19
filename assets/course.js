@@ -135,22 +135,22 @@
       href: "weeks/week07/",
       thumb: "weeks/week07/video/02-se-tdd/thumb.jpg",
       still: "weeks/week07/video/02-se-tdd/poster.jpg",
-      meta: "1 支影片＋2 支補充・共 12 分 20 秒",
+      meta: "1 支影片＋2 支補充・共 12 分 26 秒",
       i18n: {
         "zh-Hans": {
           title: "像工程师一样开发：规划与测试",
           summary: "瀑布式开发一阶一阶往下，错在需求就得逆流；测试驱动开发（TDD）先写测试、再写程序，就是我们一直在用的 VERIFY.md。补充：拆开自己的网站，以及用 Git 的版本管理当安全网。",
-          meta: "1 个视频＋2 个补充・共 12 分 20 秒",
+          meta: "1 个视频＋2 个补充・共 12 分 26 秒",
         },
         en: {
           title: "Developing Like an Engineer: Planning and Testing",
           summary: "The waterfall model flows down one step at a time, and a mistake in the requirements means going back upstream; test-driven development (TDD) writes the tests first and the code second, which is the VERIFY.md we have been using all along. Extras: take your own website apart, and use Git’s version control as a safety net.",
-          meta: "1 video + 2 extras · 12 min 20 s in total",
+          meta: "1 video + 2 extras · 12 min 26 s in total",
         },
         vi: {
           title: "Phát triển như một kỹ sư: lập kế hoạch và kiểm thử",
           summary: "Mô hình thác nước chảy xuống từng bậc, sai ở yêu cầu thì phải ngược dòng; phát triển hướng kiểm thử (TDD) viết kiểm thử trước rồi mới viết code, chính là VERIFY.md mà chúng ta vẫn dùng. Bổ sung: tháo rời trang web của bạn, và dùng quản lý phiên bản của Git làm lưới an toàn.",
-          meta: "1 video + 2 bổ sung · tổng cộng 12 phút 20 giây",
+          meta: "1 video + 2 bổ sung · tổng cộng 12 phút 26 giây",
         },
       },
     },
