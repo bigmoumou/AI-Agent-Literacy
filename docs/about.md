@@ -15,7 +15,7 @@ An AI teaching-video demonstration site for the Learning Analytics Tools course 
 
 這是臺師大課程 Learning Analytics Tools Implementation Applications 的教材網站，也是一個公開的 AI 示範教學實例：這門課教學生怎麼和 AI 工具合作，而這門課自己的教學影片，也是用 AI 工具做出來的。網站程式碼以 MIT 授權開源，影片與教材內容以 CC BY-NC-SA 4.0 開放授權（限非商業使用）。
 
-每週的 AI 教學影片由 Claude Code 以程式碼製作，授課教師提供教材、選定方向，並在每個階段審核。學生在網站上看短影片、點章節、讀重點，依自己的步調互動複習；學生同意公開的作業作品，也在這裡的[作品集](https://learning-analytics-tools.pages.dev/works/)展示。製作這些影片用的教學影片生成 prompt 與製作經驗，會陸續整理公開（規劃中）。
+每週的 AI 教學影片以程式碼製作：授課教師提供教材、選定方向，並在每個階段審核；網站和影片的開發由 Codex 與 Claude 協力完成，影片做好後也由兩者互相審查。學生在網站上看短影片、點章節、讀重點，依自己的步調互動複習；學生同意公開的作業作品，也在這裡的[作品集](https://learning-analytics-tools.pages.dev/works/)展示。製作這些影片用的教學影片生成 prompt 與製作經驗，會陸續整理公開（規劃中）。
 
 網站：<https://learning-analytics-tools.pages.dev/>
 
@@ -39,9 +39,9 @@ An AI teaching-video demonstration site for the Learning Analytics Tools course 
 
 ### AI 教學影片
 
-目前（2026 年 10 月）已公開 Week 3「AI Agent 的工作資料夾」、Week 4「AI Agent 內建瀏覽器」與 Week 5「讓 Codex 做對：驗證與 context window」：共 10 支影片加 6 支補充教材（合計 51 分鐘）、146 個章節、86 則重點。Week 6 是考試週，只有「TEST」入口：從異次元裂縫掉進黑洞，再選一台遠端電腦（Mac 或 Windows）作答（考試模式準備中，目前進去是練習電腦）。Week 7 到 Week 16 依課程進度陸續開放，網站上先顯示「準備中」。
+目前（2026 年 10 月）已公開 Week 3「AI Agent 的工作資料夾」、Week 4「AI Agent 內建瀏覽器」、Week 5「讓 Codex 做對：驗證與 context window」，以及 Week 7「像工程師一樣開發：規劃與測試」先上線的兩支補充：共 10 支影片加 8 支補充教材（合計約 60 分鐘）、161 個章節、97 則重點。Week 6 是考試週，只有「TEST」入口：從異次元裂縫掉進黑洞，再選一台遠端電腦（Mac 或 Windows），沒有提示，一關一關靠自己完成任務。Week 7 的影片和作業、Week 8 到 Week 16 依課程進度陸續開放，還沒開放的週次在網站上顯示「準備中」。
 
-影片沒有旁白，用動畫、字卡和程式合成的配樂說明一個主題，長度從 1 分多到 4 分鐘左右。課程教的是 AI 程式助理的實際用法，影片中示範的工具主要是 OpenAI 的 Codex。
+影片沒有旁白，用動畫、字卡和程式合成的配樂說明一個主題，長度從 1 分多到 5 分鐘左右。課程教的是 AI 程式助理的實際用法，影片中示範的工具主要是 OpenAI 的 Codex。
 
 | | 影片 | 長度 | 章節／重點 | 內容 |
 |---|---|---|---|---|
@@ -52,7 +52,7 @@ An AI teaching-video demonstration site for the Learning Analytics Tools course 
 | <img src="../weeks/week03/video/s2-terminal-win/thumb.jpg" width="180" alt="Week 3 補充 2 縮圖"> | Week 3・補充 2<br>[終端機介紹（Win）](https://learning-analytics-tools.pages.dev/weeks/week03/#s2-terminal-win) | 5:23 | 12／7 | 同一個狐狸小安的故事搬到 Windows 11：從搜尋打開終端機、看懂 `PS C:\Users\an>` 提示字元、`ls` 的表格輸出、`mv`，解壓縮改用內建的 `tar -xvf`；練習頁加上 OneDrive 桌面的提醒；最後補一段「東西不見了怎麼找」：`ls -Force` 看藏起來的、名字有空格加引號（或按 Tab）、`ls -Recurse -Force -Filter` 搜尋 |
 | <img src="../weeks/week04/video/01-built-in-browser/thumb.jpg" width="180" alt="Week 4 影片 01 縮圖"> | Week 4・01<br>[AI Agent 內建瀏覽器](https://learning-analytics-tools.pages.dev/weeks/week04/) | 2:28 | 8／5 | AI Agent 控制瀏覽器的五種方法；Codex 內建瀏覽器卡住後，Codex 自己找出原因並修好，再實際在 Blockbench 做出方塊桌椅（22 分 34 秒的操作，影片中加速播放） |
 | <img src="../weeks/week04/video/02-browser-uses/thumb.jpg" width="180" alt="Week 4 影片 02 縮圖"> | Week 4・02<br>[內建瀏覽器還能做的三件事：看、改、查](https://learning-analytics-tools.pages.dev/weeks/week04/#02-browser-uses) | 2:52 | 6／5 | 看：請 Codex 用手機寬度檢查你的網站並修好跑版；改：在網頁上框選、留言，Codex 照著改；查：幫你看公開網頁並附來源；最後說明它做不到的事 |
-| <img src="../weeks/week04/video/03-homework-ginkgo/thumb.jpg" width="180" alt="Week 4 影片 03 縮圖"> | Week 4・03<br>[作業：東京銀杏散步地圖網站](https://learning-analytics-tools.pages.dev/weeks/week04/#03-homework-ginkgo) | 2:26 | 7／5 | Single-turn Prompting 作業：照「櫻花地圖」做東京銀杏統整網站；老師給的資料來源要先請 Codex 分析（故意多抓）、需求寫成 BRIEF.md、只有一次機會，練的是人自己的思考。世界是一本銀杏散步手帳，BRIEF.md 裝進信封投進郵筒（學弟2 製作） |
+| <img src="../weeks/week04/video/03-homework-ginkgo/thumb.jpg" width="180" alt="Week 4 影片 03 縮圖"> | Week 4・03<br>[作業：東京銀杏散步地圖網站](https://learning-analytics-tools.pages.dev/weeks/week04/#03-homework-ginkgo) | 2:27 | 7／6 | Single-turn Prompting 作業：照「櫻花地圖」做東京銀杏統整網站；老師給的資料來源要先請 Codex 分析（故意多抓）、需求寫成 BRIEF.md、只有一次機會，練的是人自己的思考。世界是一本銀杏散步手帳，BRIEF.md 裝進信封投進郵筒（學弟2 製作） |
 | <img src="../weeks/week04/video/04-homework-github/thumb.jpg" width="180" alt="Week 4 影片 04 縮圖"> | Week 4・04<br>[遠端連線作業：GitHub、Mermaid、內建瀏覽器](https://learning-analytics-tools.pages.dev/weeks/week04/#04-homework-github) | 3:23 | 7／5 | Week 4 作業：把 Week 3 的美術館專案放上 GitHub、在 ARCHITECTURE.md 用 Mermaid 加判斷、請 Codex 用內建瀏覽器檢查網站並修好，最後照清單檢查、交出倉庫網址 |
 | <img src="../weeks/week04/video/s1-github/thumb.jpg" width="180" alt="Week 4 補充 1 縮圖"> | Week 4・補充 1<br>[GitHub 入門：程式碼版的雲端硬碟](https://learning-analytics-tools.pages.dev/weeks/week04/#s1-github) | 3:42 | 9／5 | GitHub 就是程式碼版的雲端硬碟，和 Google 雲端硬碟比較；用狐狸小安的家和雲端倉庫教 `clone`、`add`＋`commit`、`push`、`pull`，第一次使用的設定，最後請 Codex（GitHub plugin）幫你下指令 |
 | <img src="../weeks/week04/video/s2-mermaid/thumb.jpg" width="180" alt="Week 4 補充 2 縮圖"> | Week 4・補充 2<br>[Mermaid：用文字畫流程圖](https://learning-analytics-tools.pages.dev/weeks/week04/#s2-mermaid) | 4:10 | 12／5 | .md 和 .mmd 兩種存法；左邊打一行、右邊長出方塊：`flowchart TD/LR`、`[ ]`、`( )`、`{ }`、`-->`、`-->|字|`；接到作業的 ARCHITECTURE.md；在 GitHub、Mermaid Live Editor、VS Code 看圖；畫不出來就請 Codex 修 |
@@ -61,6 +61,8 @@ An AI teaching-video demonstration site for the Learning Analytics Tools course 
 | <img src="../weeks/week05/video/03-homework-grades/thumb.jpg" width="180" alt="Week 5 影片 03 縮圖"> | Week 5・03<br>[作業：成績分析小報告](https://learning-analytics-tools.pages.dev/weeks/week05/#03-homework-grades) | 2:29 | 8／5 | 這週你是助教：用 Codex 分析兩個班的虛構成績表（`week5-hw.zip`），寫一份最上面有答案卡的 `report.md`，推到公開的 GitHub repo。專案要有四樣：Codex 開在專案資料夾、`AGENTS.md`、`VERIFY.md`、GitHub。用身高表（公尺、公分混在一起）示範「安靜的錯」：Codex 很有自信地給出錯的平均，`VERIFY.md` 加一條合理範圍，它就自己抓到了。可以多輪，但越短越好；交 repo 連結，完整對話自願附上 |
 | <img src="../weeks/week05/video/s1-codex-loop/thumb.jpg" width="180" alt="Week 5 補充 1 縮圖"> | Week 5・補充 1<br>[按下 Enter 之後，Codex 做了什麼](https://learning-analytics-tools.pages.dev/weeks/week05/#s1-codex-loop) | 3:44 | 10／5 | 用「一疊紙條」講 Codex 背後的流程：模型在 OpenAI 的伺服器只讀寫文字，Codex 在你的電腦上動手；按一次 Enter，背後來回很多次（依 OpenAI〈Unrolling the Codex agent loop〉）。讀檔、上網搜尋（在 OpenAI 那邊）、下載（預設沙箱不能連網，要你允許）、寫程式分析、寫檔，每一步的結果都疊進 context window；讀過的內容會送到 OpenAI，個資先換成代號 |
 | <img src="../weeks/week05/video/s2-context-full/thumb.jpg" width="180" alt="Week 5 補充 2 縮圖"> | Week 5・補充 2<br>[對話滿了會怎樣](https://learning-analytics-tools.pages.dev/weeks/week05/#s2-context-full) | 2:35 | 10／5 | 同一疊紙條疊到頂：快滿時 Codex 自動壓縮，前面的對話換成精簡版，活動紀錄出現「Context automatically compacted」；精簡版可能掉了「缺考不算進平均」這種決定，新圖的數字就對不起來。Codex 原始碼裡的提醒：長對話和多次壓縮可能讓模型比較不準。兩個習慣：一件事一段對話、要一直遵守的事寫進 `AGENTS.md` |
+| <img src="../weeks/week07/video/s1-website-modules/thumb.jpg" width="180" alt="Week 7 補充 1 縮圖"> | Week 7・補充 1<br>[網站是怎麼組成的](https://learning-analytics-tools.pages.dev/weeks/week07/#s1-website-modules) | 5:00 | 9／6 | 網站像一棟房子：HTML 是隔間、CSS 是裝潢、JS 是水電和開關，再加上圖片和資料；拆開自己的網站，看每一塊管什麼；網站就是一個資料夾，入口是 `index.html`；瀏覽器就是網頁的「編譯器」；靜態和動態的差別；懂了網站的組成，才控制得住 AI。示範網站和 Codex 畫面是示意 |
+| <img src="../weeks/week07/video/s2-git-versions/thumb.jpg" width="180" alt="Week 7 補充 2 縮圖"> | Week 7・補充 2<br>[Git：版本管理，也是你的安全網](https://learning-analytics-tools.pages.dev/weeks/week07/#s2-git-versions) | 3:48 | 6／5 | Git 最重要的是版本管理：每次 commit 就是一個存檔點，可以看歷史、比較差異、回到任何一版，GitHub 只是把版本放到雲端；AI 一次改好幾個檔案，先用 Codex app 的「檢視變更」看它改了什麼；改壞了就請 AI 回到上一個 commit；測試全綠才 commit，說明寫清楚。「檢視變更」面板、commit 編號和測試案例都是示意 |
 
 ### 學生參與和互動複習
 
@@ -71,7 +73,7 @@ An AI teaching-video demonstration site for the Learning Analytics Tools course 
 - 章節：一週一頁，每支影片下方是章節和編號重點。點章節就跳到那個時間播放，正在播的章節會標示出來。
 - 時間連結：週次頁網址加上 `#t=30`，會從這週第一支影片的第 30 秒開始播放；加上 `#02-agents-md-context&t=30` 則指定某一支影片的某一秒。教師可以把連結貼給學生，指到要複習的那一刻，例如 [Week 3 影片 02 的第 30 秒](https://learning-analytics-tools.pages.dev/weeks/week03/#02-agents-md-context&t=30)。
 - 播放清單與觀看進度：一週有兩支以上影片時，頁面自動變成播放清單。每支有縮圖、長度和觀看進度，看到 95% 以上會打勾；播完會出現「下一支」，點了才播。沒選到的影片不會先下載，一次只播一支。桌機的清單在右側，手機的清單在播放器上方，可以左右滑動。
-- 不追蹤學生：觀看進度只存在學生自己的瀏覽器，不會上傳。網站不需要登入，也沒有任何分析或追蹤程式。
+- 不追蹤學生：觀看進度只存在學生自己的瀏覽器，不會上傳。網站不需要登入，也不用 cookie。2026-10-19 起，網站用 Cloudflare Web Analytics 統計各頁的瀏覽次數（來自哪個國家、什麼裝置、從哪個網站連過來）。它不辨識個人，也不記錄影片看了多少。
 - 四種語言：繁體中文（預設）、简体中文、English、Tiếng Việt。網址加 `?lang=zh-Hans`、`?lang=en` 或 `?lang=vi`，就是指定語言的連結，可以直接分享。影片畫面裡的字是繁體中文；切換到其他語言時，標題、章節和重點都有翻譯，週次標題下也會說明這一點。
 - 首頁膠捲：片頭加 Week 3 到 Week 16 各一格，已開放的週次顯示影片封面，其他顯示「準備中」。可以拖曳、滑動、用滾輪或方向鍵捲動，點畫格進入那一週。膠捲以原生 WebGL2 繪製、不用任何函式庫，停住時不重畫，手機只載入小縮圖；瀏覽器不支援 WebGL2 時，改顯示週次清單。
 - 深色與淺色主題（預設跟隨系統）、手機版面、螢幕閱讀器標示（ARIA）；系統設定為減少動態效果時，網站的動畫也會減少。
@@ -90,7 +92,7 @@ An AI teaching-video demonstration site for the Learning Analytics Tools course 
 
 ### AI 教學影片怎麼做
 
-影片的畫面主要是用 HTML、CSS、JavaScript 寫成的動態網頁，逐格渲染成影片。例外有兩處：Week 4 影片 01 的 Blockbench 段落是教師實際操作的瀏覽器錄影（加速播放），嵌在程式畫的 Codex 介面裡；Week 3 影片 03 開頭用了三張 Wikimedia Commons 的圖片。畫面都不是影片生成模型產生的。每支影片都由教師和 Claude Code（Claude Opus）合作完成，使用 opus-video skill（原作者為周行 Kianzzz，MIT 授權；本課程使用依需求調整過的版本）。Claude Code 寫程式產生畫面和聲音，教師在每個階段確認。影片教的是 Codex 等 AI 程式助理的用法：Codex 是教學主題，不是做影片的工具。
+影片的畫面主要是用 HTML、CSS、JavaScript 寫成的動態網頁，逐格渲染成影片。例外有兩處：Week 4 影片 01 的 Blockbench 段落是教師實際操作的瀏覽器錄影（加速播放），嵌在程式畫的 Codex 介面裡；Week 3 影片 03 開頭用了三張 Wikimedia Commons 的圖片。畫面都不是影片生成模型產生的。每支影片都由教師與 Codex、Claude 協力完成，用到 opus-video skill（原作者為周行 Kianzzz，MIT 授權；本課程使用依需求調整過的版本）等工具，寫程式產生畫面和聲音；影片做好後由 Codex 與 Claude 互相審查，教師在每個階段確認。影片教的是 Codex 等 AI 程式助理的用法。
 
 ![Week 3 影片 02〈AGENTS.md 與上下文管理〉的封面](../weeks/week03/video/02-agents-md-context/poster.jpg)
 
@@ -100,8 +102,8 @@ An AI teaching-video demonstration site for the Learning Analytics Tools course 
 4. 結構化 prompt：選定後寫成 `brief.md`，分成 `<role>` `<inputs>` `<direction>` `<structure>` `<build>` `<gotchas>` `<start>` 等區塊（Week 3 影片 03 沒有 `<start>`），是這支影片完整的製作指示，也可以換個主題重複使用。這些 `brief.md` 就是規劃公開的「教學影片生成 prompt」。
 5. 用程式碼渲染：每一格畫面只由時間 t 決定（GSAP 時間軸、HyperFrames），不用計時器，需要亂數時也固定種子，所以任何一格都能單獨重新渲染；用 Playwright 與 HyperFrames 逐格渲染，再由 FFmpeg 輸出 1920×1080、30 fps 的影片。
 6. 聲音也用程式合成：不用旁白和現成音樂；配樂與音效用 numpy、SciPy 合成，音效對準畫面上動作發生的那一格，響度統一為 -27 LUFS。
-7. 審查：製作中抽查靜態影格或樣片，成片一定看縮圖總表（包括手機寬度）。每一輪由 Claude Code 依開場、手機可讀、動作自然、畫面變化、構圖、音畫同步、貼合原始素材七項自評（10 分制），每項都到 8 分以上才交付，每一輪都有紀錄。教師看過後指出的問題，會寫成之後每支影片都要遵守的規則。
-8. 發布：`tools/publish-video.sh` 把成品重新壓縮成 H.264、切成 8 秒一段的 HLS，擷取封面（1920×1080）和縮圖（800×450），放進網站的影片資料夾；push 到 `main` 後上線。
+7. 審查：製作中抽查靜態影格或樣片，成片一定看縮圖總表（包括手機寬度）。每一輪由 Claude Code 依開場、手機可讀、動作自然、畫面變化、構圖、音畫同步、貼合原始素材七項自評（10 分制），每項都到 8 分以上才交付，每一輪都有紀錄。成片再由另一方（Codex 或 Claude）審查流程、教學是否清楚和畫面細節。教師看過後指出的問題，會寫成之後每支影片都要遵守的規則。
+8. 發布：`tools/publish-video.sh` 把成品重新壓縮成 H.264、切成 8 秒一段的 HLS，放到另一個 Cloudflare 專案「影片站」並馬上上傳；封面（1920×1080）和縮圖（800×450）放進網站的影片資料夾，push 到 `main` 後上線。影片站的串流檔不進 git，這樣重做影片時 repo 不會越來越大。
 
 ### 開源與開放內容的範圍與規劃
 
@@ -109,8 +111,11 @@ An AI teaching-video demonstration site for the Learning Analytics Tools course 
 |---|---|
 | 網站程式（HTML、CSS、JavaScript）、工具（`tools/`）、範本與說明文件 | 已公開，MIT 授權 |
 | AI 教學影片（HLS）、封面、縮圖，以及每週的文字（繁體中文原文與簡中、英文、越南文翻譯） | 已公開，CC BY-NC-SA 4.0 |
-| Week 6（考試） | 入口已公開，考試模式準備中 |
-| Week 7 到 Week 16 | 依課程進度陸續開放 |
+| Week 6（考試） | 已上線：連到遠端電腦，沒有提示，一關一關完成任務 |
+| Week 7 | 兩支補充已上線，影片和作業製作中 |
+| Week 8 到 Week 16 | 依課程進度陸續開放 |
+| 全英文版影片（畫面上的字和字卡都是英文） | 規劃中；目前網站介面、章節和重點已有英文 |
+| Claude 版影片（同樣的內容，改用 Claude Code 示範） | 規劃中；目前影片示範的工具是 Codex |
 | 學生作品展示（作品集） | 已上線，陸續加入學生同意公開的作品；著作權屬於各作者 |
 | 練習用的模擬電腦（課堂練習） | Mac 版、Windows 版都已上線，每週同一台電腦、換那週的任務：Week 3 有 10 個任務（終端機、Finder、Codex），Week 4 有 11 個（內建瀏覽器、GitHub、Mermaid、作業），Week 5 有 5 個（驗證清單 `VERIFY.md`、選模型、看活動紀錄、對話滿了、作業前的準備） |
 | 教學影片生成 prompt：每支影片的 `brief.md`、動態素材規格、三方案提案 | 規劃中，整理後公開 |
@@ -150,7 +155,7 @@ python -m http.server 8000
 2. 每一頁 `<head>` 最前面有一段程式，會把 `*.github.io` 的訪客轉到 learning-analytics-tools.pages.dev（`404.html` 和 `tools/template/week.html.tmpl` 也有；不改的話，放在 GitHub Pages 的副本會把訪客送到這個網站）；`_redirects` 是這個網站自己的舊網址轉址；首頁頂端列和頁尾有本 repo 的 GitHub 連結，各頁頁尾的「授權說明」也連到本 repo。請改成你的網址或拿掉，`tools/check.mjs` 裡對應的檢查也要一起改。
 3. 頁尾的著作權聲明在各頁面、範本和 `assets/i18n-strings.js` 裡，請改成你自己的，`tools/check.mjs` 裡的版權字串也要一起改。各頁面和範本 `<head>` 的 `author`、`copyright` meta 也要改；`CITATION.cff` 請改成你自己的資料或刪掉。`LICENSE` 裡的 MIT 條款與原作者的著作權聲明請保留；換成自己的影片和文字後，`LICENSE-CONTENT.md` 也要改成你自己的內容授權，`NOTICE.md` 保留 hls.js 的聲明，其他項目依你的內容調整。
 4. 新增影片：`tools/new-video.sh <週次> <NN-slug> <標題>` 從 `tools/template/` 建立週次頁和影片段落，並在 repo 旁邊建立 `../製作/` 的製作資料夾（不在 git 裡）。影片用什麼工具做都可以，只要最後是一個 mp4，再用 `tools/publish-video.sh` 轉成 HLS（需要 FFmpeg）。這兩個是 bash 腳本，Windows 可以用 Git Bash 執行。推上去之前執行 `node tools/check.mjs`（需要 Node.js，只用內建模組）。
-5. 部署：本網站用 Cloudflare Pages，push 到 `main` 就自動部署。影片只放 HLS，因為 Cloudflare Pages 不支援 Range 請求，mp4 放上去無法跳到指定時間；單一檔案不能超過 25 MiB，工具都會檢查。網站是純靜態檔案，原則上也能放在其他靜態網站主機。
+5. 部署：本網站用 Cloudflare Pages，push 到 `main` 就自動部署。影片的串流檔不在 repo，放在另一個 Cloudflare 專案（影片站），所以 fork 之後影片會從本課程的影片站播放；換成自己的影片時，要改 `assets/video.js` 的 `MEDIA`，`tools/publish-video.sh` 也要有自己的影片站資料夾（見 [docs/維護說明.md](維護說明.md)「影片放在哪裡」）。影片只放 HLS，因為 Cloudflare Pages 不支援 Range 請求，mp4 放上去無法跳到指定時間；單一檔案不能超過 25 MiB，工具都會檢查。網站是純靜態檔案，原則上也能放在其他靜態網站主機。
 
 只沿用程式碼時依 MIT 授權；沿用本課程的影片或文字時，請遵守 CC BY-NC-SA 4.0：標示出處、非商業使用、改作後以相同授權分享。
 
@@ -189,7 +194,7 @@ repo 裡的 [CITATION.cff](../CITATION.cff) 會讓 GitHub 頁面右側出現「C
 ### 致謝
 
 - 修課的同學。
-- [Claude Code](https://claude.com/claude-code)（Anthropic）：影片和網站程式都是教師在 Claude Code 中與 Claude 協作完成，commit 紀錄裡標有 Claude 為共同作者。
+- [Codex](https://openai.com/codex/)（OpenAI）與 [Claude Code](https://claude.com/claude-code)（Anthropic）：網站和影片的開發由教師與兩者協力完成，影片也由兩者互相審查。
 - opus-video skill 的原作者周行（Kianzzz），MIT 授權；本課程使用依需求調整過的版本。
 - 影片製作用到 HyperFrames（HeyGen，Apache-2.0）、GSAP、Playwright、FFmpeg、numpy 與 SciPy。
 - 網站播放器使用 [hls.js](https://github.com/video-dev/hls.js)；字型來自 Google Fonts。
@@ -207,7 +212,7 @@ JUNHAO CHEN（[@bigmoumou](https://github.com/bigmoumou)），課程教師。問
 
 This is an AI teaching-video demonstration site: the course website for Learning Analytics Tools Implementation Applications at National Taiwan Normal University (NTNU), and a public example of AI demonstration teaching, in which the course shows students how to work with AI tools and its own teaching videos are made with them. The site's code is open source under the MIT License, and the videos and course content are openly licensed under CC BY-NC-SA 4.0 (non-commercial use).
 
-Each week's AI teaching videos are made in code with Claude Code, while the teacher supplies the material, chooses the direction and reviews every stage. Students watch short videos, jump to chapters and read the key points to review at their own pace, and homework that students agree to publish is shown here too, in the [showcase](https://learning-analytics-tools.pages.dev/works/). The prompts used to generate the teaching videos and the production experience behind them will be cleaned up and released step by step (planned).
+Each week's AI teaching videos are made in code: the teacher supplies the material, chooses the direction and reviews every stage, while the site and the videos are developed by Codex and Claude working together, and each finished video is reviewed by both of them. Students watch short videos, jump to chapters and read the key points to review at their own pace, and homework that students agree to publish is shown here too, in the [showcase](https://learning-analytics-tools.pages.dev/works/). The prompts used to generate the teaching videos and the production experience behind them will be cleaned up and released step by step (planned).
 
 Website: <https://learning-analytics-tools.pages.dev/>
 
@@ -231,9 +236,9 @@ This repository is the website itself; every file the site serves is here.
 
 ### AI teaching videos
 
-As of October 2026, Week 3, "The AI Agent's Working Folder", Week 4, "AI Agent Built-in Browser", and Week 5, "Getting It Right with Codex: Verification and the Context Window", are published: 10 videos plus 6 extras (51 min in total), 146 chapters and 86 key points. Week 6 is the test week and has only a "TEST" entrance: you fall through a dimensional rift into a black hole, then pick a remote computer (Mac or Windows) to work on (the test mode is still being built; for now it opens the practice computer). Weeks 7 to 16 open as the course goes on and show as "Coming soon" on the site until then.
+As of October 2026, Week 3, "The AI Agent's Working Folder", Week 4, "AI Agent Built-in Browser", Week 5, "Getting It Right with Codex: Verification and the Context Window", and the first two extras of Week 7, "Developing Like an Engineer: Planning and Testing", are published: 10 videos plus 8 extras (about 60 min in total), 161 chapters and 97 key points. Week 6 is the test week and has only a "TEST" entrance: you fall through a dimensional rift into a black hole, then pick a remote computer (Mac or Windows) and complete the tasks one level at a time, with no hints. The Week 7 videos and homework and Weeks 8 to 16 open as the course goes on; weeks not yet open show as "Coming soon" on the site.
 
-The videos have no voice-over. Each one explains a single topic with animation, text cards and music synthesized in code, and runs between one and about four minutes. The course teaches the practical use of AI coding agents, and the tool shown in the videos is mostly OpenAI's Codex.
+The videos have no voice-over. Each one explains a single topic with animation, text cards and music synthesized in code, and runs between one and about five minutes. The course teaches the practical use of AI coding agents, and the tool shown in the videos is mostly OpenAI's Codex.
 
 | | Video | Length | Chapters / key points | Topic |
 |---|---|---|---|---|
@@ -244,7 +249,7 @@ The videos have no voice-over. Each one explains a single topic with animation, 
 | <img src="../weeks/week03/video/s2-terminal-win/thumb.jpg" width="180" alt="Thumbnail of Week 3 extra 2"> | Week 3 · Extra 2<br>[Intro to the Terminal (Win)](https://learning-analytics-tools.pages.dev/weeks/week03/?lang=en#s2-terminal-win) | 5:23 | 12 / 7 | The same story of 小安 the fox on Windows 11: opening Terminal from Search, reading the `PS C:\Users\an>` prompt, the table output of `ls`, `mv`, and unpacking with the built-in `tar -xvf`; the practice page adds a reminder about a Desktop backed up by OneDrive; a closing part on finding lost things: `ls -Force` for hidden folders, quotes (or Tab) for names with spaces, `ls -Recurse -Force -Filter` to search |
 | <img src="../weeks/week04/video/01-built-in-browser/thumb.jpg" width="180" alt="Thumbnail of Week 4 video 01"> | Week 4 · 01<br>[AI Agent Built-in Browser](https://learning-analytics-tools.pages.dev/weeks/week04/?lang=en) | 2:32 | 8 / 5 | Five ways an AI agent can control a browser; when Codex's built-in browser gets stuck, Codex finds the cause and fixes it, then builds a block table and chair in Blockbench (22 min 34 s of real work, sped up in the video) |
 | <img src="../weeks/week04/video/02-browser-uses/thumb.jpg" width="180" alt="Thumbnail of Week 4 video 02"> | Week 4 · 02<br>[Three More Things the Built-in Browser Can Do](https://learning-analytics-tools.pages.dev/weeks/week04/?lang=en#02-browser-uses) | 2:52 | 6 / 5 | Look: Codex checks your site at phone width and fixes the layout; edit: select part of a page and comment, and Codex changes it; look up: it reads public pages and keeps the sources; and what it can’t do |
-| <img src="../weeks/week04/video/03-homework-ginkgo/thumb.jpg" width="180" alt="Thumbnail of Week 4 video 03"> | Week 4 · 03<br>[Homework: A Tokyo Ginkgo Walking-Map Website](https://learning-analytics-tools.pages.dev/weeks/week04/?lang=en#03-homework-ginkgo) | 2:26 | 7 / 5 | Single-turn prompting homework: a Tokyo ginkgo round-up site in the style of the cherry-blossom maps; the teacher’s source sheet has to be analysed with Codex first (more than you need, on purpose), the requirements go into a BRIEF.md, and there is only one run, which trains your own thinking. Set in a ginkgo walking notebook; the BRIEF.md goes into an envelope and into a postbox |
+| <img src="../weeks/week04/video/03-homework-ginkgo/thumb.jpg" width="180" alt="Thumbnail of Week 4 video 03"> | Week 4 · 03<br>[Homework: A Tokyo Ginkgo Walking-Map Website](https://learning-analytics-tools.pages.dev/weeks/week04/?lang=en#03-homework-ginkgo) | 2:27 | 7 / 6 | Single-turn prompting homework: a Tokyo ginkgo round-up site in the style of the cherry-blossom maps; the teacher’s source sheet has to be analysed with Codex first (more than you need, on purpose), the requirements go into a BRIEF.md, and there is only one run, which trains your own thinking. Set in a ginkgo walking notebook; the BRIEF.md goes into an envelope and into a postbox |
 | <img src="../weeks/week04/video/04-homework-github/thumb.jpg" width="180" alt="Thumbnail of Week 4 video 04"> | Week 4 · 04<br>[Remote Homework: GitHub, Mermaid and the Built-in Browser](https://learning-analytics-tools.pages.dev/weeks/week04/?lang=en#04-homework-github) | 3:23 | 7 / 5 | The Week 4 homework: put the Week 3 museum project on GitHub, add a decision to ARCHITECTURE.md with Mermaid, have Codex check and fix the site in the built-in browser, then check the list and hand in the repository link |
 | <img src="../weeks/week04/video/s1-github/thumb.jpg" width="180" alt="Thumbnail of Week 4 extra 1"> | Week 4 · Extra 1<br>[Getting Started with GitHub: a Cloud Drive for Code](https://learning-analytics-tools.pages.dev/weeks/week04/?lang=en#s1-github) | 3:42 | 9 / 5 | GitHub as a cloud drive for code, compared with Google Drive; 小安 the fox's home and the cloud repository teach `clone`, `add` + `commit`, `push` and `pull`, then first-time setup, and finally asking Codex (GitHub plugin) to run the commands |
 | <img src="../weeks/week04/video/s2-mermaid/thumb.jpg" width="180" alt="Thumbnail of Week 4 extra 2"> | Week 4 · Extra 2<br>[Mermaid: Drawing Flowcharts with Text](https://learning-analytics-tools.pages.dev/weeks/week04/?lang=en#s2-mermaid) | 4:10 | 12 / 5 | Two ways to store it (.md and .mmd); type a line on the left and a box appears on the right: `flowchart TD/LR`, `[ ]`, `( )`, `{ }`, `-->`, `-->|text|`; the homework’s ARCHITECTURE.md; viewing on GitHub, Mermaid Live Editor and VS Code; asking Codex to fix it |
@@ -253,6 +258,8 @@ The videos have no voice-over. Each one explains a single topic with animation, 
 | <img src="../weeks/week05/video/03-homework-grades/thumb.jpg" width="180" alt="Thumbnail of Week 5 video 03"> | Week 5 · 03<br>[Homework: A Short Grade-Analysis Report](https://learning-analytics-tools.pages.dev/weeks/week05/?lang=en#03-homework-grades) | 2:29 | 8 / 5 | This week you are the teaching assistant: use Codex to analyse a made-up grade sheet for two classes (`week5-hw.zip`), write a `report.md` that starts with an answer card, and push it to a public GitHub repo. The project needs four things: Codex opened in the project folder, `AGENTS.md`, `VERIFY.md` and GitHub. A height table that mixes metres and centimetres shows the "quiet mistake": Codex confidently gives a wrong average, and one range check in `VERIFY.md` lets it catch the error itself. Several turns are fine, but shorter is better; hand in the repo link, and the full conversation only if you agree |
 | <img src="../weeks/week05/video/s1-codex-loop/thumb.jpg" width="180" alt="Thumbnail of Week 5 extra 1"> | Week 5 · Extra 1<br>[After You Press Enter: What Codex Does](https://learning-analytics-tools.pages.dev/weeks/week05/?lang=en#s1-codex-loop) | 3:44 | 10 / 5 | Codex's agent loop told as "a stack of notes": the model on OpenAI's servers only reads and writes text, while Codex does the work on your computer; one press of Enter means many round trips (per OpenAI's "Unrolling the Codex agent loop"). Reading files, web search (done at OpenAI), downloading (the default sandbox has no network, so you approve it), analysing with a script and writing files: every step's result piles into the context window; what Codex reads is sent to OpenAI, so replace personal data with codes |
 | <img src="../weeks/week05/video/s2-context-full/thumb.jpg" width="180" alt="Thumbnail of Week 5 extra 2"> | Week 5 · Extra 2<br>[When the Conversation Fills Up](https://learning-analytics-tools.pages.dev/weeks/week05/?lang=en#s2-context-full) | 2:35 | 10 / 5 | The same stack of notes reaches the top: when the chat is nearly full, Codex compacts it automatically, swapping the earlier conversation for a condensed version, and the activity log shows "Context automatically compacted"; the condensed version may drop a decision such as "don't count absent students in the average", so a new chart no longer matches. The warning in the Codex source code: long threads and multiple compactions can make the model less accurate. Two habits: one task per chat, and anything that must always hold goes into `AGENTS.md` |
+| <img src="../weeks/week07/video/s1-website-modules/thumb.jpg" width="180" alt="Thumbnail of Week 7 extra 1"> | Week 7 · Extra 1<br>[What a Website Is Made Of](https://learning-analytics-tools.pages.dev/weeks/week07/?lang=en#s1-website-modules) | 5:00 | 9 / 6 | A website is like a house: HTML is the floor plan, CSS the decoration and JS the wiring and switches, plus images and data; take your own site apart to see what each piece does; a website is a folder whose entrance is `index.html`; the browser is the web page's "compiler"; static versus dynamic; knowing how a site is built is what lets you steer the AI. The demo site and the Codex screens are illustrations |
+| <img src="../weeks/week07/video/s2-git-versions/thumb.jpg" width="180" alt="Thumbnail of Week 7 extra 2"> | Week 7 · Extra 2<br>[Git: Version Control, and Your Safety Net](https://learning-analytics-tools.pages.dev/weeks/week07/?lang=en#s2-git-versions) | 3:48 | 6 / 5 | Above all, Git is version control: every commit is a save point you can look back at, compare and return to, and GitHub just keeps the versions in the cloud; AI changes several files at once, so first look at what it changed in the Codex app's review pane; if something breaks, ask the AI to go back to the last commit; commit only when every test is green, with a clear message. The review pane, commit IDs and test cases are illustrations |
 
 ### Student participation and interactive review
 
@@ -263,7 +270,7 @@ The site follows one format, "every week: short videos and a few key points", so
 - Chapters: one page per week, with each video's chapters and numbered key points below it. Clicking a chapter jumps to that time and plays, and the chapter currently playing is highlighted.
 - Time links: adding `#t=30` to a week page's address starts its first video at 30 seconds, and adding `#02-agents-md-context&t=30` picks a specific video and second. A teacher can send students a link to the exact moment to review, for example [Week 3 video 02 at 30 seconds](https://learning-analytics-tools.pages.dev/weeks/week03/?lang=en#02-agents-md-context&t=30).
 - Playlist and watch progress: when a week has two or more videos, the page turns into a playlist. Each video has a thumbnail, its length and the viewer's progress, and gets a check mark at 95% or more; when a video ends, an "Up next" button appears and plays the next video only when clicked. Videos that are not selected are not downloaded in advance, and only one plays at a time. On desktop the list sits on the right; on phones it sits above the player as a row you can swipe.
-- No tracking of students: watch progress is stored only in the student's own browser and is never uploaded. The site needs no login and has no analytics or tracking scripts.
+- No tracking of students: watch progress is stored only in the student's own browser and is never uploaded. The site needs no login and sets no cookies. Since 2026-10-19 it uses Cloudflare Web Analytics to count page views (by country, device and referring site). It does not identify anyone and does not record how much of a video was watched.
 - Four languages: Traditional Chinese (default), Simplified Chinese, English and Vietnamese. Adding `?lang=zh-Hans`, `?lang=en` or `?lang=vi` to an address gives a link that opens in that language. Text inside the videos is in Traditional Chinese; in the other languages the titles, chapters and key points are translated, and a note under the week title says so.
 - Homepage film strip: a leader frame plus one frame for each of Weeks 3 to 16. Open weeks show their video poster and the rest show "Coming soon". You can drag, swipe, use the mouse wheel or the arrow keys, and click a frame to enter that week. The strip is drawn in native WebGL2 with no library, does not redraw while still, and loads only small thumbnails on phones; if the browser lacks WebGL2, a plain list of weeks is shown instead.
 - Dark and light themes (following the system by default), a phone layout and screen-reader labels (ARIA). When the system asks for reduced motion, the site reduces its animation too.
@@ -282,7 +289,7 @@ The [showcase](https://learning-analytics-tools.pages.dev/works/) (作品集 in 
 
 ### How the AI teaching videos are made
 
-The visuals are mainly animated web pages written in HTML, CSS and JavaScript and rendered frame by frame into video. There are two exceptions: the Blockbench part of Week 4 video 01 is a real screen recording of the teacher's browser session (sped up), set inside the coded Codex interface, and Week 3 video 03 opens with three Wikimedia Commons images. None of the footage comes from a video-generation model. Each video is made by the teacher together with Claude Code (Claude Opus), using the opus-video skill (originally written by 周行 Kianzzz under the MIT License; this course uses a locally adapted version). Claude Code writes the code that produces the visuals and the sound, and the teacher signs off at each stage. The videos teach the use of AI coding agents such as Codex: Codex is the subject being taught, not the tool that made the videos.
+The visuals are mainly animated web pages written in HTML, CSS and JavaScript and rendered frame by frame into video. There are two exceptions: the Blockbench part of Week 4 video 01 is a real screen recording of the teacher's browser session (sped up), set inside the coded Codex interface, and Week 3 video 03 opens with three Wikimedia Commons images. None of the footage comes from a video-generation model. Each video is made by the teacher together with Codex and Claude, who write the code that produces the visuals and the sound with tools such as the opus-video skill (originally written by 周行 Kianzzz under the MIT License; this course uses a locally adapted version). Codex and Claude review each other's finished videos, and the teacher signs off at each stage. The videos teach the use of AI coding agents such as Codex.
 
 ![Poster of Week 3 video 02, "AGENTS.md and Context Management"](../weeks/week03/video/02-agents-md-context/poster.jpg)
 
@@ -292,8 +299,8 @@ The visuals are mainly animated web pages written in HTML, CSS and JavaScript an
 4. A structured prompt: the chosen plan is written up as `brief.md`, in up to seven blocks (`<role>` `<inputs>` `<direction>` `<structure>` `<build>` `<gotchas>` `<start>`; Week 3 video 03 has no `<start>`). It is the complete production instruction for that video and can be reused with a new topic. These `brief.md` files are the teaching-video prompts planned for release.
 5. Rendering from code: every frame depends only on the time t (a GSAP timeline in HyperFrames), with no timers, and any randomness uses a fixed seed, so any single frame can be re-rendered on its own. Frames are rendered one by one with Playwright and HyperFrames, and FFmpeg writes the 1920×1080, 30 fps video.
 6. Sound synthesized in code too: no voice-over and no stock music. Music and sound effects are synthesized with numpy and SciPy, each effect is placed on the frame where its action happens, and loudness is normalized to -27 LUFS.
-7. Review: static frames or a draft are spot-checked during production, and the final cut is always checked on contact sheets, including at phone width. In each round Claude Code self-scores the video out of 10 on seven criteria: opening, readability on a phone, natural motion, visual variety, composition, sound and picture in sync, and faithfulness to the source material. A video is delivered only when every criterion scores 8 or higher, and every round is logged. Problems the teacher points out afterwards become rules that every later video follows.
-8. Publishing: `tools/publish-video.sh` re-encodes the finished video to H.264, cuts it into 8-second HLS segments, and grabs a poster (1920×1080) and a thumbnail (800×450) into the site's video folder; they go live on the next push to `main`.
+7. Review: static frames or a draft are spot-checked during production, and the final cut is always checked on contact sheets, including at phone width. In each round Claude Code self-scores the video out of 10 on seven criteria: opening, readability on a phone, natural motion, visual variety, composition, sound and picture in sync, and faithfulness to the source material. A video is delivered only when every criterion scores 8 or higher, and every round is logged. The finished cut is then reviewed by the other side (Codex or Claude) for flow, clear teaching and visual details. Problems the teacher points out afterwards become rules that every later video follows.
+8. Publishing: `tools/publish-video.sh` re-encodes the finished video to H.264, cuts it into 8-second HLS segments and uploads them straight away to a separate Cloudflare project, the media site; the poster (1920×1080) and thumbnail (800×450) go into the site's video folder and go live on the next push to `main`. The streams on the media site stay out of git, so re-making a video does not keep growing the repository.
 
 ### Scope of open source and open content, and roadmap
 
@@ -301,8 +308,11 @@ The visuals are mainly animated web pages written in HTML, CSS and JavaScript an
 |---|---|
 | Site code (HTML, CSS, JavaScript), tools (`tools/`), templates and documentation | Published, MIT License |
 | AI teaching videos (HLS), posters and thumbnails, and each week's text in Traditional Chinese with its Simplified Chinese, English and Vietnamese translations | Published, CC BY-NC-SA 4.0 |
-| Week 6 (test) | Entrance published, test mode in progress |
-| Weeks 7 to 16 | Opening one by one as the course goes on |
+| Week 6 (test) | Live: connect to a remote computer and complete the tasks one level at a time, with no hints |
+| Week 7 | Two extras live; the videos and homework are in production |
+| Weeks 8 to 16 | Opening one by one as the course goes on |
+| Full English videos (English on-screen text and title cards) | Planned; the site interface, chapters and key points are already in English |
+| Claude versions of the videos (the same lessons, demonstrated with Claude Code) | Planned; the videos currently demonstrate Codex |
 | Student work showcase | Live; more work is added as students agree to publish it; copyright stays with each author |
 | Practice environment: a simulated computer (in-class practice) | Mac and Windows versions live; every week uses the same computer with that week's missions: 10 for Week 3 (terminal, Finder, Codex), 11 for Week 4 (built-in browser, GitHub, Mermaid, homework) and 5 for Week 5 (a `VERIFY.md` checklist, picking the model, the activity log, a full chat, homework set-up) |
 | Teaching-video prompts: each video's `brief.md`, the specs for the animated materials, and the three-plan proposals | Planned, to be released once cleaned up |
@@ -342,7 +352,7 @@ When adapting it to your course:
 2. Every page starts its `<head>` with a script that sends `*.github.io` visitors to learning-analytics-tools.pages.dev (so do `404.html` and `tools/template/week.html.tmpl`; left as is, a copy hosted on GitHub Pages sends its visitors to this site), `_redirects` holds this site's own redirects for old addresses, the homepage links to this repository on GitHub in its top bar and footer, and the "License" link in every page's footer points to this repository too. Point them to your address or remove them, and change the matching check in `tools/check.mjs` as well.
 3. The copyright line in the footer lives in each page, in the templates and in `assets/i18n-strings.js`; change it to your own, together with the copyright string in `tools/check.mjs`. Also change the `author` and `copyright` meta tags in each page's and template's `<head>`, and replace `CITATION.cff` with your own details or delete it. Keep the MIT terms and the original copyright notice in `LICENSE`. Once you replace the videos and text with your own, change `LICENSE-CONTENT.md` to your own content license, and in `NOTICE.md` keep the hls.js notice and adjust the other entries to your content.
 4. Adding a video: `tools/new-video.sh <week> <NN-slug> <title>` builds the week page and the video section from `tools/template/`, and creates a production folder in `../製作/` next to the repository (outside git). Make the video with any tool you like, as long as the result is an mp4, then convert it to HLS with `tools/publish-video.sh` (requires FFmpeg). Both are bash scripts; on Windows, Git Bash runs them. Run `node tools/check.mjs` before you push (requires Node.js; it uses only built-in modules).
-5. Deployment: this site runs on Cloudflare Pages and deploys on every push to `main`. Videos are served only as HLS, because Cloudflare Pages does not support Range requests and an mp4 there cannot be seeked. No single file may exceed 25 MiB, and the tools check for that. Since the site is plain static files, other static hosts should work as well.
+5. Deployment: this site runs on Cloudflare Pages and deploys on every push to `main`. The video streams are not in the repository but on a separate Cloudflare project (the media site), so a fork plays them from this course's media site; to use your own videos, change `MEDIA` in `assets/video.js` and give `tools/publish-video.sh` a media-site folder of your own (see 「影片放在哪裡」 in [docs/維護說明.md](維護說明.md)). Videos are served only as HLS, because Cloudflare Pages does not support Range requests and an mp4 there cannot be seeked. No single file may exceed 25 MiB, and the tools check for that. Since the site is plain static files, other static hosts should work as well.
 
 If you reuse only the code, the MIT License applies. If you reuse this course's videos or text, follow CC BY-NC-SA 4.0: give credit, use them non-commercially, and share adaptations under the same license.
 
@@ -381,7 +391,7 @@ The [CITATION.cff](../CITATION.cff) file in this repository adds a "Cite this re
 ### Acknowledgements
 
 - The students taking the course.
-- [Claude Code](https://claude.com/claude-code) (Anthropic): both the videos and the site code were made by the teacher working with Claude in Claude Code, and the commit history lists Claude as co-author.
+- [Codex](https://openai.com/codex/) (OpenAI) and [Claude Code](https://claude.com/claude-code) (Anthropic): the site and the videos were developed by the teacher working with both, and they review each other's videos.
 - 周行 (Kianzzz), the original author of the opus-video skill (MIT License); this course uses a locally adapted version.
 - Video production uses HyperFrames (HeyGen, Apache-2.0), GSAP, Playwright, FFmpeg, numpy and SciPy.
 - The site's player uses [hls.js](https://github.com/video-dev/hls.js); the fonts come from Google Fonts.

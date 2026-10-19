@@ -74,7 +74,7 @@ CC0 不要求標示來源；這裡列出來，方便查核、也謝謝原作者�
 
 ### 製作影片用的工具（不在 repo 裡）
 
-影片以 Claude Code（Anthropic）製作，使用 opus-video skill（Copyright (c) 2026 周行 (Kianzzz)，MIT 授權；本課程使用依需求調整過的版本），並用到 HyperFrames（HeyGen，Apache-2.0）、GSAP、Playwright、FFmpeg、numpy 與 SciPy。這些工具都沒有放在這個 repo。之後公開教學影片生成 prompt 與製作經驗時，用到 opus-video skill 的文字或程式的地方，會保留原作者的 MIT 授權聲明。
+影片由教師與 Codex（OpenAI）、Claude Code（Anthropic）協力製作，使用 opus-video skill（Copyright (c) 2026 周行 (Kianzzz)，MIT 授權；本課程使用依需求調整過的版本），並用到 HyperFrames（HeyGen，Apache-2.0）、GSAP、Playwright、FFmpeg、numpy 與 SciPy。這些工具都沒有放在這個 repo。之後公開教學影片生成 prompt 與製作經驗時，用到 opus-video skill 的文字或程式的地方，會保留原作者的 MIT 授權聲明。
 
 ### 學生作品
 
@@ -165,7 +165,7 @@ CC0 does not require attribution; they are listed here for reference and with th
 
 ### Tools used to make the videos (not in this repository)
 
-The videos were made with Claude Code (Anthropic), using the opus-video skill (Copyright (c) 2026 周行 (Kianzzz), MIT License; this course uses a locally adapted version), together with HyperFrames (HeyGen, Apache-2.0), GSAP, Playwright, FFmpeg, numpy and SciPy. None of these tools are included in this repository. When the teaching-video prompts and production experience are released later, any text or scripts taken from the opus-video skill will keep its author's MIT license notice.
+The videos were made by the teacher working with Codex (OpenAI) and Claude Code (Anthropic), using the opus-video skill (Copyright (c) 2026 周行 (Kianzzz), MIT License; this course uses a locally adapted version), together with HyperFrames (HeyGen, Apache-2.0), GSAP, Playwright, FFmpeg, numpy and SciPy. None of these tools are included in this repository. When the teaching-video prompts and production experience are released later, any text or scripts taken from the opus-video skill will keep its author's MIT license notice.
 
 ### Student work
 
