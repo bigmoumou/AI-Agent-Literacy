@@ -125,33 +125,45 @@
     <!-- 作業（2026-10-19，教學影片製作對話窗）：膠捲裡左右兩格，左邊說明影片（還在做，先放「製作中」），右邊直接玩老師的範例「空中之島」
          （island-7k2q/，原始碼在 製作/week07/sky-island；按「在這裡玩」才載入）。素材 homework/sky-island-assets.zip 由
          製作/week07/sky-island/test/export_assets.py、zip_assets.py 產生。2026-10-19 深夜老師：「不需要藏了」，已拿掉 data-preview＋hidden。
-         說明影片（原始檔 製作/week07/03-homework-island）做好後，左邊那格換成 video 標籤（串流放 video/03-homework-island/hls/），course.js 的 meta 也要加上這支。 -->
-    <section class="unit unit-hw" id="03-homework-island" aria-labelledby="u03-title" data-thumb="homework/thumb.jpg" data-needs="02-se-tdd">
+         2026-10-20 老師：左右兩格不順 → 同一個畫面（.hw-stage）：先播說明影片（原始檔 製作/week07/03-homework-island），播完按「開始玩」溶接成遊戲（assets/video.js）。 -->
+    <section class="unit unit-hw" id="03-homework-island" aria-labelledby="u03-title" data-needs="01-se-tdd 02-plans">
       <h2 class="unit-title" id="u03-title"><span class="unit-num" data-ui="video.n" data-n="03">影片 03</span><span data-i18n
         data-zh-hans="作业：规划并做出“空中之岛”"
         data-en="Homework: Plan and Build “Sky Island”"
         data-vi="Bài tập: Lập kế hoạch và làm “Đảo trên trời”">作業：規劃並做出「空中之島」</span></h2>
 
+      <div class="hw-steps" role="tablist" aria-label="說明影片和範例">
+        <button type="button" class="hw-step" role="tab" data-go="video" aria-selected="true"><span class="hw-n">1</span><span data-i18n data-zh-hans="看说明视频" data-en="Watch the how-to video" data-vi="Xem video hướng dẫn">看說明影片</span></button>
+        <span class="hw-arrow" aria-hidden="true">→</span>
+        <button type="button" class="hw-step" role="tab" data-go="game" aria-selected="false"><span class="hw-n">2</span><span data-i18n data-zh-hans="玩空中之岛" data-en="Play Sky Island" data-vi="Chơi Đảo trên trời">玩空中之島</span></button>
+      </div>
       <div class="film">
-        <div class="hw-duo">
-          <div class="player hw-pane">
-            <span class="hw-tag" data-i18n data-zh-hans="说明视频" data-en="How-to video" data-vi="Video hướng dẫn">說明影片</span>
-            <div class="hw-soon">
-              <strong data-i18n data-zh-hans="视频制作中" data-en="Video coming soon" data-vi="Video đang được làm">影片製作中</strong>
-              <span data-i18n data-zh-hans="先玩右边的范例，作业说明在下面。" data-en="Play the example on the right first; the homework is explained below." data-vi="Hãy chơi ví dụ bên phải trước; bài tập được giải thích ở bên dưới.">先玩右邊的範例，作業說明在下面。</span>
-            </div>
+        <div class="player hw-stage" data-mode="video">
+          <video controls preload="metadata" playsinline data-hls="video/03-homework-island/hls/index.m3u8" poster="video/03-homework-island/poster.jpg" width="1920" height="1080">
+            你的瀏覽器無法播放這支影片。
+          </video>
+          <div class="hw-game" data-src="island-7k2q/" aria-hidden="true">
+            <span class="hw-loading" data-i18n data-zh-hans="载入中…" data-en="Loading…" data-vi="Đang tải…">載入中…</span>
+            <span class="hw-acts"><button type="button" class="hw-back" data-i18n data-zh-hans="↺ 回到影片" data-en="↺ Back to the video" data-vi="↺ Quay lại video">↺ 回到影片</button><button type="button" class="hw-full" hidden data-i18n data-zh-hans="全屏幕" data-en="Full screen" data-vi="Toàn màn hình">全螢幕</button><a class="hw-open" href="island-7k2q/" target="_blank" rel="noopener" data-i18n data-zh-hans="开新分页 ↗" data-en="New tab ↗" data-vi="Thẻ mới ↗">開新分頁 ↗</a></span>
           </div>
-          <div class="player hw-pane hw-game">
-            <span class="hw-tag" data-i18n data-zh-hans="范例：空中之岛" data-en="Example: Sky Island" data-vi="Ví dụ: Đảo trên trời">範例：空中之島</span>
-            <img class="still" src="homework/island.jpg" alt="" width="1600" height="900" loading="lazy" decoding="async">
-            <button type="button" class="hw-play" data-src="island-7k2q/"><span aria-hidden="true">▶</span><span data-i18n data-zh-hans="在这里玩" data-en="Play here" data-vi="Chơi tại đây">在這裡玩</span></button>
-            <span class="hw-acts">
-              <button type="button" class="hw-full" hidden data-i18n data-zh-hans="全屏幕" data-en="Full screen" data-vi="Toàn màn hình">全螢幕</button>
-              <a class="hw-open" href="island-7k2q/" target="_blank" rel="noopener" data-i18n data-zh-hans="开新分页 ↗" data-en="New tab ↗" data-vi="Thẻ mới ↗">開新分頁 ↗</a>
-            </span>
+          <div class="hw-end" hidden>
+            <button type="button" class="hw-go"><span aria-hidden="true">▶</span><span data-i18n data-zh-hans="开始玩空中之岛" data-en="Play Sky Island" data-vi="Chơi Đảo trên trời">開始玩空中之島</span></button>
+            <button type="button" class="hw-again" data-i18n data-zh-hans="再看一次视频" data-en="Watch the video again" data-vi="Xem lại video">再看一次影片</button>
           </div>
         </div>
       </div>
+      <ol class="chapters" aria-label="影片片段（點了直接跳到那一段）" data-ui-attr="aria-label:video.chapters">
+        <li><button type="button" data-t="0"><span class="k">00:00</span><span class="t" data-i18n data-zh-hans="开场" data-en="Opening" data-vi="Mở đầu">開場</span></button></li>
+        <li><button type="button" data-t="7"><span class="k">00:07</span><span class="t" data-i18n data-zh-hans="先玩，再自己写 BRIEF.md" data-en="Play first, then write BRIEF.md yourself" data-vi="Chơi trước, rồi tự viết BRIEF.md">先玩，再自己寫 BRIEF.md</span></button></li>
+        <li><button type="button" data-t="26"><span class="k">00:26</span><span class="t" data-i18n data-zh-hans="自己想测试：我的测试" data-en="Think of the tests yourself: My tests" data-vi="Tự nghĩ kiểm thử: Kiểm thử của tôi">自己想測試：我的測試</span></button></li>
+        <li><button type="button" data-t="47"><span class="k">00:47</span><span class="t" data-i18n data-zh-hans="Codex 挑毛病、补漏" data-en="Codex points out gaps and adds tests" data-vi="Codex chỉ ra chỗ chưa ổn và bổ sung">Codex 挑毛病、補漏</span></button></li>
+        <li><button type="button" data-t="66"><span class="k">01:06</span><span class="t" data-i18n data-zh-hans="照你的要求起草 PLANS.md" data-en="Codex drafts PLANS.md on your terms" data-vi="Codex viết nháp PLANS.md theo yêu cầu của bạn">照你的要求起草 PLANS.md</span></button></li>
+        <li><button type="button" data-t="77"><span class="k">01:17</span><span class="t" data-i18n data-zh-hans="审 AI 的第一版" data-en="Review the AI’s first draft" data-vi="Duyệt bản nháp đầu của AI">審 AI 的第一版</span></button></li>
+        <li><button type="button" data-t="100"><span class="k">01:40</span><span class="t" data-i18n data-zh-hans="TDD 交给 Codex" data-en="TDD is Codex’s job" data-vi="Giao TDD cho Codex">TDD 交給 Codex</span></button></li>
+        <li><button type="button" data-t="120"><span class="k">02:00</span><span class="t" data-i18n data-zh-hans="你看三件事" data-en="Three things you check" data-vi="Ba điều bạn kiểm tra">你看三件事</span></button></li>
+        <li><button type="button" data-t="140"><span class="k">02:20</span><span class="t" data-i18n data-zh-hans="交作业" data-en="Handing it in" data-vi="Nộp bài">交作業</span></button></li>
+        <li><button type="button" data-t="151"><span class="k">02:31</span><span class="t" data-i18n data-zh-hans="结尾：换你玩" data-en="Ending: your turn" data-vi="Kết thúc: đến lượt bạn">結尾：換你玩</span></button></li>
+      </ol>
 
       <p class="hw-lead" data-i18n
           data-zh-hans="这周的作业：玩一玩老师做的“空中之岛”，然后<strong>自己规划、自己做出一个</strong>。重点是<strong>你先想清楚</strong>要做什么、怎样算做好，再让 Codex 照你的计划和测试一步一步做；不是把整件事丢给 AI。"

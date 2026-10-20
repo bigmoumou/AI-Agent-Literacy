@@ -180,23 +180,37 @@ body::after {
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .hw-dl { --dl: #ffa64d; --dl-bg: rgba(255, 166, 77, .18); } }
 :root[data-theme="dark"] .hw-dl { --dl: #ffa64d; --dl-bg: rgba(255, 166, 77, .18); }
 
-/* ---------- 作業（section.unit-hw，2026-10-19）：膠捲裡左右兩格，左邊說明影片、右邊可以直接玩的範例（按「在這裡玩」才載入 iframe） ---------- */
-.hw-duo { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(8px, 1.4vw, 14px); }
-@media (max-width: 720px) { .hw-duo { grid-template-columns: 1fr; } }
-.hw-pane { background: #121417; }
-.hw-pane img.still { position: absolute; inset: 0; }
-.hw-pane.is-playing .hw-tag { display: none; }
-.hw-tag { position: absolute; left: .6rem; top: .55rem; z-index: 2; padding: .12rem .55rem; border-radius: 999px; background: rgba(0, 0, 0, .55); color: #fff; font-size: .76rem; font-weight: 700; pointer-events: none; }
-.hw-soon { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .35rem; padding: 1rem 1.2rem; text-align: center; background: linear-gradient(160deg, #23262c, #121417); }
-.hw-soon strong { color: #f1efe9; font-size: 1.02rem; }
-.hw-soon span { color: #b9b6ae; font-size: .84rem; line-height: 1.6; }
-.hw-play { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 2; display: inline-flex; align-items: center; gap: .5rem; padding: .62rem 1.25rem; border: 0; border-radius: 999px; background: #3f7d4e; color: #fff; font: inherit; font-weight: 700; cursor: pointer; box-shadow: 0 6px 18px rgba(0, 0, 0, .3); }
-.hw-play:hover, .hw-play:focus-visible { background: #4a9160; }
+/* ---------- 作業（section.unit-hw）：同一個畫面先播說明影片，播完按「開始玩」溶接成範例遊戲（2026-10-20 改版，老師：左右兩格不順；原本左邊影片、右邊遊戲）
+   上面一行「1 看說明影片 → 2 玩空中之島」隨時切換（.hw-step，選到的那一個字變深、底下一條強調色的線）。
+   遊戲（iframe）載好才淡入（0.9 秒），底下的影片停在最後一格（就是遊戲一開始的視角）。程式在 video.js。 ---------- */
+.hw-steps { display: flex; align-items: center; flex-wrap: wrap; gap: .3rem .8rem; margin: 0 0 .9rem; }
+.hw-step { display: inline-flex; align-items: baseline; gap: .45rem; padding: .25rem 0 .3rem; border: 0; border-bottom: 2px solid transparent; background: none; color: var(--ink-3); font: inherit; font-weight: 700; cursor: pointer; transition: color .25s, border-color .25s; }
+.hw-step:hover, .hw-step:focus-visible { color: var(--ink-2); }
+.hw-step[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.hw-n { font-family: var(--font-mono); font-size: .8rem; color: var(--accent); }
+.hw-arrow { color: var(--ink-3); }
+.hw-stage { background: #121417; }
+.hw-stage[data-mode="game"] video { pointer-events: none; }
+.hw-game { position: absolute; inset: 0; z-index: 1; visibility: hidden; }
+.hw-stage[data-mode="game"] .hw-game { visibility: visible; }
+.hw-frame { position: absolute; inset: 0; display: block; width: 100%; height: 100%; border: 0; opacity: 0; transform: scale(1.012); transition: opacity .9s var(--ease), transform .9s var(--ease); }
+.hw-game.is-ready .hw-frame { opacity: 1; transform: none; }
+.hw-stage[data-mode="video"] .hw-frame { opacity: 0; transition-duration: .5s; }
+.hw-loading { position: absolute; left: 50%; bottom: 1rem; transform: translateX(-50%); padding: .2rem .75rem; border-radius: 999px; background: rgba(0, 0, 0, .55); color: #fff; font-size: .8rem; font-weight: 700; pointer-events: none; }
+.hw-game.is-ready .hw-loading { display: none; }
 .hw-acts { position: absolute; right: .55rem; top: .5rem; z-index: 2; display: flex; gap: .35rem; }
 .hw-acts > * { padding: .14rem .6rem; border: 0; border-radius: 999px; background: rgba(0, 0, 0, .55); color: #fff; font: inherit; font-size: .76rem; font-weight: 700; text-decoration: none; cursor: pointer; }
 .hw-acts > *:hover { background: rgba(0, 0, 0, .75); }
 .hw-acts > [hidden] { display: none; }
-.hw-frame { position: absolute; inset: 0; display: block; width: 100%; height: 100%; border: 0; }
+/* 影片播完：畫面中間「▶ 開始玩空中之島」，下面一顆小的「再看一次影片」 */
+.hw-end { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .75rem; background: rgba(10, 12, 14, .2); animation: hw-in .45s var(--ease) both; }
+.hw-end[hidden] { display: none; }
+.hw-go { display: inline-flex; align-items: center; gap: .6rem; padding: .85rem 1.5rem; border: 0; border-radius: 999px; background: #3f7d4e; color: #fff; font: inherit; font-size: 1.05rem; font-weight: 700; cursor: pointer; box-shadow: 0 10px 30px rgba(0, 0, 0, .35); }
+.hw-go:hover, .hw-go:focus-visible { background: #4a9160; }
+.hw-again { padding: .2rem .75rem; border: 0; border-radius: 999px; background: rgba(0, 0, 0, .5); color: #fff; font: inherit; font-size: .82rem; font-weight: 700; cursor: pointer; }
+.hw-again:hover, .hw-again:focus-visible { background: rgba(0, 0, 0, .72); }
+@keyframes hw-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .hw-end { animation: none; } .hw-frame { transform: none; } }
 
 /* ---------- 課堂練習（section.unit-lab）：不是影片，膠捲裡是左右兩台筆電（Mac｜Windows），點哪一台就進哪一個練習 ----------
    版面和影片段落一樣（標題、膠捲、重點），清單上它也是一格（video.js 用 data-thumb 當縮圖）。

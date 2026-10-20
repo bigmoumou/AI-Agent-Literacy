@@ -32,15 +32,43 @@
   const PREVIEW = /[?&]preview(=|&|$)/.test(location.search);
   document.querySelectorAll("section.unit[data-preview]").forEach((u) => { if (PREVIEW) u.hidden = false; else u.remove(); });
 
-  /* 作業段落（section.unit-hw）：右邊的範例先放一張圖，按「在這裡玩」才載入（iframe，同一個網站），載入後多一顆「全螢幕」 */
-  document.querySelectorAll(".hw-play[data-src]").forEach((btn) => btn.addEventListener("click", () => {
-    const pane = btn.closest(".hw-pane"), f = document.createElement("iframe");
-    f.className = "hw-frame"; f.src = btn.dataset.src; f.title = btn.textContent.replace("▶", "").trim(); f.allow = "fullscreen";
-    const still = pane.querySelector("img.still"); if (still) still.remove();
-    btn.remove(); pane.append(f); pane.classList.add("is-playing"); f.focus();
-    const full = pane.querySelector(".hw-full");
-    if (full && f.requestFullscreen) { full.hidden = false; full.addEventListener("click", () => f.requestFullscreen()); }
-  }));
+  /* 作業段落的播放區（.hw-stage，2026-10-20 改版；原本是左邊影片、右邊遊戲兩格）：同一個畫面先播說明影片，
+     上面一行「1 看說明影片 → 2 玩空中之島」隨時可以切換。影片播完出現「▶ 開始玩空中之島」，按了就溶接成遊戲：
+     iframe（同一個網站）第一次切過去才載入，載好、再等一下讓它畫出第一格才淡入，底下的影片停在最後一格。
+     影片最後一格就是遊戲一開始的視角，看起來像影片變成遊戲。按片段、回到影片，就切回影片。 */
+  document.querySelectorAll(".hw-stage").forEach((stage) => {
+    const unit = stage.closest(".unit") || document;
+    const vid = stage.querySelector("video"), game = stage.querySelector(".hw-game"), end = stage.querySelector(".hw-end");
+    const steps = Array.from(unit.querySelectorAll(".hw-step"));
+    let frame = null;
+    const setMode = (m) => {
+      if (stage.dataset.mode === m) return;
+      stage.dataset.mode = m;
+      steps.forEach((b) => b.setAttribute("aria-selected", b.dataset.go === m ? "true" : "false"));
+      game.setAttribute("aria-hidden", m === "game" ? "false" : "true");
+      if (end) end.hidden = true;
+      if (m !== "game") return;
+      if (vid) vid.pause();
+      if (frame) { frame.focus(); return; }
+      frame = document.createElement("iframe");
+      frame.className = "hw-frame"; frame.src = game.dataset.src; frame.allow = "fullscreen";
+      frame.title = steps[1] ? steps[1].textContent.replace(/^\s*2\s*/, "").trim() : "Sky Island";
+      frame.addEventListener("load", () => setTimeout(() => { game.classList.add("is-ready"); frame.focus(); }, 350), { once: true });
+      game.prepend(frame);
+      const full = game.querySelector(".hw-full");
+      if (full && frame.requestFullscreen) { full.hidden = false; full.addEventListener("click", () => frame.requestFullscreen()); }
+    };
+    steps.forEach((b) => b.addEventListener("click", () => setMode(b.dataset.go)));
+    const back = game.querySelector(".hw-back");
+    if (back) back.addEventListener("click", () => setMode("video"));
+    unit.querySelectorAll(".chapters button[data-t]").forEach((b) => b.addEventListener("click", () => setMode("video")));
+    if (vid && end) {
+      vid.addEventListener("ended", () => { if (stage.dataset.mode === "video") end.hidden = false; });
+      ["play", "seeking"].forEach((ev) => vid.addEventListener(ev, () => { end.hidden = true; }));
+      end.querySelector(".hw-go").addEventListener("click", () => setMode("game"));
+      end.querySelector(".hw-again").addEventListener("click", () => { end.hidden = true; vid.currentTime = 0; vid.play().catch(() => {}); });
+    }
+  });
 
   const vids = Array.from(document.querySelectorAll("video[data-hls]"));
   const units = Array.from(document.querySelectorAll("section.unit"));
@@ -403,8 +431,8 @@
       best = saved = 1;
       writeP(unit.id, 1);
       paint();
-      // 「下一支」只接影片；後面是課堂練習（不是影片）就不出現，不會自動打開
-      if (units[i + 1] && units[i + 1].querySelector("video[data-hls]")) nextUp(unit, units[i + 1], items[i + 1]);
+      // 「下一支」只接影片；後面是課堂練習（不是影片）就不出現，不會自動打開。作業的說明影片播完是「開始玩」（.hw-stage），不接下一支
+      if (!unit.querySelector(".hw-stage") && units[i + 1] && units[i + 1].querySelector("video[data-hls]")) nextUp(unit, units[i + 1], items[i + 1]);
     });
   });
 
