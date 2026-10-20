@@ -133,8 +133,8 @@
       title: "像工程師一樣開發：規劃與測試",
       summary: "瀑布式開發一階一階往下，錯在需求就得逆流；測試驅動開發（TDD）先寫測試、再寫程式，就是我們一直在用的 VERIFY.md。補充：拆開自己的網站，以及用 Git 的版本管理當安全網。作業：規劃並做出自己的「空中之島」。",
       href: "weeks/week07/",
-      thumb: "weeks/week07/video/02-se-tdd/thumb.jpg",
-      still: "weeks/week07/video/02-se-tdd/poster.jpg",
+      thumb: "weeks/week07/video/01-se-tdd/thumb.jpg",
+      still: "weeks/week07/video/01-se-tdd/poster.jpg",
       meta: "1 支影片＋2 支補充・共 10 分 12 秒",
       i18n: {
         "zh-Hans": {
