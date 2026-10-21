@@ -51,6 +51,10 @@
   if (/[?&]week=5(&|$)/.test(location.search) || /[?&]mission=w5-/.test(location.search)) {
     ['w4-code', 'w4-github', 'w4-cxbrowser', 'w5-codex', 'w5-web'].forEach(function (n) { document.write('<link rel="stylesheet" href=\x27css/' + n + '.css\x27>'); });
   }
+  // Week 7（?week=7）：Week 5 的 Codex 樣式，加上空中之島（你的版本）的視窗（製作/lab-week7/SPEC-w7.md）
+  if (/[?&]week=7(&|$)/.test(location.search) || /[?&]mission=w7-/.test(location.search)) {
+    ['w4-code', 'w4-github', 'w4-cxbrowser', 'w5-codex', 'w7'].forEach(function (n) { document.write('<link rel="stylesheet" href=\x27css/' + n + '.css\x27>'); });
+  }
 </script>
 <!-- 多語系要比其他程式先載入（不要 defer）；練習版只有繁體中文，boot.js 會把 <html lang> 鎖回 zh-Hant -->
 <script src="../../assets/i18n-strings.js"></script>
@@ -137,6 +141,16 @@
     });
     ['seed5', 'opendata', 'codex5', 'intents5', 'missions-verify', 'missions-context', 'missions-hw'].forEach(function (n) {
       document.write('<script src=\x27js/w5/' + n + '.js\x27><\/script>');
+    });
+  }
+  // Week 7：Week 4 的平台模組（git 遠端、內建瀏覽器）＋ Week 5 的 Codex（活動列、讀 AGENTS.md），再接 Week 7 自己的：專案和 git 歷史、遊戲視窗和 npm test、Codex 的回覆、五個任務
+  if (window.LAB && LAB.week === 7) {
+    ['markdown', 'mermaid', 'web', 'github', 'github-pages', 'gitremote', 'cxbrowser'].forEach(function (n) {
+      document.write('<script src=\x27js/w4/' + n + '.js\x27><\/script>');
+    });
+    document.write('<script src=\x27js/w5/codex5.js\x27><\/script>');
+    ['seed7', 'game7', 'intents7', 'missions7'].forEach(function (n) {
+      document.write('<script src=\x27js/w7/' + n + '.js\x27><\/script>');
     });
   }
 </script>

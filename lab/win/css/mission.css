@@ -255,6 +255,8 @@ body.lab-card-dragging, body.lab-card-dragging * { cursor: grabbing !important; 
 }
 .lab-step-text { overflow-wrap: anywhere; }
 .lab-opt { margin-left: 6px; color: var(--lab-ink-3); font-size: 12px; }
+/* Week 7 「自己來」：第二次以後的動作不指位置（missions.js stepTarget），卡上一個小字 */
+.lab-solo { margin-right: 6px; color: #a36500; font-size: 12px; font-weight: 700; letter-spacing: .04em; }
 .lab-hintbar { display: flex; gap: 16px; margin-top: 6px; font-size: 13px; }
 .lab-hinttext, .lab-answertext { margin: 8px 0 0; color: var(--lab-ink-2); font-size: 13px; line-height: 1.65; overflow-wrap: anywhere; }
 .lab-answertext { padding-top: 6px; border-top: 1px solid var(--lab-line); color: var(--lab-ink); }

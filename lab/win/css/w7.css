@@ -1,0 +1,6 @@
+/* Week 7（?week=7）：空中之島（你的版本）的視窗（js/w7/game7.js）。裡面是網站上真的空中之島（iframe），只開放做到的 STEP。 */
+.w7-game { height: 100%; display: flex; flex-direction: column; background: #bfe0f4; }
+.w7-game-frame { flex: 1; width: 100%; min-height: 0; border: 0; display: block; background: #bfe0f4; }
+.w7-game-bar { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 5px 10px; background: rgba(246, 246, 246, .96); border-top: 1px solid rgba(0, 0, 0, .08); font-size: 12px; color: #5b5b5b; }
+.w7-game-btn { border: 1px solid rgba(0, 0, 0, .15); border-radius: 6px; background: #fff; padding: 3px 10px; font: inherit; color: #333; cursor: pointer; }
+.w7-game-btn:hover { background: #f2f2f2; }

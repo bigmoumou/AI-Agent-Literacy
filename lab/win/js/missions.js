@@ -504,7 +504,8 @@
             });
           };
         }(sentence, link, label));
-        out.push(h('span', { class: 'lab-copyline' }, h('span', { class: 'lab-mono lab-copytext' }, sentence), ' ', link));
+        var nl = sentence.split('\n');   // Week 7: a block (BRIEF.md, the teacher's tests) shows its first line and how many lines; 複製 still takes all of it
+        out.push(h('span', { class: 'lab-copyline' + (nl.length > 1 ? ' is-block' : '') }, h('span', { class: 'lab-mono lab-copytext' }, nl.length > 1 ? nl[0] + ' …（共 ' + nl.length + ' 行）' : sentence), ' ', link));
       } else out.push(h('span', { class: 'lab-mono' }, m[2]));
       last = re.lastIndex;
     }
@@ -672,7 +673,7 @@
           },
             h('span', { class: 'lab-num' + (done && !skipped ? ' is-check' : '') + (skipped ? ' is-skip' : '') }, skipped ? '–' : (done ? greenCheck(tickedAt, true) : pad2(i + 1))),
             h('div', { class: 'lab-step-body' },
-              h('div', { class: 'lab-step-text' }, inline(st.text), st.optional && (!done || skipped) ? h('span', { class: 'lab-opt' }, skipped ? '（選做，略過了）' : '（選做）') : null)));
+              h('div', { class: 'lab-step-text' }, st.solo ? h('span', { class: 'lab-solo', dataset: { lab: 'step-solo' } }, '自己來') : null, inline(st.text), st.optional && (!done || skipped) ? h('span', { class: 'lab-opt' }, skipped ? '（選做，略過了）' : '（選做）') : null)));
           if (isCur && enterAge < 900) li.style.setProperty('--lab-age', (-enterAge) + 'ms');
           if (isCur) {
             var body = li.querySelector('.lab-step-body');
@@ -1388,6 +1389,8 @@
     var r = m && data.missions[m.id];
     if (!m || !r || !r.startedAt || r.doneAt) return null;
     var i = firstUndone(m, r);
+    // Week 7 「自己來」 (solo): the second and later time an action comes up there is no cue until the student asks for a hint (teacher, 2026-10-21: muscle memory)
+    if (i >= 0 && m.steps[i].solo && !(r.hints[m.steps[i].id] > 0)) return null;
     var mt = i >= 0 ? menuTarget(m.steps[i]) : null;
     if (mt) return mt;
     var t = i >= 0 ? m.steps[i].target : null;
