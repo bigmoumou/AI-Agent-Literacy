@@ -19,13 +19,13 @@ National Taiwan Normal University (NTNU)
 
 **An example of AI demonstration teaching.** The course teaches students to work with AI coding agents such as OpenAI Codex, and its own materials are made the same way. The teaching videos, the course site and the practice environment were developed with AI agents (Codex and Claude); the teacher designed the curriculum, supplied the content and reviewed every video. Students see what to do with AI and, in the materials themselves, how a complete piece of work gets made with it. Everything is published as an open course under open licenses.
 
-| | |
-|---|---|
-| **Course** | Learning Analytics Tools Implementation Applications, NTNU, 2026 |
-| **Format** | Weekly microlearning videos (1–5 min) with chapters and key points; a browser-based practice computer; a scenario-based exam |
-| **Published** | Weeks 3–8: 23 videos, about 75 minutes (October 2026), updated weekly |
-| **Languages** | Site in English, Traditional Chinese, Simplified Chinese and Vietnamese; on-screen text in Traditional Chinese |
-| **Licenses** | Code [MIT](LICENSE); videos and course content [CC BY-NC-SA 4.0](LICENSE-CONTENT.md) |
+<table>
+<tr><td><b>Course</b></td><td>Learning Analytics Tools Implementation Applications, NTNU, 2026</td></tr>
+<tr><td><b>Format</b></td><td>Weekly microlearning videos (1–5 min) with chapters and key points; a browser-based practice computer; a scenario-based exam</td></tr>
+<tr><td><b>Published</b></td><td>Weeks 3–8: 23 videos, about 75 minutes (October 2026), updated weekly</td></tr>
+<tr><td><b>Languages</b></td><td>Site in English, Traditional Chinese, Simplified Chinese and Vietnamese; on-screen text in Traditional Chinese</td></tr>
+<tr><td><b>Licenses</b></td><td>Code <a href="LICENSE">MIT</a>; videos and course content <a href="LICENSE-CONTENT.md">CC BY-NC-SA 4.0</a></td></tr>
+</table>
 
 <table>
 <tr>
@@ -141,13 +141,13 @@ Thanks to the students taking the course.
 
 **AI 示範教學的實例。** 這門課教學生和 AI 程式助理（例如 OpenAI 的 Codex）一起工作，而課程本身的教材也是這樣做出來的：教學影片、課程網站和練習環境由 AI 代理（Codex 與 Claude）開發，授課教師設計課程、提供教材，並審核每一支影片。學生除了學到怎麼用 AI，也能從教材本身看到一件完整的作品如何和 AI 合作完成。所有內容都以開放授權公開，是一門開放式課程。
 
-| | |
-|---|---|
-| **課程** | 學習分析工具（Learning Analytics Tools Implementation Applications），國立臺灣師範大學，2026 |
-| **形式** | 每週微學習影片（1–5 分鐘），附章節和重點；瀏覽器裡的練習電腦；情境式考試 |
-| **已公開** | Week 3–8：23 支影片，約 75 分鐘（2026 年 10 月），每週更新 |
-| **語言** | 網站有英文、繁體中文、簡體中文、越南文；影片畫面是繁體中文 |
-| **授權** | 程式 [MIT](LICENSE)；影片與教材 [CC BY-NC-SA 4.0](LICENSE-CONTENT.md) |
+<table>
+<tr><td><b>課程</b></td><td>學習分析工具（Learning Analytics Tools Implementation Applications），國立臺灣師範大學，2026</td></tr>
+<tr><td><b>形式</b></td><td>每週微學習影片（1–5 分鐘），附章節和重點；瀏覽器裡的練習電腦；情境式考試</td></tr>
+<tr><td><b>已公開</b></td><td>Week 3–8：23 支影片，約 75 分鐘（2026 年 10 月），每週更新</td></tr>
+<tr><td><b>語言</b></td><td>網站有英文、繁體中文、簡體中文、越南文；影片畫面是繁體中文</td></tr>
+<tr><td><b>授權</b></td><td>程式 <a href="LICENSE">MIT</a>；影片與教材 <a href="LICENSE-CONTENT.md">CC BY-NC-SA 4.0</a></td></tr>
+</table>
 
 ### 教學設計
 
@@ -239,13 +239,13 @@ python -m http.server 8000
 
 **AI 示范教学的实例。** 这门课教学生和 AI 编程助手（例如 OpenAI 的 Codex）一起工作，而课程本身的教材也是这样做出来的：教学视频、课程网站和练习环境由 AI 智能体（Codex 与 Claude）开发，授课教师设计课程、提供教材，并审核每一个视频。学生除了学到怎么用 AI，也能从教材本身看到一件完整的作品如何与 AI 合作完成。所有内容都以开放许可公开，是一门开放课程。
 
-| | |
-|---|---|
-| **课程** | 学习分析工具（Learning Analytics Tools Implementation Applications），台湾师范大学，2026 |
-| **形式** | 每周微学习视频（1–5 分钟），附章节和要点；浏览器里的练习电脑；情境式考试 |
-| **已公开** | Week 3–8：23 个视频，约 75 分钟（2026 年 10 月），每周更新 |
-| **语言** | 网站有英文、繁体中文、简体中文、越南文；视频画面是繁体中文 |
-| **许可** | 代码 [MIT](LICENSE)；视频与教材 [CC BY-NC-SA 4.0](LICENSE-CONTENT.md) |
+<table>
+<tr><td><b>课程</b></td><td>学习分析工具（Learning Analytics Tools Implementation Applications），台湾师范大学，2026</td></tr>
+<tr><td><b>形式</b></td><td>每周微学习视频（1–5 分钟），附章节和要点；浏览器里的练习电脑；情境式考试</td></tr>
+<tr><td><b>已公开</b></td><td>Week 3–8：23 个视频，约 75 分钟（2026 年 10 月），每周更新</td></tr>
+<tr><td><b>语言</b></td><td>网站有英文、繁体中文、简体中文、越南文；视频画面是繁体中文</td></tr>
+<tr><td><b>许可</b></td><td>代码 <a href="LICENSE">MIT</a>；视频与教材 <a href="LICENSE-CONTENT.md">CC BY-NC-SA 4.0</a></td></tr>
+</table>
 
 ### 教学设计
 
@@ -337,13 +337,13 @@ python -m http.server 8000
 
 **AI デモンストレーション教育の実践例。** この授業では、OpenAI の Codex などの AI コーディングエージェントと協働する方法を教えています。授業の教材そのものも同じ方法で作られています。教育動画・コースサイト・練習環境は AI エージェント（Codex と Claude）が開発し、担当教員がカリキュラムを設計して教材を用意し、すべての動画をレビューしました。学生は AI の使い方を学ぶと同時に、教材そのものを通して、AI と協働してひとつの作品を完成させる過程を見ることができます。すべてオープンライセンスで公開しているオープンコースです。
 
-| | |
-|---|---|
-| **授業** | 学習分析ツール（Learning Analytics Tools Implementation Applications）、国立台湾師範大学、2026 年 |
-| **形式** | 毎週のマイクロラーニング動画（1〜5 分、チャプターと要点つき）、ブラウザ上の練習用コンピューター、シナリオ型の試験 |
-| **公開済み** | Week 3〜8：動画 23 本、約 75 分（2026 年 10 月時点）、毎週更新 |
-| **言語** | サイトは英語・繁体字中国語・簡体字中国語・ベトナム語（日本語は未対応）、動画内の文字は繁体字中国語 |
-| **ライセンス** | コード [MIT](LICENSE)、動画と教材 [CC BY-NC-SA 4.0](LICENSE-CONTENT.md) |
+<table>
+<tr><td><b>授業</b></td><td>学習分析ツール（Learning Analytics Tools Implementation Applications）、国立台湾師範大学、2026 年</td></tr>
+<tr><td><b>形式</b></td><td>毎週のマイクロラーニング動画（1〜5 分、チャプターと要点つき）、ブラウザ上の練習用コンピューター、シナリオ型の試験</td></tr>
+<tr><td><b>公開済み</b></td><td>Week 3〜8：動画 23 本、約 75 分（2026 年 10 月時点）、毎週更新</td></tr>
+<tr><td><b>言語</b></td><td>サイトは英語・繁体字中国語・簡体字中国語・ベトナム語（日本語は未対応）、動画内の文字は繁体字中国語</td></tr>
+<tr><td><b>ライセンス</b></td><td>コード <a href="LICENSE">MIT</a>、動画と教材 <a href="LICENSE-CONTENT.md">CC BY-NC-SA 4.0</a></td></tr>
+</table>
 
 ### 教育デザイン
 
