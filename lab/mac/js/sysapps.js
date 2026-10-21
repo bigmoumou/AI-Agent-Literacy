@@ -1953,7 +1953,7 @@
     if (p.kind === 'search') return p.query;
     return p.url.replace(/^https?:\/\//i, '').replace(/^www\./i, '').replace(/\/$/, '');
   }
-  var SF_FAVS = [['Example', 'https://example.com', '#3a7bd5'], ['師大', 'https://www.ntnu.edu.tw', '#b03a48'], ['維基百科', 'https://zh.wikipedia.org', '#6b6f78'], ['課程網站', 'https://learning-analytics-tools.pages.dev', '#c78a2a']];
+  var SF_FAVS = [['Example', 'https://example.com', '#3a7bd5'], ['師大', 'https://www.ntnu.edu.tw', '#b03a48'], ['維基百科', 'https://zh.wikipedia.org', '#6b6f78'], ['課程網站', 'https://ai-agent-literacy.pages.dev', '#c78a2a']];
 
   function openSafari(args) {
     args = args || {};

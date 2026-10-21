@@ -37,11 +37,11 @@ Copyright © 2026 JUNHAO CHEN
 
 建議依「標題、作者、出處、授權」的順序標示：
 
-> 〈AGENTS.md 與上下文管理〉，JUNHAO CHEN，Learning Analytics Tools（https://learning-analytics-tools.pages.dev/weeks/week03/#02-agents-md-context），以 CC BY-NC-SA 4.0 授權（https://creativecommons.org/licenses/by-nc-sa/4.0/）。
+> 〈AGENTS.md 與上下文管理〉，JUNHAO CHEN，Learning Analytics Tools（https://ai-agent-literacy.pages.dev/weeks/week03/#02-agents-md-context），以 CC BY-NC-SA 4.0 授權（https://creativecommons.org/licenses/by-nc-sa/4.0/）。
 
 改作時：
 
-> 本影片改作自 JUNHAO CHEN 的〈AGENTS.md 與上下文管理〉（https://learning-analytics-tools.pages.dev/weeks/week03/#02-agents-md-context），原作以 CC BY-NC-SA 4.0 授權；修改內容：（說明改了哪些地方）。本改作同樣以 CC BY-NC-SA 4.0 授權。
+> 本影片改作自 JUNHAO CHEN 的〈AGENTS.md 與上下文管理〉（https://ai-agent-literacy.pages.dev/weeks/week03/#02-agents-md-context），原作以 CC BY-NC-SA 4.0 授權；修改內容：（說明改了哪些地方）。本改作同樣以 CC BY-NC-SA 4.0 授權。
 
 ### 不在本授權範圍內
 
@@ -97,11 +97,11 @@ As long as you follow the conditions below, you may, for non-commercial purposes
 
 Credit in the order title, author, source, license:
 
-> "AGENTS.md and Context Management" by JUNHAO CHEN, from Learning Analytics Tools (https://learning-analytics-tools.pages.dev/weeks/week03/?lang=en#02-agents-md-context), licensed under CC BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/).
+> "AGENTS.md and Context Management" by JUNHAO CHEN, from Learning Analytics Tools (https://ai-agent-literacy.pages.dev/weeks/week03/?lang=en#02-agents-md-context), licensed under CC BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/).
 
 For an adaptation:
 
-> This video is adapted from "AGENTS.md and Context Management" by JUNHAO CHEN (https://learning-analytics-tools.pages.dev/weeks/week03/?lang=en#02-agents-md-context), licensed under CC BY-NC-SA 4.0. Changes: (describe what you changed). This adaptation is also licensed under CC BY-NC-SA 4.0.
+> This video is adapted from "AGENTS.md and Context Management" by JUNHAO CHEN (https://ai-agent-literacy.pages.dev/weeks/week03/?lang=en#02-agents-md-context), licensed under CC BY-NC-SA 4.0. Changes: (describe what you changed). This adaptation is also licensed under CC BY-NC-SA 4.0.
 
 ### Not covered by this license
 

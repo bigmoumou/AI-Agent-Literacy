@@ -6,7 +6,7 @@ An open course on working with AI coding agents<br>
 </p>
 
 <p align="center">
-<a href="https://learning-analytics-tools.pages.dev/"><b>Course site</b></a> ·
+<a href="https://ai-agent-literacy.pages.dev/"><b>Course site</b></a> ·
 <a href="#educational-design">Educational design</a> ·
 <a href="#videos">Videos</a> ·
 <a href="#how-its-made">How it's made</a> ·
@@ -15,7 +15,7 @@ An open course on working with AI coding agents<br>
 <b>English</b> · <a href="#zh-tw">繁體中文</a> · <a href="#zh-cn">简体中文</a> · <a href="#ja">日本語</a>
 </p>
 
-[![The course homepage: the film strip glides from Week 3 to the latest week](docs/images/home.webp)](https://learning-analytics-tools.pages.dev/)
+[![The course homepage: the film strip glides from Week 3 to the latest week](docs/images/home.webp)](https://ai-agent-literacy.pages.dev/)
 
 **An example of AI demonstration teaching.** Agent Literacy teaches students to work with AI coding agents such as OpenAI Codex, and its own materials are made the same way. The teaching videos, the course site and the practice environment were developed with AI agents (Codex and Claude); the teacher designed the curriculum, supplied the content and reviewed every video. Students see what to do with AI and, in the materials themselves, how a complete piece of work gets made with it. Everything is published as an open course under open licenses.
 
@@ -52,26 +52,26 @@ An open course on working with AI coding agents<br>
 
 | Week | Video | Length |
 |---|---|---|
-| Week 3 | [01 The Journey of report.md](https://learning-analytics-tools.pages.dev/weeks/week03/?lang=en#01-report-journey) | 1:33 |
-| | [02 AGENTS.md and Context Management](https://learning-analytics-tools.pages.dev/weeks/week03/?lang=en#02-agents-md-context) | 3:40 |
-| | [03 Homework: Collecting Florence Museum Data](https://learning-analytics-tools.pages.dev/weeks/week03/?lang=en#03-homework-firenze) | 2:55 |
-| | [Extra 1 Intro to the Terminal (Mac)](https://learning-analytics-tools.pages.dev/weeks/week03/?lang=en#s1-terminal-mac) ・ [Extra 2 (Windows)](https://learning-analytics-tools.pages.dev/weeks/week03/?lang=en#s2-terminal-win) | 5:14 ・ 5:23 |
-| Week 4 | [01 AI Agent Built-in Browser](https://learning-analytics-tools.pages.dev/weeks/week04/?lang=en#01-built-in-browser) | 2:28 |
-| | [02 Three More Things the Built-in Browser Can Do](https://learning-analytics-tools.pages.dev/weeks/week04/?lang=en#02-browser-uses) | 2:52 |
-| | [03 Homework: A Tokyo Ginkgo Walking-Map Website](https://learning-analytics-tools.pages.dev/weeks/week04/?lang=en#03-homework-ginkgo) | 2:27 |
-| | [04 Homework: GitHub, Mermaid and the Built-in Browser](https://learning-analytics-tools.pages.dev/weeks/week04/?lang=en#04-homework-github) | 3:23 |
-| | [Extra 1 Getting Started with GitHub](https://learning-analytics-tools.pages.dev/weeks/week04/?lang=en#s1-github) ・ [Extra 2 Mermaid Flowcharts](https://learning-analytics-tools.pages.dev/weeks/week04/?lang=en#s2-mermaid) | 3:42 ・ 4:10 |
-| Week 5 | [01 What Counts as Done: a Verification Checklist](https://learning-analytics-tools.pages.dev/weeks/week05/?lang=en#01-verify-md) | 3:24 |
-| | [02 Don't Keep Switching Models](https://learning-analytics-tools.pages.dev/weeks/week05/?lang=en#02-model-switch) | 1:30 |
-| | [03 Homework: A Short Grade-Analysis Report](https://learning-analytics-tools.pages.dev/weeks/week05/?lang=en#03-homework-grades) | 2:29 |
-| | [Extra 1 After You Press Enter](https://learning-analytics-tools.pages.dev/weeks/week05/?lang=en#s1-codex-loop) ・ [Extra 2 When the Conversation Fills Up](https://learning-analytics-tools.pages.dev/weeks/week05/?lang=en#s2-context-full) | 3:44 ・ 2:35 |
-| Week 6 | [TEST](https://learning-analytics-tools.pages.dev/weeks/week06/?lang=en) (not a video: the exam on a remote computer) | — |
-| Week 7 | [01 Software Engineering and Test-Driven Development (TDD)](https://learning-analytics-tools.pages.dev/weeks/week07/?lang=en#01-se-tdd) | 3:24 |
-| | [02 Plan Big Tasks First: PLANS.md](https://learning-analytics-tools.pages.dev/weeks/week07/?lang=en#02-plans) | 4:08 |
-| | [03 Homework: Plan and Build "Sky Island"](https://learning-analytics-tools.pages.dev/weeks/week07/?lang=en#03-homework-island) | 2:52 |
-| | [Extra 1 What a Website Is Made Of](https://learning-analytics-tools.pages.dev/weeks/week07/?lang=en#s1-website-modules) ・ [Extra 2 Git: Version Control, and Your Safety Net](https://learning-analytics-tools.pages.dev/weeks/week07/?lang=en#s2-git-versions) | 3:51 ・ 2:57 |
-| Week 8 | [01 VERIFY Is Written. Is That Enough Testing? TESTS.md](https://learning-analytics-tools.pages.dev/weeks/week08/?lang=en#01-tests) | 3:46 |
-| | [02 All Tests Pass. Are the Tests Any Good? Break a Line on Purpose](https://learning-analytics-tools.pages.dev/weeks/week08/?lang=en#02-break) | 2:58 |
+| Week 3 | [01 The Journey of report.md](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=en#01-report-journey) | 1:33 |
+| | [02 AGENTS.md and Context Management](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=en#02-agents-md-context) | 3:40 |
+| | [03 Homework: Collecting Florence Museum Data](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=en#03-homework-firenze) | 2:55 |
+| | [Extra 1 Intro to the Terminal (Mac)](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=en#s1-terminal-mac) ・ [Extra 2 (Windows)](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=en#s2-terminal-win) | 5:14 ・ 5:23 |
+| Week 4 | [01 AI Agent Built-in Browser](https://ai-agent-literacy.pages.dev/weeks/week04/?lang=en#01-built-in-browser) | 2:28 |
+| | [02 Three More Things the Built-in Browser Can Do](https://ai-agent-literacy.pages.dev/weeks/week04/?lang=en#02-browser-uses) | 2:52 |
+| | [03 Homework: A Tokyo Ginkgo Walking-Map Website](https://ai-agent-literacy.pages.dev/weeks/week04/?lang=en#03-homework-ginkgo) | 2:27 |
+| | [04 Homework: GitHub, Mermaid and the Built-in Browser](https://ai-agent-literacy.pages.dev/weeks/week04/?lang=en#04-homework-github) | 3:23 |
+| | [Extra 1 Getting Started with GitHub](https://ai-agent-literacy.pages.dev/weeks/week04/?lang=en#s1-github) ・ [Extra 2 Mermaid Flowcharts](https://ai-agent-literacy.pages.dev/weeks/week04/?lang=en#s2-mermaid) | 3:42 ・ 4:10 |
+| Week 5 | [01 What Counts as Done: a Verification Checklist](https://ai-agent-literacy.pages.dev/weeks/week05/?lang=en#01-verify-md) | 3:24 |
+| | [02 Don't Keep Switching Models](https://ai-agent-literacy.pages.dev/weeks/week05/?lang=en#02-model-switch) | 1:30 |
+| | [03 Homework: A Short Grade-Analysis Report](https://ai-agent-literacy.pages.dev/weeks/week05/?lang=en#03-homework-grades) | 2:29 |
+| | [Extra 1 After You Press Enter](https://ai-agent-literacy.pages.dev/weeks/week05/?lang=en#s1-codex-loop) ・ [Extra 2 When the Conversation Fills Up](https://ai-agent-literacy.pages.dev/weeks/week05/?lang=en#s2-context-full) | 3:44 ・ 2:35 |
+| Week 6 | [TEST](https://ai-agent-literacy.pages.dev/weeks/week06/?lang=en) (not a video: the exam on a remote computer) | — |
+| Week 7 | [01 Software Engineering and Test-Driven Development (TDD)](https://ai-agent-literacy.pages.dev/weeks/week07/?lang=en#01-se-tdd) | 3:24 |
+| | [02 Plan Big Tasks First: PLANS.md](https://ai-agent-literacy.pages.dev/weeks/week07/?lang=en#02-plans) | 4:08 |
+| | [03 Homework: Plan and Build "Sky Island"](https://ai-agent-literacy.pages.dev/weeks/week07/?lang=en#03-homework-island) | 2:52 |
+| | [Extra 1 What a Website Is Made Of](https://ai-agent-literacy.pages.dev/weeks/week07/?lang=en#s1-website-modules) ・ [Extra 2 Git: Version Control, and Your Safety Net](https://ai-agent-literacy.pages.dev/weeks/week07/?lang=en#s2-git-versions) | 3:51 ・ 2:57 |
+| Week 8 | [01 VERIFY Is Written. Is That Enough Testing? TESTS.md](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=en#01-tests) | 3:46 |
+| | [02 All Tests Pass. Are the Tests Any Good? Break a Line on Purpose](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=en#02-break) | 2:58 |
 
 **Topics covered**: AI coding agents (OpenAI Codex, Claude Code), working folders and the terminal, `AGENTS.md` and the context window, the built-in browser, GitHub and Mermaid, verification checklists (`VERIFY.md`), switching models mid-task (GPT-6 Luna → GPT-6.1 Sol), the Codex agent loop and automatic compaction, test-driven development, `PLANS.md` and `TESTS.md`.
 
@@ -114,7 +114,7 @@ To cite this work, use the **Cite this repository** button ([CITATION.cff](CITAT
   author       = {Chen, Jun-Hao and Liu, Che-You},
   title        = {Agent Literacy: An Open Course on Working with {AI} Coding Agents},
   year         = {2026},
-  howpublished = {\url{https://learning-analytics-tools.pages.dev/}},
+  howpublished = {\url{https://ai-agent-literacy.pages.dev/}},
   note         = {Open educational resource. Source: https://github.com/bigmoumou/AI-Agent-Literacy}
 }
 ```
@@ -162,26 +162,26 @@ Thanks to the students taking the course.
 
 | 週 | 影片 | 長度 |
 |---|---|---|
-| Week 3 | [01 report.md 的旅程](https://learning-analytics-tools.pages.dev/weeks/week03/#01-report-journey) | 1:33 |
-| | [02 AGENTS.md 與上下文管理](https://learning-analytics-tools.pages.dev/weeks/week03/#02-agents-md-context) | 3:40 |
-| | [03 作業：佛羅倫斯美術館資料收集](https://learning-analytics-tools.pages.dev/weeks/week03/#03-homework-firenze) | 2:55 |
-| | [補充 1 終端機介紹（Mac）](https://learning-analytics-tools.pages.dev/weeks/week03/#s1-terminal-mac)・[補充 2（Windows）](https://learning-analytics-tools.pages.dev/weeks/week03/#s2-terminal-win) | 5:14・5:23 |
-| Week 4 | [01 AI Agent 內建瀏覽器](https://learning-analytics-tools.pages.dev/weeks/week04/#01-built-in-browser) | 2:28 |
-| | [02 內建瀏覽器的三件事：看、改、查](https://learning-analytics-tools.pages.dev/weeks/week04/#02-browser-uses) | 2:52 |
-| | [03 作業：東京銀杏散步地圖網站](https://learning-analytics-tools.pages.dev/weeks/week04/#03-homework-ginkgo) | 2:27 |
-| | [04 作業：GitHub、Mermaid、內建瀏覽器](https://learning-analytics-tools.pages.dev/weeks/week04/#04-homework-github) | 3:23 |
-| | [補充 1 GitHub 入門](https://learning-analytics-tools.pages.dev/weeks/week04/#s1-github)・[補充 2 Mermaid 流程圖](https://learning-analytics-tools.pages.dev/weeks/week04/#s2-mermaid) | 3:42・4:10 |
-| Week 5 | [01 怎樣才算做好：驗證清單](https://learning-analytics-tools.pages.dev/weeks/week05/#01-verify-md) | 3:24 |
-| | [02 不要一直換模型](https://learning-analytics-tools.pages.dev/weeks/week05/#02-model-switch) | 1:30 |
-| | [03 作業：成績分析小報告](https://learning-analytics-tools.pages.dev/weeks/week05/#03-homework-grades) | 2:29 |
-| | [補充 1 按下 Enter 之後](https://learning-analytics-tools.pages.dev/weeks/week05/#s1-codex-loop)・[補充 2 對話滿了會怎樣](https://learning-analytics-tools.pages.dev/weeks/week05/#s2-context-full) | 3:44・2:35 |
-| Week 6 | [TEST](https://learning-analytics-tools.pages.dev/weeks/week06/)（不是影片，是連到遠端電腦的考試） | — |
-| Week 7 | [01 軟體工程與測試驅動開發（TDD）](https://learning-analytics-tools.pages.dev/weeks/week07/#01-se-tdd) | 3:24 |
-| | [02 大任務，先規劃：PLANS.md](https://learning-analytics-tools.pages.dev/weeks/week07/#02-plans) | 4:08 |
-| | [03 作業：規劃並做出「空中之島」](https://learning-analytics-tools.pages.dev/weeks/week07/#03-homework-island) | 2:52 |
-| | [補充 1 網站是怎麼組成的](https://learning-analytics-tools.pages.dev/weeks/week07/#s1-website-modules)・[補充 2 Git：版本管理，也是你的安全網](https://learning-analytics-tools.pages.dev/weeks/week07/#s2-git-versions) | 3:51・2:57 |
-| Week 8 | [01 VERIFY 寫好了，這樣就測夠了嗎？TESTS.md](https://learning-analytics-tools.pages.dev/weeks/week08/#01-tests) | 3:46 |
-| | [02 測試全部通過，就代表測得好嗎？故意弄壞一行](https://learning-analytics-tools.pages.dev/weeks/week08/#02-break) | 2:58 |
+| Week 3 | [01 report.md 的旅程](https://ai-agent-literacy.pages.dev/weeks/week03/#01-report-journey) | 1:33 |
+| | [02 AGENTS.md 與上下文管理](https://ai-agent-literacy.pages.dev/weeks/week03/#02-agents-md-context) | 3:40 |
+| | [03 作業：佛羅倫斯美術館資料收集](https://ai-agent-literacy.pages.dev/weeks/week03/#03-homework-firenze) | 2:55 |
+| | [補充 1 終端機介紹（Mac）](https://ai-agent-literacy.pages.dev/weeks/week03/#s1-terminal-mac)・[補充 2（Windows）](https://ai-agent-literacy.pages.dev/weeks/week03/#s2-terminal-win) | 5:14・5:23 |
+| Week 4 | [01 AI Agent 內建瀏覽器](https://ai-agent-literacy.pages.dev/weeks/week04/#01-built-in-browser) | 2:28 |
+| | [02 內建瀏覽器的三件事：看、改、查](https://ai-agent-literacy.pages.dev/weeks/week04/#02-browser-uses) | 2:52 |
+| | [03 作業：東京銀杏散步地圖網站](https://ai-agent-literacy.pages.dev/weeks/week04/#03-homework-ginkgo) | 2:27 |
+| | [04 作業：GitHub、Mermaid、內建瀏覽器](https://ai-agent-literacy.pages.dev/weeks/week04/#04-homework-github) | 3:23 |
+| | [補充 1 GitHub 入門](https://ai-agent-literacy.pages.dev/weeks/week04/#s1-github)・[補充 2 Mermaid 流程圖](https://ai-agent-literacy.pages.dev/weeks/week04/#s2-mermaid) | 3:42・4:10 |
+| Week 5 | [01 怎樣才算做好：驗證清單](https://ai-agent-literacy.pages.dev/weeks/week05/#01-verify-md) | 3:24 |
+| | [02 不要一直換模型](https://ai-agent-literacy.pages.dev/weeks/week05/#02-model-switch) | 1:30 |
+| | [03 作業：成績分析小報告](https://ai-agent-literacy.pages.dev/weeks/week05/#03-homework-grades) | 2:29 |
+| | [補充 1 按下 Enter 之後](https://ai-agent-literacy.pages.dev/weeks/week05/#s1-codex-loop)・[補充 2 對話滿了會怎樣](https://ai-agent-literacy.pages.dev/weeks/week05/#s2-context-full) | 3:44・2:35 |
+| Week 6 | [TEST](https://ai-agent-literacy.pages.dev/weeks/week06/)（不是影片，是連到遠端電腦的考試） | — |
+| Week 7 | [01 軟體工程與測試驅動開發（TDD）](https://ai-agent-literacy.pages.dev/weeks/week07/#01-se-tdd) | 3:24 |
+| | [02 大任務，先規劃：PLANS.md](https://ai-agent-literacy.pages.dev/weeks/week07/#02-plans) | 4:08 |
+| | [03 作業：規劃並做出「空中之島」](https://ai-agent-literacy.pages.dev/weeks/week07/#03-homework-island) | 2:52 |
+| | [補充 1 網站是怎麼組成的](https://ai-agent-literacy.pages.dev/weeks/week07/#s1-website-modules)・[補充 2 Git：版本管理，也是你的安全網](https://ai-agent-literacy.pages.dev/weeks/week07/#s2-git-versions) | 3:51・2:57 |
+| Week 8 | [01 VERIFY 寫好了，這樣就測夠了嗎？TESTS.md](https://ai-agent-literacy.pages.dev/weeks/week08/#01-tests) | 3:46 |
+| | [02 測試全部通過，就代表測得好嗎？故意弄壞一行](https://ai-agent-literacy.pages.dev/weeks/week08/#02-break) | 2:58 |
 
 **涵蓋主題**：AI 程式助理（OpenAI Codex、Claude Code）、工作資料夾與終端機、`AGENTS.md` 與 context window、內建瀏覽器、GitHub 與 Mermaid、驗證清單（`VERIFY.md`）、做到一半換模型（GPT-6 Luna → GPT-6.1 Sol）、Codex 的 agent loop 與自動壓縮、測試驅動開發、`PLANS.md` 與 `TESTS.md`。
 
@@ -260,26 +260,26 @@ python -m http.server 8000
 
 | 周 | 视频 | 时长 |
 |---|---|---|
-| Week 3 | [01 report.md 的旅程](https://learning-analytics-tools.pages.dev/weeks/week03/?lang=zh-Hans#01-report-journey) | 1:33 |
-| | [02 AGENTS.md 与上下文管理](https://learning-analytics-tools.pages.dev/weeks/week03/?lang=zh-Hans#02-agents-md-context) | 3:40 |
-| | [03 作业：佛罗伦萨美术馆数据收集](https://learning-analytics-tools.pages.dev/weeks/week03/?lang=zh-Hans#03-homework-firenze) | 2:55 |
-| | [补充 1 终端介绍（Mac）](https://learning-analytics-tools.pages.dev/weeks/week03/?lang=zh-Hans#s1-terminal-mac)・[补充 2（Windows）](https://learning-analytics-tools.pages.dev/weeks/week03/?lang=zh-Hans#s2-terminal-win) | 5:14・5:23 |
-| Week 4 | [01 AI Agent 内置浏览器](https://learning-analytics-tools.pages.dev/weeks/week04/?lang=zh-Hans#01-built-in-browser) | 2:28 |
-| | [02 内置浏览器的三件事：看、改、查](https://learning-analytics-tools.pages.dev/weeks/week04/?lang=zh-Hans#02-browser-uses) | 2:52 |
-| | [03 作业：东京银杏散步地图网站](https://learning-analytics-tools.pages.dev/weeks/week04/?lang=zh-Hans#03-homework-ginkgo) | 2:27 |
-| | [04 作业：GitHub、Mermaid、内置浏览器](https://learning-analytics-tools.pages.dev/weeks/week04/?lang=zh-Hans#04-homework-github) | 3:23 |
-| | [补充 1 GitHub 入门](https://learning-analytics-tools.pages.dev/weeks/week04/?lang=zh-Hans#s1-github)・[补充 2 Mermaid 流程图](https://learning-analytics-tools.pages.dev/weeks/week04/?lang=zh-Hans#s2-mermaid) | 3:42・4:10 |
-| Week 5 | [01 怎样才算做好：验证清单](https://learning-analytics-tools.pages.dev/weeks/week05/?lang=zh-Hans#01-verify-md) | 3:24 |
-| | [02 不要一直换模型](https://learning-analytics-tools.pages.dev/weeks/week05/?lang=zh-Hans#02-model-switch) | 1:30 |
-| | [03 作业：成绩分析小报告](https://learning-analytics-tools.pages.dev/weeks/week05/?lang=zh-Hans#03-homework-grades) | 2:29 |
-| | [补充 1 按下 Enter 之后](https://learning-analytics-tools.pages.dev/weeks/week05/?lang=zh-Hans#s1-codex-loop)・[补充 2 对话满了会怎样](https://learning-analytics-tools.pages.dev/weeks/week05/?lang=zh-Hans#s2-context-full) | 3:44・2:35 |
-| Week 6 | [TEST](https://learning-analytics-tools.pages.dev/weeks/week06/?lang=zh-Hans)（不是视频，是连接到远程电脑的考试） | — |
-| Week 7 | [01 软件工程与测试驱动开发（TDD）](https://learning-analytics-tools.pages.dev/weeks/week07/?lang=zh-Hans#01-se-tdd) | 3:24 |
-| | [02 大任务，先规划：PLANS.md](https://learning-analytics-tools.pages.dev/weeks/week07/?lang=zh-Hans#02-plans) | 4:08 |
-| | [03 作业：规划并做出“空中之岛”](https://learning-analytics-tools.pages.dev/weeks/week07/?lang=zh-Hans#03-homework-island) | 2:52 |
-| | [补充 1 网站是怎么组成的](https://learning-analytics-tools.pages.dev/weeks/week07/?lang=zh-Hans#s1-website-modules)・[补充 2 Git：版本管理，也是你的安全网](https://learning-analytics-tools.pages.dev/weeks/week07/?lang=zh-Hans#s2-git-versions) | 3:51・2:57 |
-| Week 8 | [01 VERIFY 写好了，这样就测够了吗？TESTS.md](https://learning-analytics-tools.pages.dev/weeks/week08/?lang=zh-Hans#01-tests) | 3:46 |
-| | [02 测试全部通过，就代表测得好吗？故意弄坏一行](https://learning-analytics-tools.pages.dev/weeks/week08/?lang=zh-Hans#02-break) | 2:58 |
+| Week 3 | [01 report.md 的旅程](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=zh-Hans#01-report-journey) | 1:33 |
+| | [02 AGENTS.md 与上下文管理](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=zh-Hans#02-agents-md-context) | 3:40 |
+| | [03 作业：佛罗伦萨美术馆数据收集](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=zh-Hans#03-homework-firenze) | 2:55 |
+| | [补充 1 终端介绍（Mac）](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=zh-Hans#s1-terminal-mac)・[补充 2（Windows）](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=zh-Hans#s2-terminal-win) | 5:14・5:23 |
+| Week 4 | [01 AI Agent 内置浏览器](https://ai-agent-literacy.pages.dev/weeks/week04/?lang=zh-Hans#01-built-in-browser) | 2:28 |
+| | [02 内置浏览器的三件事：看、改、查](https://ai-agent-literacy.pages.dev/weeks/week04/?lang=zh-Hans#02-browser-uses) | 2:52 |
+| | [03 作业：东京银杏散步地图网站](https://ai-agent-literacy.pages.dev/weeks/week04/?lang=zh-Hans#03-homework-ginkgo) | 2:27 |
+| | [04 作业：GitHub、Mermaid、内置浏览器](https://ai-agent-literacy.pages.dev/weeks/week04/?lang=zh-Hans#04-homework-github) | 3:23 |
+| | [补充 1 GitHub 入门](https://ai-agent-literacy.pages.dev/weeks/week04/?lang=zh-Hans#s1-github)・[补充 2 Mermaid 流程图](https://ai-agent-literacy.pages.dev/weeks/week04/?lang=zh-Hans#s2-mermaid) | 3:42・4:10 |
+| Week 5 | [01 怎样才算做好：验证清单](https://ai-agent-literacy.pages.dev/weeks/week05/?lang=zh-Hans#01-verify-md) | 3:24 |
+| | [02 不要一直换模型](https://ai-agent-literacy.pages.dev/weeks/week05/?lang=zh-Hans#02-model-switch) | 1:30 |
+| | [03 作业：成绩分析小报告](https://ai-agent-literacy.pages.dev/weeks/week05/?lang=zh-Hans#03-homework-grades) | 2:29 |
+| | [补充 1 按下 Enter 之后](https://ai-agent-literacy.pages.dev/weeks/week05/?lang=zh-Hans#s1-codex-loop)・[补充 2 对话满了会怎样](https://ai-agent-literacy.pages.dev/weeks/week05/?lang=zh-Hans#s2-context-full) | 3:44・2:35 |
+| Week 6 | [TEST](https://ai-agent-literacy.pages.dev/weeks/week06/?lang=zh-Hans)（不是视频，是连接到远程电脑的考试） | — |
+| Week 7 | [01 软件工程与测试驱动开发（TDD）](https://ai-agent-literacy.pages.dev/weeks/week07/?lang=zh-Hans#01-se-tdd) | 3:24 |
+| | [02 大任务，先规划：PLANS.md](https://ai-agent-literacy.pages.dev/weeks/week07/?lang=zh-Hans#02-plans) | 4:08 |
+| | [03 作业：规划并做出“空中之岛”](https://ai-agent-literacy.pages.dev/weeks/week07/?lang=zh-Hans#03-homework-island) | 2:52 |
+| | [补充 1 网站是怎么组成的](https://ai-agent-literacy.pages.dev/weeks/week07/?lang=zh-Hans#s1-website-modules)・[补充 2 Git：版本管理，也是你的安全网](https://ai-agent-literacy.pages.dev/weeks/week07/?lang=zh-Hans#s2-git-versions) | 3:51・2:57 |
+| Week 8 | [01 VERIFY 写好了，这样就测够了吗？TESTS.md](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=zh-Hans#01-tests) | 3:46 |
+| | [02 测试全部通过，就代表测得好吗？故意弄坏一行](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=zh-Hans#02-break) | 2:58 |
 
 **涵盖主题**：AI 编程助手（OpenAI Codex、Claude Code）、工作文件夹与终端、`AGENTS.md` 与上下文窗口、内置浏览器、GitHub 与 Mermaid、验证清单（`VERIFY.md`）、做到一半换模型（GPT-6 Luna → GPT-6.1 Sol）、Codex 的 agent loop 与自动压缩、测试驱动开发、`PLANS.md` 与 `TESTS.md`。
 
@@ -358,26 +358,26 @@ python -m http.server 8000
 
 | 週 | 動画 | 長さ |
 |---|---|---|
-| Week 3 | [01 report.md の旅](https://learning-analytics-tools.pages.dev/weeks/week03/#01-report-journey) | 1:33 |
-| | [02 AGENTS.md とコンテキスト管理](https://learning-analytics-tools.pages.dev/weeks/week03/#02-agents-md-context) | 3:40 |
-| | [03 課題：フィレンツェの美術館データ収集](https://learning-analytics-tools.pages.dev/weeks/week03/#03-homework-firenze) | 2:55 |
-| | [補足 1 ターミナル入門（Mac）](https://learning-analytics-tools.pages.dev/weeks/week03/#s1-terminal-mac)・[補足 2（Windows）](https://learning-analytics-tools.pages.dev/weeks/week03/#s2-terminal-win) | 5:14・5:23 |
-| Week 4 | [01 AI エージェントの内蔵ブラウザ](https://learning-analytics-tools.pages.dev/weeks/week04/#01-built-in-browser) | 2:28 |
-| | [02 内蔵ブラウザでできる 3 つのこと：見る・直す・調べる](https://learning-analytics-tools.pages.dev/weeks/week04/#02-browser-uses) | 2:52 |
-| | [03 課題：東京イチョウ散歩マップのサイト](https://learning-analytics-tools.pages.dev/weeks/week04/#03-homework-ginkgo) | 2:27 |
-| | [04 課題：GitHub・Mermaid・内蔵ブラウザ](https://learning-analytics-tools.pages.dev/weeks/week04/#04-homework-github) | 3:23 |
-| | [補足 1 GitHub 入門](https://learning-analytics-tools.pages.dev/weeks/week04/#s1-github)・[補足 2 Mermaid でフローチャート](https://learning-analytics-tools.pages.dev/weeks/week04/#s2-mermaid) | 3:42・4:10 |
-| Week 5 | [01 「できた」とは何か：検証チェックリスト](https://learning-analytics-tools.pages.dev/weeks/week05/#01-verify-md) | 3:24 |
-| | [02 モデルを途中で変えない](https://learning-analytics-tools.pages.dev/weeks/week05/#02-model-switch) | 1:30 |
-| | [03 課題：成績分析の小レポート](https://learning-analytics-tools.pages.dev/weeks/week05/#03-homework-grades) | 2:29 |
-| | [補足 1 Enter を押したあと](https://learning-analytics-tools.pages.dev/weeks/week05/#s1-codex-loop)・[補足 2 会話がいっぱいになると](https://learning-analytics-tools.pages.dev/weeks/week05/#s2-context-full) | 3:44・2:35 |
-| Week 6 | [TEST](https://learning-analytics-tools.pages.dev/weeks/week06/)（動画ではなく、リモートのコンピューターで受ける試験） | — |
-| Week 7 | [01 ソフトウェア工学とテスト駆動開発（TDD）](https://learning-analytics-tools.pages.dev/weeks/week07/#01-se-tdd) | 3:24 |
-| | [02 大きなタスクはまず計画：PLANS.md](https://learning-analytics-tools.pages.dev/weeks/week07/#02-plans) | 4:08 |
-| | [03 課題：「空中の島」を計画して作る](https://learning-analytics-tools.pages.dev/weeks/week07/#03-homework-island) | 2:52 |
-| | [補足 1 Web サイトは何でできているか](https://learning-analytics-tools.pages.dev/weeks/week07/#s1-website-modules)・[補足 2 Git：バージョン管理はセーフティネット](https://learning-analytics-tools.pages.dev/weeks/week07/#s2-git-versions) | 3:51・2:57 |
-| Week 8 | [01 VERIFY を書いたら、テストは十分？TESTS.md](https://learning-analytics-tools.pages.dev/weeks/week08/#01-tests) | 3:46 |
-| | [02 テストが全部通れば良いテスト？わざと 1 行壊す](https://learning-analytics-tools.pages.dev/weeks/week08/#02-break) | 2:58 |
+| Week 3 | [01 report.md の旅](https://ai-agent-literacy.pages.dev/weeks/week03/#01-report-journey) | 1:33 |
+| | [02 AGENTS.md とコンテキスト管理](https://ai-agent-literacy.pages.dev/weeks/week03/#02-agents-md-context) | 3:40 |
+| | [03 課題：フィレンツェの美術館データ収集](https://ai-agent-literacy.pages.dev/weeks/week03/#03-homework-firenze) | 2:55 |
+| | [補足 1 ターミナル入門（Mac）](https://ai-agent-literacy.pages.dev/weeks/week03/#s1-terminal-mac)・[補足 2（Windows）](https://ai-agent-literacy.pages.dev/weeks/week03/#s2-terminal-win) | 5:14・5:23 |
+| Week 4 | [01 AI エージェントの内蔵ブラウザ](https://ai-agent-literacy.pages.dev/weeks/week04/#01-built-in-browser) | 2:28 |
+| | [02 内蔵ブラウザでできる 3 つのこと：見る・直す・調べる](https://ai-agent-literacy.pages.dev/weeks/week04/#02-browser-uses) | 2:52 |
+| | [03 課題：東京イチョウ散歩マップのサイト](https://ai-agent-literacy.pages.dev/weeks/week04/#03-homework-ginkgo) | 2:27 |
+| | [04 課題：GitHub・Mermaid・内蔵ブラウザ](https://ai-agent-literacy.pages.dev/weeks/week04/#04-homework-github) | 3:23 |
+| | [補足 1 GitHub 入門](https://ai-agent-literacy.pages.dev/weeks/week04/#s1-github)・[補足 2 Mermaid でフローチャート](https://ai-agent-literacy.pages.dev/weeks/week04/#s2-mermaid) | 3:42・4:10 |
+| Week 5 | [01 「できた」とは何か：検証チェックリスト](https://ai-agent-literacy.pages.dev/weeks/week05/#01-verify-md) | 3:24 |
+| | [02 モデルを途中で変えない](https://ai-agent-literacy.pages.dev/weeks/week05/#02-model-switch) | 1:30 |
+| | [03 課題：成績分析の小レポート](https://ai-agent-literacy.pages.dev/weeks/week05/#03-homework-grades) | 2:29 |
+| | [補足 1 Enter を押したあと](https://ai-agent-literacy.pages.dev/weeks/week05/#s1-codex-loop)・[補足 2 会話がいっぱいになると](https://ai-agent-literacy.pages.dev/weeks/week05/#s2-context-full) | 3:44・2:35 |
+| Week 6 | [TEST](https://ai-agent-literacy.pages.dev/weeks/week06/)（動画ではなく、リモートのコンピューターで受ける試験） | — |
+| Week 7 | [01 ソフトウェア工学とテスト駆動開発（TDD）](https://ai-agent-literacy.pages.dev/weeks/week07/#01-se-tdd) | 3:24 |
+| | [02 大きなタスクはまず計画：PLANS.md](https://ai-agent-literacy.pages.dev/weeks/week07/#02-plans) | 4:08 |
+| | [03 課題：「空中の島」を計画して作る](https://ai-agent-literacy.pages.dev/weeks/week07/#03-homework-island) | 2:52 |
+| | [補足 1 Web サイトは何でできているか](https://ai-agent-literacy.pages.dev/weeks/week07/#s1-website-modules)・[補足 2 Git：バージョン管理はセーフティネット](https://ai-agent-literacy.pages.dev/weeks/week07/#s2-git-versions) | 3:51・2:57 |
+| Week 8 | [01 VERIFY を書いたら、テストは十分？TESTS.md](https://ai-agent-literacy.pages.dev/weeks/week08/#01-tests) | 3:46 |
+| | [02 テストが全部通れば良いテスト？わざと 1 行壊す](https://ai-agent-literacy.pages.dev/weeks/week08/#02-break) | 2:58 |
 
 **扱うテーマ**：AI コーディングエージェント（OpenAI Codex、Claude Code）、作業フォルダとターミナル、`AGENTS.md` とコンテキストウィンドウ、内蔵ブラウザ、GitHub と Mermaid、検証チェックリスト（`VERIFY.md`）、作業途中のモデル切り替え（GPT-6 Luna → GPT-6.1 Sol）、Codex のエージェントループと自動圧縮、テスト駆動開発、`PLANS.md` と `TESTS.md`。
 

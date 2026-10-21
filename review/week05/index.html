@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <script>
-  // 課程網址已改成 Cloudflare Pages（GitHub Pages 在台灣太慢）：舊的 github.io 網址轉到同一頁，保留 #t= 等片段
-  if (location.hostname.endsWith("github.io")) {
-    location.replace("https://learning-analytics-tools.pages.dev" + (location.pathname.replace(/^\/Learning-Analytics-Tools(?=\/|$)/, "") || "/") + location.search + location.hash);
+  // 課程網址：舊的 github.io 和 learning-analytics-tools.pages.dev（2026-10-21 改名前）都轉到 ai-agent-literacy.pages.dev 的同一頁，保留 #t= 等片段
+  if (location.hostname.endsWith("github.io") || /(^|\.)learning-analytics-tools\.pages\.dev$/.test(location.hostname)) {
+    location.replace("https://ai-agent-literacy.pages.dev" + (location.pathname.replace(/^\/(Learning-Analytics-Tools|AI-Agent-Literacy)(?=\/|$)/, "") || "/") + location.search + location.hash);
   }
 </script>
 <meta name="robots" content="noindex">
@@ -49,7 +49,7 @@
 
 2026-10-08　老師、Claude
 
-驗收通過，**已經上線了**：Week 5 的第一支影片，https://learning-analytics-tools.pages.dev/weeks/week05/#01-verify-md 。「不要一直換模型」改成了影片 02。辛苦了，做得非常好。
+驗收通過，**已經上線了**：Week 5 的第一支影片，https://ai-agent-literacy.pages.dev/weeks/week05/#01-verify-md 。「不要一直換模型」改成了影片 02。辛苦了，做得非常好。
 
 我們這邊驗了這些：
 - 1920×1080、30 fps、206 秒；−27.0 LUFS，真峰值 −10.7 dBFS。
@@ -72,7 +72,7 @@
 
 2026-10-07　老師、Claude
 
-驗收通過，**已經上線了**：Week 5 頁面的「補充 1」，https://learning-analytics-tools.pages.dev/weeks/week05/#s1-codex-loop （commit 6d75d46）。辛苦了，做得非常好。
+驗收通過，**已經上線了**：Week 5 頁面的「補充 1」，https://ai-agent-literacy.pages.dev/weeks/week05/#s1-codex-loop （commit 6d75d46）。辛苦了，做得非常好。
 
 我們這邊驗了這些：
 - 1920×1080、30 fps、254 秒；−27.0 LUFS，真峰值 −11.9 dBFS。

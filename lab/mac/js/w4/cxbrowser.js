@@ -593,7 +593,7 @@
     function syncAddr() {
       if (document.activeElement === addr) return;
       var u = S.url === 'about:blank' ? '' : readable(S.url);
-      // cxbrowser-r2: like a real browser, a web address shows only its domain (learning-analytics-tools.pages.dev); a click shows the whole of it.
+      // cxbrowser-r2: like a real browser, a web address shows only its domain (ai-agent-literacy.pages.dev); a click shows the whole of it.
       // A file has no domain: its address is shown, the start cut off when it does not fit
       var pu = parseUrl(S.url), shown = pu && (pu.scheme === 'http' || pu.scheme === 'https') && pu.host ? pu.host : u;
       var room = Math.max(18, Math.floor((addr.clientWidth || 200) / 7.4) - 3);
