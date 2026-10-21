@@ -189,7 +189,7 @@ python -m http.server 8000
 
 repo 裡的 [CITATION.cff](../CITATION.cff) 會讓 GitHub 頁面右側出現「Cite this repository」，可以直接取得 APA 或 BibTeX 格式。也可以這樣引用：
 
-> Chen, J. (2026). *Learning Analytics Tools Implementation Applications (NTNU): Course website and AI-made teaching videos* [Computer software]. https://github.com/bigmoumou/Learning-Analytics-Tools
+> Chen, J.-H., & Liu, C.-Y. (2026). *Agent Literacy: An open course on working with AI coding agents* [Computer software]. https://github.com/bigmoumou/Learning-Analytics-Tools
 
 ### 致謝
 
@@ -392,7 +392,7 @@ Example credit line for reusing course content (if you made changes, add "adapte
 
 The [CITATION.cff](../CITATION.cff) file in this repository adds a "Cite this repository" entry to the GitHub sidebar, with APA and BibTeX formats. You can also cite it as:
 
-> Chen, J. (2026). *Learning Analytics Tools Implementation Applications (NTNU): Course website and AI-made teaching videos* [Computer software]. https://github.com/bigmoumou/Learning-Analytics-Tools
+> Chen, J.-H., & Liu, C.-Y. (2026). *Agent Literacy: An open course on working with AI coding agents* [Computer software]. https://github.com/bigmoumou/Learning-Analytics-Tools
 
 ### Acknowledgements
 

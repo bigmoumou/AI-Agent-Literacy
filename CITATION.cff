@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use these course materials, please cite them as below."
 type: software
-title: "Learning Analytics Tools Implementation Applications (NTNU): Course website and AI-made teaching videos"
+title: "Agent Literacy: An Open Course on Working with AI Coding Agents"
 authors:
   - family-names: Chen
     given-names: Jun-Hao
@@ -10,9 +10,10 @@ authors:
     given-names: Che-You
     alias: 劉哲佑
 abstract: >-
-  Open course materials and an example of AI demonstration teaching: the
-  course website for the NTNU course Learning Analytics Tools Implementation
-  Applications, which teaches students to work with AI coding agents. It
+  Agent Literacy is an open course on working with AI coding agents and an
+  example of AI demonstration teaching. It was first piloted at National
+  Taiwan Normal University (NTNU) in 2026, in the course Learning Analytics
+  Tools Implementation Applications. It
   offers weekly microlearning videos made with AI agents (Codex and Claude)
   and reviewed by the teacher, a browser-based practice computer for
   simulation-based practice, a scenario-based exam, and a student work

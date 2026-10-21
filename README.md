@@ -110,10 +110,9 @@ Code is under the [MIT License](LICENSE). Videos and course content are under [C
 To cite this work, use the **Cite this repository** button ([CITATION.cff](CITATION.cff)) or:
 
 ```bibtex
-@misc{chen2026learninganalyticstools,
+@misc{chen2026agentliteracy,
   author       = {Chen, Jun-Hao and Liu, Che-You},
-  title        = {Learning Analytics Tools Implementation Applications ({NTNU}):
-                  Course Website and {AI}-Made Teaching Videos},
+  title        = {Agent Literacy: An Open Course on Working with {AI} Coding Agents},
   year         = {2026},
   howpublished = {\url{https://learning-analytics-tools.pages.dev/}},
   note         = {Open educational resource. Source: https://github.com/bigmoumou/Learning-Analytics-Tools}
