@@ -53,7 +53,7 @@
   function describe(f) {
     if (f.kind === "leader") {
       return {
-        kicker: "LEARNING ANALYTICS TOOLS・NTNU",
+        kicker: "AGENT LITERACY・NTNU",
         title: tr("home.leaderTitle"),
         meta: tr("home.leaderMeta"),
         alt: tr("home.seeAll"), altAction: "index",
@@ -387,7 +387,7 @@
     g.font = `700 15px ${MONO}`;
     g.textBaseline = "alphabetic";
     g.textAlign = "left";
-    g.fillText("LEARNING ANALYTICS TOOLS", 56, 107);
+    g.fillText("AGENT LITERACY", 56, 107);
     g.fillText(`▸ ${num}`, 56, 675);
     g.textAlign = "right";
     g.fillText("NTNU", TEX_W - 56, 107);

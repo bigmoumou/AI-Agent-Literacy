@@ -78,7 +78,7 @@
     // 分類頁的標題由這裡決定（換語言時 assets/i18n.js 不要把它蓋回「作品集」）
     const titleEl = document.querySelector("title[data-ui]");
     if (titleEl) titleEl.removeAttribute("data-ui");
-    listTitle = `${pick(cat, "title")}｜${t("works.title", null, "作品集")}｜Learning Analytics Tools`;
+    listTitle = `${pick(cat, "title")}｜${t("works.title", null, "作品集")}｜Agent Literacy`;
     if (!document.body.classList.contains("is-viewing")) document.title = listTitle;
   }
 

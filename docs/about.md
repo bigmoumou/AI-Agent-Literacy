@@ -1,4 +1,4 @@
-# 完整說明：Learning Analytics Tools（NTNU）
+# 完整說明：Agent Literacy（首個示範場域：臺師大 Learning Analytics Tools）
 
 
 > 這是網站的完整說明（原本的 README）。簡短版在 [README](../README.md)。Full details; the short version is the [README](../README.md).
