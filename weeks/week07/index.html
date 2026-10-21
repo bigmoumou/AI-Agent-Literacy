@@ -70,7 +70,7 @@
 
       <div class="film">
         <div class="player">
-          <video controls preload="metadata" playsinline data-hls="video/01-se-tdd/hls/index.m3u8" data-poster="video/01-se-tdd/poster.jpg" width="1920" height="1080">
+          <video controls preload="metadata" playsinline data-hls="video/01-se-tdd/hls/index.m3u8" data-poster="video/01-se-tdd/poster.jpg" data-hls-en="video/01-se-tdd/en/hls/index.m3u8" data-poster-en="video/01-se-tdd/poster-en.jpg" width="1920" height="1080">
             你的瀏覽器無法播放這支影片。
           </video>
         </div>
@@ -117,7 +117,7 @@
           data-vi="<strong>Viết kiểm thử là viết ra trước: cho đầu vào gì thì phải ra kết quả gì.</strong> Mỗi dòng là một trường hợp kiểm thử (test case); viết thành code thì một lệnh chạy hết. Nghe quen không? Đó chính là <code>VERIFY.md</code> mà chúng ta vẫn dùng. Từ Single-turn Prompting đến <code>VERIFY.md</code>, chúng ta luôn nhấn mạnh: nghĩ rõ trước, kết quả mới chắc chắn."><strong>寫測試，就是先寫下「給什麼輸入，應該得到什麼」。</strong>一條就是一個測試案例（test case），寫成程式，一個指令全部跑完。是不是很熟悉？這就是我們一直在用的 <code>VERIFY.md</code>。從 Single-turn Prompting 到 <code>VERIFY.md</code>，我們一直強調：先想清楚，結果才有確定性。</p></li>
         <li><p data-i18n
           data-zh-hans="<strong>为什么特别适合 AI：AI 很会说“做好了”，测试不会被说服。</strong>回归（regression）是改了 A，坏了 B：新加“补考”的规则后，原本会过的“请假”测试变红了；测试每次都全部重跑，B 一坏马上被抓到。小心 AI 为了通过去改测试，在 <code>AGENTS.md</code> 写上“不要为了通过而修改测试；觉得测试错了，先问我”。视频里的山谷、Codex 画面和成绩都是示意。"
-          data-en="<strong>Why it suits AI so well: AI is good at saying “done”, and tests can’t be talked round.</strong> Regression means changing A and breaking B: after adding a new rule for make-up exams, the “leave of absence” test that used to pass turns red; because every run re-runs all the tests, B breaking is caught right away. Watch out for the AI changing the tests just to make them pass: write in <code>AGENTS.md</code> “don’t change the tests to make them pass; if you think a test is wrong, ask me first”. The valley, the Codex screens and the grades in the video are illustrations."
+          data-en="<strong>Why it suits AI so well: AI is good at saying “done”, and tests can’t be talked round.</strong> Regression means changing A and breaking B: after adding a new rule for make-up exams, the “excused” test that used to pass turns red; because every run re-runs all the tests, B breaking is caught right away. Watch out for the AI changing the tests just to make them pass: write in <code>AGENTS.md</code> “don’t change the tests to make them pass; if you think a test is wrong, ask me first”. The valley, the Codex screens and the grades in the video are illustrations."
           data-vi="<strong>Vì sao đặc biệt hợp với AI: AI rất giỏi nói “xong rồi”, còn kiểm thử thì không bị thuyết phục.</strong> Hồi quy (regression) là sửa A mà hỏng B: thêm quy tắc “thi bù” xong, kiểm thử “nghỉ phép” vốn qua được nay chuyển đỏ; vì mỗi lần đều chạy lại toàn bộ kiểm thử nên B vừa hỏng là bị bắt ngay. Cẩn thận AI sửa kiểm thử chỉ để qua: hãy ghi vào <code>AGENTS.md</code> “đừng sửa kiểm thử để cho qua; nếu thấy kiểm thử sai thì hỏi tôi trước”. Thung lũng, màn hình Codex và điểm số trong video đều là minh hoạ."><strong>為什麼特別適合 AI：AI 很會說「做好了」，測試不會被說服。</strong>回歸（regression）是改了 A，壞了 B：新加「補考」的規則後，原本會過的「請假」測試變紅了；測試每次都全部重跑，B 一壞馬上被抓到。小心 AI 為了通過去改測試，在 <code>AGENTS.md</code> 寫上「不要為了通過而修改測試；覺得測試錯了，先問我」。影片裡的山谷、Codex 畫面和成績都是示意。</p></li>
       </ol>
     </section>
