@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<script>
+  // 課程網址已改成 Cloudflare Pages（GitHub Pages 在台灣太慢）：舊的 github.io 網址轉到同一頁，保留 #t= 等片段
+  if (location.hostname.endsWith("github.io")) {
+    location.replace("https://learning-analytics-tools.pages.dev" + (location.pathname.replace(/^\/Learning-Analytics-Tools(?=\/|$)/, "") || "/") + location.search + location.hash);
+  }
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title data-i18n
+  data-zh-hans="Week 8｜把测试做扎实：TESTS.md 与故意弄坏一行"
+  data-en="Week 8 | Making Tests Solid: TESTS.md and Breaking a Line on Purpose"
+  data-vi="Tuần 8 | Làm kiểm thử thật chắc: TESTS.md và cố ý làm hỏng một dòng">Week 8｜把測試做紮實：TESTS.md 與故意弄壞一行</title>
+<meta name="description" content="Week 8：VERIFY.md 是驗收，TESTS.md 由 AI 從每一條展開成細部測試（邊界、沒想到的情況、組合、順序、迴歸），每一條都追得回來，你用三個問題審它；再故意把程式弄壞一行，看測試抓不抓得到。兩支影片。" data-i18n-attr="content"
+  data-zh-hans="Week 8：VERIFY.md 是验收，TESTS.md 由 AI 从每一条展开成细部测试（边界、没想到的情况、组合、顺序、回归），每一条都追得回来，你用三个问题审它；再故意把程序弄坏一行，看测试抓不抓得到。两个视频。"
+  data-en="Week 8: VERIFY.md is the acceptance check; in TESTS.md the AI expands each item into detailed tests (boundaries, cases nobody thought of, combinations, order, regression), every one traceable to its source, and you review it with three questions. Then break one line of the program on purpose to see whether the tests catch it. Two videos."
+  data-vi="Tuần 8: VERIFY.md là nghiệm thu; trong TESTS.md, AI mở rộng mỗi mục thành các kiểm thử chi tiết (biên, trường hợp chưa ai nghĩ tới, kết hợp, thứ tự, hồi quy), mỗi dòng đều truy được nguồn, và bạn duyệt bằng ba câu hỏi. Sau đó cố ý làm hỏng một dòng code để xem kiểm thử có bắt được không. Hai video.">
+<meta name="author" content="JUNHAO CHEN">
+<meta name="copyright" content="© 2026 JUNHAO CHEN">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+<link rel="stylesheet" href="../../assets/week.css">
+<!-- 多語系要比其他程式先載入（不要 defer） -->
+<script src="../../assets/i18n-strings.js"></script>
+<script src="../../assets/i18n.js"></script>
+<script src="../../assets/course.js" defer></script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23f6efdc'/%3E%3Cpath d='M9.5 24v-5M16 24v-9M22.5 24V8' stroke='%238a5400' stroke-width='4.2'/%3E%3C/svg%3E">
+</head>
+<body data-root="../../">
+<div class="page">
+  <header class="top">
+    <a class="brand" href="../../">
+      <span class="brand-name">Learning Analytics Tools</span>
+      <span class="brand-sub" data-ui="brand.sub">NTNU・課程教材・Week 3 – 16</span>
+    </a>
+    <a class="pill nav-works" href="../../works/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H5a.5.5 0 0 1-.5-.5V5a.5.5 0 0 1 .5-.5zm9 0h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5h-5a.5.5 0 0 1-.5-.5V5a.5.5 0 0 1 .5-.5zm-9 9h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H5a.5.5 0 0 1-.5-.5v-5a.5.5 0 0 1 .5-.5zm9 0h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5h-5a.5.5 0 0 1-.5-.5v-5a.5.5 0 0 1 .5-.5z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span data-ui="nav.works">作品集</span></a>
+    <a class="pill icon-only nav-gh" href="https://github.com/bigmoumou/Learning-Analytics-Tools" aria-label="GitHub 原始碼" data-ui-attr="aria-label:home.github"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2.2a9.8 9.8 0 0 0-3.1 19.1c.5.1.7-.2.7-.5v-1.7c-2.7.6-3.3-1.3-3.3-1.3-.4-1.1-1.1-1.4-1.1-1.4-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.3-1.1.6-1.3-2.2-.2-4.5-1.1-4.5-4.9 0-1.1.4-2 1-2.7-.1-.2-.4-1.2.1-2.6 0 0 .8-.3 2.7 1a9.4 9.4 0 0 1 4.9 0c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.6.6.7 1 1.6 1 2.7 0 3.8-2.3 4.7-4.5 4.9.4.3.7.9.7 1.8v2.7c0 .3.2.6.7.5A9.8 9.8 0 0 0 12 2.2z"/></svg></a>
+    <button class="pill icon-only" id="themeBtn" type="button">深色</button>
+  </header>
+
+  <main>
+    <div class="head">
+      <p class="kicker"><span class="dot" aria-hidden="true"></span>WEEK 08</p>
+      <h1 data-i18n
+        data-zh-hans="把测试做扎实：TESTS.md 与故意弄坏一行"
+        data-en="Making Tests Solid: TESTS.md and Breaking a Line on Purpose"
+        data-vi="Làm kiểm thử thật chắc: TESTS.md và cố ý làm hỏng một dòng">把測試做紮實：TESTS.md 與故意弄壞一行</h1>
+      <p class="lede" data-i18n
+        data-zh-hans="上周的 &lt;code&gt;VERIFY.md&lt;/code&gt; 是验收：你写、条数少、人看得懂。这周把测试做扎实：&lt;code&gt;TESTS.md&lt;/code&gt; 由 AI 从每一条 VERIFY 展开成细部测试，边界、没想到的情况、组合、顺序、回归，每一条都说得出它从哪一条来；你用三个问题审它。可是测试全部通过，就代表测得好吗？故意把程序弄坏一行，看测试抓不抓得到：没抓到的那一次，就是少的那条测试。"
+        data-en="Last week’s &lt;code&gt;VERIFY.md&lt;/code&gt; is the acceptance check: you write it, it is short, and anyone can read it. This week we make the tests solid: in &lt;code&gt;TESTS.md&lt;/code&gt; the AI expands each VERIFY item into detailed tests (boundaries, cases nobody thought of, combinations, order, regression), and every test can say which item it came from; you review it with three questions. But if every test passes, does that mean the tests are good? Break one line of the program on purpose and see whether the tests catch it: the time they miss it shows you the test that is missing."
+        data-vi="&lt;code&gt;VERIFY.md&lt;/code&gt; của tuần trước là nghiệm thu: bạn viết, ít dòng, ai đọc cũng hiểu. Tuần này làm kiểm thử thật chắc: trong &lt;code&gt;TESTS.md&lt;/code&gt;, AI mở rộng mỗi mục VERIFY thành các kiểm thử chi tiết (biên, trường hợp chưa ai nghĩ tới, kết hợp, thứ tự, hồi quy), dòng nào cũng nói được nó đến từ mục nào; bạn duyệt bằng ba câu hỏi. Nhưng kiểm thử qua hết thì có nghĩa là kiểm thử tốt không? Cố ý làm hỏng một dòng code rồi xem kiểm thử có bắt được không: lần không bắt được chính là kiểm thử còn thiếu.">上週的 <code>VERIFY.md</code> 是驗收：你寫、條數少、人看得懂。這週把測試做紮實：<code>TESTS.md</code> 由 AI 從每一條 VERIFY 展開成細部測試，邊界、沒想到的情況、組合、順序、迴歸，每一條都說得出它從哪一條來；你用三個問題審它。可是測試全部通過，就代表測得好嗎？故意把程式弄壞一行，看測試抓不抓得到：沒抓到的那一次，就是少的那條測試。</p>
+      <p class="lang-note" data-ui="video.note"></p>
+    </div>
+
+    <!-- 2026-10-21 老師：Week 8 做 01 TESTS.md＋02「故意弄壞一行」，做完直接上線（教學影片製作對話窗，原始檔在 製作/week08/01-tests、02-break）。
+         和測試有關的只放 Week 8，Week 7 是簡化版、不改。這一頁由 製作/week08/tools/site_week8.py 產生（文字四種語言都在那裡改，可以重跑）。
+         一支影片一個 section：id 和 video/ 裡的資料夾同名；影片、片段、重點都由 assets/video.js 接起來。 -->
+
+    <section class="unit" id="01-tests" aria-labelledby="u01-title">
+      <h2 class="unit-title" id="u01-title"><span class="unit-num" data-ui="video.n" data-n="01">影片 01</span><span data-i18n
+        data-zh-hans="VERIFY 写好了，这样就测够了吗？TESTS.md"
+        data-en="VERIFY Is Written. Is That Enough Testing? TESTS.md"
+        data-vi="Đã viết VERIFY, như vậy kiểm thử đủ chưa? TESTS.md">VERIFY 寫好了，這樣就測夠了嗎？TESTS.md</span></h2>
+
+      <div class="film">
+        <div class="player">
+          <video controls preload="metadata" playsinline data-hls="video/01-tests/hls/index.m3u8" data-poster="video/01-tests/poster.jpg" width="1920" height="1080">
+            你的瀏覽器無法播放這支影片。
+          </video>
+        </div>
+      </div>
+
+      <ol class="chapters" aria-label="影片片段（點了直接跳到那一段）" data-ui-attr="aria-label:video.chapters">
+        <li><button type="button" data-t="0"><span class="k">00:00</span><span class="t" data-i18n data-zh-hans="开场" data-en="Opening" data-vi="Mở đầu">開場</span></button></li>
+        <li><button type="button" data-t="9"><span class="k">00:09</span><span class="t" data-i18n data-zh-hans="先回想上周：三题想一想" data-en="Recall last week: three questions" data-vi="Nhớ lại tuần trước: ba câu hỏi">先回想上週：三題想一想</span></button></li>
+        <li><button type="button" data-t="44"><span class="k">00:44</span><span class="t" data-i18n data-zh-hans="VERIFY 越写越长" data-en="VERIFY keeps getting longer" data-vi="VERIFY ngày càng dài">VERIFY 越寫越長</span></button></li>
+        <li><button type="button" data-t="62"><span class="k">01:02</span><span class="t" data-i18n data-zh-hans="拆成两份：验收和细部测试" data-en="Split in two: acceptance and detailed tests" data-vi="Tách làm hai: nghiệm thu và kiểm thử chi tiết">拆成兩份：驗收和細部測試</span></button></li>
+        <li><button type="button" data-t="78"><span class="k">01:18</span><span class="t" data-i18n data-zh-hans="空中之岛：一条 VERIFY 展开成好几条" data-en="Sky Island: one VERIFY item becomes several tests" data-vi="Đảo trên trời: một mục VERIFY thành nhiều kiểm thử">空中之島：一條 VERIFY 展開成好幾條</span></button></li>
+        <li><button type="button" data-t="85"><span class="k">01:25</span><span class="t" data-i18n data-zh-hans="边界" data-en="Boundaries" data-vi="Biên">邊界</span></button></li>
+        <li><button type="button" data-t="94"><span class="k">01:34</span><span class="t" data-i18n data-zh-hans="没想到的情况" data-en="Cases nobody thought of" data-vi="Trường hợp chưa ai nghĩ tới">沒想到的情況</span></button></li>
+        <li><button type="button" data-t="103"><span class="k">01:43</span><span class="t" data-i18n data-zh-hans="组合" data-en="Combinations" data-vi="Kết hợp">組合</span></button></li>
+        <li><button type="button" data-t="111"><span class="k">01:51</span><span class="t" data-i18n data-zh-hans="顺序" data-en="Order" data-vi="Thứ tự">順序</span></button></li>
+        <li><button type="button" data-t="122"><span class="k">02:02</span><span class="t" data-i18n data-zh-hans="回归：修过的 bug" data-en="Regression: a bug that was fixed" data-vi="Hồi quy: lỗi đã sửa">迴歸：修過的 bug</span></button></li>
+        <li><button type="button" data-t="140"><span class="k">02:20</span><span class="t" data-i18n data-zh-hans="每一条都追得回来" data-en="Every test traces back" data-vi="Mỗi kiểm thử đều truy được nguồn">每一條都追得回來</span></button></li>
+        <li><button type="button" data-t="162"><span class="k">02:42</span><span class="t" data-i18n data-zh-hans="请 Codex 展开 TESTS.md" data-en="Have Codex expand TESTS.md" data-vi="Nhờ Codex mở rộng TESTS.md">請 Codex 展開 TESTS.md</span></button></li>
+        <li><button type="button" data-t="176"><span class="k">02:56</span><span class="t" data-i18n data-zh-hans="审 TESTS：三个问题" data-en="Review TESTS: three questions" data-vi="Duyệt TESTS: ba câu hỏi">審 TESTS：三個問題</span></button></li>
+        <li><button type="button" data-t="201"><span class="k">03:21</span><span class="t" data-i18n data-zh-hans="工具箱多一份：TESTS.md" data-en="One more file in the toolbox: TESTS.md" data-vi="Thêm một tệp vào hộp đồ nghề: TESTS.md">工具箱多一份：TESTS.md</span></button></li>
+        <li><button type="button" data-t="217"><span class="k">03:37</span><span class="t" data-i18n data-zh-hans="结尾" data-en="Wrap-up" data-vi="Kết">結尾</span></button></li>
+      </ol>
+
+      <ol class="points">
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;VERIFY 是验收，TESTS 是细部测试。&lt;/strong&gt;VERIFY.md 由你写，条数少、人看得懂，说“怎样算做好”（验收测试，Acceptance Test）；TESTS.md 由 AI 从每一条展开成细部测试（Test Cases）。上周 AI 补的先写在 VERIFY 里，是简化版；这周拆成两份，你写的和 AI 补的分清楚。"
+          data-en="&lt;strong&gt;VERIFY is acceptance; TESTS is the detailed tests.&lt;/strong&gt; You write VERIFY.md: a few items anyone can read that say what counts as done (acceptance tests). In TESTS.md the AI expands each item into detailed tests (test cases). Last week what the AI added went into VERIFY, the simplified version; this week we split it in two, so what you wrote and what the AI added stay apart."
+          data-vi="&lt;strong&gt;VERIFY là nghiệm thu, TESTS là kiểm thử chi tiết.&lt;/strong&gt; VERIFY.md do bạn viết, ít dòng, ai đọc cũng hiểu, nói “thế nào là xong” (kiểm thử nghiệm thu, Acceptance Test); TESTS.md do AI mở rộng từ mỗi mục thành kiểm thử chi tiết (Test Cases). Tuần trước phần AI bổ sung được ghi luôn vào VERIFY, đó là bản đơn giản; tuần này tách làm hai, phần bạn viết và phần AI bổ sung tách bạch."><strong>VERIFY 是驗收，TESTS 是細部測試。</strong>VERIFY.md 由你寫，條數少、人看得懂，說「怎樣算做好」（驗收測試，Acceptance Test）；TESTS.md 由 AI 從每一條展開成細部測試（Test Cases）。上週 AI 補的先寫在 VERIFY 裡，是簡化版；這週拆成兩份，你寫的和 AI 補的分清楚。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;一条 VERIFY，展开成好几条。&lt;/strong&gt;边界：刚好在线的两边各测一次（1 格内捡得到、2 格捡不到）；没想到的情况：那一格已经 64 个；组合：两个一起捡，数字 +2；顺序：捡起来、关掉再开，数字还在；回归：修好过的 bug 写成一条测试，以后不能再发生。"
+          data-en="&lt;strong&gt;One VERIFY item becomes several tests.&lt;/strong&gt; Boundaries: test once on each side of the line (within 1 block it is picked up, at 2 blocks it is not); cases nobody thought of: that slot already holds 64; combinations: pick up two at once and the count goes up by 2; order: pick it up, close and reopen, and the count is still there; regression: a bug that was fixed becomes a test so it can never come back."
+          data-vi="&lt;strong&gt;Một mục VERIFY thành nhiều kiểm thử.&lt;/strong&gt; Biên: thử mỗi bên của đường ranh một lần (trong 1 ô thì nhặt được, ở 2 ô thì không); trường hợp chưa ai nghĩ tới: ô đó đã có 64 khối; kết hợp: nhặt hai khối cùng lúc thì số tăng 2; thứ tự: nhặt lên, đóng rồi mở lại, số vẫn còn; hồi quy: lỗi đã sửa được viết thành một kiểm thử để không bao giờ quay lại."><strong>一條 VERIFY，展開成好幾條。</strong>邊界：剛好在線的兩邊各測一次（1 格內撿得到、2 格撿不到）；沒想到的情況：那一格已經 64 個；組合：兩個一起撿，數字 +2；順序：撿起來、關掉再開，數字還在；迴歸：修好過的 bug 寫成一條測試，以後不能再發生。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;每一条都追得回来（追溯，Traceability）。&lt;/strong&gt;T3.1 就是 STEP 3 展开的第 1 条。审的时候一组一组看；VERIFY 改了，马上知道哪几条要跟着改。"
+          data-en="&lt;strong&gt;Every test traces back (traceability).&lt;/strong&gt; T3.1 is the first test expanded from STEP 3. You review them group by group, and when VERIFY changes you know at once which tests must change with it."
+          data-vi="&lt;strong&gt;Mỗi kiểm thử đều truy được nguồn (Traceability).&lt;/strong&gt; T3.1 là kiểm thử thứ nhất mở rộng từ STEP 3. Khi duyệt, xem từng nhóm một; VERIFY thay đổi thì biết ngay những dòng nào phải đổi theo."><strong>每一條都追得回來（追溯，Traceability）。</strong>T3.1 就是 STEP 3 展開的第 1 條。審的時候一組一組看；VERIFY 改了，馬上知道哪幾條要跟著改。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;AI 展开，你审三个问题。&lt;/strong&gt;请 Codex 从 VERIFY.md 写成 TESTS.md，每条标出来源，先不要写程序；再问：每一条 VERIFY 底下都有细部测试吗？有没有边界情况？测的是规则，不是画面？（“很好看”测不出来。）不对就请 AI 改。"
+          data-en="&lt;strong&gt;The AI expands; you ask three questions.&lt;/strong&gt; Have Codex turn VERIFY.md into TESTS.md, marking where each test came from and writing no code yet. Then ask: does every VERIFY item have detailed tests under it? Are there boundary cases? Does it test the rules, not the look? (“Looks nice” cannot be tested.) If not, ask the AI to fix it."
+          data-vi="&lt;strong&gt;AI mở rộng, bạn hỏi ba câu.&lt;/strong&gt; Nhờ Codex viết TESTS.md từ VERIFY.md, mỗi dòng ghi rõ nguồn, chưa viết code; rồi hỏi: dưới mỗi mục VERIFY đều có kiểm thử chi tiết chưa? Có trường hợp biên không? Kiểm thử quy tắc chứ không phải giao diện? (“Đẹp” thì không kiểm thử được.) Chưa đúng thì nhờ AI sửa."><strong>AI 展開，你審三個問題。</strong>請 Codex 從 VERIFY.md 寫成 TESTS.md，每條標出來源，先不要寫程式；再問：每一條 VERIFY 底下都有細部測試嗎？有沒有邊界情況？測的是規則，不是畫面？（「很好看」測不出來。）不對就請 AI 改。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;顺序：VERIFY → TESTS → PLANS。&lt;/strong&gt;先展开成细部测试，再排进 PLANS 的每一步。AGENTS.md 写上：VERIFY.md 不要改；TESTS.md 从 VERIFY 展开，每条标出它来自哪一条；TESTS.md 我审过，才开始写程序。"
+          data-en="&lt;strong&gt;The order: VERIFY → TESTS → PLANS.&lt;/strong&gt; First expand into detailed tests, then place them in each step of PLANS. Write into AGENTS.md: do not change VERIFY.md; TESTS.md is expanded from VERIFY, each test marking which item it came from; no code until I have reviewed TESTS.md."
+          data-vi="&lt;strong&gt;Thứ tự: VERIFY → TESTS → PLANS.&lt;/strong&gt; Mở rộng thành kiểm thử chi tiết trước, rồi xếp vào từng bước của PLANS. Ghi vào AGENTS.md: không sửa VERIFY.md; TESTS.md mở rộng từ VERIFY, mỗi dòng ghi rõ đến từ mục nào; tôi duyệt TESTS.md xong mới bắt đầu viết code."><strong>順序：VERIFY → TESTS → PLANS。</strong>先展開成細部測試，再排進 PLANS 的每一步。AGENTS.md 寫上：VERIFY.md 不要改；TESTS.md 從 VERIFY 展開，每條標出它來自哪一條；TESTS.md 我審過，才開始寫程式。</p></li>
+      </ol>
+    </section>
+
+    <section class="unit" id="02-break" aria-labelledby="u02-title" data-needs="01-tests">
+      <h2 class="unit-title" id="u02-title"><span class="unit-num" data-ui="video.n" data-n="02">影片 02</span><span data-i18n
+        data-zh-hans="测试全部通过，就代表测得好吗？故意弄坏一行"
+        data-en="All Tests Pass. Are the Tests Any Good? Break a Line on Purpose"
+        data-vi="Kiểm thử qua hết, vậy kiểm thử có tốt không? Cố ý làm hỏng một dòng">測試全部通過，就代表測得好嗎？故意弄壞一行</span></h2>
+
+      <div class="film">
+        <div class="player">
+          <video controls preload="metadata" playsinline data-hls="video/02-break/hls/index.m3u8" data-poster="video/02-break/poster.jpg" width="1920" height="1080">
+            你的瀏覽器無法播放這支影片。
+          </video>
+        </div>
+      </div>
+
+      <ol class="chapters" aria-label="影片片段（點了直接跳到那一段）" data-ui-attr="aria-label:video.chapters">
+        <li><button type="button" data-t="0"><span class="k">00:00</span><span class="t" data-i18n data-zh-hans="开场" data-en="Opening" data-vi="Mở đầu">開場</span></button></li>
+        <li><button type="button" data-t="9"><span class="k">00:09</span><span class="t" data-i18n data-zh-hans="全部绿灯，就没问题了？" data-en="All green, so nothing is wrong?" data-vi="Xanh hết là không có vấn đề?">全部綠燈，就沒問題了？</span></button></li>
+        <li><button type="button" data-t="20"><span class="k">00:20</span><span class="t" data-i18n data-zh-hans="程序和测试都是 AI 写的" data-en="The AI wrote both the code and the tests" data-vi="Cả code lẫn kiểm thử đều do AI viết">程式和測試都是 AI 寫的</span></button></li>
+        <li><button type="button" data-t="32"><span class="k">00:32</span><span class="t" data-i18n data-zh-hans="故意弄坏一行，像消防演习" data-en="Break a line on purpose, like a fire drill" data-vi="Cố ý làm hỏng một dòng, như diễn tập cứu hỏa">故意弄壞一行，像消防演習</span></button></li>
+        <li><button type="button" data-t="41"><span class="k">00:41</span><span class="t" data-i18n data-zh-hans="第 1 次：+1 改成 +2，抓到了" data-en="Try 1: +1 becomes +2, caught" data-vi="Lần 1: +1 thành +2, bắt được">第 1 次：+1 改成 +2，抓到了</span></button></li>
+        <li><button type="button" data-t="60"><span class="k">01:00</span><span class="t" data-i18n data-zh-hans="第 2 次：1.5 改成 15，没抓到" data-en="Try 2: 1.5 becomes 15, missed" data-vi="Lần 2: 1.5 thành 15, không bắt được">第 2 次：1.5 改成 15，沒抓到</span></button></li>
+        <li><button type="button" data-t="70"><span class="k">01:10</span><span class="t" data-i18n data-zh-hans="岛上真的玩：5 格外也捡得到" data-en="Play it: picked up from 5 blocks away" data-vi="Chơi thật: đứng cách 5 ô vẫn nhặt được">島上真的玩：5 格外也撿得到</span></button></li>
+        <li><button type="button" data-t="81"><span class="k">01:21</span><span class="t" data-i18n data-zh-hans="T3.1 只测了一半，补上" data-en="T3.1 tested only half; add the rest" data-vi="T3.1 chỉ kiểm thử một nửa, bổ sung">T3.1 只測了一半，補上</span></button></li>
+        <li><button type="button" data-t="96"><span class="k">01:36</span><span class="t" data-i18n data-zh-hans="突变测试（Mutation Testing）" data-en="Mutation testing" data-vi="Kiểm thử đột biến (Mutation Testing)">突變測試（Mutation Testing）</span></button></li>
+        <li><button type="button" data-t="104"><span class="k">01:44</span><span class="t" data-i18n data-zh-hans="先 commit，交给 Codex 做" data-en="Commit first, then hand it to Codex" data-vi="Commit trước, rồi giao cho Codex">先 commit，交給 Codex 做</span></button></li>
+        <li><button type="button" data-t="118"><span class="k">01:58</span><span class="t" data-i18n data-zh-hans="4 次抓到 3 次，补上 T4.3" data-en="Caught 3 of 4; add T4.3" data-vi="Bắt được 3 trong 4 lần, bổ sung T4.3">4 次抓到 3 次，補上 T4.3</span></button></li>
+        <li><button type="button" data-t="147"><span class="k">02:27</span><span class="t" data-i18n data-zh-hans="三个规则" data-en="Three rules" data-vi="Ba quy tắc">三個規則</span></button></li>
+        <li><button type="button" data-t="168"><span class="k">02:48</span><span class="t" data-i18n data-zh-hans="结尾" data-en="Wrap-up" data-vi="Kết">結尾</span></button></li>
+      </ol>
+
+      <ol class="points">
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;全部通过，只代表通过了“写出来的那些”测试。&lt;/strong&gt;程序和测试都是 AI 写的；测试写得太松，程序错了也照样绿灯。没写到的地方，绿灯不会告诉你。"
+          data-en="&lt;strong&gt;All passing only means passing the tests that were written.&lt;/strong&gt; The AI wrote both the code and the tests; if the tests are too loose, wrong code still shows green. Green will not tell you about what was never tested."
+          data-vi="&lt;strong&gt;Qua hết chỉ có nghĩa là qua những kiểm thử “đã được viết ra”.&lt;/strong&gt; Cả code lẫn kiểm thử đều do AI viết; kiểm thử viết quá lỏng thì code sai vẫn xanh. Chỗ chưa được kiểm thử, đèn xanh sẽ không cho bạn biết."><strong>全部通過，只代表通過了「寫出來的那些」測試。</strong>程式和測試都是 AI 寫的；測試寫得太鬆，程式錯了也照樣綠燈。沒寫到的地方，綠燈不會告訴你。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;故意弄坏一行，看测试抓不抓得到。&lt;/strong&gt;像消防演习：把程序的一个数字改坏，跑全部测试。有测试变红＝抓到了，这些测试有用；全部还是绿的＝没抓到，少了一条测试。这叫突变测试（Mutation Testing）。"
+          data-en="&lt;strong&gt;Break one line on purpose and see whether the tests catch it.&lt;/strong&gt; Like a fire drill: change one number in the code to a wrong value and run all the tests. A test turns red = caught, so those tests work; everything stays green = missed, so a test is missing. This is called mutation testing."
+          data-vi="&lt;strong&gt;Cố ý làm hỏng một dòng, xem kiểm thử có bắt được không.&lt;/strong&gt; Như diễn tập cứu hỏa: sửa sai một con số trong code rồi chạy toàn bộ kiểm thử. Có kiểm thử chuyển đỏ = bắt được, kiểm thử có tác dụng; vẫn xanh hết = không bắt được, còn thiếu một kiểm thử. Cách này gọi là kiểm thử đột biến (Mutation Testing)."><strong>故意弄壞一行，看測試抓不抓得到。</strong>像消防演習：把程式的一個數字改壞，跑全部測試。有測試變紅＝抓到了，這些測試有用；全部還是綠的＝沒抓到，少了一條測試。這叫突變測試（Mutation Testing）。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;没抓到的那一次，就是少的那条测试。&lt;/strong&gt;把捡得到的距离 1.5 改成 15，测试全部通过，岛上却站在 5 格外也捡得起来：原来 T3.1 只测了“1 格内捡得到”。补上“2 格捡不到”，再弄坏一次，这次抓到了。"
+          data-en="&lt;strong&gt;The time it is missed shows the missing test.&lt;/strong&gt; Change the pick-up distance from 1.5 to 15 and every test still passes, yet on the island you can pick things up from 5 blocks away: T3.1 only tested “within 1 block it is picked up”. Add “at 2 blocks it is not”, break it again, and this time it is caught."
+          data-vi="&lt;strong&gt;Lần không bắt được chính là kiểm thử còn thiếu.&lt;/strong&gt; Đổi khoảng cách nhặt từ 1.5 thành 15, kiểm thử vẫn qua hết, vậy mà trên đảo đứng cách 5 ô vẫn nhặt được: hóa ra T3.1 chỉ kiểm thử “trong 1 ô thì nhặt được”. Bổ sung “ở 2 ô thì không nhặt được”, làm hỏng lại lần nữa, lần này bắt được."><strong>沒抓到的那一次，就是少的那條測試。</strong>把撿得到的距離 1.5 改成 15，測試全部通過，島上卻站在 5 格外也撿得起來：原來 T3.1 只測了「1 格內撿得到」。補上「2 格撿不到」，再弄壞一次，這次抓到了。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;交给 Codex 做。&lt;/strong&gt;先 commit；请它一次只改一行、跑全部测试、记下有没有失败、再改回来，最后告诉你哪一次没被抓到。没抓到的（放方块时不扣数量），请它补一条测试并确认抓得到；全部改回来、全部通过，才 commit。"
+          data-en="&lt;strong&gt;Hand it to Codex.&lt;/strong&gt; Commit first; have it change one line at a time, run all the tests, note whether any fail and change it back, then tell you which try was missed. For the missed one (placing a block does not lower the count), have it add a test and confirm the test catches it; commit only when everything is changed back and every test passes."
+          data-vi="&lt;strong&gt;Giao cho Codex.&lt;/strong&gt; Commit trước; nhờ nó mỗi lần chỉ sửa một dòng, chạy toàn bộ kiểm thử, ghi lại có lỗi hay không rồi sửa lại như cũ, cuối cùng cho bạn biết lần nào không bị bắt. Với lần không bắt được (đặt khối mà không trừ số lượng), nhờ nó bổ sung một kiểm thử và xác nhận bắt được; sửa lại hết và mọi kiểm thử đều qua thì mới commit."><strong>交給 Codex 做。</strong>先 commit；請它一次只改一行、跑全部測試、記下有沒有失敗、再改回來，最後告訴你哪一次沒被抓到。沒抓到的（放方塊時不扣數量），請它補一條測試並確認抓得到；全部改回來、全部通過，才 commit。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;三个规则。&lt;/strong&gt;先 commit，弄坏了才回得去；一次只改一行，试完一定改回来；没抓到，要补的是测试，不是程序。不用每一行都试，先试最重要的规则（数字、存档）。"
+          data-en="&lt;strong&gt;Three rules.&lt;/strong&gt; Commit first, so you can go back after breaking things; change only one line at a time and always change it back; when something is missed, add a test rather than changing the code. You do not need to try every line; try the most important rules first (counts, saving)."
+          data-vi="&lt;strong&gt;Ba quy tắc.&lt;/strong&gt; Commit trước, làm hỏng rồi mới quay lại được; mỗi lần chỉ sửa một dòng, thử xong nhất định sửa lại; không bắt được thì cái cần bổ sung là kiểm thử, không phải code. Không cần thử từng dòng; thử những quy tắc quan trọng nhất trước (số lượng, lưu)."><strong>三個規則。</strong>先 commit，弄壞了才回得去；一次只改一行，試完一定改回來；沒抓到，要補的是測試，不是程式。不用每一行都試，先試最重要的規則（數字、存檔）。</p></li>
+      </ol>
+    </section>
+
+    <nav class="pager" id="pager" data-week="8" aria-label="其他週次" data-ui-attr="aria-label:pager.label"></nav>
+  </main>
+
+  <footer class="foot">
+    <span>Learning Analytics Tools Implementation Applications (NTNU)</span>
+    <span><span data-ui="footer.copyright">Copyright © 2026 JUNHAO CHEN・程式碼 MIT・內容 CC BY-NC-SA 4.0</span> <a class="foot-lic" href="https://github.com/bigmoumou/Learning-Analytics-Tools#授權" data-ui="footer.license" data-ui-attr="href:footer.licenseUrl">授權說明</a></span>
+    <a href="../../" data-ui="nav.home">回到課程首頁</a>
+  </footer>
+</div>
+
+<!-- 先 hls.js、再 video.js（播放、片段、#t= 連結都在 video.js） -->
+<script src="../../assets/vendor/hls.light.min.js"></script>
+<script src="../../assets/video.js"></script>
+</body>
+</html>
