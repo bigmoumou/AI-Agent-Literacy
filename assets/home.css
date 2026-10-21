@@ -28,6 +28,11 @@
 }
 /* 簡中用簡體字型（assets/i18n.js 選到時才載入） */
 :root:lang(zh-Hans) { --font-body: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; }
+/* 英文、越南文（2026-10-22）：Noto Sans TC 的彎引號和撇號（‘ ’ “ ”）是全形寬，英文句子會變成「OpenAI’ s」那樣的大縫。
+   只有這四個字元改用系統的西文字型（unicode-range），其他字照舊；系統都沒有這些字型時就照舊用 Noto。中文頁（含简中）不受影響。 */
+@font-face { font-family: "Latin Quotes"; font-weight: 100 600; src: local("Segoe UI"), local("Helvetica Neue"), local("Helvetica"), local("Arial"), local("Roboto"), local("Noto Sans"), local("DejaVu Sans"); unicode-range: U+2018-2019, U+201C-201D; }
+@font-face { font-family: "Latin Quotes"; font-weight: 700 900; src: local("Segoe UI Bold"), local("HelveticaNeue-Bold"), local("Helvetica Bold"), local("Arial Bold"), local("Roboto Bold"), local("Noto Sans Bold"), local("DejaVu Sans Bold"); unicode-range: U+2018-2019, U+201C-201D; }
+:root:lang(en), :root:lang(vi) { --font-body: "Latin Quotes", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif; }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #070707; --ink: #f1efe9; --ink-2: #b9b6ae; --ink-3: #85827b;
