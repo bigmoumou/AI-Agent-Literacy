@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use these course materials, please cite them as below."
 type: software
-title: "Agent Literacy: An Open Course on Working with AI Coding Agents"
+title: "AI Agent Literacy: An Open Course on Working with AI Coding Agents"
 authors:
   - family-names: Chen
     given-names: Jun-Hao
@@ -10,7 +10,7 @@ authors:
     given-names: Che-You
     alias: 劉哲佑
 abstract: >-
-  Agent Literacy is an open course on working with AI coding agents and an
+  AI Agent Literacy is an open course on working with AI coding agents and an
   example of AI demonstration teaching. It was first piloted at National
   Taiwan Normal University (NTNU) in 2026, in the course Learning Analytics
   Tools Implementation Applications. It

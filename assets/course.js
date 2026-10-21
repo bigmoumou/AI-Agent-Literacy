@@ -13,7 +13,7 @@
   "use strict";
 
   const COURSE = {
-    title: "Agent Literacy",
+    title: "AI Agent Literacy",
     subtitle: "An open course on working with AI coding agents (first piloted at NTNU: Learning Analytics Tools Implementation Applications)",
     repo: "https://github.com/bigmoumou/AI-Agent-Literacy",
     firstWeek: 3,

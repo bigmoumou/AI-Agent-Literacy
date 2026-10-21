@@ -1,4 +1,4 @@
-<h1 align="center">Agent Literacy</h1>
+<h1 align="center">AI Agent Literacy</h1>
 
 <p align="center">
 An open course on working with AI coding agents<br>
@@ -17,7 +17,7 @@ An open course on working with AI coding agents<br>
 
 [![The course homepage: the film strip glides from Week 3 to the latest week](docs/images/home.webp)](https://ai-agent-literacy.pages.dev/)
 
-**An example of AI demonstration teaching.** Agent Literacy teaches students to work with AI coding agents such as OpenAI Codex, and its own materials are made the same way. The teaching videos, the course site and the practice environment were developed with AI agents (Codex and Claude); the teacher designed the curriculum, supplied the content and reviewed every video. Students see what to do with AI and, in the materials themselves, how a complete piece of work gets made with it. Everything is published as an open course under open licenses.
+**An example of AI demonstration teaching.** AI Agent Literacy teaches students to work with AI coding agents such as OpenAI Codex, and its own materials are made the same way. The teaching videos, the course site and the practice environment were developed with AI agents (Codex and Claude); the teacher designed the curriculum, supplied the content and reviewed every video. Students see what to do with AI and, in the materials themselves, how a complete piece of work gets made with it. Everything is published as an open course under open licenses.
 
 <table>
 <tr><td><b>Pilot site</b></td><td>National Taiwan Normal University (NTNU), 2026, in the course <i>Learning Analytics Tools Implementation Applications</i></td></tr>
@@ -110,9 +110,9 @@ Code is under the [MIT License](LICENSE). Videos and course content are under [C
 To cite this work, use the **Cite this repository** button ([CITATION.cff](CITATION.cff)) or:
 
 ```bibtex
-@misc{chen2026agentliteracy,
+@misc{chen2026aiagentliteracy,
   author       = {Chen, Jun-Hao and Liu, Che-You},
-  title        = {Agent Literacy: An Open Course on Working with {AI} Coding Agents},
+  title        = {{AI} Agent Literacy: An Open Course on Working with {AI} Coding Agents},
   year         = {2026},
   howpublished = {\url{https://ai-agent-literacy.pages.dev/}},
   note         = {Open educational resource. Source: https://github.com/bigmoumou/AI-Agent-Literacy}
@@ -138,7 +138,7 @@ Thanks to the students taking the course.
 
 ### 課程簡介
 
-**AI 示範教學的實例。** Agent Literacy（AI 代理素養）是一門開放式課程，教學生和 AI 程式助理（例如 OpenAI 的 Codex）一起工作，而課程本身的教材也是這樣做出來的：教學影片、課程網站和練習環境由 AI 代理（Codex 與 Claude）開發，授課教師設計課程、提供教材，並審核每一支影片。學生除了學到怎麼用 AI，也能從教材本身看到一件完整的作品如何和 AI 合作完成。所有內容都以開放授權公開，是一門開放式課程。
+**AI 示範教學的實例。** AI Agent Literacy（AI 代理素養）是一門開放式課程，教學生和 AI 程式助理（例如 OpenAI 的 Codex）一起工作，而課程本身的教材也是這樣做出來的：教學影片、課程網站和練習環境由 AI 代理（Codex 與 Claude）開發，授課教師設計課程、提供教材，並審核每一支影片。學生除了學到怎麼用 AI，也能從教材本身看到一件完整的作品如何和 AI 合作完成。所有內容都以開放授權公開，是一門開放式課程。
 
 <table>
 <tr><td><b>首個示範場域</b></td><td>國立臺灣師範大學（2026），課程「學習分析工具」（Learning Analytics Tools Implementation Applications）</td></tr>
@@ -236,7 +236,7 @@ python -m http.server 8000
 
 ### 课程简介
 
-**AI 示范教学的实例。** Agent Literacy（AI 智能体素养）是一门开放课程，教学生和 AI 编程助手（例如 OpenAI 的 Codex）一起工作，而课程本身的教材也是这样做出来的：教学视频、课程网站和练习环境由 AI 智能体（Codex 与 Claude）开发，授课教师设计课程、提供教材，并审核每一个视频。学生除了学到怎么用 AI，也能从教材本身看到一件完整的作品如何与 AI 合作完成。所有内容都以开放许可公开，是一门开放课程。
+**AI 示范教学的实例。** AI Agent Literacy（AI 智能体素养）是一门开放课程，教学生和 AI 编程助手（例如 OpenAI 的 Codex）一起工作，而课程本身的教材也是这样做出来的：教学视频、课程网站和练习环境由 AI 智能体（Codex 与 Claude）开发，授课教师设计课程、提供教材，并审核每一个视频。学生除了学到怎么用 AI，也能从教材本身看到一件完整的作品如何与 AI 合作完成。所有内容都以开放许可公开，是一门开放课程。
 
 <table>
 <tr><td><b>首个示范场域</b></td><td>台湾师范大学（2026），课程“学习分析工具”（Learning Analytics Tools Implementation Applications）</td></tr>
@@ -334,7 +334,7 @@ python -m http.server 8000
 
 ### 概要
 
-**AI デモンストレーション教育の実践例。** Agent Literacy（AI エージェント・リテラシー）は、OpenAI の Codex などの AI コーディングエージェントと協働する方法を教えるオープンコースです。授業の教材そのものも同じ方法で作られています。教育動画・コースサイト・練習環境は AI エージェント（Codex と Claude）が開発し、担当教員がカリキュラムを設計して教材を用意し、すべての動画をレビューしました。学生は AI の使い方を学ぶと同時に、教材そのものを通して、AI と協働してひとつの作品を完成させる過程を見ることができます。すべてオープンライセンスで公開しているオープンコースです。
+**AI デモンストレーション教育の実践例。** AI Agent Literacy（AI エージェント・リテラシー）は、OpenAI の Codex などの AI コーディングエージェントと協働する方法を教えるオープンコースです。授業の教材そのものも同じ方法で作られています。教育動画・コースサイト・練習環境は AI エージェント（Codex と Claude）が開発し、担当教員がカリキュラムを設計して教材を用意し、すべての動画をレビューしました。学生は AI の使い方を学ぶと同時に、教材そのものを通して、AI と協働してひとつの作品を完成させる過程を見ることができます。すべてオープンライセンスで公開しているオープンコースです。
 
 <table>
 <tr><td><b>最初の実践の場</b></td><td>国立台湾師範大学（2026 年）、授業「学習分析ツール」（Learning Analytics Tools Implementation Applications）</td></tr>
