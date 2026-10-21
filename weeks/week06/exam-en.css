@@ -1,0 +1,43 @@
+/* Week 6 exam: English layer styles (loaded by exam-en.js on the English site only; the Chinese page never loads this file).
+   English is wider than Chinese: the mono labels are set in capitals with a little less letter-spacing, the HUD header may not wrap,
+   "REPAIR COMPLETE" is wider than 修復完成, and the toast header that exam.css writes as 小安 becomes Xiao An. */
+
+/* the toast's name tag (exam.css: content: "小安") */
+html[lang="en"] .g-comm.is-toast .g-who::before { content: "Xiao An"; }
+
+/* mono labels in capitals (MISSION 01 / 04, ON THE LINE · XIAO AN, SIGNAL FAIR, LEVEL 4 | ...); the HUD's two body-font labels keep their case */
+html[lang="en"] #guide .g-k, html[lang="en"] .g-call, html[lang="en"] .quiz-tag, html[lang="en"] .quiz-why-k, html[lang="en"] .quiz-mark { text-transform: uppercase; }
+html[lang="en"] #guide .g-hgoal .g-k, html[lang="en"] #guide .g-hud .g-stab > .g-k:first-child { text-transform: none; }
+html[lang="en"] #guide .g-k { letter-spacing: .14em; }
+html[lang="en"] #guide .g-keys { letter-spacing: .06em; text-transform: none; }
+
+/* HUD header: "MISSION 02 / 04" on the left, "BACK TO LEVEL 1" on the right, one line each */
+html[lang="en"] #guide .g-hud .g-hrow { gap: 10px; }
+html[lang="en"] #guide .g-hud .g-hrow .g-k { white-space: nowrap; letter-spacing: .1em; }
+html[lang="en"] #guide .g-hud .g-hrow .g-amber { font-size: 12.5px; }
+html[lang="en"] #guide .g-reset { font-size: 11px; letter-spacing: .08em; }
+html[lang="en"] #guide .g-reset.is-armed, html[lang="en"] #guide.is-hud .g-reset.is-armed:hover { letter-spacing: .06em; }
+
+/* HUD: "Spacetime stability" is long; on a narrow column the label gets its own line above the bar so the percentage never lands on the segments */
+html[lang="en"] #guide .g-hud .g-stab { flex-wrap: wrap; row-gap: 8px; }
+html[lang="en"] #guide .g-hud .g-stab > .g-k:first-child { flex: 0 0 auto; }
+html[lang="en"] #guide .g-hud .g-segs { flex: 1 1 96px; min-width: 96px; }
+
+/* a comma or full stop right after a file-name tag sits against it, as in English text */
+html[lang="en"] .g-nb .g-code { margin-right: 0; }
+
+/* the three lines under the title card and the goal: a little narrower letter-spacing, same sizes */
+html[lang="en"] .g-title h2 { letter-spacing: .02em; }
+html[lang="en"] .g-goal span:last-child { font-size: clamp(15px, 1.5vw, 19px); }
+
+/* REPAIR COMPLETE (the stamp that follows a cleared level): wider than 修復完成, so smaller type and tracking, and never wrapped */
+html[lang="en"] .g-stamp { white-space: nowrap; }
+html[lang="en"] .g-big { font-size: clamp(26px, 3.6vw, 46px); letter-spacing: .16em; text-indent: .16em; text-transform: uppercase; }
+
+/* the quiz: capital tag line, the Right / Wrong marks do not need the Chinese single-character width */
+html[lang="en"] .quiz-tag { letter-spacing: .12em; }
+html[lang="en"] .quiz-mark { letter-spacing: .08em; }
+html[lang="en"] .quiz-why-from { letter-spacing: 0; }
+
+/* "Pick a computer": the "Resume at level N" tag under each laptop */
+html[lang="en"] .pick-prog { letter-spacing: .04em; }

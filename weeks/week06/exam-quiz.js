@@ -5,7 +5,9 @@
    ExamQuiz.open({ onDone, sfx }) */
 (function () {
   "use strict";
-  const Q = [
+  // 英文版（weeks/week06/exam-en.js，只在英文網站載入）：有 window.ExamEN 才換成英文題庫和英文介面字，沒有的話下面全部照原樣
+  const T = (zh) => (window.ExamEN && window.ExamEN.t(zh)) || zh;
+  const Q = window.ExamEN ? window.ExamEN.QUIZ : [
     {
       q: "Codex 這類 AI Agent 為什麼以「資料夾」當作一個專案？",
       a: ["它讀寫的是硬碟上這個資料夾裡的真檔案：規則（AGENTS.md）、資料、產出都在同一個地方",
@@ -99,7 +101,7 @@
     const root = $$("div", "quiz");
     root.setAttribute("role", "dialog"); root.setAttribute("aria-modal", "true"); root.setAttribute("aria-labelledby", "quizQ");
     const panel = $$("div", "quiz-panel");
-    const head = $$("div", "quiz-head"), tag = $$("span", "quiz-tag", "第 4 關｜回到正確的時空"), count = $$("span", "quiz-count");
+    const head = $$("div", "quiz-head"), tag = $$("span", "quiz-tag", T("第 4 關｜回到正確的時空")), count = $$("span", "quiz-count");
     head.append(tag, count);
     const bar = $$("div", "quiz-bar"), fill = $$("i");
     bar.append(fill);
@@ -155,12 +157,12 @@
       count.textContent = "";
       fill.style.width = "0%";
       body.replaceChildren();
-      const p1 = $$("p", "quiz-story", "時空轉移開始了。");
-      const p2 = $$("p", "quiz-story", "要回到原本的時空，你得記得那段時空發生過的事——Week 3 到 Week 5。");
-      const p3 = $$("p", "quiz-rule", "10 題，每題 4 選 1。選錯可以再選，選對才會告訴你為什麼。");
+      const p1 = $$("p", "quiz-story", T("時空轉移開始了。"));
+      const p2 = $$("p", "quiz-story", T("要回到原本的時空，你得記得那段時空發生過的事——Week 3 到 Week 5。"));
+      const p3 = $$("p", "quiz-rule", T("10 題，每題 4 選 1。選錯可以再選，選對才會告訴你為什麼。"));
       body.append(p1, p2, p3);
       note.textContent = "";
-      btn.textContent = "開始";
+      btn.textContent = T("開始");
       btn.disabled = false;
       btn.onclick = () => ask(0);
       onKey = (e) => { if (e.key === "Enter") { e.preventDefault(); ask(0); } };
@@ -196,7 +198,7 @@
       const why = $$("div", "quiz-why");
       body.append(h, list, why);
       note.textContent = "";
-      btn.textContent = "確認";
+      btn.textContent = T("確認");
       btn.disabled = true;
       btn.onclick = confirm;
       onKey = (e) => {
@@ -228,8 +230,8 @@
         const b = opts[pick];
         if (+b.dataset.k !== 0) {                                 // 選錯：這個選項劃掉，再選一次
           b.classList.remove("is-pick"); b.classList.add("is-no"); b.disabled = true; b.setAttribute("aria-checked", "false");
-          b.querySelector(".quiz-mark").textContent = "不對";
-          note.textContent = "再想想。";
+          b.querySelector(".quiz-mark").textContent = T("不對");
+          note.textContent = T("再想想。");
           pick = -1; btn.disabled = true;
           sfx("no");
           jolt("is-shake"); onStep(n, "wrong");
@@ -239,16 +241,16 @@
         }
         done = true;                                              // 選對：說明為什麼
         b.classList.remove("is-pick"); b.classList.add("is-yes");
-        b.querySelector(".quiz-mark").textContent = "對";
+        b.querySelector(".quiz-mark").textContent = T("對");
         opts.forEach((x) => { x.disabled = true; if (x !== b) x.classList.add("is-dim"); });
-        why.append($$("span", "quiz-why-k", "為什麼"), $$("p", "quiz-why-t", item.why), $$("span", "quiz-why-from", "出處：" + item.from));
+        why.append($$("span", "quiz-why-k", T("為什麼")), $$("p", "quiz-why-t", item.why), $$("span", "quiz-why-from", T("出處：") + item.from));
         why.classList.add("is-on");
         note.textContent = "";
         fill.style.width = ((n + 1) / Q.length * 100) + "%";
         sfx("yes");
         jolt("is-right"); onStep(n, "right");
         const last = n === Q.length - 1;
-        btn.textContent = last ? "回到原本的時空" : "下一題";
+        btn.textContent = last ? T("回到原本的時空") : T("下一題");
         btn.disabled = false;
         btn.onclick = () => (last ? end() : ask(n + 1));
         setTimeout(() => btn.focus(), 30);
