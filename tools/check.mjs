@@ -7,7 +7,7 @@
 //   3. HTML 裡的本機連結（href、src、poster、data-poster(-en)、data-hls(-en)、data-thumb）都找得到檔案；data-hls、data-hls-en（英文版）到影片站的本機資料夾找
 //      （影片串流檔不在這個 repo，放在 ../media-site/public/，見 docs/維護說明.md「影片放在哪裡」；別台電腦沒有這個資料夾時只提醒）
 //   4. HLS 播放清單（.m3u8）列出的小段都在（同樣在影片站的資料夾裡）
-//   5. assets/course.js 的 WEEKS 裡的 href、thumb、still 都找得到
+//   5. assets/course.js 的 WEEKS 裡的 href、thumb、still（和英文的 thumbEn、stillEn）都找得到
 //   6. 每個影片資料夾（weeks/weekNN/video/NN-slug/，補充教材是 sN-slug/）在 repo 裡有 poster.jpg、thumb.jpg、在影片站有 hls/index.m3u8，
 //      而且週次頁有用到；repo 裡不能再有 hls/（影片放進 git 會讓 repo 越來越大）
 //   7. _redirects 轉去的目的地存在
@@ -158,7 +158,7 @@ for (const pl of playlists) {
 
 // 5. 課程資料
 const course = fs.readFileSync(path.join(ROOT, "assets/course.js"), "utf8");
-for (const m of course.matchAll(/\b(href|thumb|still): "([^"]+)"/g)) {
+for (const m of course.matchAll(/\b(href|thumb|still|thumbEn|stillEn): "([^"]+)"/g)) {
   if (!exists(path.join(ROOT, m[2]))) error(`assets/course.js 的 ${m[1]}: "${m[2]}" 找不到`);
 }
 // 8. 已開放的週次要有三種語言的 title、summary、meta

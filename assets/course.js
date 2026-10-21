@@ -4,6 +4,7 @@
      再照 weeks/week03/ 的結構放檔案（一頁 index.html：每支影片一段，影片、片段、幾則重點；
      影片檔放在 video/NN-slug/）。首頁膠捲會自動多一格已開放的畫面。
    - still 是膠捲畫格用的大圖、thumb 是清單用的小圖，通常用這週第一支影片的 poster.jpg、thumb.jpg；
+     那支影片有英文版時，另外寫 stillEn、thumbEn（poster-en.jpg、thumb-en.jpg），英文介面會換用；
      meta 是首頁顯示的一行說明，例如「影片 1 分 23 秒・5 則重點」或「2 支影片・共 3 分鐘」。
    - i18n 放 title、summary、meta 的簡中、英文、越南文；已開放的週次三種都要有（tools/check.mjs 會檢查）。
      介面文字在 assets/i18n-strings.js，語言切換在 assets/i18n.js（要比這個檔案先載入）。
@@ -56,6 +57,8 @@
       href: "weeks/week03/",
       thumb: "weeks/week03/video/01-report-journey/thumb.jpg",
       still: "weeks/week03/video/01-report-journey/poster.jpg",
+      thumbEn: "weeks/week03/video/01-report-journey/thumb-en.jpg",
+      stillEn: "weeks/week03/video/01-report-journey/poster-en.jpg",
       meta: "3 支影片＋2 支補充・共 18 分 45 秒",
       i18n: {
         "zh-Hans": {
@@ -82,6 +85,8 @@
       href: "weeks/week04/",
       thumb: "weeks/week04/video/01-built-in-browser/thumb.jpg",
       still: "weeks/week04/video/01-built-in-browser/poster.jpg",
+      thumbEn: "weeks/week04/video/01-built-in-browser/thumb-en.jpg",
+      stillEn: "weeks/week04/video/01-built-in-browser/poster-en.jpg",
       meta: "4 支影片＋2 支補充・共 19 分 1 秒",
       i18n: {
         "zh-Hans": {
@@ -108,6 +113,8 @@
       href: "weeks/week05/",
       thumb: "weeks/week05/video/01-verify-md/thumb.jpg",
       still: "weeks/week05/video/01-verify-md/poster.jpg",
+      thumbEn: "weeks/week05/video/01-verify-md/thumb-en.jpg",
+      stillEn: "weeks/week05/video/01-verify-md/poster-en.jpg",
       meta: "3 支影片＋2 支補充・共 13 分 42 秒",
       i18n: {
         "zh-Hans": {
@@ -162,6 +169,8 @@
       href: "weeks/week07/",
       thumb: "weeks/week07/video/01-se-tdd/thumb.jpg",
       still: "weeks/week07/video/01-se-tdd/poster.jpg",
+      thumbEn: "weeks/week07/video/01-se-tdd/thumb-en.jpg",
+      stillEn: "weeks/week07/video/01-se-tdd/poster-en.jpg",
       meta: "3 支影片＋2 支補充・共 17 分 13 秒",
       i18n: {
         "zh-Hans": {
@@ -209,6 +218,10 @@
       },
     },
   };
+
+  // 英文版（2026-10-22）：有 thumbEn／stillEn 的週次，英文介面的首頁膠捲、全部週次清單、換頁列用英文封面。
+  // 語言是頁面載入時決定的（首頁換語言會整頁重新載入）；其他語言照舊用 thumb／still。
+  if (window.I18N && window.I18N.lang === "en") Object.values(WEEKS).forEach((w) => { if (w.thumbEn) w.thumb = w.thumbEn; if (w.stillEn) w.still = w.stillEn; });
 
   window.COURSE = COURSE;
   window.WEEKS = WEEKS;
