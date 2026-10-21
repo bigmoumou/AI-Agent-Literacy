@@ -5,6 +5,11 @@ title: "Learning Analytics Tools Implementation Applications (NTNU): Course webs
 authors:
   - family-names: Chen
     given-names: Junhao
+    alias: 陳俊豪
+  - family-names: 劉
+    given-names: 哲佑
+  - family-names: 邱
+    given-names: 嵦時
 abstract: >-
   An AI teaching-video demonstration site: the course website for the NTNU
   course Learning Analytics Tools Implementation Applications, with AI-made
@@ -24,7 +29,11 @@ keywords:
   - learning analytics
   - teaching videos
   - AI in education
-  - Codex
+  - OpenAI Codex
   - Claude Code
+  - opus-video
+  - HTML-to-video
+  - AI agents
+  - test-driven development
   - NTNU
   - National Taiwan Normal University

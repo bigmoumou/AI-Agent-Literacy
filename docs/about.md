@@ -200,9 +200,11 @@ repo 裡的 [CITATION.cff](../CITATION.cff) 會讓 GitHub 頁面右側出現「C
 - 網站播放器使用 [hls.js](https://github.com/video-dev/hls.js)；字型來自 Google Fonts。
 - 以 CC0 釋出照片的 Jonathan Körner（原刊於 Unsplash）、Julian Lupyan，以及練習用模擬 Mac 桌布的 Clara Marie（原刊於 Unsplash）；照片都取自 Wikimedia Commons。
 
-### 維護者
+### 作者與維護者
 
-JUNHAO CHEN（[@bigmoumou](https://github.com/bigmoumou)），課程教師。問題與建議請使用 [Issues](https://github.com/bigmoumou/Learning-Analytics-Tools/issues)。
+作者：陳俊豪（JUNHAO CHEN）、劉哲佑、邱嵦時。
+
+維護者：陳俊豪（[@bigmoumou](https://github.com/bigmoumou)），課程教師。問題與建議請使用 [Issues](https://github.com/bigmoumou/Learning-Analytics-Tools/issues)。
 
 ---
 
@@ -397,6 +399,8 @@ The [CITATION.cff](../CITATION.cff) file in this repository adds a "Cite this re
 - The site's player uses [hls.js](https://github.com/video-dev/hls.js); the fonts come from Google Fonts.
 - Jonathan Körner (first published on Unsplash), Julian Lupyan, and Clara Marie (first published on Unsplash; the practice Mac's wallpaper), for releasing their photos under CC0; all were obtained from Wikimedia Commons.
 
-### Maintainer
+### Authors and maintainer
 
-JUNHAO CHEN ([@bigmoumou](https://github.com/bigmoumou)), the course teacher. Please use [issues](https://github.com/bigmoumou/Learning-Analytics-Tools/issues) for questions and suggestions.
+Authors: 陳俊豪 (JUNHAO CHEN), 劉哲佑, 邱嵦時.
+
+Maintainer: JUNHAO CHEN ([@bigmoumou](https://github.com/bigmoumou)), the course teacher. Please use [issues](https://github.com/bigmoumou/Learning-Analytics-Tools/issues) for questions and suggestions.
