@@ -10,7 +10,7 @@
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sky Island</title>
-<!-- Week 7 作業的範例「空中之島」（2026-10-19；作業段落在 weeks/week07 的 #03-homework-island）：原始碼在 製作/week07/sky-island（src/island.js），用 build.sh 打包成 island.js。 -->
+<!-- Week 7 作業的範例「空中之島」（2026-10-19；v2 2026-10-21 挖方塊像 Minecraft：按住挖、裂痕、掉落、撿起、放會用掉；作業段落在 weeks/week07 的 #03-homework-island）：原始碼在 製作/week07/sky-island（src/island.js），用 build.sh 打包成 island.js。 -->
 <meta name="robots" content="noindex, nofollow">
 <meta name="author" content="JUNHAO CHEN">
 <meta name="copyright" content="© 2026 JUNHAO CHEN">
@@ -29,6 +29,11 @@
   .slot.on { border-color: #fff; background: rgba(255,255,255,.12); }
   .slot canvas { image-rendering: pixelated; }
   .slot span { position: absolute; left: 4px; top: 1px; font: 700 12px system-ui, sans-serif; color: #fff; text-shadow: 0 1px 0 #000; }
+  /* 有幾個（v2：挖、撿才有，放了會少）：右下角的數字；0 個的格子變淡 */
+  .slot b.cnt { position: absolute; right: 4px; bottom: 1px; font: 700 15px ui-monospace, Consolas, monospace; color: #fff; text-shadow: 1px 1px 0 #3b3b3b; }
+  .slot.empty canvas { opacity: .32; }
+  .slot.bump { animation: bump .28s ease-out; }
+  @keyframes bump { 40% { transform: scale(1.14); } }
   #name, #toast { position: fixed; left: 50%; transform: translateX(-50%); font: 700 18px system-ui, sans-serif; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.7); opacity: 0; pointer-events: none; white-space: nowrap; }
   #name { bottom: 84px; } #toast { top: 22%; font-size: 22px; }
   #name.show, #toast.show { animation: fade 1.8s ease forwards; }
@@ -56,7 +61,7 @@
   @media (max-height: 380px) { .keys li:nth-child(n+3) { display: none; } .note, .copy { display: none; } }
   @media (max-height: 300px) { .kicker, .keys, .note, #reset, .copy { display: none; } h1 { font-size: 18px; margin: 0 0 8px; } .card { width: auto; padding: 10px 16px; } .go { padding: 6px 18px; font-size: 14px; } }
   @media (max-width: 640px), (max-height: 420px) {
-    #bar { bottom: 6px; gap: 2px; padding: 2px; } .slot { width: 34px; height: 34px; } .slot canvas { width: 28px; height: 28px; } .slot span { font-size: 9px; left: 2px; }
+    #bar { bottom: 6px; gap: 2px; padding: 2px; } .slot { width: 34px; height: 34px; } .slot canvas { width: 28px; height: 28px; } .slot span { font-size: 9px; left: 2px; } .slot b.cnt { font-size: 10px; right: 2px; bottom: 0; }
     #name { bottom: 48px; font-size: 14px; }
   }
 </style>
@@ -76,12 +81,14 @@
       <li><span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span> Move</li>
       <li><span><kbd>Space</kbd></span> Jump</li>
       <li>Mouse: look around</li>
-      <li>Left click: break a block · Right click: place a block</li>
+      <li>Hold left click: break a block (it cracks first)</li>
+      <li>Walk over what drops: pick it up</li>
+      <li>Right click: place a block (uses one)</li>
       <li><span><kbd>1</kbd>–<kbd>8</kbd></span> or mouse wheel: choose a block</li>
       <li><span><kbd>Esc</kbd></span> Pause</li>
     </ul>
     <div class="go">Click to start</div>
-    <p class="note">What you build is saved in this browser.</p>
+    <p class="note">What you build and pick up is saved in this browser.</p>
     <button id="reset" type="button">Reset the island</button>
     <div class="copy">Copyright © 2026 JUNHAO CHEN</div>
   </div>

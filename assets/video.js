@@ -76,6 +76,26 @@
   const I18N = window.I18N;
   const tr = (key, zh) => (I18N ? I18N.t(key) : zh);
 
+  /* 作業裡要照抄的範本（figure.hw-verify，例如 Week 7 的 VERIFY.md 第 1 批）：「複製」按了就把目前語言的那一份放進剪貼簿，按鈕變「已複製」2 秒 */
+  document.querySelectorAll(".hw-verify").forEach((fig) => {
+    const btn = fig.querySelector(".hw-copy"), pre = fig.querySelector("pre");
+    if (!btn || !pre) return;
+    let timer = 0;
+    const done = () => {
+      btn.textContent = tr("hw.copied", "已複製"); btn.classList.add("is-done");
+      clearTimeout(timer); timer = setTimeout(() => { btn.textContent = tr("hw.copy", "複製"); btn.classList.remove("is-done"); }, 2000);
+    };
+    const fallback = (text) => {   // 沒有 clipboard API（例如不是 https）：用隱藏的 textarea
+      const ta = document.createElement("textarea"); ta.value = text; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.append(ta); ta.select(); try { document.execCommand("copy"); done(); } catch (e) { /* 只能自己選取複製 */ } ta.remove();
+    };
+    btn.addEventListener("click", () => {
+      const text = pre.textContent.replace(/\r\n?/g, "\n").replace(/\s+$/, "") + "\n";   // 頁面檔是 CRLF：換行統一成 \n
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, () => fallback(text));
+      else fallback(text);
+    });
+  });
+
   /* 標題裡的（…）、(…) 包成不拆行的一段，換行時整組一起下去，不會剩下孤零零的「（Windows）」。
      換語言時 i18n.js 會把文字換回去，所以每次 langchange 都再包一次。 */
   const PAREN = /([（(][^（）()]*[）)])/;
@@ -294,7 +314,7 @@
 
   /* ---------- 先看哪幾支（data-needs）：例如作業影片要先看兩支補充 ----------
      <section class="unit" id="03-…" data-needs="s1-github s2-mermaid">。
-     - 清單（桌機直排）：從那幾支的縮圖左邊拉一條細線，在清單左邊的空隙匯成一條，往上接到這一支、箭頭指進去；線旁直寫「先看」。
+     - 清單（桌機直排）：從那幾支的縮圖左邊拉一條細線，在清單左邊的空隙匯成一條，接到這一支（在上面、下面都可以）、箭頭指進去；線旁直寫「先看」。
        那幾支都看完了，線變淡、「先看」變 ✓。滑到其中一支，線和相關的項目一起亮。
      - 影片本身：標題下面一行「先看」＋那幾支的小縮圖，點了就換過去；看完的打勾。手機橫排的清單沒有線，靠這一行。 */
   const NS = "http://www.w3.org/2000/svg";
@@ -369,17 +389,21 @@
       const at = (b) => { const r = b.querySelector(".reel-thumb").getBoundingClientRect(); return { x: r.left - R.left, y: r.top - R.top + r.height / 2 }; };
       const to = at(items[i]);
       const from = ks.map((k) => at(items[k]));
-      const sx = -15, rr = 8;
-      const low = Math.max(...from.map((p) => p.y));
+      const sx = -15, rr = 8, f = (v) => v.toFixed(1);
+      // 那幾支可能在這一支上面（Week 7：先看 01、02 再做作業）或下面（Week 4：補充排在作業後面），每段彎角都往這一支的方向轉
+      const ys = from.map((p) => p.y), hi = Math.min(...ys), lo = Math.max(...ys);
+      const near = ys.reduce((a, y) => (Math.abs(y - to.y) < Math.abs(a - to.y) ? y : a), ys[0]);
       let d = "";
-      from.forEach((p) => { d += `M${(p.x - 6).toFixed(1)} ${p.y.toFixed(1)}H${sx + rr}Q${sx} ${p.y.toFixed(1)} ${sx} ${(p.y - rr).toFixed(1)}`; });
-      d += `M${sx} ${(low - rr).toFixed(1)}V${(to.y + rr).toFixed(1)}Q${sx} ${to.y.toFixed(1)} ${sx + rr} ${to.y.toFixed(1)}H${(to.x - 5).toFixed(1)}`;
+      from.forEach((p) => { const s = to.y > p.y ? 1 : -1; d += `M${f(p.x - 6)} ${f(p.y)}H${sx + rr}Q${sx} ${f(p.y)} ${sx} ${f(p.y + s * rr)}`; });
+      if (to.y > lo) d += `M${sx} ${f(hi + rr)}V${f(to.y - rr)}Q${sx} ${f(to.y)} ${sx + rr} ${f(to.y)}H${f(to.x - 5)}`;        // 都在上面：往下接
+      else if (to.y < hi) d += `M${sx} ${f(lo - rr)}V${f(to.y + rr)}Q${sx} ${f(to.y)} ${sx + rr} ${f(to.y)}H${f(to.x - 5)}`;   // 都在下面：往上接
+      else d += `M${sx} ${f(hi + rr)}V${f(lo - rr)}M${sx} ${f(to.y)}H${f(to.x - 5)}`;                                            // 上下都有：直線穿過、橫的接進去
       line.setAttribute("d", d);
       head.setAttribute("d", `M${(to.x - 11).toFixed(1)} ${(to.y - 4).toFixed(1)}L${(to.x - 4).toFixed(1)} ${to.y.toFixed(1)}L${(to.x - 11).toFixed(1)} ${(to.y + 4).toFixed(1)}`);
       svg.setAttribute("width", R.width);
       svg.setAttribute("height", R.height);
       lab.style.left = sx + "px";
-      lab.style.top = ((to.y + low) / 2).toFixed(1) + "px";
+      lab.style.top = ((to.y + near) / 2).toFixed(1) + "px";
     };
     const hot = (on) => {
       svg.classList.toggle("is-hot", on);

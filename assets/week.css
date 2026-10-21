@@ -189,6 +189,14 @@ body::after {
 .hw-step[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
 .hw-n { font-family: var(--font-mono); font-size: .8rem; color: var(--accent); }
 .hw-arrow { color: var(--ink-3); }
+/* 作業裡要照抄的範本（figure.hw-verify，2026-10-21 Week 7 r4：VERIFY.md 第 1 批「老師想的測試」）：放在重點那一點裡（li > .hw-li），右上角「複製」（video.js） */
+.hw-li { min-width: 0; }
+.hw-verify { margin: 1rem 0 .3rem; border: 1px solid var(--line); border-radius: 10px; background: var(--btn); overflow: hidden; }
+.hw-verify figcaption { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .5rem .6rem .5rem 1rem; border-bottom: 1px solid var(--line); font-size: .86rem; color: var(--ink-2); }
+.hw-verify pre { margin: 0; padding: .9rem 1rem 1rem; font-family: var(--font-mono); font-size: .84rem; line-height: 1.75; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--ink); }
+.hw-copy { flex: none; padding: .3rem .8rem; border: 1px solid var(--line); border-radius: 999px; background: transparent; color: var(--ink-2); font: inherit; font-size: .8rem; font-weight: 700; cursor: pointer; transition: color .2s, border-color .2s; }
+.hw-copy:hover, .hw-copy:focus-visible { color: var(--ink); border-color: var(--ink-3); }
+.hw-copy.is-done { color: var(--accent); border-color: var(--accent); }
 .hw-stage { background: #121417; }
 .hw-stage[data-mode="game"] video { pointer-events: none; }
 .hw-game { position: absolute; inset: 0; z-index: 1; visibility: hidden; }
