@@ -11,11 +11,14 @@ authors:
   - family-names: 邱
     given-names: 嵦時
 abstract: >-
-  An AI teaching-video demonstration site: the course website for the NTNU
-  course Learning Analytics Tools Implementation Applications, with AI-made
-  teaching videos with chapters and key points, an interactive weekly review
-  site in four languages, and a student work showcase. The code
-  is licensed under MIT (LICENSE); the course content (videos, posters,
+  Open course materials and an example of AI demonstration teaching: the
+  course website for the NTNU course Learning Analytics Tools Implementation
+  Applications, which teaches students to work with AI coding agents. It
+  offers weekly microlearning videos made with AI agents (Codex and Claude)
+  and reviewed by the teacher, a browser-based practice computer for
+  simulation-based practice, a scenario-based exam, and a student work
+  showcase, with the site in four languages. The code is licensed under MIT
+  (LICENSE); the course content (videos, posters,
   thumbnails and course text) is licensed under CC BY-NC-SA 4.0
   (LICENSE-CONTENT.md). Student work and third-party items are not covered
   (NOTICE.md).
@@ -29,6 +32,12 @@ keywords:
   - learning analytics
   - teaching videos
   - AI in education
+  - AI demonstration teaching
+  - AI literacy
+  - open course
+  - microlearning
+  - simulation-based learning
+  - scenario-based assessment
   - OpenAI Codex
   - Claude Code
   - opus-video
