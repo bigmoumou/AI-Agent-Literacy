@@ -1,4 +1,5 @@
-/* missions7.js — Week 7 missions (製作/lab-week7/SPEC-w7.md): the homework's flow on the student's own Sky Island, five missions, 27 steps.
+/* missions7.js — Week 7 missions (製作/lab-week7/SPEC-w7.md): the homework's flow on the student's own Sky Island, five missions, 29 steps.
+   2026-10-21 老師審過後：打開專案改成把資料夾拖進 VS Code（`cd` 留到第一次用終端機）；任務 5 最後用指令上傳 GitHub，只打 `git push`。
    Teacher, 2026-10-21: practise the flow (VERIFY → PLANS → tests), not the code; copy and paste is fine; the aim is muscle memory.
    A step marked solo:true (「自己來」) shows no cue until the student asks for a hint (missions.js): the second and later time an action
    comes up, the student does it from the words alone. Loaded only for ?week=7. Data only: LAB.missions.register plus the mission api. */
@@ -79,9 +80,13 @@
   });
   var T_TERM = chain(termShown, dock('terminal'));
   function codeOpen() { var l = []; try { l = LAB.code.windows(); } catch (e) { l = []; } return l.some(function (c) { return c.folder && String(c.folder).toLowerCase() === SI.toLowerCase(); }); }
-  /* editing a file: the editor that shows it, else its row in VS Code's file list, else the Terminal (`cd`, `code .`), else the Dock */
+  /* opening the project (2026-10-21 老師：拖進 VS Code 比 `cd`、`code .` 簡單): VS Code not open yet → its Dock icon;
+     open → the sky-island folder on the desktop (drag it into the window) */
+  var siIcon = trusted(function () { var el = byPath(document, 'desktop-icon', SI); return el && seeable(el) ? el : null; });
+  function T_OPEN(api) { if (codeOpen()) return null; return liveWins('code').length ? siIcon(api) || document.querySelector(dock('code')) : document.querySelector(dock('code')); }
+  /* editing a file: the editor that shows it, else its row in VS Code's file list, else opening the project, else the Dock */
   function codeFlow(path) {
-    return chain(editorOf(path), inWins('code', 'cd-explorer-row', path), function (api) { return codeOpen() ? null : T_TERM(api); }, dock('code'));
+    return chain(editorOf(path), inWins('code', 'cd-explorer-row', path), function (api) { return codeOpen() ? null : T_OPEN(api); }, dock('code'));
   }
   function info() { try { return LAB.codex5.activeInfo(); } catch (e) { return null; } }
   function inProject(api) { var c = info(); return !!(c && c.projectPath && same(api, c.projectPath, SI)); }
@@ -142,10 +147,10 @@
     steps: [
       {
         id: 's1',
-        text: '用終端機進到專案，再用 VS Code 打開它：[[cd ~/Desktop/sky-island]]，按 Return（Windows 鍵盤是 Enter），再打 [[code .]]',
-        hint: '`cd` 是進到資料夾；`code .` 的點代表「現在這個資料夾」，VS Code 會把整個專案打開。',
-        answer: '打開 Dock 上的終端機，打 `cd ~/Desktop/sky-island` 按 Return，再打 `code .` 按 Return。',
-        target: function (api) { return codeOpen() ? null : T_TERM(api); },
+        text: '用 VS Code 打開專案：點 Dock 上的 VS Code，再把桌面上的 `sky-island` 資料夾拖進 VS Code 的視窗',
+        hint: '拖進去就會打開整個資料夾，左邊列出裡面的檔案。VS Code 的視窗擋住桌面的話，先把視窗拉小或移開一點。',
+        answer: '點 Dock 上的 VS Code，再按住桌面上的 sky-island 資料夾，拖到 VS Code 視窗裡放開。',
+        target: T_OPEN,
         check: function (ev, api) { return codeOpen() || !!api.seen('code:folder', function (d) { return d && same(api, d.path, SI); }, { since: 'mission' }); }
       },
       {
@@ -174,6 +179,14 @@
       },
       {
         id: 's5',
+        text: '打開終端機，進到專案資料夾：[[cd ~/Desktop/sky-island]]，按 Return（Windows 鍵盤是 Enter）',
+        hint: '`cd` 是進到資料夾。git、npm test 都要在專案資料夾裡打。',
+        answer: '打開 Dock 上的終端機，打 `cd ~/Desktop/sky-island` 按 Return。',
+        target: T_TERM,
+        check: function (ev, api) { return !!api.termSeen(function (c) { return (c.name === 'cd' && c.status === 0 && same(api, c.cwdAfter, SI)) || same(api, c.cwd, SI); }, { since: 'mission' }); }
+      },
+      {
+        id: 's6',
         text: '測試要比 PLANS 先 commit，證明是你先想的。在終端機打 [[git add .]]，再打 [[git commit -m "BRIEF 和 VERIFY"]]',
         hint: '`git add .` 把改過的檔案放進這次的存檔點；`git commit -m "說明"` 存檔，引號裡寫一句這次做了什麼。',
         answer: '在終端機（已經在 sky-island 裡）打 `git add .` 按 Return，再打 `git commit -m "BRIEF 和 VERIFY"` 按 Return。',
@@ -185,7 +198,7 @@
         }
       },
       {
-        id: 's6',
+        id: 's7',
         text: '看看存檔點：[[git log --oneline]]',
         hint: '一行一個存檔點，最上面是最新的。',
         answer: '在終端機打 `git log --oneline` 按 Return：最上面是「BRIEF 和 VERIFY」，下面是「建立專案」。',
@@ -193,7 +206,7 @@
         check: function (ev, api) { return ran(api, 'git', 'log'); }
       }
     ],
-    outro: '第 1 批照抄老師的，第 2 批自己想；寫完先 commit，證明是你自己先想的。' + practised(['cd、code .', '貼上、存檔', 'git add、git commit', 'git log --oneline'])
+    outro: '第 1 批照抄老師的，第 2 批自己想；寫完先 commit，證明是你自己先想的。' + practised(['把資料夾拖進 VS Code', '貼上、存檔', 'cd', 'git add、git commit', 'git log --oneline'])
   });
 
   /* ================================================================== 2 · 請 Codex 挑毛病，AI 補的放進 STEP */
@@ -337,7 +350,7 @@
         id: 's1',
         text: '把 TDD 的規矩寫進 `AGENTS.md`：在 VS Code 打開它，貼在最後，存檔。[[' + F.TDD.replace(/\n$/, '') + ']]',
         hint: 'Codex 每次回答前都會讀 AGENTS.md；寫進去，它每一步都照這個順序做。',
-        answer: 'VS Code 左邊點 `AGENTS.md`，游標移到最後，空一行貼上，按 Command+S。（VS Code 沒開：終端機打 `cd ~/Desktop/sky-island`、`code .`）',
+        answer: 'VS Code 左邊點 `AGENTS.md`，游標移到最後，空一行貼上，按 Command+S。（VS Code 沒開：把桌面上的 sky-island 資料夾拖進 VS Code）',
         target: codeFlow(AGENTS),
         check: function (ev, api) { return tddRules(api); }
       },
@@ -423,7 +436,7 @@
       },
       {
         id: 's2',
-        text: '一批做完，整串玩一遍：[[打開遊戲讓我玩玩看]]，先**連續挖兩格**，再走過去撿，最後放一格。方塊欄撿到幾個？',
+        text: '一批做完，整串玩一遍：[[打開遊戲讓我玩玩看]]，先連續挖兩格（先不要撿），再走過去撿，最後放一格。方塊欄撿到幾個？',
         hint: '挖兩格的時候先不要撿：兩格都挖掉、兩個小方塊都在地上，再走過去。放方塊是右鍵。',
         answer: '打開遊戲 → 對著兩格地面各按住左鍵挖掉 → 走過去撿 → 選那一格按右鍵放一格。只撿到 1 個，第二個怎麼走都撿不起來：這是 bug。',
         target: function (api) { return W7.gameWindow() ? T_GAME(api) : T_COMPOSER(api); },
@@ -470,8 +483,23 @@
             !!api.seen('island:pick', function (d) { return d && d.inv >= 2 && !d.bug; }) &&
             W7.stepLines(headFile('VERIFY.md'), 3).some(function (l) { return /^- \[[xX]\][^\n]*連續挖兩格/.test(l); });
         }
+      },
+      {
+        id: 's6',
+        text: '最後上傳到 GitHub。這次我們用指令自己上傳試試看（之前都是請 Codex 幫你上傳）：[[git push]]',
+        hint: '這個專案是從你的 GitHub repo 下載（clone）下來的，已經接好了，所以只要打 `git push`，這幾次的存檔點就全部送上去。交作業交的就是這個 repo 的連結。',
+        answer: '在終端機（在 sky-island 裡）打 `git push` 按 Return，看到 `main -> main` 就上傳好了。',
+        target: T_TERM,
+        check: function () { return W7.git.pushed(SI); },
+        trap: function (ev, api) {
+          var c = api.termCmd(ev, function (x) { return x.name === 'git' && x.args[0] === 'push'; });
+          if (!c) return null;
+          if (c.status !== 0 && !same(api, c.cwd, SI)) return '要在專案資料夾裡打：先 `cd ~/Desktop/sky-island`，再 `git push`。';
+          if (c.status === 0 && !W7.git.pushed(SI)) return '上傳的是最後一個存檔點：還有沒 commit 的改動，先 `git commit -am "說明"`，再 `git push`。';
+          return null;
+        }
       }
     ],
-    outro: '一批做完，自己從頭玩一遍；自動測試沒想到的，就是你要補的。bug 先寫進 VERIFY.md（你的），再請 Codex 寫成測試、修好，以後就不會再犯。作業就照這個迴圈，做完第 1 批再做你的第 2 批。' + practised(['做下一步', 'npm test', '整串玩一遍', 'bug 先寫進 VERIFY.md', '請 Codex 寫成測試、修好', 'git commit -am'])
+    outro: '一批做完，自己從頭玩一遍；自動測試沒想到的，就是你要補的。bug 先寫進 VERIFY.md（你的），再請 Codex 寫成測試、修好，以後就不會再犯。作業就照這個迴圈，做完第 1 批再做你的第 2 批；最後 `git push`，交 GitHub repo 的連結。' + practised(['做下一步', 'npm test', '整串玩一遍', 'bug 先寫進 VERIFY.md', '請 Codex 寫成測試、修好', 'git commit -am', 'git push'])
   });
 })(window.LAB);

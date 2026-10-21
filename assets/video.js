@@ -33,40 +33,146 @@
   document.querySelectorAll("section.unit[data-preview]").forEach((u) => { if (PREVIEW) u.hidden = false; else u.remove(); });
 
   /* 作業段落的播放區（.hw-stage，2026-10-20 改版；原本是左邊影片、右邊遊戲兩格）：同一個畫面先播說明影片，
-     上面一行「1 看說明影片 → 2 玩空中之島」隨時可以切換。影片播完出現「▶ 開始玩空中之島」，按了就溶接成遊戲：
-     iframe（同一個網站）第一次切過去才載入，載好、再等一下讓它畫出第一格才淡入，底下的影片停在最後一格。
-     影片最後一格就是遊戲一開始的視角，看起來像影片變成遊戲。按片段、回到影片，就切回影片。 */
+     上面一行「1 看說明影片 → 2 玩空中之島」隨時可以切換。按片段、回到影片，就切回影片。
+     2026-10-21 老師：影片播完直接進遊戲（不用按「開始玩」），過場要酷一點 → 「挖開影片」（約 2.4 秒）：
+     影片最後一格先褪成灰灰的、浮出淡淡的方塊格線（畫面變成方塊）；正中央準心那一格像遊戲裡挖方塊一樣出現裂痕（遊戲自己的裂痕圖）、
+     被挖掉縮成小方塊彈一下掉下去；接著其他格從中央一圈一圈跟著掉，露出底下已經載好、彩色的遊戲；
+     全部挖開後，方塊欄、手、開始卡片才一個一個進來（遊戲的 __stage.enter()）。
+     遊戲在影片快播完（剩 25 秒）時就先在底下載好、停在第一格（?stage=1），播完馬上接得上。動作都不快（每格最多約 20 px）、沒有閃光。
+     手動按「2 玩空中之島」也走同一個過場（從當下那一格挖開）。設定「減少動態」的人：只淡出。 */
+  const RM = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  function breakIn(stage, vid, poster, cracks, done) {
+    const box = stage.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1);
+    const W = Math.max(2, Math.round(box.width * dpr)), H = Math.max(2, Math.round(box.height * dpr));
+    const fx = document.createElement("canvas"); fx.className = "hw-fx"; fx.width = W; fx.height = H; fx.setAttribute("aria-hidden", "true");
+    const g = fx.getContext("2d");
+    // 影片現在這一格（照 contain 放進框裡）和褪色的一份
+    const shot = document.createElement("canvas"); shot.width = W; shot.height = H;
+    const s = shot.getContext("2d"); s.fillStyle = "#121417"; s.fillRect(0, 0, W, H);
+    try {   // 影片還沒播過（沒有畫面）就用封面
+      const src = vid.readyState >= 2 ? vid : poster && poster.complete && poster.naturalWidth ? poster : null;
+      if (src) {
+        const vw = src.videoWidth || src.naturalWidth || 16, vh = src.videoHeight || src.naturalHeight || 9, k = Math.min(W / vw, H / vh);
+        s.drawImage(src, (W - vw * k) / 2, (H - vh * k) / 2, vw * k, vh * k);
+      }
+    } catch (e) { /* 畫不出來就是一片深色，照樣挖開 */ }
+    const dim = document.createElement("canvas"); dim.width = W; dim.height = H;
+    const d = dim.getContext("2d"); d.drawImage(shot, 0, 0);
+    d.globalCompositeOperation = "saturation"; d.globalAlpha = 0.72; d.fillStyle = "hsl(0, 0%, 50%)"; d.fillRect(0, 0, W, H);
+    d.globalCompositeOperation = "source-over"; d.globalAlpha = 1; d.fillStyle = "rgba(14, 18, 22, 0.24)"; d.fillRect(0, 0, W, H);
+    stage.append(fx);
+    const end = () => { fx.remove(); done(); };
+    if (RM) {   // 減少動態：褪色的那一格淡出就好
+      fx.style.transition = "opacity .6s ease"; g.drawImage(dim, 0, 0);
+      requestAnimationFrame(() => { fx.style.opacity = "0"; }); setTimeout(end, 650); return;
+    }
+    // 方塊格：欄數、列數都是單數，正中央剛好一格對著準心
+    const cols = box.width < 560 ? 5 : 9, size = W / cols;
+    let rows = Math.ceil(H / size); if (rows % 2 === 0) rows++;
+    const oy = (H - rows * size) / 2, mc = (cols - 1) / 2, mr = (rows - 1) / 2, bw = Math.max(1, Math.round(1.5 * dpr));
+    let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const DIM = 0.35, GRID = [0.15, 0.5], CRACK = [0.45, 1.05], POP0 = 0.5, POP = 0.38, CHIP = 0.5, tiles = [], chips = [];
+    let far = 0;
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) far = Math.max(far, Math.hypot(c - mc, (r - mr) * 1.15));
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+      const mid = r === mr && c === mc, dd = Math.hypot(c - mc, (r - mr) * 1.15) / far;
+      tiles.push({ x: c * size, y: oy + r * size, mid, at: mid ? CRACK[1] : CRACK[1] + 0.08 + dd * 0.7 + (rnd() - 0.5) * 0.08,
+        len: mid ? POP0 : POP, vx: mid ? 0 : (rnd() - 0.5) * 0.3 * size, popped: false });
+    }
+    const total = Math.max(...tiles.map((t) => t.at + t.len)) + 0.05;
+    const ease = (k) => 1 - Math.pow(1 - k, 3), clamp = (k) => Math.max(0, Math.min(1, k));
+    const burst = (tl, t, n) => { for (let i = 0; i < n; i++) chips.push({ x: tl.x + size * (0.3 + rnd() * 0.4), y: tl.y + size * (0.3 + rnd() * 0.4), vx: (rnd() - 0.5) * 1.6 * size, vy: -(0.5 + rnd() * 0.8) * size, s: size * (0.09 + rnd() * 0.05), at: t, sx: tl.x + rnd() * size * 0.8, sy: tl.y + rnd() * size * 0.8 }); };
+    let t0 = 0;
+    const step = (now) => {
+      if (!t0) t0 = now;
+      const t = (now - t0) / 1000, fade = clamp(t / DIM), grid = ease(clamp((t - GRID[0]) / (GRID[1] - GRID[0])));
+      g.clearRect(0, 0, W, H);
+      for (const tl of tiles) {
+        const u = t - tl.at;
+        if (u < 0) {   // 還在：褪色、浮出方塊的邊（上、左亮一點，下、右暗一點）
+          if (fade < 1) { g.drawImage(shot, tl.x, tl.y, size, size, tl.x, tl.y, size, size); g.globalAlpha = fade; }
+          g.drawImage(dim, tl.x, tl.y, size, size, tl.x, tl.y, size, size); g.globalAlpha = 1;
+          if (grid > 0) {
+            g.fillStyle = `rgba(255, 255, 255, ${0.16 * grid})`; g.fillRect(tl.x, tl.y, size, bw); g.fillRect(tl.x, tl.y + bw, bw, size - bw);
+            g.fillStyle = `rgba(0, 0, 0, ${0.26 * grid})`; g.fillRect(tl.x, tl.y + size - bw, size, bw); g.fillRect(tl.x + size - bw, tl.y, bw, size - bw);
+          }
+          if (tl.mid && cracks && t >= CRACK[0]) {   // 準心那一格：裂痕 0 → 9（遊戲的 16×16 裂痕圖，放大不糊）
+            const st = Math.min(9, Math.floor(((t - CRACK[0]) / (CRACK[1] - CRACK[0])) * 10));
+            g.globalAlpha = 0.72; g.imageSmoothingEnabled = false;
+            g.drawImage(cracks, st * 16, 0, 16, 16, tl.x, tl.y, size, size);
+            g.imageSmoothingEnabled = true; g.globalAlpha = 1;
+          }
+        } else if (u < tl.len) {   // 挖掉：縮成小方塊（約 1/4 大）彈一下掉下去，後半段淡掉
+          if (!tl.popped) { tl.popped = true; burst(tl, t, tl.mid ? 5 : 0); }
+          const k = u / tl.len, sc = 1 - (tl.mid ? 0.75 : 0.8) * ease(clamp(k / 0.45)), w = size * sc;
+          const dy = (tl.mid ? -0.28 * k + 1.0 * k * k : -0.1 * k + 0.68 * k * k) * size, dx = tl.vx * k;
+          g.globalAlpha = k < 0.5 ? 1 : 1 - (k - 0.5) / 0.5;
+          g.drawImage(dim, tl.x, tl.y, size, size, tl.x + (size - w) / 2 + dx, tl.y + (size - w) / 2 + dy, w, w);
+          g.globalAlpha = 1;
+        }
+      }
+      for (let i = chips.length - 1; i >= 0; i--) {   // 碎屑：和遊戲裡挖掉方塊時噴出來的一樣，小小的、往外彈、掉下去
+        const c = chips[i], a = t - c.at;
+        if (a > CHIP) { chips.splice(i, 1); continue; }
+        const x = c.x + c.vx * a, y = c.y + c.vy * a + 1.9 * size * a * a;
+        g.globalAlpha = 1 - a / CHIP; g.drawImage(dim, c.sx, c.sy, size * 0.2, size * 0.2, x - c.s / 2, y - c.s / 2, c.s, c.s); g.globalAlpha = 1;
+      }
+      if (t < total) requestAnimationFrame(step); else end();
+    };
+    requestAnimationFrame(step);
+  }
+
   document.querySelectorAll(".hw-stage").forEach((stage) => {
     const unit = stage.closest(".unit") || document;
-    const vid = stage.querySelector("video"), game = stage.querySelector(".hw-game"), end = stage.querySelector(".hw-end");
+    const vid = stage.querySelector("video"), game = stage.querySelector(".hw-game");
     const steps = Array.from(unit.querySelectorAll(".hw-step"));
-    let frame = null;
-    const setMode = (m) => {
-      if (stage.dataset.mode === m) return;
-      stage.dataset.mode = m;
-      steps.forEach((b) => b.setAttribute("aria-selected", b.dataset.go === m ? "true" : "false"));
-      game.setAttribute("aria-hidden", m === "game" ? "false" : "true");
-      if (end) end.hidden = true;
-      if (m !== "game") return;
-      if (vid) vid.pause();
-      if (frame) { frame.focus(); return; }
+    let frame = null, loaded = false, entered = false, going = false, poster = null;
+    if (vid && vid.poster) { poster = new Image(); poster.src = vid.poster; }
+    const load = () => {   // 遊戲在底下先載好（看不到），停在第一格等過場
+      if (frame) return;
       frame = document.createElement("iframe");
-      frame.className = "hw-frame"; frame.src = game.dataset.src; frame.allow = "fullscreen";
+      frame.className = "hw-frame"; frame.allow = "fullscreen";
+      frame.src = game.dataset.src + (game.dataset.src.indexOf("?") < 0 ? "?" : "&") + "stage=1";
       frame.title = steps[1] ? steps[1].textContent.replace(/^\s*2\s*/, "").trim() : "Sky Island";
-      frame.addEventListener("load", () => setTimeout(() => { game.classList.add("is-ready"); frame.focus(); }, 350), { once: true });
+      frame.addEventListener("load", () => { loaded = true; stage.dispatchEvent(new Event("hw-loaded")); }, { once: true });
       game.prepend(frame);
       const full = game.querySelector(".hw-full");
       if (full && frame.requestFullscreen) { full.hidden = false; full.addEventListener("click", () => frame.requestFullscreen()); }
     };
-    steps.forEach((b) => b.addEventListener("click", () => setMode(b.dataset.go)));
+    const st = () => { try { return frame.contentWindow.__stage || null; } catch (e) { return null; } };
+    const show = (m) => {
+      stage.dataset.mode = m;
+      steps.forEach((b) => b.setAttribute("aria-selected", b.dataset.go === m ? "true" : "false"));
+      game.setAttribute("aria-hidden", m === "game" ? "false" : "true");
+    };
+    const toGame = () => {
+      if (stage.dataset.mode === "game" || going) return;
+      going = true; load();
+      if (vid) vid.pause();
+      // 全螢幕看影片時先退出來，過場才看得到
+      try { if (document.fullscreenElement === vid) document.exitFullscreen(); else if (vid && vid.webkitDisplayingFullscreen) vid.webkitExitFullscreen(); } catch (e) { /* 無所謂 */ }
+      const run = () => {
+        stage.classList.remove("is-waiting");
+        game.classList.add("is-ready", "no-fade");
+        show("game");
+        const s = st();
+        breakIn(stage, vid, poster, s && s.cracks, () => {
+          going = false; game.classList.remove("no-fade");
+          if (s && !entered) { entered = true; s.enter(); }
+          frame.focus();
+        });
+      };
+      if (loaded) run();
+      else { stage.classList.add("is-waiting"); stage.addEventListener("hw-loaded", () => setTimeout(run, 120), { once: true }); }
+    };
+    const toVideo = () => { if (going) return; show("video"); };
+    steps.forEach((b) => b.addEventListener("click", () => (b.dataset.go === "game" ? toGame() : toVideo())));
     const back = game.querySelector(".hw-back");
-    if (back) back.addEventListener("click", () => setMode("video"));
-    unit.querySelectorAll(".chapters button[data-t]").forEach((b) => b.addEventListener("click", () => setMode("video")));
-    if (vid && end) {
-      vid.addEventListener("ended", () => { if (stage.dataset.mode === "video") end.hidden = false; });
-      ["play", "seeking"].forEach((ev) => vid.addEventListener(ev, () => { end.hidden = true; }));
-      end.querySelector(".hw-go").addEventListener("click", () => setMode("game"));
-      end.querySelector(".hw-again").addEventListener("click", () => { end.hidden = true; vid.currentTime = 0; vid.play().catch(() => {}); });
+    if (back) back.addEventListener("click", toVideo);
+    unit.querySelectorAll(".chapters button[data-t]").forEach((b) => b.addEventListener("click", toVideo));
+    if (vid) {
+      vid.addEventListener("timeupdate", () => { if (vid.duration && vid.duration - vid.currentTime < 25) load(); });
+      vid.addEventListener("ended", () => { if (stage.dataset.mode === "video") toGame(); });
     }
   });
 

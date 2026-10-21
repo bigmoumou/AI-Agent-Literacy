@@ -277,6 +277,48 @@
       for (k in wt) if (!hasOwn.call(head, k) || head[k] !== wt[k]) return false;
       for (k in head) if (!hasOwn.call(wt, k)) return false;
       return true;
+    },
+    /* 2026-10-21 老師：上傳 GitHub 這次用指令，最後一步只打 `git push`。所以專案像是從學生自己的 GitHub repo clone 下來的：
+       雲端（LAB.github，Week 4 的 github.js）有一個 an/sky-island，裡面是到現在為止的存檔點；本機的 origin 指到它、main 追蹤 origin/main。
+       之後在本機 commit 的，`git push` 就送上去（Week 4 的 gitremote.js 真的把存檔點搬過去，GitHub 網頁看得到）。 */
+    connect: function (root) {
+      var G = LAB.github; if (!G || !G.createRepo) return false;
+      var name = 'sky-island', ghKey = G.user + '/' + name;
+      try { if (G.get(ghKey)) G.reset(); } catch (e) { /* fine */ }
+      var made = G.createRepo({ name: name, visibility: 'public', readme: false, ageMs: 7 * 3600 * 1000 });
+      if (!made || !made.ok) return false;
+      var url = G.cloneUrl(ghKey), headId = null, send = [], repo, id;
+      if (WIN) {
+        repo = winState(root); if (!repo) return false;
+        headId = repo.branches[repo.head] || null;
+        for (id = headId; id && repo.commits[id]; id = repo.commits[id].parent) {
+          var wc = repo.commits[id];
+          send.unshift({ id: wc.id, msg: wc.msg, author: wc.name + ' <' + wc.email + '>', time: wc.ts, parent: wc.parent, tree: plain(wc.tree) });
+        }
+      } else {
+        repo = W7.git.repo(root); if (!repo) return false;
+        headId = repo.branches[repo.branch] || null;
+        for (id = headId; id && repo.commits[id]; id = repo.commits[id].parent) send.unshift(JSON.parse(JSON.stringify(repo.commits[id])));
+      }
+      if (headId) G.push(ghKey, 'main', send, headId);
+      var config = '[core]\n\trepositoryformatversion = 0\n\tfilemode = ' + (WIN ? 'false' : 'true') + '\n\tbare = false\n\tlogallrefupdates = true\n\tignorecase = true\n' +
+        (WIN ? '' : '\tprecomposeunicode = true\n') + '[remote "origin"]\n\turl = ' + url + '\n\tfetch = +refs/heads/*:refs/remotes/origin/*\n[branch "main"]\n\tremote = origin\n\tmerge = refs/heads/main\n';
+      if (WIN) {
+        repo.remotes = { origin: url }; repo.tracking = headId ? { 'origin/main': headId } : {}; repo.upstream = { main: 'origin/main' };
+        winSave(root, repo);
+      } else {
+        if (!repo.remotes) repo.remotes = Object.create(null);
+        if (!repo.tracking) repo.tracking = Object.create(null);
+        if (!repo.upstream) repo.upstream = Object.create(null);
+        repo.remotes.origin = url; repo.upstream.main = 'origin/main'; if (headId) repo.tracking['origin/main'] = headId;
+      }
+      LAB.vfs.writeFile(LAB.vfs.join(root, '.git/config'), config, { by: 'system' });
+      return true;
+    },
+    /* has every commit been pushed? (the cloud's main is the local HEAD) */
+    pushed: function (root) {
+      var G = LAB.github, h = W7.git.head(root); if (!G || !h) return false;
+      return G.head(G.user + '/sky-island', 'main') ? G.head(G.user + '/sky-island', 'main').id === h.id : false;
     }
   };
   function identity() {
@@ -303,6 +345,7 @@
     identity();
     W7.git.init(SI);
     c('建立專案');
+    W7.git.connect(SI);   // 從自己的 GitHub repo 來的（見 W7.git.connect）；之後的存檔點都還沒上傳，任務 5 最後 `git push`
     if (at >= 1) { w(W7.BRIEF, F.BRIEF); w(W7.VERIFY, F.VERIFY1); c('BRIEF 和 VERIFY：第 1 批老師的、第 2 批我的'); }
     if (at >= 2) { w(W7.VERIFY, F.VERIFY2); c('VERIFY：AI 補充，留兩條、劃掉一條'); }
     if (at >= 3) {

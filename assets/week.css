@@ -210,15 +210,13 @@ body::after {
 .hw-acts > * { padding: .14rem .6rem; border: 0; border-radius: 999px; background: rgba(0, 0, 0, .55); color: #fff; font: inherit; font-size: .76rem; font-weight: 700; text-decoration: none; cursor: pointer; }
 .hw-acts > *:hover { background: rgba(0, 0, 0, .75); }
 .hw-acts > [hidden] { display: none; }
-/* 影片播完：畫面中間「▶ 開始玩空中之島」，下面一顆小的「再看一次影片」 */
-.hw-end { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .75rem; background: rgba(10, 12, 14, .2); animation: hw-in .45s var(--ease) both; }
-.hw-end[hidden] { display: none; }
-.hw-go { display: inline-flex; align-items: center; gap: .6rem; padding: .85rem 1.5rem; border: 0; border-radius: 999px; background: #3f7d4e; color: #fff; font: inherit; font-size: 1.05rem; font-weight: 700; cursor: pointer; box-shadow: 0 10px 30px rgba(0, 0, 0, .35); }
-.hw-go:hover, .hw-go:focus-visible { background: #4a9160; }
-.hw-again { padding: .2rem .75rem; border: 0; border-radius: 999px; background: rgba(0, 0, 0, .5); color: #fff; font: inherit; font-size: .82rem; font-weight: 700; cursor: pointer; }
-.hw-again:hover, .hw-again:focus-visible { background: rgba(0, 0, 0, .72); }
-@keyframes hw-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-@media (prefers-reduced-motion: reduce) { .hw-end { animation: none; } .hw-frame { transform: none; } }
+/* 影片播完的過場（2026-10-21，video.js 的 breakIn）：上面蓋一張畫布，影片最後一格從中央一塊一塊挖開，露出底下的遊戲。
+   過場時遊戲的 iframe 直接顯示（no-fade，不做原本的淡入放大），才不會和挖開的格子對不齊。遊戲還在載入時（is-waiting）影片停在最後一格、下面顯示「載入中…」 */
+.hw-fx { position: absolute; inset: 0; z-index: 3; display: block; width: 100%; height: 100%; pointer-events: none; }
+.hw-game.no-fade .hw-frame { opacity: 1; transform: none; transition: none; }
+.hw-stage.is-waiting .hw-game { visibility: visible; }
+.hw-stage.is-waiting .hw-acts { display: none; }
+@media (prefers-reduced-motion: reduce) { .hw-frame { transform: none; } }
 
 /* ---------- 課堂練習（section.unit-lab）：不是影片，膠捲裡是左右兩台筆電（Mac｜Windows），點哪一台就進哪一個練習 ----------
    版面和影片段落一樣（標題、膠捲、重點），清單上它也是一格（video.js 用 data-thumb 當縮圖）。

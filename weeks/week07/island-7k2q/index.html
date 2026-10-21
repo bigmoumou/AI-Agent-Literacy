@@ -57,6 +57,19 @@
   #showNote { position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%); padding: 6px 14px; border-radius: 999px; background: rgba(20,24,28,.55); color: #fff; font: 600 13px system-ui, sans-serif; white-space: nowrap; pointer-events: none; }
   #showNote[hidden] { display: none; }
   @media (max-width: 420px) { #showNote { font-size: 11px; bottom: 8px; padding: 4px 10px; } }
+  /* 作業頁播放區的過場（?stage=1，2026-10-21）：等進場時藏起方塊欄、說明卡；進場時方塊欄從下面升上來、一格一格出現，說明卡最後淡入 */
+  body.stage-wait #start, body.stage-wait #bar, body.stage-wait #showNote { opacity: 0; }
+  body.stage-wait #start { pointer-events: none; }   /* 過場還沒跑完，點了也不會開始 */
+  body.stage-in #bar { animation: barIn .5s cubic-bezier(.2, .8, .2, 1) both; }
+  body.stage-in .slot { animation: slotIn .36s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(120ms + var(--i) * 40ms); }
+  body.stage-in #start { animation: fadeIn .5s ease both .5s; }
+  body.stage-in .card { animation: cardIn .6s cubic-bezier(.2, .8, .2, 1) both .5s; }
+  body.stage-in #showNote { animation: fadeIn .6s ease both .3s; }
+  @keyframes barIn { from { opacity: 0; transform: translate(-50%, 22px); } }
+  @keyframes slotIn { from { opacity: 0; transform: translateY(12px); } }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(14px); } }
+  @keyframes fadeIn { from { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { body.stage-in #bar, body.stage-in .slot, body.stage-in #start, body.stage-in .card, body.stage-in #showNote { animation: none; } }
   /* 放在作業頁的小框裡（半個欄寬）：說明卡和方塊欄縮小 */
   @media (max-height: 560px) {
     .card { padding: 14px 18px 10px; } .kicker { font-size: 11px; } h1 { font-size: 22px; margin: 2px 0 8px; }
