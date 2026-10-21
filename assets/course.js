@@ -15,7 +15,7 @@
   const COURSE = {
     title: "Learning Analytics Tools",
     subtitle: "Learning Analytics Tools Implementation Applications (NTNU)",
-    repo: "https://github.com/bigmoumou/Learning-Analytics-Tools",
+    repo: "https://github.com/bigmoumou/AI-Agent-Literacy",
     firstWeek: 3,
     lastWeek: 16,
   };

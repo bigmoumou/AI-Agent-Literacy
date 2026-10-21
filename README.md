@@ -89,8 +89,8 @@ The full workflow and the lessons learned are in [docs/about.md](docs/about.md) 
 The site is plain HTML, CSS and JavaScript with no build step, so it can be forked for another course:
 
 ```bash
-git clone https://github.com/bigmoumou/Learning-Analytics-Tools.git
-cd Learning-Analytics-Tools
+git clone https://github.com/bigmoumou/AI-Agent-Literacy.git
+cd AI-Agent-Literacy
 python -m http.server 8000
 ```
 
@@ -115,11 +115,11 @@ To cite this work, use the **Cite this repository** button ([CITATION.cff](CITAT
   title        = {Agent Literacy: An Open Course on Working with {AI} Coding Agents},
   year         = {2026},
   howpublished = {\url{https://learning-analytics-tools.pages.dev/}},
-  note         = {Open educational resource. Source: https://github.com/bigmoumou/Learning-Analytics-Tools}
+  note         = {Open educational resource. Source: https://github.com/bigmoumou/AI-Agent-Literacy}
 }
 ```
 
-Questions and suggestions are welcome as [issues](https://github.com/bigmoumou/Learning-Analytics-Tools/issues). Please do not include students' names or student IDs.
+Questions and suggestions are welcome as [issues](https://github.com/bigmoumou/AI-Agent-Literacy/issues). Please do not include students' names or student IDs.
 
 ## Team and acknowledgements
 
@@ -199,8 +199,8 @@ Thanks to the students taking the course.
 網站是純 HTML、CSS、JavaScript，不用建置，可以直接 fork：
 
 ```bash
-git clone https://github.com/bigmoumou/Learning-Analytics-Tools.git
-cd Learning-Analytics-Tools
+git clone https://github.com/bigmoumou/AI-Agent-Literacy.git
+cd AI-Agent-Literacy
 python -m http.server 8000
 ```
 
@@ -217,7 +217,7 @@ python -m http.server 8000
 
 程式以 [MIT](LICENSE) 授權；影片與教材以 [CC BY-NC-SA 4.0](LICENSE-CONTENT.md) 授權（標示出處、非商業使用、改作後相同方式分享）。學生作品的著作權屬於學生本人；第三方元件與圖片見 [NOTICE.md](NOTICE.md)。
 
-引用時請用 GitHub 右側的 **Cite this repository**（[CITATION.cff](CITATION.cff)），或上方英文段的 BibTeX。問題和建議請開 [Issue](https://github.com/bigmoumou/Learning-Analytics-Tools/issues)，請不要寫出學生的姓名或學號。
+引用時請用 GitHub 右側的 **Cite this repository**（[CITATION.cff](CITATION.cff)），或上方英文段的 BibTeX。問題和建議請開 [Issue](https://github.com/bigmoumou/AI-Agent-Literacy/issues)，請不要寫出學生的姓名或學號。
 
 ### 團隊與致謝
 
@@ -297,8 +297,8 @@ python -m http.server 8000
 网站是纯 HTML、CSS、JavaScript，不需要构建，可以直接 fork：
 
 ```bash
-git clone https://github.com/bigmoumou/Learning-Analytics-Tools.git
-cd Learning-Analytics-Tools
+git clone https://github.com/bigmoumou/AI-Agent-Literacy.git
+cd AI-Agent-Literacy
 python -m http.server 8000
 ```
 
@@ -315,7 +315,7 @@ python -m http.server 8000
 
 代码采用 [MIT](LICENSE) 许可；视频与教材采用 [CC BY-NC-SA 4.0](LICENSE-CONTENT.md) 许可（署名、非商业性使用、相同方式共享）。学生作品的著作权属于学生本人；第三方组件与图片见 [NOTICE.md](NOTICE.md)。
 
-引用时请使用 GitHub 右侧的 **Cite this repository**（[CITATION.cff](CITATION.cff)），或上方英文部分的 BibTeX。问题和建议请开 [Issue](https://github.com/bigmoumou/Learning-Analytics-Tools/issues)，请不要写出学生的姓名或学号。
+引用时请使用 GitHub 右侧的 **Cite this repository**（[CITATION.cff](CITATION.cff)），或上方英文部分的 BibTeX。问题和建议请开 [Issue](https://github.com/bigmoumou/AI-Agent-Literacy/issues)，请不要写出学生的姓名或学号。
 
 ### 团队与致谢
 
@@ -395,8 +395,8 @@ python -m http.server 8000
 サイトは素の HTML・CSS・JavaScript で、ビルドは不要です。そのまま fork できます。
 
 ```bash
-git clone https://github.com/bigmoumou/Learning-Analytics-Tools.git
-cd Learning-Analytics-Tools
+git clone https://github.com/bigmoumou/AI-Agent-Literacy.git
+cd AI-Agent-Literacy
 python -m http.server 8000
 ```
 
@@ -413,7 +413,7 @@ python -m http.server 8000
 
 コードは [MIT](LICENSE)、動画と教材は [CC BY-NC-SA 4.0](LICENSE-CONTENT.md)（表示・非営利・継承）で公開しています。学生の作品の著作権は各学生にあります。サードパーティのコンポーネントと画像は [NOTICE.md](NOTICE.md) をご覧ください。
 
-引用には GitHub 右側の **Cite this repository**（[CITATION.cff](CITATION.cff)）か、英語セクションの BibTeX をご利用ください。質問や提案は [Issue](https://github.com/bigmoumou/Learning-Analytics-Tools/issues) へ。学生の氏名や学籍番号は書かないでください。
+引用には GitHub 右側の **Cite this repository**（[CITATION.cff](CITATION.cff)）か、英語セクションの BibTeX をご利用ください。質問や提案は [Issue](https://github.com/bigmoumou/AI-Agent-Literacy/issues) へ。学生の氏名や学籍番号は書かないでください。
 
 ### チームと謝辞
 

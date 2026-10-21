@@ -142,8 +142,8 @@ An AI teaching-video demonstration site for the Learning Analytics Tools course 
 網站是純 HTML、CSS、JavaScript，沒有建置步驟，也沒有 npm 套件，可以 fork 後改成自己的課程網站。
 
 ```bash
-git clone https://github.com/bigmoumou/Learning-Analytics-Tools.git
-cd Learning-Analytics-Tools
+git clone https://github.com/bigmoumou/AI-Agent-Literacy.git
+cd AI-Agent-Literacy
 python -m http.server 8000
 ```
 
@@ -165,7 +165,7 @@ python -m http.server 8000
 
 歡迎修課同學、教師和任何讀者一起改進：
 
-- 回報問題：在 [Issues](https://github.com/bigmoumou/Learning-Analytics-Tools/issues) 寫下錯字、說明不清楚的地方、翻譯問題、影片無法播放、手機版面，或無障礙的問題（螢幕閱讀器、鍵盤操作），請附上頁面網址、瀏覽器和裝置。
+- 回報問題：在 [Issues](https://github.com/bigmoumou/AI-Agent-Literacy/issues) 寫下錯字、說明不清楚的地方、翻譯問題、影片無法播放、手機版面，或無障礙的問題（螢幕閱讀器、鍵盤操作），請附上頁面網址、瀏覽器和裝置。
 - 修正錯字或翻譯：可以直接送 Pull Request。週次頁的翻譯寫在 `data-zh-hans`、`data-en`、`data-vi` 屬性裡（屬性裡的引號用「“ ”」，不要用 `"`），首頁的週次標題與摘要在 `assets/course.js` 的 `WEEKS[n].i18n`，全站共用的介面文字在 `assets/i18n-strings.js`；完整規則見 [docs/維護說明.md](維護說明.md) 的「多語系」。
 - 影片和教材內容的修改，以及較大的程式修改，請先開 Issue 討論；送出前請執行 `node tools/check.mjs`，確定沒有錯誤。
 - 除非另外說明，送進來的程式碼以 MIT 授權，教材內容的修改以 CC BY-NC-SA 4.0 授權。
@@ -189,7 +189,7 @@ python -m http.server 8000
 
 repo 裡的 [CITATION.cff](../CITATION.cff) 會讓 GitHub 頁面右側出現「Cite this repository」，可以直接取得 APA 或 BibTeX 格式。也可以這樣引用：
 
-> Chen, J.-H., & Liu, C.-Y. (2026). *Agent Literacy: An open course on working with AI coding agents* [Computer software]. https://github.com/bigmoumou/Learning-Analytics-Tools
+> Chen, J.-H., & Liu, C.-Y. (2026). *Agent Literacy: An open course on working with AI coding agents* [Computer software]. https://github.com/bigmoumou/AI-Agent-Literacy
 
 ### 致謝
 
@@ -208,7 +208,7 @@ repo 裡的 [CITATION.cff](../CITATION.cff) 會讓 GitHub 頁面右側出現「C
 
 資源支援：感謝國立臺灣大學生物環境系統工程學系[許少瑜教授](https://www.bse.ntu.edu.tw/member/teacher/syhsu)的 [MPIPM 研究室](https://shaoyiuhsu.wixsite.com/website)（孔隙介質多相流研究室）提供資源支援。
 
-維護者：陳俊豪，課程教師。問題與建議請使用 [Issues](https://github.com/bigmoumou/Learning-Analytics-Tools/issues)。
+維護者：陳俊豪，課程教師。問題與建議請使用 [Issues](https://github.com/bigmoumou/AI-Agent-Literacy/issues)。
 
 ---
 
@@ -345,8 +345,8 @@ Some of the lessons learned so far, which the experience write-up will cover:
 The site is plain HTML, CSS and JavaScript with no build step and no npm packages, so you can fork it and turn it into a site for your own course.
 
 ```bash
-git clone https://github.com/bigmoumou/Learning-Analytics-Tools.git
-cd Learning-Analytics-Tools
+git clone https://github.com/bigmoumou/AI-Agent-Literacy.git
+cd AI-Agent-Literacy
 python -m http.server 8000
 ```
 
@@ -368,7 +368,7 @@ Full maintainer documentation (folder structure, adding a video, video and HLS r
 
 Students, teachers and any other readers are welcome to help improve the site:
 
-- Reporting problems: open an [issue](https://github.com/bigmoumou/Learning-Analytics-Tools/issues) for typos, unclear explanations, translation problems, videos that will not play, layout problems on phones, or accessibility problems (screen readers, keyboard use). Please include the page address, your browser and your device.
+- Reporting problems: open an [issue](https://github.com/bigmoumou/AI-Agent-Literacy/issues) for typos, unclear explanations, translation problems, videos that will not play, layout problems on phones, or accessibility problems (screen readers, keyboard use). Please include the page address, your browser and your device.
 - Fixing typos or translations: send a pull request directly. Translations on week pages are in the `data-zh-hans`, `data-en` and `data-vi` attributes (use curly quotes “ ” inside them, never a straight `"`), homepage week titles and summaries are in `WEEKS[n].i18n` in `assets/course.js`, and interface text shared across the site is in `assets/i18n-strings.js`; the full rules are under 「多語系」 in [docs/維護說明.md](維護說明.md).
 - For changes to the videos or course content, and for larger code changes, please open an issue to discuss first. Run `node tools/check.mjs` before submitting to make sure it reports no errors.
 - Unless stated otherwise, contributed code is licensed under MIT and contributed changes to course content under CC BY-NC-SA 4.0.
@@ -392,7 +392,7 @@ Example credit line for reusing course content (if you made changes, add "adapte
 
 The [CITATION.cff](../CITATION.cff) file in this repository adds a "Cite this repository" entry to the GitHub sidebar, with APA and BibTeX formats. You can also cite it as:
 
-> Chen, J.-H., & Liu, C.-Y. (2026). *Agent Literacy: An open course on working with AI coding agents* [Computer software]. https://github.com/bigmoumou/Learning-Analytics-Tools
+> Chen, J.-H., & Liu, C.-Y. (2026). *Agent Literacy: An open course on working with AI coding agents* [Computer software]. https://github.com/bigmoumou/AI-Agent-Literacy
 
 ### Acknowledgements
 
@@ -411,4 +411,4 @@ Teaching assistants and students: 許家瑋 (Graduate Institute of Information a
 
 Resource support: we thank the [MPIPM Lab](https://shaoyiuhsu.wixsite.com/website) (Multi-Phase In Porous Medium) of [Prof. Shao-Yiu Hsu (許少瑜)](https://www.bse.ntu.edu.tw/member/teacher/syhsu), Department of Bioenvironmental Systems Engineering, National Taiwan University, for supporting this project with resources.
 
-Maintainer: Jun-Hao Chen, the course teacher. Please use [issues](https://github.com/bigmoumou/Learning-Analytics-Tools/issues) for questions and suggestions.
+Maintainer: Jun-Hao Chen, the course teacher. Please use [issues](https://github.com/bigmoumou/AI-Agent-Literacy/issues) for questions and suggestions.
