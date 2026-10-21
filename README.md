@@ -111,7 +111,7 @@ To cite this work, use the **Cite this repository** button ([CITATION.cff](CITAT
 
 ```bibtex
 @misc{chen2026learninganalyticstools,
-  author       = {Chen, Jun-Hao and Liu, Che-You and {邱嵦時}},
+  author       = {Chen, Jun-Hao and Liu, Che-You},
   title        = {Learning Analytics Tools Implementation Applications ({NTNU}):
                   Course Website and {AI}-Made Teaching Videos},
   year         = {2026},
