@@ -4,7 +4,7 @@
 // 檢查項目：
 //   1. 每個檔案都小於 25 MiB（Cloudflare Pages 的上限，超過時整個部署會失敗）
 //   2. 每個 .html 都有 github.io 轉址程式（舊網址才轉得過來）和版權聲明
-//   3. HTML 裡的本機連結（href、src、poster、data-hls、data-thumb）都找得到檔案；data-hls 到影片站的本機資料夾找
+//   3. HTML 裡的本機連結（href、src、poster、data-poster(-en)、data-hls(-en)、data-thumb）都找得到檔案；data-hls、data-hls-en（英文版）到影片站的本機資料夾找
 //      （影片串流檔不在這個 repo，放在 ../media-site/public/，見 docs/維護說明.md「影片放在哪裡」；別台電腦沒有這個資料夾時只提醒）
 //   4. HLS 播放清單（.m3u8）列出的小段都在（同樣在影片站的資料夾裡）
 //   5. assets/course.js 的 WEEKS 裡的 href、thumb、still 都找得到
@@ -130,14 +130,14 @@ for (const page of pages) {
   if (!html.includes(REDIRECT_MARK)) error(`${rel(page)} 少了 github.io 轉址程式（從 weeks/week03/index.html 的 <head> 複製）`);
   if (!html.includes(COPYRIGHT)) error(`${rel(page)} 少了版權聲明「${COPYRIGHT}」（從 weeks/week03/index.html 的頁尾複製）`);
   if (html.includes("待填")) warn(`${rel(page)} 還有「待填」的地方`);
-  for (const m of html.matchAll(/\s(href|src|poster|data-poster|data-hls|data-thumb)="([^"]*)"/g)) {
+  for (const m of html.matchAll(/\s(href|src|poster|data-poster|data-poster-en|data-hls|data-hls-en|data-thumb)="([^"]*)"/g)) {
     const ref = m[2];
     if (/^(https?:|mailto:|data:|javascript:|#)/.test(ref) || ref === "") continue;
     let target = resolveRef(page, ref);
-    if (m[1] === "data-hls" && target) {
+    if ((m[1] === "data-hls" || m[1] === "data-hls-en") && target) {
       if (!HAS_MEDIA) continue;                     // 這台電腦沒有影片站的資料夾：最後提醒一次
       target = toMedia(target);
-      if (!fs.existsSync(target)) { error(`${rel(page)}：data-hls="${ref}" 在影片站的資料夾（${MEDIA_DIR}）找不到（用 tools/publish-video.sh 發布）`); continue; }
+      if (!fs.existsSync(target)) { error(`${rel(page)}：${m[1]}="${ref}" 在影片站的資料夾（${MEDIA_DIR}）找不到（用 tools/publish-video.sh 發布）`); continue; }
       playlists.add(target);
       continue;
     }
@@ -193,6 +193,7 @@ for (const week of fs.existsSync(weeksDir) ? fs.readdirSync(weeksDir) : []) {
     for (const need of ["poster.jpg", "thumb.jpg"]) {
       if (!fs.existsSync(path.join(d, need))) error(`weeks/${week}/video/${slug}/ 少了 ${need}（用 tools/publish-video.sh 產生）`);
     }
+    if (fs.existsSync(path.join(d, "en", "hls"))) error(`weeks/${week}/video/${slug}/en/hls/ 不能放在 repo 裡：英文版串流檔也放影片站（tools/publish-video.sh --lang en），把這個資料夾刪掉`);
     if (fs.existsSync(path.join(d, "hls"))) error(`weeks/${week}/video/${slug}/hls/ 不能放在 repo 裡：影片串流檔放影片站（tools/publish-video.sh 會放對地方），把這個資料夾刪掉`);
     if (HAS_MEDIA && !fs.existsSync(path.join(MEDIA_DIR, "weeks", week, "video", slug, "hls", "index.m3u8"))) {
       error(`影片站沒有 weeks/${week}/video/${slug}/hls/index.m3u8（用 tools/publish-video.sh 發布）`);

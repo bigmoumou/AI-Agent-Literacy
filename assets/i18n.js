@@ -1,6 +1,9 @@
 /* ==========================================================================
    多語系：繁中（預設）、简中、English、Tiếng Việt
-   - 語言的決定順序：網址 ?lang= → 上次選的（localStorage）→ 繁中。不看瀏覽器語言：第一次來一律是繁中。
+   - 語言的決定順序：網址 ?lang= → 上次選的（localStorage）→ 瀏覽器語言 → 英文。
+     瀏覽器語言（2026-10-21 英文版計畫，製作/english/README.md）：依瀏覽器的語言偏好順序，取第一個網站有的語言：
+     zh-CN／zh-SG／zh-MY／zh-Hans 是简中，其他 zh（zh-TW、zh-HK、zh）是繁中，vi 是越南文，en 是英文；
+     清單裡一個都沒有就用英文。中文瀏覽器和以前一樣是繁中。自動判斷的結果不存起來，只有使用者自己選的才記住。
    - 預設的繁中直接寫在 HTML 裡（沒有 JavaScript 也看得到），其他語言這樣標：
        data-ui="key"                     全站共用的文字，從 assets/i18n-strings.js 取（{n} 這類變數取自同一個元素的 data-n）
        data-ui-attr="aria-label:key"     把共用文字放進屬性，多個用 ; 隔開
@@ -37,7 +40,20 @@
       const s = localStorage.getItem(STORE);
       if (CODES.includes(s)) return s;
     } catch (e) { /* 無法讀取也沒關係 */ }
-    return DEFAULT;
+    return fromBrowser();
+  }
+
+  function fromBrowser() {
+    let list = [];
+    try { list = (navigator.languages && navigator.languages.length ? Array.from(navigator.languages) : [navigator.language]).filter(Boolean); } catch (e) { /* 讀不到就照預設 */ }
+    if (!list.length) return DEFAULT;
+    for (const raw of list) {
+      const l = String(raw).toLowerCase();
+      if (l === "zh" || l.startsWith("zh-")) return /^zh-(cn|sg|my|hans)\b/.test(l) ? "zh-Hans" : "zh-Hant";
+      if (l === "vi" || l.startsWith("vi-")) return "vi";
+      if (l === "en" || l.startsWith("en-")) return "en";
+    }
+    return "en";
   }
 
   // 簡體中文用 Noto Sans SC（同一個字的寫法和繁體字型不一樣），選到時才載入

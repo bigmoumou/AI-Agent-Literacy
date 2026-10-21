@@ -23,8 +23,12 @@
      封面 poster.jpg、縮圖 thumb.jpg 還在這個 repo。 */
   const MEDIA = "https://learning-analytics-media.o1r2g3a4n5i6z7e8.workers.dev/";
   const SITE = new URL("..", (document.currentScript && document.currentScript.src) || location.href).href; // assets/ 的上一層＝網站根目錄
+  /* 英文版影片（2026-10-21 起，見 製作/english/README.md）：<video> 另外寫 data-hls-en="video/NN-slug/en/hls/index.m3u8"
+     （和 data-poster-en="video/NN-slug/poster-en.jpg"）時，英文介面播英文版，其他語言照舊播中文版；沒有 data-hls-en 的影片一律播中文版。
+     英文版和中文版是同一條時間軸（長度、每個章節的秒數都一樣），所以章節、重點、#t= 都共用，換語言時從同一秒接著播。 */
+  const wantsEn = (vid) => !!(vid && vid.dataset.hlsEn && window.I18N && window.I18N.lang === "en");
   const hlsUrl = (vid) => {
-    const abs = new URL(vid.dataset.hls, location.href).href;
+    const abs = new URL(wantsEn(vid) ? vid.dataset.hlsEn : vid.dataset.hls, location.href).href;
     return abs.startsWith(SITE) ? MEDIA + abs.slice(SITE.length) : abs;
   };
 
@@ -32,8 +36,9 @@
      其他支的封面（每張 1920×1080，100–170 KB）原本一開頁就全部下載，和看得到的東西搶網路。
      頁面寫 data-poster="…"（寫 poster="…" 也照樣可以）：顯示出來的那一支馬上補上封面；其他的等網頁載完、瀏覽器有空時再在背景抓好，
      切換影片時封面已經在快取裡，看起來和原本一樣（手機開了「節省數據」就等顯示時才抓）。 */
-  const posterOf = (v) => (v && (v.getAttribute("poster") || v.dataset.poster)) || "";
-  const setPoster = (v) => { if (v.dataset.poster && !v.getAttribute("poster")) v.setAttribute("poster", v.dataset.poster); };
+  const posterData = (v) => (wantsEn(v) && v.dataset.posterEn) || v.dataset.poster || "";
+  const posterOf = (v) => (v && (posterData(v) || v.getAttribute("poster"))) || "";
+  const setPoster = (v) => { const p = posterData(v); if (p && v.getAttribute("poster") !== p) v.setAttribute("poster", p); };
   (() => {
     const lazy = Array.from(document.querySelectorAll("video[data-poster]"));
     if (!lazy.length) return;
@@ -274,9 +279,11 @@
     if (vid.dataset.attached) return;
     vid.dataset.attached = "1";
     const src = hlsUrl(vid);
+    vid.dataset.src = src;
     const Hls = window.Hls;
     if (Hls && Hls.isSupported()) {
       const hls = new Hls();
+      vid._hls = hls;
       let recovered = false;
       hls.on(Hls.Events.ERROR, (_, data) => {
         if (!data.fatal) return;
@@ -298,6 +305,44 @@
       failed(vid);
     }
   }
+
+  /* 換語言（只有有英文版的影片會受影響）：還沒接上的，下次接上時自然用新語言；已經接上的，換來源後從同一秒接著播（播放中就繼續播）。 */
+  function relang(vid) {
+    setPoster(vid);
+    if (!vid.dataset.attached || vid.dataset.src === hlsUrl(vid)) return;
+    const t = vid.currentTime || 0, playing = !vid.paused && !vid.ended;
+    if (vid._hls) { vid._hls.destroy(); vid._hls = null; }
+    vid.removeAttribute("src");
+    vid.load();
+    delete vid.dataset.attached;
+    attach(vid);
+    if (t > 0.05 || playing) seek(vid, t, playing);
+  }
+  document.addEventListener("langchange", () => {
+    document.querySelectorAll("video[data-hls-en]").forEach((v) => {
+      if (v.dataset.attached || v.getAttribute("poster")) relang(v);
+    });
+    langNote();
+  });
+  /* 週次標題下那一行「影片畫面裡的字是繁中」（.lang-note）：英文介面時，整頁影片都有英文版就不顯示，只有部分有就換成說明哪些是英文 */
+  function langNote() {
+    const el = document.querySelector(".lang-note");
+    if (!el || !window.I18N) return;
+    const all = Array.from(document.querySelectorAll("video[data-hls]"));
+    const en = window.I18N.lang === "en" ? all.filter((v) => v.dataset.hlsEn).length : 0;
+    if (en && en === all.length) {           // 整頁都是英文版：拿掉 data-ui（i18n.js 就不會再填回去），整行藏起來
+      delete el.dataset.ui;
+      el.textContent = "";
+      el.hidden = true;
+      return;
+    }
+    const key = en ? "video.noteSome" : "video.note";
+    if (el.dataset.ui === key) return;       // 一般情況（包括中文介面）：i18n.js 已經照 data-ui 填好了
+    el.dataset.ui = key;
+    el.textContent = window.I18N.t(key);
+    el.hidden = el.textContent === "";
+  }
+  langNote();
 
   // 播不了時直接在畫面上說明，不讓學生對著黑畫面
   function failed(vid) {
@@ -401,7 +446,9 @@
       '<span class="reel-bar" aria-hidden="true"><span></span></span>' +
       '<span class="reel-thumb"><img alt="" loading="lazy" width="800" height="450">' + (vid ? '<span class="reel-len"></span>' : "") + "</span>" +
       '<span class="reel-text"><span class="reel-n"></span></span>';
-    b.querySelector("img").src = vid ? posterOf(vid).replace(/poster\.jpg$/, "thumb.jpg") : (unit.dataset.thumb || "");
+    const thumbOf = () => (vid ? posterOf(vid).replace(/poster(-en)?\.jpg$/, "thumb$1.jpg") : (unit.dataset.thumb || ""));
+    b.querySelector("img").src = thumbOf();
+    if (vid && vid.dataset.posterEn) document.addEventListener("langchange", () => { const s = thumbOf(); const img = b.querySelector("img"); if (img.getAttribute("src") !== s) img.src = s; });
     const n = b.querySelector(".reel-n");
     const grp = GROUPS.find((g) => unit.classList.contains(g.cls));
     if (grp && num) {
