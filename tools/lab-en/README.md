@@ -27,6 +27,8 @@ node tools/lab-en/laben.cjs extract mac    # 把所有字串單位寫成 JSON（
 2. `node tools/lab-en/laben.cjs build mac` 和 `win`：有新的中文字串，`report` 會列出來，補字典；有修補對不上，建置會停在那一條。
 3. 把 `lab/*/js/en/`、`lab/*/css/en/`、`lab/*/index.en.html` 一起 commit（它們是生成檔，不要手改）。
 
+`build` 會在 `lab/<os>/js/en/SOURCES.json` 記下讀到的每個中文檔的 sha256（換行統一成 LF）。`node tools/check.mjs` 拿它和現在的中文檔比，對不上就提醒「英文練習電腦沒有跟上中文檔」：表示有人改了中文卻沒重建，英文使用者會停在舊版（中文版不受影響）。
+
 ## 哪些週次用英文版
 
 `lab/mac/index.html`、`lab/win/index.html` 的 `<head>` 最後面有一小段轉址（`<!--lab-en:redirect-->`），`LAB_EN_WEEKS` 列出已有英文版的週次。英文瀏覽器（或 `?lang=en`）打開這些週次會轉到 `index.en.html`，其他週次和被別的頁面嵌在 iframe 裡的（Week 6 考試）維持中文。

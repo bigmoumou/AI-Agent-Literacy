@@ -451,6 +451,12 @@ function main() {
     const hasEn = new Set(listJs(finalEnDir).filter((f) => !f.startsWith('extra/')).map((f) => f.replace(/\.js$/, '')));
     fs.writeFileSync(path.join(ROOT, 'lab', osName, 'index.en.html'), buildHtml(osName, hasEn, cfg));
     console.log('index.en.html written;', hasEn.size, 'scripts have an English copy');
+    // SOURCES.json: the sha256 of every Chinese file this build read, so tools/check.mjs can warn when a Chinese file
+    // changes and the English layer was not rebuilt (2026-10-22). Line endings are normalised like the build itself.
+    const sha = (p) => require('crypto').createHash('sha256').update(fs.readFileSync(p, 'utf8').split('\r\n').join('\n')).digest('hex');
+    const sources = { 'index.html': sha(path.join(ROOT, 'lab', osName, 'index.html')) };
+    for (const f of files) sources['js/' + f] = sha(path.join(jsDir, f));
+    fs.writeFileSync(path.join(finalEnDir, 'SOURCES.json'), JSON.stringify(sources, null, 1) + '\n');
   }
   if (cmd === 'report' || totalMissing) {
     for (const f of Object.keys(report)) {

@@ -18,9 +18,11 @@
 //  10. 作品集：assets/works-data.js 的每個分類都有頁面和三種語言的標題；每件作品都有資料夾（index.html）
 //      和縮圖，stars 若有寫要是 1–3 的整數；代號是遮蔽過的（有 x）；works/<分類>/ 裡沒有沒登記的資料夾。學生的網頁不套用 2、3、8 的規定，
 //      只檢查檔案大小，找不到的本機檔案列成提醒
+//  11. 提醒：英文練習電腦（lab/<os>/js/en/，tools/lab-en 生成）的 SOURCES.json 和現在的中文檔對不上，表示改了中文檔卻沒重建英文層
 import fs from "node:fs";
 import path from "node:path";
 import vm from "node:vm";
+import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -263,6 +265,21 @@ for (const f of published) {
   }
 }
 if (total > BUDGET) warn(`網站總共 ${(total / 1048576).toFixed(0)} MB，repo 太大了（GitHub 建議 1 GB 以下）`);
+// 11. 英文練習電腦（2026-10-22）：lab/<os>/js/en/ 是 tools/lab-en/laben.cjs 從中文檔生成的，SOURCES.json 記著當時中文檔的 sha256。
+//     中文檔改了卻沒重建，英文版就會停在舊版（中文版不受影響），所以只提醒，不擋。
+for (const os of ["mac", "win"]) {
+  const man = path.join(ROOT, "lab", os, "js", "en", "SOURCES.json");
+  if (!fs.existsSync(man)) continue;
+  const want = JSON.parse(fs.readFileSync(man, "utf8"));
+  const sha = (p) => createHash("sha256").update(fs.readFileSync(p, "utf8").split("\r\n").join("\n")).digest("hex");
+  const jsDir = path.join(ROOT, "lab", os, "js");
+  const now = walk(jsDir).filter((f) => f.endsWith(".js") && !rel(f).startsWith(`lab/${os}/js/en/`)).map((f) => "js/" + path.relative(jsDir, f).split(path.sep).join("/"));
+  const changed = [...new Set([...Object.keys(want), ...now])].filter((k) => {
+    const p = path.join(ROOT, "lab", os, k);
+    return !fs.existsSync(p) || want[k] !== sha(p);
+  });
+  if (changed.length) warn(`英文練習電腦（lab/${os}）沒有跟上中文檔：${changed.slice(0, 5).join("、")}${changed.length > 5 ? ` 等 ${changed.length} 個` : ""} 改過了。請跑 node tools/lab-en/laben.cjs build ${os}（和 report ${os}），把 lab/${os}/js/en/、css/en/、index.en.html 一起 commit；做法見 tools/lab-en/README.md`);
+}
 if (!HAS_MEDIA) warn(`這台電腦沒有影片站的資料夾（${MEDIA_DIR}），影片串流檔沒有檢查；影片只在 ultra7 上發布`);
 
 console.log(`檢查了 ${published.length} 個檔案、${pages.length} 個頁面、${playlists.size} 支影片；網站總共 ${(total / 1048576).toFixed(1)} MB。`);
