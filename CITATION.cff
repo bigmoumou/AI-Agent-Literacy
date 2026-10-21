@@ -4,10 +4,11 @@ type: software
 title: "Learning Analytics Tools Implementation Applications (NTNU): Course website and AI-made teaching videos"
 authors:
   - family-names: Chen
-    given-names: Junhao
+    given-names: Jun-Hao
     alias: 陳俊豪
-  - family-names: 劉
-    given-names: 哲佑
+  - family-names: Liu
+    given-names: Che-You
+    alias: 劉哲佑
   - family-names: 邱
     given-names: 嵦時
 abstract: >-

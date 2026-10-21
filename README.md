@@ -15,7 +15,7 @@ National Taiwan Normal University (NTNU)
 <b>English</b> · <a href="#zh-tw">繁體中文</a> · <a href="#zh-cn">简体中文</a> · <a href="#ja">日本語</a>
 </p>
 
-[![The course homepage: each week is a frame on a film strip](docs/images/home.jpg)](https://learning-analytics-tools.pages.dev/)
+[![The course homepage: the film strip glides from Week 3 to the latest week](docs/images/home.webp)](https://learning-analytics-tools.pages.dev/)
 
 **An example of AI demonstration teaching.** The course teaches students to work with AI coding agents such as OpenAI Codex, and its own materials are made the same way. The teaching videos, the course site and the practice environment were developed with AI agents (Codex and Claude); the teacher designed the curriculum, supplied the content and reviewed every video. Students see what to do with AI and, in the materials themselves, how a complete piece of work gets made with it. Everything is published as an open course under open licenses.
 
@@ -111,7 +111,7 @@ To cite this work, use the **Cite this repository** button ([CITATION.cff](CITAT
 
 ```bibtex
 @misc{chen2026learninganalyticstools,
-  author       = {Chen, Junhao and {劉哲佑} and {邱嵦時}},
+  author       = {Chen, Jun-Hao and Liu, Che-You and {邱嵦時}},
   title        = {Learning Analytics Tools Implementation Applications ({NTNU}):
                   Course Website and {AI}-Made Teaching Videos},
   year         = {2026},
@@ -124,7 +124,7 @@ Questions and suggestions are welcome as [issues](https://github.com/bigmoumou/L
 
 ## Team and acknowledgements
 
-- **Authors**: 陳俊豪 (Junhao Chen, maintainer, [@bigmoumou](https://github.com/bigmoumou)), 劉哲佑, 邱嵦時
+- **Authors**: Jun-Hao Chen (陳俊豪, maintainer), Che-You Liu (劉哲佑), 邱嵦時
 - **Teaching assistants and students**: 許家瑋 (Graduate Institute of Information and Computer Education, National Taiwan Normal University)
 - **Resource support**: the [MPIPM Lab](https://shaoyiuhsu.wixsite.com/website) (Multi-Phase In Porous Medium) of [Prof. Shao-Yiu Hsu (許少瑜)](https://www.bse.ntu.edu.tw/member/teacher/syhsu), Department of Bioenvironmental Systems Engineering, National Taiwan University
 - **Tools**: the site and the videos were made together with [Codex](https://openai.com/codex/) (OpenAI) and [Claude Code](https://claude.com/claude-code) (Anthropic). The video workflow mainly draws on the opus-video skill by 周行 (Kianzzz), with our own changes; we plan to open-source this teaching-video skill as well.
@@ -222,7 +222,7 @@ python -m http.server 8000
 
 ### 團隊與致謝
 
-- **作者**：陳俊豪（維護者，[@bigmoumou](https://github.com/bigmoumou)）、劉哲佑、邱嵦時
+- **作者**：陳俊豪（維護者）、劉哲佑、邱嵦時
 - **參與助教與學生**：許家瑋（國立臺灣師範大學資訊教育研究所）
 - **資源支援**：感謝國立臺灣大學生物環境系統工程學系[許少瑜教授](https://www.bse.ntu.edu.tw/member/teacher/syhsu)的 [MPIPM 研究室](https://shaoyiuhsu.wixsite.com/website)（孔隙介質多相流研究室）提供資源支援
 - **工具**：網站和影片與 [Codex](https://openai.com/codex/)（OpenAI）、[Claude Code](https://claude.com/claude-code)（Anthropic）協力完成。影片的製作流程主要參考周行（Kianzzz）的 opus-video skill，再依課程需求做了個人化修改；這套教學影片 skill 之後也會開源。
@@ -320,7 +320,7 @@ python -m http.server 8000
 
 ### 团队与致谢
 
-- **作者**：陈俊豪（维护者，[@bigmoumou](https://github.com/bigmoumou)）、刘哲佑、邱嵦时
+- **作者**：陈俊豪（维护者）、刘哲佑、邱嵦时
 - **参与助教与学生**：许家玮（台湾师范大学资讯教育研究所）
 - **资源支持**：感谢台湾大学生物环境系统工程学系[许少瑜教授](https://www.bse.ntu.edu.tw/member/teacher/syhsu)的 [MPIPM 研究室](https://shaoyiuhsu.wixsite.com/website)（孔隙介质多相流研究室）提供资源支持
 - **工具**：网站和视频与 [Codex](https://openai.com/codex/)（OpenAI）、[Claude Code](https://claude.com/claude-code)（Anthropic）协作完成。视频的制作流程主要参考周行（Kianzzz）的 opus-video skill，再根据课程需求做了个性化修改；这套教学视频 skill 之后也会开源。
@@ -418,7 +418,7 @@ python -m http.server 8000
 
 ### チームと謝辞
 
-- **作者**：陳俊豪（メンテナー、[@bigmoumou](https://github.com/bigmoumou)）、劉哲佑、邱嵦時
+- **作者**：陳俊豪（Jun-Hao Chen、メンテナー）、劉哲佑（Che-You Liu）、邱嵦時
 - **参加した TA と学生**：許家瑋（国立台湾師範大学 情報教育研究所）
 - **リソース支援**：国立台湾大学 生物環境システム工学科 [許少瑜教授](https://www.bse.ntu.edu.tw/member/teacher/syhsu)の [MPIPM 研究室](https://shaoyiuhsu.wixsite.com/website)（多孔質媒体の多相流研究室）にリソース面でご支援いただきました
 - **ツール**：サイトと動画は [Codex](https://openai.com/codex/)（OpenAI）と [Claude Code](https://claude.com/claude-code)（Anthropic）と協力して制作しました。動画の制作フローは主に周行（Kianzzz）さんの opus-video skill を参考にし、授業に合わせて独自に手を加えたもので、この教育動画用 skill も今後オープンソースとして公開する予定です。
