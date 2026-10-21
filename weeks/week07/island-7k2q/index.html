@@ -52,6 +52,11 @@
   .copy { margin-top: 12px; font-size: 11px; color: #9a907f; }
   .msg { position: fixed; inset: 0; display: grid; place-items: center; background: #bfe0f4; padding: 16px; text-align: center; font-size: 18px; color: #24221e; }
   .msg[hidden] { display: none; }
+  /* 手機、平板：只展示（島慢慢轉），不能玩 */
+  body.show #start, body.show #bar, body.show #cross, body.show #name, body.show #toast { display: none; }
+  #showNote { position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%); padding: 6px 14px; border-radius: 999px; background: rgba(20,24,28,.55); color: #fff; font: 600 13px system-ui, sans-serif; white-space: nowrap; pointer-events: none; }
+  #showNote[hidden] { display: none; }
+  @media (max-width: 420px) { #showNote { font-size: 11px; bottom: 8px; padding: 4px 10px; } }
   /* 放在作業頁的小框裡（半個欄寬）：說明卡和方塊欄縮小 */
   @media (max-height: 560px) {
     .card { padding: 14px 18px 10px; } .kicker { font-size: 11px; } h1 { font-size: 22px; margin: 2px 0 8px; }
@@ -95,6 +100,7 @@
 </div>
 <div id="nogl" class="msg" hidden>This browser can’t show 3D graphics.<br>Please try the latest Chrome or Edge, with hardware acceleration turned on.</div>
 <div id="touch" class="msg" hidden>Sky Island needs a keyboard and a mouse.<br>Please open it on a computer.</div>
+<div id="showNote" hidden>Play it on a computer (keyboard and mouse)</div>
 <script src="island.js"></script>
 </body>
 </html>
