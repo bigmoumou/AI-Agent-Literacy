@@ -204,6 +204,10 @@ repo 裡的 [CITATION.cff](../CITATION.cff) 會讓 GitHub 頁面右側出現「C
 
 作者：陳俊豪（JUNHAO CHEN）、劉哲佑、邱嵦時。
 
+參與助教與學生：許家瑋（國立臺灣師範大學資訊教育研究所）。
+
+資源支援：感謝國立臺灣大學生物環境系統工程學系[許少瑜教授](https://www.bse.ntu.edu.tw/member/teacher/syhsu)的 [MPIPM 研究室](https://shaoyiuhsu.wixsite.com/website)（孔隙介質多相流研究室）提供資源支援。
+
 維護者：陳俊豪（[@bigmoumou](https://github.com/bigmoumou)），課程教師。問題與建議請使用 [Issues](https://github.com/bigmoumou/Learning-Analytics-Tools/issues)。
 
 ---
@@ -402,5 +406,9 @@ The [CITATION.cff](../CITATION.cff) file in this repository adds a "Cite this re
 ### Authors and maintainer
 
 Authors: 陳俊豪 (JUNHAO CHEN), 劉哲佑, 邱嵦時.
+
+Teaching assistants and students: 許家瑋 (Graduate Institute of Information and Computer Education, National Taiwan Normal University).
+
+Resource support: we thank the [MPIPM Lab](https://shaoyiuhsu.wixsite.com/website) (Multi-Phase In Porous Medium) of [Prof. Shao-Yiu Hsu (許少瑜)](https://www.bse.ntu.edu.tw/member/teacher/syhsu), Department of Bioenvironmental Systems Engineering, National Taiwan University, for supporting this project with resources.
 
 Maintainer: JUNHAO CHEN ([@bigmoumou](https://github.com/bigmoumou)), the course teacher. Please use [issues](https://github.com/bigmoumou/Learning-Analytics-Tools/issues) for questions and suggestions.

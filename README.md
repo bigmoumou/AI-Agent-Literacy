@@ -95,9 +95,13 @@ The video streams are not in this repository but on a separate Cloudflare projec
 
 To cite this project, see [CITATION.cff](CITATION.cff). Questions and suggestions are welcome as [issues](https://github.com/bigmoumou/Learning-Analytics-Tools/issues); please do not include students' names or student IDs.
 
-### Authors
+### Authors and acknowledgements
 
-陳俊豪 (Junhao Chen, maintainer, [@bigmoumou](https://github.com/bigmoumou)), 劉哲佑, 邱嵦時. The site and the videos were made together with [Codex](https://openai.com/codex/) (OpenAI) and [Claude Code](https://claude.com/claude-code) (Anthropic), using the opus-video skill (周行 Kianzzz, MIT), HyperFrames, hls.js and other tools. Thanks to the students taking the course.
+- **Authors**: 陳俊豪 (Junhao Chen, maintainer, [@bigmoumou](https://github.com/bigmoumou)), 劉哲佑, 邱嵦時
+- **Teaching assistants and students**: 許家瑋 (Graduate Institute of Information and Computer Education, National Taiwan Normal University)
+- **Resource support**: the [MPIPM Lab](https://shaoyiuhsu.wixsite.com/website) (Multi-Phase In Porous Medium) of [Prof. Shao-Yiu Hsu (許少瑜)](https://www.bse.ntu.edu.tw/member/teacher/syhsu), Department of Bioenvironmental Systems Engineering, National Taiwan University
+
+The site and the videos were made together with [Codex](https://openai.com/codex/) (OpenAI) and [Claude Code](https://claude.com/claude-code) (Anthropic), using the opus-video skill (周行 Kianzzz, MIT), HyperFrames, hls.js and other tools. Thanks to the students taking the course.
 
 ---
 
@@ -177,9 +181,13 @@ python -m http.server 8000
 
 引用見 [CITATION.cff](CITATION.cff)。問題和建議請開 [Issue](https://github.com/bigmoumou/Learning-Analytics-Tools/issues)，請不要寫出學生的姓名或學號。
 
-### 作者
+### 作者與致謝
 
-陳俊豪（維護者，[@bigmoumou](https://github.com/bigmoumou)）、劉哲佑、邱嵦時。網站和影片與 [Codex](https://openai.com/codex/)（OpenAI）、[Claude Code](https://claude.com/claude-code)（Anthropic）協力完成，使用 opus-video skill（周行 Kianzzz，MIT）、HyperFrames、hls.js 等工具。感謝修課的同學。
+- **作者**：陳俊豪（維護者，[@bigmoumou](https://github.com/bigmoumou)）、劉哲佑、邱嵦時
+- **參與助教與學生**：許家瑋（國立臺灣師範大學資訊教育研究所）
+- **資源支援**：感謝國立臺灣大學生物環境系統工程學系[許少瑜教授](https://www.bse.ntu.edu.tw/member/teacher/syhsu)的 [MPIPM 研究室](https://shaoyiuhsu.wixsite.com/website)（孔隙介質多相流研究室）提供資源支援
+
+網站和影片與 [Codex](https://openai.com/codex/)（OpenAI）、[Claude Code](https://claude.com/claude-code)（Anthropic）協力完成，使用 opus-video skill（周行 Kianzzz，MIT）、HyperFrames、hls.js 等工具。感謝修課的同學。
 
 ---
 
@@ -259,9 +267,13 @@ python -m http.server 8000
 
 引用方式见 [CITATION.cff](CITATION.cff)。问题和建议请开 [Issue](https://github.com/bigmoumou/Learning-Analytics-Tools/issues)，请不要写出学生的姓名或学号。
 
-### 作者
+### 作者与致谢
 
-陈俊豪（维护者，[@bigmoumou](https://github.com/bigmoumou)）、刘哲佑、邱嵦时。网站和视频与 [Codex](https://openai.com/codex/)（OpenAI）、[Claude Code](https://claude.com/claude-code)（Anthropic）协作完成，使用 opus-video skill（周行 Kianzzz，MIT）、HyperFrames、hls.js 等工具。感谢修课的同学。
+- **作者**：陈俊豪（维护者，[@bigmoumou](https://github.com/bigmoumou)）、刘哲佑、邱嵦时
+- **参与助教与学生**：许家玮（台湾师范大学资讯教育研究所）
+- **资源支持**：感谢台湾大学生物环境系统工程学系[许少瑜教授](https://www.bse.ntu.edu.tw/member/teacher/syhsu)的 [MPIPM 研究室](https://shaoyiuhsu.wixsite.com/website)（孔隙介质多相流研究室）提供资源支持
+
+网站和视频与 [Codex](https://openai.com/codex/)（OpenAI）、[Claude Code](https://claude.com/claude-code)（Anthropic）协作完成，使用 opus-video skill（周行 Kianzzz，MIT）、HyperFrames、hls.js 等工具。感谢修课的同学。
 
 ---
 
@@ -341,6 +353,10 @@ python -m http.server 8000
 
 引用には [CITATION.cff](CITATION.cff) をご利用ください。質問や提案は [Issue](https://github.com/bigmoumou/Learning-Analytics-Tools/issues) へ。学生の氏名や学籍番号は書かないでください。
 
-### 作者
+### 作者と謝辞
 
-陳俊豪（メンテナー、[@bigmoumou](https://github.com/bigmoumou)）、劉哲佑、邱嵦時。サイトと動画は [Codex](https://openai.com/codex/)（OpenAI）と [Claude Code](https://claude.com/claude-code)（Anthropic）と協力して制作し、opus-video skill（周行 Kianzzz、MIT）、HyperFrames、hls.js などのツールを使っています。受講してくれた学生のみなさんに感謝します。
+- **作者**：陳俊豪（メンテナー、[@bigmoumou](https://github.com/bigmoumou)）、劉哲佑、邱嵦時
+- **参加した TA と学生**：許家瑋（国立台湾師範大学 情報教育研究所）
+- **リソース支援**：国立台湾大学 生物環境システム工学科 [許少瑜教授](https://www.bse.ntu.edu.tw/member/teacher/syhsu)の [MPIPM 研究室](https://shaoyiuhsu.wixsite.com/website)（多孔質媒体の多相流研究室）にリソース面でご支援いただきました
+
+サイトと動画は [Codex](https://openai.com/codex/)（OpenAI）と [Claude Code](https://claude.com/claude-code)（Anthropic）と協力して制作し、opus-video skill（周行 Kianzzz、MIT）、HyperFrames、hls.js などのツールを使っています。受講してくれた学生のみなさんに感謝します。
