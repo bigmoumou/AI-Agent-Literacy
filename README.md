@@ -6,7 +6,10 @@ An open course on working with AI coding agents<br>
 </p>
 
 <p align="center">
-<a href="https://ai-agent-literacy.pages.dev/"><b>Course site</b></a> ·
+<a href="https://ai-agent-literacy.pages.dev/"><img src="https://img.shields.io/badge/Open%20the%20course%20site-ai--agent--literacy.pages.dev-f0b545?style=for-the-badge&labelColor=1f1f22" alt="Open the course site: ai-agent-literacy.pages.dev" height="40"></a>
+</p>
+
+<p align="center">
 <a href="#educational-design">Educational design</a> ·
 <a href="#videos">Videos</a> ·
 <a href="#how-its-made">How it's made</a> ·
@@ -138,6 +141,8 @@ Thanks to the students taking the course.
 
 ### 課程簡介
 
+**課程網站**：[ai-agent-literacy.pages.dev](https://ai-agent-literacy.pages.dev/)
+
 **AI 示範教學的實例。** AI Agent Literacy（AI 代理素養）是一門開放式課程，教學生和 AI 程式助理（例如 OpenAI 的 Codex）一起工作，而課程本身的教材也是這樣做出來的：教學影片、課程網站和練習環境由 AI 代理（Codex 與 Claude）開發，授課教師設計課程、提供教材，並審核每一支影片。學生除了學到怎麼用 AI，也能從教材本身看到一件完整的作品如何和 AI 合作完成。所有內容都以開放授權公開，是一門開放式課程。
 
 <table>
@@ -236,6 +241,8 @@ python -m http.server 8000
 
 ### 课程简介
 
+**课程网站**：[ai-agent-literacy.pages.dev](https://ai-agent-literacy.pages.dev/?lang=zh-Hans)
+
 **AI 示范教学的实例。** AI Agent Literacy（AI 智能体素养）是一门开放课程，教学生和 AI 编程助手（例如 OpenAI 的 Codex）一起工作，而课程本身的教材也是这样做出来的：教学视频、课程网站和练习环境由 AI 智能体（Codex 与 Claude）开发，授课教师设计课程、提供教材，并审核每一个视频。学生除了学到怎么用 AI，也能从教材本身看到一件完整的作品如何与 AI 合作完成。所有内容都以开放许可公开，是一门开放课程。
 
 <table>
@@ -333,6 +340,8 @@ python -m http.server 8000
 <summary><b>日本語</b></summary>
 
 ### 概要
+
+**コースサイト**：[ai-agent-literacy.pages.dev](https://ai-agent-literacy.pages.dev/)
 
 **AI デモンストレーション教育の実践例。** AI Agent Literacy（AI エージェント・リテラシー）は、OpenAI の Codex などの AI コーディングエージェントと協働する方法を教えるオープンコースです。授業の教材そのものも同じ方法で作られています。教育動画・コースサイト・練習環境は AI エージェント（Codex と Claude）が開発し、担当教員がカリキュラムを設計して教材を用意し、すべての動画をレビューしました。学生は AI の使い方を学ぶと同時に、教材そのものを通して、AI と協働してひとつの作品を完成させる過程を見ることができます。すべてオープンライセンスで公開しているオープンコースです。
 
