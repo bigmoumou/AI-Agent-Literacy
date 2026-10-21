@@ -66,7 +66,7 @@
 
       <div class="film">
         <div class="player">
-          <video controls preload="metadata" playsinline data-hls="video/01-verify-md/hls/index.m3u8" data-poster="video/01-verify-md/poster.jpg" width="1920" height="1080">
+          <video controls preload="metadata" playsinline data-hls="video/01-verify-md/hls/index.m3u8" data-poster="video/01-verify-md/poster.jpg" data-hls-en="video/01-verify-md/en/hls/index.m3u8" data-poster-en="video/01-verify-md/poster-en.jpg" width="1920" height="1080">
             你的瀏覽器無法播放這支影片。
           </video>
         </div>
@@ -92,7 +92,7 @@
           data-vi="<strong>“Xong rồi” là do Codex tự đánh giá; chỗ nào không viết rõ thì mỗi lần có thể một khác.</strong> Tiểu An chỉ nói “làm xong toàn bộ bản đồ dạo bộ cây bạch quả giúp mình”: hỏi hai lần, một lần làm 12 địa điểm và có kiểm tra bản điện thoại, lần kia chỉ có 4 địa điểm, không kiểm tra điện thoại, trên điện thoại còn phải cuộn ngang (minh hoạ). AI không phải lần nào cũng trả lời giống nhau; nó không biết “xong” trong đầu bạn trông thế nào, nên “thế nào là xong” cần được viết ra."><strong>「做好了」是 Codex 自己判斷的，沒寫清楚的地方，每次可能不一樣。</strong>小安只說「幫我把銀杏散步地圖全部做好」：問兩次，一次做了 12 個景點、有檢查手機，另一次只有 4 個景點、沒檢查手機，手機上還要左右捲動（示意）。AI 每次的回答不一定一樣；它不知道你心裡的「做好」長什麼樣，所以「怎樣算做好」要寫下來。</p></li>
         <li><p data-i18n
           data-zh-hans="<strong><code>AGENTS.md</code> 是长期协作规则，<code>VERIFY.md</code> 是验收单。</strong>长期协作规则写“怎么做”：繁体中文、文件放在哪里、不要改什么，Codex 每段对话一开始都会读它，这是 Week 3 学过的。验收单写“怎样算做好、怎么检查”。<code>VERIFY.md</code> 这个文件名是我们的习惯，不是官方规定；OpenAI 的《Codex Best practices》建议把“做好是什么、怎么验证”写给 Codex。"
-          data-en="<strong><code>AGENTS.md</code> holds the long-term collaboration rules; <code>VERIFY.md</code> is the acceptance checklist.</strong> The rules say how to work: reply in Traditional Chinese, where files go, what not to change; Codex reads them at the start of every chat, as covered in Week 3. The checklist says what counts as done and how to check it. The name <code>VERIFY.md</code> is our habit, not an official rule; OpenAI’s “Codex Best practices” recommends telling Codex what done means and how to verify the work."
+          data-en="<strong><code>AGENTS.md</code> holds the long-term collaboration rules; <code>VERIFY.md</code> is the acceptance checklist.</strong> The rules say how to work: reply in English, where files go, what not to change; Codex reads them at the start of every chat, as covered in Week 3. The checklist says what counts as done and how to check it. The name <code>VERIFY.md</code> is our habit, not an official rule; OpenAI’s “Codex Best practices” recommends telling Codex what done means and how to verify the work."
           data-vi="<strong><code>AGENTS.md</code> là quy tắc cộng tác lâu dài, <code>VERIFY.md</code> là phiếu nghiệm thu.</strong> Quy tắc ghi “làm thế nào”: trả lời bằng tiếng Trung phồn thể, tệp để ở đâu, không được sửa gì; mỗi cuộc trò chuyện Codex đều đọc nó ngay từ đầu, như đã học ở Week 3. Phiếu nghiệm thu ghi “thế nào là xong, kiểm tra ra sao”. Tên tệp <code>VERIFY.md</code> là thói quen của chúng tôi, không phải quy định chính thức; “Codex Best practices” của OpenAI khuyên nên viết cho Codex biết thế nào là xong và cách kiểm chứng."><strong><code>AGENTS.md</code> 是長期協作規則，<code>VERIFY.md</code> 是驗收單。</strong>長期協作規則寫「怎麼做」：繁中、檔案放哪、不要改什麼，Codex 每段對話一開始都會讀它，這是 Week 3 學過的。驗收單寫「怎樣算做好、怎麼檢查」。<code>VERIFY.md</code> 這個檔名是我們的習慣，不是官方規定；OpenAI 的〈Codex Best practices〉建議把「做好是什麼、怎麼驗證」寫給 Codex。</p></li>
         <li><p data-i18n
           data-zh-hans="<strong>好的验证是“可以检查”的。</strong>每一条都写清楚：看什么、怎么看、应该看到什么。“要好看”“不要有错”都不算，有数字就写数字。像“地图上有 12 个标记”“宽 390 px 时不会左右滚动”，写进清单就不用每次靠它猜；“标记点得到”没有数字，就没办法检查，改成“宽 390 px 时，每个标记至少 44 px”才检查得了。"
@@ -353,7 +353,7 @@
         data-vi="Đây không phải video mà là chiếc “máy tính từ xa” giống Week 3 và Week 4, đổi sang nhiệm vụ của tuần này, mở ngay trong trình duyệt, có hai loại Mac và Windows: hãy chọn loại bạn hay dùng. Trông và dùng giống máy thật nhưng chỉ để luyện tập, bạn cứ thoải mái làm hỏng rồi làm lại, không ảnh hưởng đến máy của bạn. Sau khi kết nối, hãy chọn một nhiệm vụ (ví dụ “開工前選好模型”, chọn mô hình trước khi bắt đầu), rồi làm theo thẻ nhiệm vụ từng bước một; muốn rời đi, bấm “中斷連線” (Ngắt kết nối) ở giữa phía trên. Mỗi lần vào là một chiếc máy hoàn toàn mới; nếu tải lại trang hoặc rời đi, tiến độ lần này sẽ không được giữ lại.">這不是影片，而是一台在瀏覽器裡開啟的「遠端電腦」，和 Week 3、Week 4 是同一台，換成這週的任務，有 Mac 和 Windows 兩種，選你平常用的那一種。外觀和操作都像真的電腦，但只是練習用的，弄壞了隨時重來，不會動到你自己的電腦。連線後先選一個任務（例如「開工前選好模型」），再照著任務卡一步一步做；要離開時，按畫面上方中間的「中斷連線」。每次進入都是一台全新的電腦；重新整理或離開後，這次的進度不會留下。</p>
       <p class="lab-note" data-i18n
         data-zh-hans="练习环境的画面是繁体中文；需要用鼠标和键盘操作，建议用电脑的浏览器打开，手机的屏幕太小。"
-        data-en="The practice environment is shown in Traditional Chinese. It needs a mouse and keyboard, so open it in a browser on a computer; a phone screen is too small."
+        data-en="The practice computer is in English. It needs a mouse and keyboard, so open it in a browser on a computer; a phone screen is too small."
         data-vi="Giao diện của môi trường luyện tập là tiếng Trung phồn thể. Cần dùng chuột và bàn phím nên hãy mở bằng trình duyệt trên máy tính; màn hình điện thoại quá nhỏ.">練習環境的畫面是繁體中文；需要用滑鼠和鍵盤操作，建議用電腦的瀏覽器開啟，手機的螢幕太小。</p>
 
       <ol class="points">
