@@ -1,0 +1,16 @@
+{
+ "@file:mac:finder.js": {
+  "複製": "Duplicate",
+  "還原": "Undo",
+  "修改日期": "Date Modified",
+  "建立日期": "Created",
+  "位置": "Locations",
+  "排序方式": "Sort By",
+  "全選": "Select All",
+  "Microsoft Word 文件": "Microsoft Word document"
+ },
+ "@file:mac:sysapps.js": {
+  "關機": "Shut Down",
+  "登出": "Log Out"
+ }
+}

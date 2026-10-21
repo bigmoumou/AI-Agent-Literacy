@@ -1,0 +1,12 @@
+{
+ "@file:mac:missions-week3.js": {
+  "/^未命名檔案夾/": "/^untitled folder/i"
+ },
+ "@file:win:missions-week3.js": {
+  "/^新增資料夾( \\(\\d+\\))?$/": "/^New folder( \\(\\d+\\))?$/i",
+  "/已存在|已經存在/": "/already exists/i"
+ },
+ "@file:win:missions.js": {
+  "/找不到[\\s\\S]*?路徑，因為它不存在|no such file or directory/i": "/Cannot find path[\\s\\S]*?because it does not exist|no such file or directory/i"
+ }
+}
