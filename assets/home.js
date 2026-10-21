@@ -414,7 +414,7 @@
     // 課程名稱
     g.fillStyle = "#f4f2ec";
     g.font = `900 60px ${SANS}`;
-    ["LEARNING", "ANALYTICS", "TOOLS"].forEach((t, k) => g.fillText(t, x + 44, y + 150 + k * 66));
+    ["AGENT", "LITERACY"].forEach((t, k) => g.fillText(t, x + 44, y + 150 + k * 66));
     g.fillStyle = "#f0b545";
     g.font = `700 19px ${MONO}`;
     g.fillText("NTNU・WEEK 03 — 16", x + 48, y + 368);
@@ -520,7 +520,7 @@
     if (!document.fonts || !document.fonts.load) return Promise.resolve();
     const titles = frames.filter((f) => f.w).map((f) => wf(f.w, "title")).join("");
     const jobs = [
-      document.fonts.load(`900 60px "${SANS_FAMILY}"`, "LEARNINGANALYTICSTOOLS"),
+      document.fonts.load(`900 60px "${SANS_FAMILY}"`, "AGENTLITERACY"),
       document.fonts.load(`700 44px "${SANS_FAMILY}"`, titles + tr("home.soon") + tr("home.open")),
       document.fonts.load(`500 24px "${SANS_FAMILY}"`, tr("home.tagline")),
       document.fonts.load(`700 20px "JetBrains Mono"`, "0123456789 WEEKNTUAOLSGRCMIY"),
