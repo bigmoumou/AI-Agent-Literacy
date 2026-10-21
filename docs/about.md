@@ -92,7 +92,7 @@ An AI teaching-video demonstration site for the Learning Analytics Tools course 
 
 ### AI 教學影片怎麼做
 
-影片的畫面主要是用 HTML、CSS、JavaScript 寫成的動態網頁，逐格渲染成影片。例外有兩處：Week 4 影片 01 的 Blockbench 段落是教師實際操作的瀏覽器錄影（加速播放），嵌在程式畫的 Codex 介面裡；Week 3 影片 03 開頭用了三張 Wikimedia Commons 的圖片。畫面都不是影片生成模型產生的。每支影片都由教師與 Codex、Claude 協力完成，用到 opus-video skill（原作者為周行 Kianzzz，MIT 授權；本課程使用依需求調整過的版本）等工具，寫程式產生畫面和聲音；影片做好後由 Codex 與 Claude 互相審查，教師在每個階段確認。影片教的是 Codex 等 AI 程式助理的用法。
+影片的畫面主要是用 HTML、CSS、JavaScript 寫成的動態網頁，逐格渲染成影片。例外有兩處：Week 4 影片 01 的 Blockbench 段落是教師實際操作的瀏覽器錄影（加速播放），嵌在程式畫的 Codex 介面裡；Week 3 影片 03 開頭用了三張 Wikimedia Commons 的圖片。畫面都不是影片生成模型產生的。每支影片都由教師與 Codex、Claude 協力完成，寫程式產生畫面和聲音；製作流程主要參考 opus-video skill（原作者為周行 Kianzzz），再依課程需求做了個人化修改，這套教學影片 skill 之後也會開源；影片做好後由 Codex 與 Claude 互相審查，教師在每個階段確認。影片教的是 Codex 等 AI 程式助理的用法。
 
 ![Week 3 影片 02〈AGENTS.md 與上下文管理〉的封面](../weeks/week03/video/02-agents-md-context/poster.jpg)
 
@@ -118,7 +118,7 @@ An AI teaching-video demonstration site for the Learning Analytics Tools course 
 | Claude 版影片（同樣的內容，改用 Claude Code 示範） | 規劃中；目前影片示範的工具是 Codex |
 | 學生作品展示（作品集） | 已上線，陸續加入學生同意公開的作品；著作權屬於各作者 |
 | 練習用的模擬電腦（課堂練習） | Mac 版、Windows 版都已上線，每週同一台電腦、換那週的任務：Week 3 有 10 個任務（終端機、Finder、Codex），Week 4 有 11 個（內建瀏覽器、GitHub、Mermaid、作業），Week 5 有 5 個（驗證清單 `VERIFY.md`、選模型、看活動紀錄、對話滿了、作業前的準備） |
-| 教學影片生成 prompt：每支影片的 `brief.md`、動態素材規格、三方案提案 | 規劃中，整理後公開 |
+| 教學影片 skill（主要參考 opus-video，再做個人化修改）與教學影片生成 prompt：每支影片的 `brief.md`、動態素材規格、三方案提案 | 規劃中，整理後公開 |
 | 製作經驗：逐輪審查紀錄與整理過的教訓 | 規劃中，整理後公開 |
 | 製作專案（場景程式、音訊腳本）與 mp4 原檔 | 目前不在這個 repo；repo 只放要公開的成品 |
 | 原始投影片、螢幕錄影原檔、介面截圖（Week 4 影片 01 只放剪輯、加速後的片段） | 不公開：含未發布的教材或個人資訊 |
@@ -195,7 +195,7 @@ repo 裡的 [CITATION.cff](../CITATION.cff) 會讓 GitHub 頁面右側出現「C
 
 - 修課的同學。
 - [Codex](https://openai.com/codex/)（OpenAI）與 [Claude Code](https://claude.com/claude-code)（Anthropic）：網站和影片的開發由教師與兩者協力完成，影片也由兩者互相審查。
-- opus-video skill 的原作者周行（Kianzzz），MIT 授權；本課程使用依需求調整過的版本。
+- opus-video skill 的原作者周行（Kianzzz）：本課程的影片製作流程主要參考這個工具，再做個人化修改。
 - 影片製作用到 HyperFrames（HeyGen，Apache-2.0）、GSAP、Playwright、FFmpeg、numpy 與 SciPy。
 - 網站播放器使用 [hls.js](https://github.com/video-dev/hls.js)；字型來自 Google Fonts。
 - 以 CC0 釋出照片的 Jonathan Körner（原刊於 Unsplash）、Julian Lupyan，以及練習用模擬 Mac 桌布的 Clara Marie（原刊於 Unsplash）；照片都取自 Wikimedia Commons。
@@ -295,7 +295,7 @@ The [showcase](https://learning-analytics-tools.pages.dev/works/) (作品集 in 
 
 ### How the AI teaching videos are made
 
-The visuals are mainly animated web pages written in HTML, CSS and JavaScript and rendered frame by frame into video. There are two exceptions: the Blockbench part of Week 4 video 01 is a real screen recording of the teacher's browser session (sped up), set inside the coded Codex interface, and Week 3 video 03 opens with three Wikimedia Commons images. None of the footage comes from a video-generation model. Each video is made by the teacher together with Codex and Claude, who write the code that produces the visuals and the sound with tools such as the opus-video skill (originally written by 周行 Kianzzz under the MIT License; this course uses a locally adapted version). Codex and Claude review each other's finished videos, and the teacher signs off at each stage. The videos teach the use of AI coding agents such as Codex.
+The visuals are mainly animated web pages written in HTML, CSS and JavaScript and rendered frame by frame into video. There are two exceptions: the Blockbench part of Week 4 video 01 is a real screen recording of the teacher's browser session (sped up), set inside the coded Codex interface, and Week 3 video 03 opens with three Wikimedia Commons images. None of the footage comes from a video-generation model. Each video is made by the teacher together with Codex and Claude, who write the code that produces the visuals and the sound; the workflow mainly draws on the opus-video skill (originally written by 周行 Kianzzz), with our own changes for this course, and this teaching-video skill will be open-sourced as well. Codex and Claude review each other's finished videos, and the teacher signs off at each stage. The videos teach the use of AI coding agents such as Codex.
 
 ![Poster of Week 3 video 02, "AGENTS.md and Context Management"](../weeks/week03/video/02-agents-md-context/poster.jpg)
 
@@ -321,7 +321,7 @@ The visuals are mainly animated web pages written in HTML, CSS and JavaScript an
 | Claude versions of the videos (the same lessons, demonstrated with Claude Code) | Planned; the videos currently demonstrate Codex |
 | Student work showcase | Live; more work is added as students agree to publish it; copyright stays with each author |
 | Practice environment: a simulated computer (in-class practice) | Mac and Windows versions live; every week uses the same computer with that week's missions: 10 for Week 3 (terminal, Finder, Codex), 11 for Week 4 (built-in browser, GitHub, Mermaid, homework) and 5 for Week 5 (a `VERIFY.md` checklist, picking the model, the activity log, a full chat, homework set-up) |
-| Teaching-video prompts: each video's `brief.md`, the specs for the animated materials, and the three-plan proposals | Planned, to be released once cleaned up |
+| The teaching-video skill (based mainly on opus-video, with our own changes) and the teaching-video prompts: each video's `brief.md`, the specs for the animated materials, and the three-plan proposals | Planned, to be released once cleaned up |
 | Production experience: round-by-round review logs and the lessons drawn from them | Planned, to be released once cleaned up |
 | Production projects (scene code, audio scripts) and master mp4 files | Not in this repository for now; it holds only the published results |
 | Original slides, raw screen recordings and interface screenshots (Week 4 video 01 contains only a cut, sped-up excerpt) | Not public: they contain unreleased material or personal details |
@@ -398,7 +398,7 @@ The [CITATION.cff](../CITATION.cff) file in this repository adds a "Cite this re
 
 - The students taking the course.
 - [Codex](https://openai.com/codex/) (OpenAI) and [Claude Code](https://claude.com/claude-code) (Anthropic): the site and the videos were developed by the teacher working with both, and they review each other's videos.
-- 周行 (Kianzzz), the original author of the opus-video skill (MIT License); this course uses a locally adapted version.
+- 周行 (Kianzzz), the original author of the opus-video skill: this course's video workflow mainly draws on it, with our own changes.
 - Video production uses HyperFrames (HeyGen, Apache-2.0), GSAP, Playwright, FFmpeg, numpy and SciPy.
 - The site's player uses [hls.js](https://github.com/video-dev/hls.js); the fonts come from Google Fonts.
 - Jonathan Körner (first published on Unsplash), Julian Lupyan, and Clara Marie (first published on Unsplash; the practice Mac's wallpaper), for releasing their photos under CC0; all were obtained from Wikimedia Commons.

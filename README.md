@@ -61,7 +61,7 @@ Course site for **Learning Analytics Tools** at National Taiwan Normal Universit
 ### How it's made
 
 - **Roles**: the teacher supplies the material, sets the direction and reviews every round. The site and the videos are developed by Codex and Claude together.
-- **Video made from code**: every frame is an HTML, CSS and JavaScript page rendered to video (HTML-to-video), using the opus-video skill, HyperFrames, GSAP, Playwright and FFmpeg. Music and sound effects are synthesized in code too. No video-generation model is used.
+- **Video made from code**: every frame is an HTML, CSS and JavaScript page rendered to video (HTML-to-video), with HyperFrames, GSAP, Playwright and FFmpeg. The workflow mainly draws on the opus-video skill, with our own changes for this course. Music and sound effects are synthesized in code too. No video-generation model is used.
 - **Cross-review**: Codex and Claude review each other's videos for flow, clear teaching and visual detail, and the teacher gives the final approval.
 - **Delivery**: a plain static site on Cloudflare Pages; the videos stream as HLS (hls.js) from a separate Cloudflare media site.
 
@@ -84,7 +84,7 @@ The video streams are not in this repository but on a separate Cloudflare projec
 - [ ] Later weeks as the course goes on (up to Week 16)
 - [ ] Full English versions of the videos, with English on-screen text (the site, chapters and key points are already in English)
 - [ ] Claude versions of the videos: the same lessons, demonstrated with Claude (Claude Code) instead of Codex
-- [ ] Release the production prompts (each video's `brief.md` and the animation specs) and the lessons learned
+- [ ] Open-source our teaching-video skill (based mainly on opus-video, with our own changes), along with the production prompts (each video's `brief.md` and the animation specs) and the lessons learned
 
 ### License
 
@@ -101,7 +101,7 @@ To cite this project, see [CITATION.cff](CITATION.cff). Questions and suggestion
 - **Teaching assistants and students**: 許家瑋 (Graduate Institute of Information and Computer Education, National Taiwan Normal University)
 - **Resource support**: the [MPIPM Lab](https://shaoyiuhsu.wixsite.com/website) (Multi-Phase In Porous Medium) of [Prof. Shao-Yiu Hsu (許少瑜)](https://www.bse.ntu.edu.tw/member/teacher/syhsu), Department of Bioenvironmental Systems Engineering, National Taiwan University
 
-The site and the videos were made together with [Codex](https://openai.com/codex/) (OpenAI) and [Claude Code](https://claude.com/claude-code) (Anthropic), using the opus-video skill (周行 Kianzzz, MIT), HyperFrames, hls.js and other tools. Thanks to the students taking the course.
+The site and the videos were made together with [Codex](https://openai.com/codex/) (OpenAI) and [Claude Code](https://claude.com/claude-code) (Anthropic). The video workflow mainly draws on the opus-video skill by 周行 (Kianzzz), with our own changes for this course; we plan to open-source this teaching-video skill as well. Thanks to the students taking the course.
 
 ---
 
@@ -147,7 +147,7 @@ The site and the videos were made together with [Codex](https://openai.com/codex
 ### 怎麼做的
 
 - **分工**：教師提供教材、決定方向，每一輪都審核。網站和影片的開發由 Codex 與 Claude 協力完成。
-- **畫面和聲音都是程式**：每一格畫面都是 HTML、CSS、JavaScript 寫成的網頁，逐格渲染成影片，用到 opus-video skill、HyperFrames、GSAP、Playwright、FFmpeg；配樂和音效也用程式合成。沒有用影片生成模型。
+- **畫面和聲音都是程式**：每一格畫面都是 HTML、CSS、JavaScript 寫成的網頁，逐格渲染成影片，用到 HyperFrames、GSAP、Playwright、FFmpeg；製作流程主要參考 opus-video skill，再依課程需求做了個人化修改。配樂和音效也用程式合成。沒有用影片生成模型。
 - **互相審查**：影片做好後，由 Codex 與 Claude 互相審查流程、教學是否清楚和畫面細節，教師最後確認才上線。
 - **網站**：純靜態網站，放在 Cloudflare Pages；影片用 HLS（hls.js）從另一個 Cloudflare 影片站播放。
 
@@ -170,7 +170,7 @@ python -m http.server 8000
 - [ ] 之後的週次依課程進度上線（到 Week 16）
 - [ ] 全英文版影片：畫面上的字和字卡都改成英文（目前影片裡是繁體中文，網站介面、章節和重點已經有英文）
 - [ ] Claude 版影片：同樣的內容，改用 Claude（Claude Code）示範（目前影片示範的工具是 Codex）
-- [ ] 整理並公開製作用的 prompt（每支影片的 `brief.md`、動態素材規格）和製作經驗
+- [ ] 開源這套教學影片 skill（主要參考 opus-video，再做個人化修改），以及製作用的 prompt（每支影片的 `brief.md`、動態素材規格）和製作經驗
 
 ### 授權
 
@@ -187,7 +187,7 @@ python -m http.server 8000
 - **參與助教與學生**：許家瑋（國立臺灣師範大學資訊教育研究所）
 - **資源支援**：感謝國立臺灣大學生物環境系統工程學系[許少瑜教授](https://www.bse.ntu.edu.tw/member/teacher/syhsu)的 [MPIPM 研究室](https://shaoyiuhsu.wixsite.com/website)（孔隙介質多相流研究室）提供資源支援
 
-網站和影片與 [Codex](https://openai.com/codex/)（OpenAI）、[Claude Code](https://claude.com/claude-code)（Anthropic）協力完成，使用 opus-video skill（周行 Kianzzz，MIT）、HyperFrames、hls.js 等工具。感謝修課的同學。
+網站和影片與 [Codex](https://openai.com/codex/)（OpenAI）、[Claude Code](https://claude.com/claude-code)（Anthropic）協力完成。影片的製作流程主要參考周行（Kianzzz）的 opus-video skill，再依課程需求做了個人化修改；這套教學影片 skill 之後也會開源。感謝修課的同學。
 
 ---
 
@@ -233,7 +233,7 @@ python -m http.server 8000
 ### 怎么做的
 
 - **分工**：教师提供教材、决定方向，每一轮都审核。网站和视频的开发由 Codex 与 Claude 协作完成。
-- **画面和声音都是代码**：每一帧画面都是用 HTML、CSS、JavaScript 写成的网页，逐帧渲染成视频，用到 opus-video skill、HyperFrames、GSAP、Playwright、FFmpeg；配乐和音效也用代码合成。没有使用视频生成模型。
+- **画面和声音都是代码**：每一帧画面都是用 HTML、CSS、JavaScript 写成的网页，逐帧渲染成视频，用到 HyperFrames、GSAP、Playwright、FFmpeg；制作流程主要参考 opus-video skill，再根据课程需求做了个性化修改。配乐和音效也用代码合成。没有使用视频生成模型。
 - **互相审查**：视频做好后，由 Codex 与 Claude 互相审查流程、讲解是否清楚和画面细节，教师最后确认才上线。
 - **网站**：纯静态网站，部署在 Cloudflare Pages；视频以 HLS（hls.js）从另一个 Cloudflare 视频站播放。
 
@@ -256,7 +256,7 @@ python -m http.server 8000
 - [ ] 之后的周次按课程进度上线（到 Week 16）
 - [ ] 全英文版视频：画面上的文字和字卡都改成英文（目前视频里是繁体中文，网站界面、章节和要点已有英文）
 - [ ] Claude 版视频：同样的内容，改用 Claude（Claude Code）演示（目前视频演示的工具是 Codex）
-- [ ] 整理并公开制作用的 prompt（每个视频的 `brief.md`、动画素材规格）和制作经验
+- [ ] 开源这套教学视频 skill（主要参考 opus-video，再做个性化修改），以及制作用的 prompt（每个视频的 `brief.md`、动画素材规格）和制作经验
 
 ### 授权
 
@@ -273,7 +273,7 @@ python -m http.server 8000
 - **参与助教与学生**：许家玮（台湾师范大学资讯教育研究所）
 - **资源支持**：感谢台湾大学生物环境系统工程学系[许少瑜教授](https://www.bse.ntu.edu.tw/member/teacher/syhsu)的 [MPIPM 研究室](https://shaoyiuhsu.wixsite.com/website)（孔隙介质多相流研究室）提供资源支持
 
-网站和视频与 [Codex](https://openai.com/codex/)（OpenAI）、[Claude Code](https://claude.com/claude-code)（Anthropic）协作完成，使用 opus-video skill（周行 Kianzzz，MIT）、HyperFrames、hls.js 等工具。感谢修课的同学。
+网站和视频与 [Codex](https://openai.com/codex/)（OpenAI）、[Claude Code](https://claude.com/claude-code)（Anthropic）协作完成。视频的制作流程主要参考周行（Kianzzz）的 opus-video skill，再根据课程需求做了个性化修改；这套教学视频 skill 之后也会开源。感谢修课的同学。
 
 ---
 
@@ -319,7 +319,7 @@ python -m http.server 8000
 ### 作り方
 
 - **役割分担**：教員が教材を用意して方向を決め、毎回レビューします。サイトと動画の開発は Codex と Claude が協力して行います。
-- **映像も音もコードで作成**：すべてのフレームは HTML・CSS・JavaScript で書いた Web ページで、1 フレームずつレンダリングして動画にしています（opus-video skill、HyperFrames、GSAP、Playwright、FFmpeg を使用）。BGM と効果音もコードで合成しています。動画生成モデルは使っていません。
+- **映像も音もコードで作成**：すべてのフレームは HTML・CSS・JavaScript で書いた Web ページで、1 フレームずつレンダリングして動画にしています（HyperFrames、GSAP、Playwright、FFmpeg を使用）。制作フローは主に opus-video skill を参考にし、授業に合わせて独自に手を加えています。BGM と効果音もコードで合成しています。動画生成モデルは使っていません。
 - **相互レビュー**：完成した動画は Codex と Claude が互いに、流れ・説明のわかりやすさ・画面の細部をレビューし、最後に教員が確認してから公開します。
 - **配信**：Cloudflare Pages 上の静的サイトで、動画は別の Cloudflare メディアサイトから HLS（hls.js）で配信しています。
 
@@ -342,7 +342,7 @@ python -m http.server 8000
 - [ ] 授業の進行に合わせて、以降の週を公開（Week 16 まで）
 - [ ] 動画の完全英語版（画面上の文字とテロップも英語に。サイト・チャプター・要点はすでに英語あり）
 - [ ] 動画の Claude 版：同じ内容を Codex ではなく Claude（Claude Code）で実演
-- [ ] 制作に使ったプロンプト（各動画の `brief.md`、アニメーション素材の仕様）と制作の知見を公開
+- [ ] この教育動画用 skill（主に opus-video を参考に独自に改良したもの）をオープンソース化し、制作に使ったプロンプト（各動画の `brief.md`、アニメーション素材の仕様）と制作の知見もあわせて公開
 
 ### ライセンス
 
@@ -359,4 +359,4 @@ python -m http.server 8000
 - **参加した TA と学生**：許家瑋（国立台湾師範大学 情報教育研究所）
 - **リソース支援**：国立台湾大学 生物環境システム工学科 [許少瑜教授](https://www.bse.ntu.edu.tw/member/teacher/syhsu)の [MPIPM 研究室](https://shaoyiuhsu.wixsite.com/website)（多孔質媒体の多相流研究室）にリソース面でご支援いただきました
 
-サイトと動画は [Codex](https://openai.com/codex/)（OpenAI）と [Claude Code](https://claude.com/claude-code)（Anthropic）と協力して制作し、opus-video skill（周行 Kianzzz、MIT）、HyperFrames、hls.js などのツールを使っています。受講してくれた学生のみなさんに感謝します。
+サイトと動画は [Codex](https://openai.com/codex/)（OpenAI）と [Claude Code](https://claude.com/claude-code)（Anthropic）と協力して制作しました。動画の制作フローは主に周行（Kianzzz）さんの opus-video skill を参考にし、授業に合わせて独自に手を加えたもので、この教育動画用 skill も今後オープンソースとして公開する予定です。受講してくれた学生のみなさんに感謝します。
