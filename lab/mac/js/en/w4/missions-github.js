@@ -13,9 +13,9 @@
   var FM = W4.FM || DESKTOP + '/Firenze-Museums';
   var REPO = W4.REPO || 'an/firenze-museums-hw';
   var README0 = '# firenze-museums-hw\n';
-  var G_GITHUB = 'GitHub（Week 4 補充 1）';
-  var TAG = 'Week 4 補充 1';
-  var MAP = 'GitHub 雲端倉庫 ⇄ 你電腦上的倉庫資料夾 · clone 拿一份回家 · add＋commit 存一個版本（只在你的電腦）· push 送上雲 · pull 拿回最新';
+  var G_GITHUB = 'GitHub (Week 4 Extra 1)';
+  var TAG = 'Week 4 Extra 1';
+  var MAP = 'GitHub cloud repository ⇄ the repository folder on your computer · clone takes a copy home · add + commit saves a version (only on your computer) · push sends it up to the cloud · pull brings back the latest';
 
   /* ------------------------------------------------------------------ small helpers */
   function same(api, a, b) { try { return !!(api ? api.same(a, b) : LAB.vfs.same(a, b)); } catch (e) { return false; } }
@@ -191,7 +191,7 @@
   };
 
   /* ------------------------------------------------------------------ traps (one quiet line for a known beginner mistake) */
-  var NOT_A_REPO = '這裡不是倉庫：先 `cd` 走進 firenze-museums-hw（提示字元最後一個字要是 firenze-museums-hw），再輸入。';
+  var NOT_A_REPO = 'This is not a repository. First `cd` into firenze-museums-hw (the last word of the prompt must be firenze-museums-hw), then type it again.';
   function notRepoTrap(ev, api) {
     var c = ev && api.termCmd(ev, function (x) { return x.name === 'git' && x.status === 128 && /not a git repository/.test(x.out); });
     return c ? NOT_A_REPO : null;
@@ -203,7 +203,7 @@
       return null;
     };
   }
-  var IDENTITY = 'git 還不知道你是誰（第一次用都要設定一次）：輸入 `git config --global user.name "An"` 和 `git config --global user.email "an@example.com"`（用你自己的），再 commit 一次。';
+  var IDENTITY = 'git does not know who you are yet (you set this up once, the first time you use git): type `git config --global user.name "An"` and `git config --global user.email "an@example.com"` (use your own), then commit again.';
   function identityTrap(ev, api) {
     var c = ev && api.termCmd(ev, function (x) { return x.name === 'git' && x.args[0] === 'commit' && x.status !== 0 && /Author identity unknown/.test(x.out); });
     return c ? IDENTITY : null;
@@ -212,8 +212,8 @@
     if (!ev) return null;
     var c = api.termCmd(ev, gitCmd('push'));
     if (!c) return null;
-    if (/Everything up-to-date/.test(c.out)) return '沒有東西可以送：先 `git add`、`git commit`，再 `git push`。';
-    if (/rejected/.test(c.out)) return '被拒絕了：雲端有你電腦上沒有的版本。先 `git pull` 拿回最新版，再 `git push`。（下一個任務會練習 pull。）';
+    if (/Everything up-to-date/.test(c.out)) return 'There is nothing to send. First run `git add` and `git commit`, then `git push`.';
+    if (/rejected/.test(c.out)) return 'Rejected: the cloud has a version that your computer does not have. First run `git pull` to get the latest version, then `git push`. (The next mission practices pull.)';
     return null;
   }
 
@@ -224,43 +224,43 @@
     group: G_GITHUB,
     tag: TAG,
     map: MAP,
-    title: 'clone：拿一份回家',
+    title: 'clone: take a copy home',
     minutes: 6,
     resetsFiles: true,
-    intro: 'GitHub 是程式碼版的雲端硬碟。clone 是第一次把雲端的倉庫整個拿一份回家，連以前的每一個版本都一起拿回來。這台電腦已經裝好 git，也登入了 GitHub（帳號是 an；影片裡的示範帳號是 xiaoan-demo，真的練習時換成你自己的帳號）。',
+    intro: 'GitHub is like a cloud drive for code. clone means taking a copy of the whole repository from the cloud for the first time, together with every earlier version. This computer already has git installed and is signed in to GitHub (the account is an; the demo account in the video is xiaoan-demo, so when you practice for real, use your own account).',
     prepare: function (api) { resetWorld(api, {}); },
     steps: [
       {
         id: 's1',
-        text: '點 Dock 上的 Safari，在網址列輸入 `github.com/an/firenze-museums-hw`，按 Return（Windows 鍵盤是 Enter），看看雲端的倉庫。',
-        hint: 'GitHub 是放程式碼的網站，像雲端硬碟。放一個專案的地方叫倉庫（repository，簡稱 repo），這個倉庫裡現在只有一個 README.md。網址列在 Safari 視窗最上面。',
-        answer: 'Safari 網址列輸入 github.com/an/firenze-museums-hw，Return。',
+        text: 'Click Safari in the Dock, type `github.com/an/firenze-museums-hw` in the address bar, press Return (Enter on a Windows keyboard), and look at the repository in the cloud.',
+        hint: 'GitHub is a website for code, like a cloud drive. The place that holds one project is called a repository (“repo” for short). This repository has only one file for now, README.md. The address bar is at the top of the Safari window.',
+        answer: 'Type github.com/an/firenze-museums-hw in the Safari address bar, then press Return.',
         target: T_SAFARI,
         check: function (ev, api) { return !!api.seen('github:view', repoViews); },
         trap: function (ev) {
           if (!ev || ev.name !== 'github:view' || !ev.data) return null;
-          if (ev.data.view === '404') return '這個網址找不到倉庫（404）。倉庫網址是 github.com/an/firenze-museums-hw，注意最後的 -hw；打完要按 Return。';
-          if (ev.data.view === 'home' || ev.data.view === 'profile') return '這是 GitHub 的其他頁面。倉庫的網址是 github.com/an/firenze-museums-hw，打在網址列，再按 Return。';
+          if (ev.data.view === '404') return 'No repository was found at this address (404). The repository address is github.com/an/firenze-museums-hw. Note the -hw at the end, and press Return after you type it.';
+          if (ev.data.view === 'home' || ev.data.view === 'profile') return 'This is another page on GitHub. The repository address is github.com/an/firenze-museums-hw. Type it in the address bar, then press Return.';
           return null;
         }
       },
       {
         id: 's2',
-        text: '按綠色的「Code」按鈕，把 HTTPS 網址複製起來。',
-        hint: '這串網址是倉庫的地址，clone 要用。按網址旁邊的拷貝按鈕就會複製。',
-        answer: '點「Code」，在 HTTPS 的網址旁邊按拷貝。',
+        text: 'Click the green “Code” button and copy the HTTPS URL.',
+        hint: 'This URL is the address of the repository, and clone needs it. Click the copy button next to the URL to copy it.',
+        answer: 'Click “Code”, then click the copy button next to the HTTPS URL.',
         target: T_CODE,
         check: function (ev, api) { return !!api.seen('github:copy-url', function (d) { return d.repo === REPO && /^https?:/i.test(String(d.url)); }); },
         trap: function (ev) {
-          if (ev && ev.name === 'github:copy-url' && ev.data && /^git@/.test(String(ev.data.url))) return '你複製的是 SSH 網址（git@github.com:…）。練習版的終端機只能用 HTTPS：點 HTTPS 那一欄，再按拷貝。';
+          if (ev && ev.name === 'github:copy-url' && ev.data && /^git@/.test(String(ev.data.url))) return 'You copied the SSH URL (git@github.com:…). The practice Terminal can only use HTTPS: click the “HTTPS” tab, then click the copy button.';
           return null;
         }
       },
       {
         id: 's3',
-        text: '打開終端機，輸入 `cd Desktop` 走到桌面，再輸入 `git clone ` 加上剛剛複製的網址（Command+V 貼上），按 Return（Windows 鍵盤是 Enter）。',
-        hint: '`git clone 網址` 會在你現在站的地方，新增一個和倉庫同名的資料夾，所以先走到想放的地方。提示字元最後一個字是 Desktop，就表示你在桌面。輸入法先切到英文（ABC）。',
-        answer: '`cd ~/Desktop`，Return；`git clone https://github.com/an/firenze-museums-hw.git`，Return。',
+        text: 'Open Terminal, type `cd Desktop` to go to the Desktop, then type `git clone ` followed by the URL you just copied (paste it with Command+V), and press Return (Enter on a Windows keyboard).',
+        hint: '`git clone URL` creates a new folder with the same name as the repository in the place where you are standing now, so first go to the place where you want it. If the last word of the prompt is Desktop, you are on the Desktop. Switch the input method to English (ABC) first.',
+        answer: '`cd ~/Desktop`, Return; `git clone https://github.com/an/firenze-museums-hw.git`, Return.',
         where: DESKTOP,
         target: T_TERM,
         check: function (ev, api) { return api.exists(HW + '/.git'); },
@@ -268,34 +268,34 @@
           if (!ev || ev.name !== 'term:run') return null;
           var bad = api.termCmd(ev, function (c) { return c.name === 'git' && c.args[0] === 'clone' && c.status !== 0; });
           if (bad) {
-            if (/git@github\.com/.test(bad.args.join(' ')) || /只支援 HTTPS/.test(bad.out)) return '練習版只支援 HTTPS 網址（https://github.com/…）。回 Safari 的 Code 按鈕，點 HTTPS 那一欄再複製。';
-            if (/not found/.test(bad.out)) return '找不到這個倉庫。網址要從 GitHub 的 Code 按鈕複製，不要自己打。';
-            if (/already exists/.test(bad.out)) return '這個資料夾已經存在了。先用 `ls` 看看，或用 `rm -r` 刪掉它，再 clone 一次。';
+            if (/git@github\.com/.test(bad.args.join(' ')) || /only supports HTTPS/.test(bad.out)) return 'The practice version only supports HTTPS URLs (https://github.com/…). Go back to the Code button in Safari, click the “HTTPS” tab, and copy again.';
+            if (/not found/.test(bad.out)) return 'That repository was not found. Copy the URL from the Code button on GitHub instead of typing it yourself.';
+            if (/already exists/.test(bad.out)) return 'This folder already exists. Look at it with `ls` first, or delete it with `rm -r`, then clone again.';
             return null;
           }
           var ok = api.termCmd(ev, function (c) { return c.name === 'git' && c.args[0] === 'clone' && c.status === 0; });
-          if (ok && !api.exists(HW + '/.git')) return '資料夾被 clone 到「' + LAB.vfs.basename(ok.cwd || '/') + '」了，不在桌面。先用 `rm -r` 刪掉它，`cd ~/Desktop` 走到桌面，再 clone 一次。';
+          if (ok && !api.exists(HW + '/.git')) return ('The folder was cloned into “' + (LAB.vfs.basename(ok.cwd || '/')) + '”, not onto the Desktop. Delete it with `rm -r`, go to the Desktop with `cd ~/Desktop`, then clone again.');
           return null;
         }
       },
       {
         id: 's4',
-        text: '走進 `firenze-museums-hw`，用 `ls` 看看拿回來什麼。',
-        hint: 'cd 後面接資料夾名字，ls 看一圈。你會看到 README.md。',
-        answer: '`cd firenze-museums-hw`，Return；`ls`，Return。',
+        text: 'Go into `firenze-museums-hw` and use `ls` to see what you brought back.',
+        hint: 'Put the folder name after cd, then use ls to look around. You will see README.md.',
+        answer: '`cd firenze-museums-hw`, Return; `ls`, Return.',
         replay: 'mission',
         where: DESKTOP,
         target: T_TERM,
         check: function (ev, api) { return !!api.termSeen(function (c) { return c.name === 'ls' && c.status === 0 && same(api, api.lsDir(c), HW); }); },
         trap: function (ev, api) {
           var c = ev && api.termCmd(ev, function (x) { return x.name === 'ls' && x.status === 0 && !(x.args || []).length && !same(api, x.cwd, HW); });
-          return c ? '`ls` 看的是你現在站的地方。先 `cd firenze-museums-hw` 走進去，再 `ls`。' : null;
+          return c ? '`ls` looks at the place where you are standing now. First go in with `cd firenze-museums-hw`, then run `ls`.' : null;
         }
       },
       {
         id: 's5',
-        text: '輸入 `git log`，看看歷史。',
-        hint: 'git log 列出每一個版本和它的說明。clone 把雲端所有的版本都一起拿回來了，現在只有一個：Initial commit，是 GitHub 建倉庫時自動放的。看完按 Q 離開，或直接打下一個指令。',
+        text: 'Type `git log` to see the history.',
+        hint: 'git log lists every version with its message. clone brought back every version from the cloud. For now there is only one: Initial commit, which GitHub added automatically when it created the repository. When you are done reading, press Q to leave, or just type the next command.',
         answer: '`git log`',
         replay: 'mission',
         where: HW,
@@ -306,8 +306,8 @@
       {
         id: 's6',
         optional: true,
-        text: '輸入 `git remote -v`，看看這個資料夾記得的雲端地址。',
-        hint: 'origin 是雲端倉庫的名字。之後的 push 和 pull 都不用再輸入網址，因為它記得。',
+        text: 'Type `git remote -v` to see the cloud address that this folder remembers.',
+        hint: 'origin is the name of the cloud repository. Later you do not need to type the URL again for push and pull, because the folder remembers it.',
         answer: '`git remote -v`',
         replay: 'mission',
         where: HW,
@@ -316,7 +316,7 @@
         trap: notRepoTrap
       }
     ],
-    outro: 'clone 把雲端的倉庫整個拿一份回家，連歷史一起。這個資料夾記得它的雲端在哪裡，之後的 push 和 pull 不用再輸入網址。'
+    outro: 'clone takes a copy of the whole cloud repository home, history included. This folder remembers where its cloud is, so you do not need to type the URL again for push and pull.'
   });
 
   /* ------------------------------------------------------------------ 6 · add, commit, push */
@@ -326,44 +326,44 @@
     group: G_GITHUB,
     tag: TAG,
     map: MAP,
-    title: 'add、commit、push',
+    title: 'add, commit, push',
     minutes: 10,
     resetsFiles: true,
     needs: [HW],
-    intro: '改了檔案，要先選好檔案（add），再存成一個版本（commit）；這時候版本只存在你的電腦，還沒上雲端。再用 push 送上 GitHub。倉庫已經 clone 在桌面了。',
+    intro: 'After you change a file, first choose the file (add), then save it as a version (commit). At this point the version exists only on your computer and is not in the cloud yet. Then use push to send it up to GitHub. The repository is already cloned on the Desktop.',
     prepare: function (api) { resetWorld(api, { clone: true }); },
     steps: [
       {
         id: 's1',
-        text: '用文字編輯打開桌面上 `firenze-museums-hw` 裡的 README.md，在最後面加一行自己的說明，按 Command+S 存檔。',
-        hint: '在 Finder 打開桌面的 firenze-museums-hw，對 README.md 按右鍵 › 打開方式 › 文字編輯。存檔之後標題的「已編輯」就會消失。',
-        answer: 'Finder › 桌面 › firenze-museums-hw › README.md › 右鍵 › 打開方式 › 文字編輯；加一行字；Command+S。',
-        menuPath: ['打開方式', '文字編輯'],
+        text: 'Open README.md inside `firenze-museums-hw` on the Desktop with TextEdit, add one line of your own notes at the end, and press Command+S to save.',
+        hint: 'In Finder, open firenze-museums-hw on the Desktop, then right-click README.md › Open With › TextEdit. After you save, “Edited” disappears from the title.',
+        answer: 'Finder › Desktop › firenze-museums-hw › README.md › right-click › Open With › TextEdit; add a line; Command+S.',
+        menuPath: ['Open With', 'TextEdit'],
         target: chain(teBox(HW + '/README.md'), finderWalk([HW + '/README.md', HW], DESKTOP)),
         check: function (ev, api) { var t = api.read(HW + '/README.md'); return t !== null && t !== README0; },
         trap: function (ev, api) {
-          if (ev && ev.name === 'editor:save' && ev.data && same(api, ev.data.path, HW + '/README.md') && api.read(HW + '/README.md') === README0) return '存檔了，但內容沒有變：在最後面加一行字，再按 Command+S。';
+          if (ev && ev.name === 'editor:save' && ev.data && same(api, ev.data.path, HW + '/README.md') && api.read(HW + '/README.md') === README0) return 'Saved, but the content did not change: add a line at the end, then press Command+S.';
           return null;
         }
       },
       {
         id: 's2',
-        text: '在終端機走進 `firenze-museums-hw`，輸入 `git status`（打完按 Return，Windows 鍵盤是 Enter）：紅字是改過、但還沒存成版本的檔案。',
-        hint: '終端機在 Dock 上，圖示是黑底。用 cd 走到桌面的 firenze-museums-hw（地址是 ~/Desktop/firenze-museums-hw）。git status 會告訴你哪些檔案改過。輸入法先切到英文（ABC）。',
-        answer: '`cd ~/Desktop/firenze-museums-hw`，Return；`git status`，Return。',
+        text: 'In Terminal, go into `firenze-museums-hw` and type `git status` (press Return when you finish; Enter on a Windows keyboard). Red text shows files that were changed but not yet saved as a version.',
+        hint: 'Terminal is in the Dock; its icon has a black background. Use cd to go to firenze-museums-hw on the Desktop (the address is ~/Desktop/firenze-museums-hw). git status tells you which files have changed. Switch the input method to English (ABC) first.',
+        answer: '`cd ~/Desktop/firenze-museums-hw`, Return; `git status`, Return.',
         replay: 'mission',
         where: DESKTOP,
         target: T_TERM,
         check: function (ev, api) { return !!api.termSeen(function (c) { return c.name === 'git' && c.args[0] === 'status' && c.status === 0 && inRepo(c) && /modified:\s+README\.md/.test(c.out); }) || pastAdd(api); },
         trap: firstTrap(notRepoTrap, function (ev, api) {
           var c = ev && api.termCmd(ev, function (x) { return x.name === 'git' && x.args[0] === 'status' && x.status === 0 && /working tree clean/.test(x.out); });
-          return c ? '目前沒有改過的檔案：先回文字編輯，在 README.md 加一行字，按 Command+S 存檔，再 `git status`。' : null;
+          return c ? 'No files have been changed. First go back to TextEdit, add a line to README.md, press Command+S to save, then run `git status`.' : null;
         })
       },
       {
         id: 's3',
-        text: '輸入 `git add README.md`，選好要放進這個版本的檔案。',
-        hint: 'add 後面接檔名；想全部都放進去，可以用 `.`（一個點）。選好的檔案，`git status` 會用綠字顯示。',
+        text: 'Type `git add README.md` to choose the file that goes into this version.',
+        hint: 'Put the file name after add. To include everything, use `.` (a single dot). `git status` shows the files you chose in green.',
         answer: '`git add README.md`',
         replay: 'mission',
         where: HW,
@@ -375,26 +375,26 @@
         },
         trap: firstTrap(notRepoTrap, function (ev, api) {
           var c = ev && api.termCmd(ev, function (x) { return x.name === 'git' && x.args[0] === 'add' && x.status !== 0; });
-          if (c) return '找不到這個檔案：檔名是 README.md（注意大小寫），而且要在 firenze-museums-hw 裡輸入。';
+          if (c) return 'That file was not found. The file name is README.md (mind the upper and lower case), and you must type the command inside firenze-museums-hw.';
           var early = ev && api.termCmd(ev, function (x) { return x.name === 'git' && x.args[0] === 'commit' && x.status !== 0 && /no changes added to commit|nothing to commit|nothing added to commit/.test(x.out); });
-          return early ? '還沒選好檔案就 commit 了。先 `git add README.md` 選好要放進這個版本的檔案，再 commit。' : null;
+          return early ? 'You committed before choosing a file. First run `git add README.md` to choose the file for this version, then commit.' : null;
         })
       },
       {
         id: 's4',
         optional: true,
-        text: '第一次用 git，要先告訴它你是誰（只要設定一次）：`git config --global user.name "你的名字"`，再輸入 `git config --global user.email "你的 email"`。',
-        hint: '這兩行設定好，之後每個版本都會記上你的名字。如果你先 commit，git 會用英文提醒你這件事。',
-        answer: '`git config --global user.name "An"`，Return；`git config --global user.email "an@example.com"`，Return。（名字和 email 用你自己的。）',
+        text: 'The first time you use git, tell it who you are (you only need to do this once): `git config --global user.name "your name"`, then type `git config --global user.email "your email"`.',
+        hint: 'Once these two lines are set, every version will carry your name. If you commit first, git reminds you about this in English.',
+        answer: '`git config --global user.name "An"`, Return; `git config --global user.email "an@example.com"`, Return. (Use your own name and email.)',
         target: T_TERM,
         check: function () { var s = sys(); return !!(s && s.gitConfig['user.name'] && s.gitConfig['user.email']); },
         trap: function (ev, api) { return identityTrap(ev, api); }
       },
       {
         id: 's5',
-        text: '輸入 `git commit -m "加上自己的說明"`，把剛剛選好的檔案存成一個版本。',
-        hint: '-m 後面的一句話就是這個版本的說明，用半形引號包起來，寫這次做了什麼。',
-        answer: '`git commit -m "加上自己的說明"`（說明可以自己改）',
+        text: 'Type `git commit -m "Add my own note"` to save the file you just chose as a version.',
+        hint: 'The sentence after -m is the message for this version. Wrap it in straight quotes and write what you did this time.',
+        answer: '`git commit -m "Add my own note"` (you can change the message)',
         replay: 'mission',
         where: HW,
         target: T_TERM,
@@ -407,15 +407,15 @@
           var c = ev && api.termCmd(ev, function (x) { return x.name === 'git' && x.args[0] === 'commit' && x.status !== 0; });
           if (!c) return null;
           if (/Author identity unknown/.test(c.out)) return IDENTITY;
-          if (/no changes added to commit|nothing to commit|nothing added to commit/.test(c.out)) return '沒有選好的檔案。先 `git add README.md`。';
-          if (/要加訊息/.test(c.out)) return 'commit 要加一句說明：`git commit -m "你的說明"`，引號用半形。';
+          if (/no changes added to commit|nothing to commit|nothing added to commit/.test(c.out)) return 'No file has been chosen. First run `git add README.md`.';
+          if (/needs a message|Aborting commit due to empty commit message/.test(c.out)) return 'A commit needs a message: `git commit -m "your message"`. Use straight quotes.';
           return null;
         })
       },
       {
         id: 's6',
-        text: '再輸入 `git status`，看第一段：Your branch is ahead of \'origin/main\' by 1 commit.',
-        hint: '意思是：你的電腦比雲端多一個版本，還沒送上去。',
+        text: 'Type `git status` again and look at the first part: Your branch is ahead of \'origin/main\' by 1 commit.',
+        hint: 'It means that your computer has one more version than the cloud, and it has not been sent up yet.',
         answer: '`git status`',
         replay: 'mission',
         where: HW,
@@ -425,21 +425,21 @@
         },
         trap: firstTrap(notRepoTrap, function (ev, api) {
           var c = ev && api.termCmd(ev, function (x) { return x.name === 'git' && x.args[0] === 'status' && x.status === 0 && /up to date with 'origin\/main'/.test(x.out); });
-          return c ? '目前和雲端一樣新：你還沒有存成新的版本（或已經 push 過了）。先 `git commit -m "說明"`。' : null;
+          return c ? 'Your computer is as up to date as the cloud: you have not saved a new version yet (or you have already pushed). First run `git commit -m "message"`.' : null;
         })
       },
       {
         id: 's7',
-        text: '到 Safari 重新整理倉庫頁面（`github.com/an/firenze-museums-hw`），看看新的版本在不在上面。',
-        hint: 'commit 只存在你自己的電腦，網頁上還看不到，commits 的數字沒有變。',
-        answer: 'Safari 網址列輸入 github.com/an/firenze-museums-hw，或按網址列右邊的重新載入。',
+        text: 'In Safari, reload the repository page (`github.com/an/firenze-museums-hw`) and check whether the new version is there.',
+        hint: 'A commit exists only on your own computer. The web page cannot show it yet, and the number of commits has not changed.',
+        answer: 'Type github.com/an/firenze-museums-hw in the Safari address bar, or click Reload at the right end of the address bar.',
         target: T_SAFARI_RELOAD,
         check: function (ev, api) { return !!api.seen('github:view', repoViews); }
       },
       {
         id: 's8',
-        text: '回終端機輸入 `git push`，把版本送上雲端。',
-        hint: 'push 把你電腦上多出來的版本，送到 origin（雲端倉庫）。',
+        text: 'Go back to Terminal and type `git push` to send the version up to the cloud.',
+        hint: 'push sends the extra versions on your computer to origin (the cloud repository).',
         answer: '`git push`',
         replay: 'mission',
         where: HW,
@@ -449,9 +449,9 @@
       },
       {
         id: 's9',
-        text: '再到 Safari 重新整理：你寫的說明出現在最上面。',
-        hint: '頁面上方那一行是最新的版本，點「commits」可以看到所有版本和它們的說明。',
-        answer: '重新載入倉庫頁面。',
+        text: 'Reload in Safari again: the message you wrote is at the top.',
+        hint: 'The line at the top of the page is the latest version. Click “Commits” to see all the versions and their messages.',
+        answer: 'Reload the repository page.',
         replay: 'mission',
         target: T_SAFARI_RELOAD,
         check: function (ev, api) {
@@ -462,7 +462,7 @@
         }
       }
     ],
-    outro: 'add 選檔案、commit 存一個版本（只在你的電腦）、push 送上雲端。GitHub 網頁上看到的，是 push 之後的樣子。'
+    outro: 'add chooses files, commit saves a version (only on your computer), and push sends it up to the cloud. What you see on the GitHub page is how things look after a push.'
   });
 
   /* ------------------------------------------------------------------ 7 · pull */
@@ -472,34 +472,34 @@
     group: G_GITHUB,
     tag: TAG,
     map: MAP,
-    title: 'pull：拿回最新版',
+    title: 'pull: get the latest version',
     minutes: 5,
     resetsFiles: true,
     needs: [HW],
-    intro: '如果你換了一台電腦，或同學改了同一個倉庫，雲端就會比你的電腦新。pull 把雲端最新的版本拿回來。開始做之前先 pull；做完了 add、commit，再 push。',
+    intro: 'If you switch to another computer, or a classmate changes the same repository, the cloud becomes newer than your computer. pull brings the latest version back from the cloud. Pull before you start working; when you finish, add and commit, then push.',
     prepare: function (api) { resetWorld(api, { clone: true, identity: true }); },
     steps: [
       {
         id: 's1',
-        text: '假裝你在另一台電腦：到 Safari 打開 `github.com/an/firenze-museums-hw`，點 README.md，再點右上角的鉛筆圖示（Edit this file），把內容改一行。',
-        hint: '這等於另一台電腦（或同學）改了雲端的檔案；你桌面上的檔案還是舊的。網址列輸入網址後按 Return。',
-        answer: 'Safari › 倉庫頁 › README.md › 鉛筆圖示 › 改一行字。',
+        text: 'Pretend you are on another computer: in Safari, open `github.com/an/firenze-museums-hw`, click README.md, then click the pencil icon (Edit this file) at the top right and change one line.',
+        hint: 'This is the same as another computer (or a classmate) changing the file in the cloud; the file on your Desktop is still the old one. Type the address in the address bar, then press Return.',
+        answer: 'Safari › repository page › README.md › pencil icon › change one line.',
         target: chain(inSafari('gh-edit'), ghFileLink('README.md'), sfAddress, dock('safari')),
         check: function (ev, api) { return !!api.seen('github:edit-open', function (d) { return d.repo === REPO && d.path === 'README.md'; }); }
       },
       {
         id: 's2',
-        text: '按綠色的「Commit changes…」，寫一句說明，再按一次「Commit changes」確認。',
-        hint: '在網頁上存檔，也會產生一個版本（commit）。要先在文字框裡真的改了字，綠色按鈕才按得下去。',
-        answer: 'Commit changes… › 寫說明 › Commit changes。',
+        text: 'Click the green “Commit changes…” button, write a message, then click “Commit changes” once more to confirm.',
+        hint: 'Saving a file on the web page also creates a version (commit). You must really change some text in the text box before you can click the green button.',
+        answer: 'Commit changes… › write a message › Commit changes.',
         target: chain(inSafari('gh-commit-confirm'), inSafari('gh-commit'), inSafari('gh-edit-text')),
         check: function (ev, api) { return !!api.seen('github:web-commit', function (d) { return d.repo === REPO && d.path === 'README.md'; }); }
       },
       {
         id: 's3',
-        text: '回到終端機，走進桌面的 firenze-museums-hw，輸入 `cat README.md`（打完按 Return，Windows 鍵盤是 Enter）：你的電腦上還是舊的內容。',
-        hint: '雲端有新版本，但你的電腦還不知道，要用 pull 去拿。終端機在 Dock 上；輸入法先切到英文（ABC）。',
-        answer: '`cd ~/Desktop/firenze-museums-hw`，Return；`cat README.md`，Return。',
+        text: 'Go back to Terminal, go into firenze-museums-hw on the Desktop, and type `cat README.md` (press Return when you finish; Enter on a Windows keyboard). Your computer still has the old content.',
+        hint: 'The cloud has a new version, but your computer does not know about it yet. You need pull to get it. Terminal is in the Dock; switch the input method to English (ABC) first.',
+        answer: '`cd ~/Desktop/firenze-museums-hw`, Return; `cat README.md`, Return.',
         where: DESKTOP,
         target: T_TERM,
         check: function (ev, api) {
@@ -510,8 +510,8 @@
       },
       {
         id: 's4',
-        text: '輸入 `git pull`，把雲端最新的版本拿回來。',
-        hint: 'pull ＝ 把雲端比你新的版本，拿回你的電腦。',
+        text: 'Type `git pull` to bring back the latest version from the cloud.',
+        hint: 'pull = bring the versions that are newer in the cloud back to your computer.',
         answer: '`git pull`',
         replay: 'mission',
         where: HW,
@@ -520,15 +520,15 @@
         trap: firstTrap(notRepoTrap, function (ev, api) {
           var c = ev && api.termCmd(ev, gitCmd('pull'));
           if (!c) return null;
-          if (/Already up to date/.test(c.out)) return '現在雲端沒有比你電腦新的版本。先回 Safari，在 GitHub 網頁上改一行並按 Commit changes，再回來 pull。';
-          if (/would be overwritten/.test(c.out)) return '你電腦上的 README.md 有還沒 commit 的修改，pull 不敢蓋掉它。這個任務一開始是乾淨的：用 `git status` 看看，或按下面的「重來這個任務」。';
+          if (/Already up to date/.test(c.out)) return 'The cloud has nothing newer than your computer right now. First go back to Safari, change one line on the GitHub page and click Commit changes, then come back and pull.';
+          if (/would be overwritten/.test(c.out)) return 'The README.md on your computer has changes that are not committed yet, so pull will not overwrite it. This mission started clean: look at `git status`, or click “Restart this mission” below.';
           return null;
         })
       },
       {
         id: 's5',
-        text: '再 `cat README.md` 一次，看到剛剛在網頁上改的那行字。',
-        hint: '用 `git log` 也可以看到那個版本。',
+        text: 'Run `cat README.md` again. You should see the line you just changed on the web page.',
+        hint: 'You can also see that version with `git log`.',
         answer: '`cat README.md`',
         replay: 'mission',
         where: HW,
@@ -544,6 +544,6 @@
         }
       }
     ],
-    outro: 'push 是送上去，pull 是拿回來。開始做之前先 pull，才不會在舊版本上改。'
+    outro: 'push sends changes up; pull brings them back. Pull before you start working, so you do not edit an old version.'
   });
 })(window.LAB);

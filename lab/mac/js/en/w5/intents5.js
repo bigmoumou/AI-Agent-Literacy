@@ -16,8 +16,8 @@
     function p2(n) { return (n < 10 ? '0' : '') + n; }
     return d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate());
   }
-  var NOT_IN_GW = '這個對話不在 ginkgo-walk 專案裡（輸入框上方沒有「ginkgo-walk」標籤），我找不到要改的網站。先點側邊欄的 ginkgo-walk，在專案底下再說一次。';
-  var NOT_IN_PROJECT = '這個對話不在任何專案裡（輸入框上方沒有專案的標籤），我不知道要把檔案放在哪裡。先點側邊欄的專案，在專案底下再說一次。';
+  var NOT_IN_GW = 'This chat is not in the ginkgo-walk project (there is no “ginkgo-walk” tag above the input box), so I can\'t find the website to change. First click ginkgo-walk in the sidebar, then say it again under the project.';
+  var NOT_IN_PROJECT = 'This chat is not in any project (there is no project tag above the input box), so I don\'t know where to put the file. First click a project in the sidebar, then say it again under the project.';
   function namesVerify(ctx) { return /verify\.md/i.test(String((ctx.agents && ctx.agents.text) || '')); }
 
   /* ================================================================== VERIFY.md: read it from the disk and check every item */
@@ -37,14 +37,14 @@
   function kindOf(t) {
     var nums = numbers(t).filter(function (n) { return n !== 390; });
     // the size of the markers first: 「在手機上，…標記要夠大，手指點得到」 is about size (vague without a number), not about trying a real phone
-    if (/(標記|spot)/i.test(t) && /(px|像素|至少|大小|點得到|夠大|多大)/i.test(t)) {
+    if (/(標記|spot|marker)/i.test(t) && /(px|像素|至少|大小|點得到|夠大|多大|pixels?|at least|\bsize\b|big enough|large enough|how big|how large|easy to tap|tappable)/i.test(t)) {
       var px = nums.filter(function (n) { return n !== 12; });
-      return px.length ? { kind: 'size', px: px[px.length - 1] } : { kind: 'vague', big: /夠大/.test(t) };
+      return px.length ? { kind: 'size', px: px[px.length - 1] } : { kind: 'vague', big: /(夠大|big enough|large enough)/i.test(t) };
     }
-    if (/(手機上|手指|真的手機|iphone|android)/i.test(t)) return { kind: 'device' };
-    if (/(標記|spot)/i.test(t) && /個/.test(t)) return { kind: 'count', count: nums.length ? nums[0] : 12 };
-    if (/(捲動|scroll|超出|比畫面寬|跑版)/i.test(t)) return { kind: 'overflow' };
-    if (/(檔名|大小寫|照片)/.test(t)) return { kind: 'photos' };
+    if (/(手機上|手指|真的手機|on (?:a |the |your |my )?phones?\b|\bfingers?\b|real phone|iphone|android)/i.test(t)) return { kind: 'device' };
+    if (/(標記|spot|marker)/i.test(t) && /(個|\b\d+\s+(?:\w+\s+)?(?:markers?|spots?)\b|\bcount\b|\bhow many\b)/i.test(t)) return { kind: 'count', count: nums.length ? nums[0] : 12 };
+    if (/(捲動|scroll|超出|overflow|sideways|wider than|比畫面寬|跑版)/i.test(t)) return { kind: 'overflow' };
+    if (/(檔名|大小寫|照片|file ?names?|upper ?case|lower ?case|photos?)/i.test(t)) return { kind: 'photos' };
     return { kind: 'unknown' };
   }
   function short(t) { var a = Array.from(String(t)); return a.length > 40 ? a.slice(0, 39).join('') + '…' : t; }
@@ -95,43 +95,43 @@
       var over = res[0], size = res[1];
       var rows = [], pass = 0, fail = 0, cannot = 0, didGrep = false, didLs = false, didBrowser = false;
       its.forEach(function (it) {
-        var k = kindOf(it.text), title = short(it.text), r = '⚠️ 沒辦法檢查', ev = '';
+        var k = kindOf(it.text), title = short(it.text), r = '⚠️ Can\'t check', ev = '';
         if (k.kind === 'count') {
           var n = (html.match(/class="spot"/g) || []).length;
           if (!didGrep) { ctx.activity('run', 'Ran', 'grep -c \'class="spot"\' site/index.html', [String(n)]); didGrep = true; }
-          title = k.count + ' 個標記';
-          if (n === k.count) { r = '✅'; ev = 'site/index.html 裡有 ' + n + ' 個 `class="spot"`'; }
-          else { r = '❌'; ev = 'site/index.html 裡有 ' + n + ' 個 `class="spot"`，不是 ' + k.count + ' 個'; }
+          title = ('' + (k.count) + ' markers');
+          if (n === k.count) { r = '✅'; ev = ('site/index.html has ' + (n) + ' `class="spot"` markers'); }
+          else { r = '❌'; ev = ('site/index.html has ' + (n) + ' `class="spot"` markers, not ' + (k.count)); }
         } else if (k.kind === 'overflow') {
-          title = '390 px 不會左右捲動';
-          if (!didBrowser) { ctx.activity('run', 'Used the browser', '手機寬度 390 px', ['overflow: ' + (over === null ? '?' : over + ' px') + (size ? '　.spot: ' + size.w + ' × ' + size.h + ' px' : '')]); didBrowser = true; }
-          if (over === null) { r = '⚠️ 沒辦法檢查'; ev = '內建瀏覽器打不開這個網頁'; }
-          else if (over <= 0) { r = '✅'; ev = '手機寬度量到超出 0 px'; }
-          else { r = '❌'; ev = '手機寬度有東西超出畫面 ' + over + ' px'; }
+          title = 'No sideways scrolling at 390 px';
+          if (!didBrowser) { ctx.activity('run', 'Used the browser', 'Phone width, 390 px', ['overflow: ' + (over === null ? '?' : over + ' px') + (size ? ('; .spot: ' + (size.w) + ' × ' + (size.h) + ' px') : '')]); didBrowser = true; }
+          if (over === null) { r = '⚠️ Can\'t check'; ev = 'The built-in browser can\'t open this page'; }
+          else if (over <= 0) { r = '✅'; ev = 'Measured 0 px sticking out at phone width'; }
+          else { r = '❌'; ev = ('Something sticks out of the screen by ' + (over) + ' px at phone width'); }
         } else if (k.kind === 'photos') {
-          title = '照片檔名一字不差';
+          title = 'Photo file names match exactly';
           var mm = photoMismatch(html, o.renamed);
           if (!didLs) { ctx.activity('run', 'Ran', 'ls site/photos', photoNames(o.renamed)); didLs = true; }
-          if (!mm.length) { r = '✅'; ev = photoRefs(html).length + ' 個檔名都對得上'; }
+          if (!mm.length) { r = '✅'; ev = ('Every file name matches (' + (photoRefs(html).length) + ' checked)'); }
           else {
             r = '❌';
-            ev = mm.map(function (x) { return 'site/index.html 寫 `' + x.ref + '`，' + (x.actual ? 'site/photos/ 裡是 `' + x.actual + '`' : 'site/photos/ 裡沒有這個檔'); }).join('；');
+            ev = mm.map(function (x) { return ('site/index.html says `' + (x.ref) + '`, ' + (x.actual ? ('site/photos/ has `' + (x.actual) + '`') : 'site/photos/ has no such file')); }).join('; ');
           }
         } else if (k.kind === 'size') {
-          title = '390 px 時標記至少 ' + k.px + ' px';
-          if (!didBrowser) { ctx.activity('run', 'Used the browser', '手機寬度 390 px', ['overflow: ' + (over === null ? '?' : over + ' px') + (size ? '　.spot: ' + size.w + ' × ' + size.h + ' px' : '')]); didBrowser = true; }
-          if (!size) { r = '⚠️ 沒辦法檢查'; ev = '內建瀏覽器打不開這個網頁'; }
-          else if (size.min >= k.px) { r = '✅'; ev = '`.spot` 是 ' + size.w + ' × ' + size.h + ' px'; }
-          else { r = '❌'; ev = '`.spot` 是 ' + size.w + ' × ' + size.h + ' px'; }
+          title = ('At 390 px, markers are at least ' + (k.px) + ' px');
+          if (!didBrowser) { ctx.activity('run', 'Used the browser', 'Phone width, 390 px', ['overflow: ' + (over === null ? '?' : over + ' px') + (size ? ('; .spot: ' + (size.w) + ' × ' + (size.h) + ' px') : '')]); didBrowser = true; }
+          if (!size) { r = '⚠️ Can\'t check'; ev = 'The built-in browser can\'t open this page'; }
+          else if (size.min >= k.px) { r = '✅'; ev = ('`.spot` is ' + (size.w) + ' × ' + (size.h) + ' px'); }
+          else { r = '❌'; ev = ('`.spot` is ' + (size.w) + ' × ' + (size.h) + ' px'); }
         } else if (k.kind === 'device') {
-          title = '手機上用手指點';
-          ev = '我沒有真的手機，請你用手機試一次';
+          title = 'Tapping with a finger on a phone';
+          ev = 'I don\'t have a real phone, so please try it once on your own phone';
         } else if (k.kind === 'vague' && k.big) {
-          ev = '這一條只寫了「夠大」，沒寫多大，我沒辦法檢查';
+          ev = 'This item only says “big enough” and not how big, so I can\'t check it';
         } else if (k.kind === 'vague') {
-          ev = '這一條沒有寫看什麼、應該看到什麼，我沒辦法判斷過了沒有';
+          ev = 'This item doesn\'t say what to look at or what you should see, so I can\'t tell whether it passed';
         } else {
-          ev = '這一條我不知道怎麼檢查；寫清楚看什麼、怎麼看、應該看到什麼';
+          ev = 'I don\'t know how to check this item; write down what to look at, how to look, and what you should see';
         }
         if (r === '✅') pass++; else if (r === '❌') fail++; else cannot++;
         rows.push({ n: it.n, title: title, result: r, evidence: ev, kind: k.kind, px: k.px, item: it.text });
@@ -140,7 +140,7 @@
     });
   }
   function table(res) {
-    var out = ['| # | 檢查 | 結果 | 證據 |', '|---|---|---|---|'];
+    var out = ['| # | Check | Result | Evidence |', '|---|---|---|---|'];
     res.rows.forEach(function (r) { out.push('| ' + r.n + ' | ' + r.title + ' | ' + r.result + ' | ' + r.evidence + ' |'); });
     return out.join('\n');
   }
@@ -151,7 +151,7 @@
     var notes = [];
     res.rows.forEach(function (r) {
       if (r.result !== '❌') return;
-      if (r.kind === 'photos') notes.push('第 ' + r.n + ' 條：Mac 不分檔名大小寫，在你的電腦上看起來沒事；放上網站就會打不開。');
+      if (r.kind === 'photos') notes.push(('Item ' + (r.n) + ': your Mac does not tell upper and lower case apart in file names, so it looks fine on your computer; once the site is online, the photo won\'t open.'));
     });
     return notes.join('\n');
   }
@@ -160,59 +160,58 @@
   reg({
     id: 'w5_hw_refuse',
     test: function (t, ctx) {
-      if (has(t, /(成績|平均|及格|分數|答案卡|grades|評分|學期)/)) return true;
+      if (has(t, /(成績|平均|及格|分數|答案卡|\bgrad(?:e|es|ing)\b|評分|學期|semester|average|passing|answer key|\bscores?\b)/)) return true;
       var inHw = !!(ctx && ctx.cwd && (vfs.same(ctx.cwd, W5.HW) || vfs.exists(ctx.cwd + '/grades.csv')));
-      return inHw && has(t, /(報告|report|分析|統計|算)/);
+      return inHw && has(t, /(報告|report|分析|統計|算|analy[sz]|statistic|calculat|comput|summar)/);
     },
     run: function (ctx) {
-      ctx.say('練習版不分析作業。真正的分析，請在你自己的電腦上用 Codex 做：讀過 評分說明.md，把規則寫進 AGENTS.md、要檢查的事寫進 VERIFY.md，再開一個 New chat 下指令。');
+      ctx.say('The practice version does not analyze homework. For the real analysis, use Codex on your own computer: read grading-notes.md, write the rules into AGENTS.md and the things to check into VERIFY.md, then open a New chat and give the instruction.');
       ctx.meta.refused = true;
     }
   }, { priority: 120 });
 
   /* ================================================================== mission 2: hand-off summary, and a new chat that reads it */
-  function isPastedSummary(raw) { return /交接摘要/.test(raw) && (/\n/.test(raw) || Array.from(raw).length > 80) && /(目前|下一步|決定)/.test(raw); }
+  function isPastedSummary(raw) { return /(交接摘要|hand[- ]?off summary)/i.test(raw) && (/\n/.test(raw) || Array.from(raw).length > 80) && /(目前|下一步|決定|^\s*[-•*]?\s*(?:done so far|next step|decisions made)\s*:)/im.test(raw); }
   reg({
     id: 'w5_handoff_resume',
     test: function (t, ctx) { return isPastedSummary(ctx && ctx.rawText ? ctx.rawText : t); },
     run: function (ctx) {
       var raw = ctx.rawText;
-      var next = /下一步[：:]\s*([^\n]+)/.exec(raw);
-      var done = /目前做到[：:]\s*([^\n]+)/.exec(raw);
-      ctx.say('我讀了你貼的交接摘要。' + (done ? '\n目前做到：' + done[1] : '') + (next ? '\n下一步：' + next[1] : '') +
-        '\n前面講好的決定我也照摘要記下了。要我現在開始做下一步嗎？');
+      var next = /(?:下一步|next step)\s*[：:]\s*([^\n]+)/i.exec(raw);
+      var done = /(?:目前做到|done so far)\s*[：:]\s*([^\n]+)/i.exec(raw);
+      ctx.say(('I read the hand-off summary you pasted.' + (done ? ('\nDone so far: ' + (done[1])) : '') + (next ? ('\nNext step: ' + (next[1])) : '') + '\nI also noted the decisions we made earlier, as listed in the summary. Should I start on the next step now?'));
       ctx.meta.handoffResume = true;
     }
   }, { priority: 119 });
   reg({
     id: 'w5_handoff',
-    test: function (t, ctx) { return has(t, /(交接|handoff|hand-off)/) && !isPastedSummary(ctx && ctx.rawText ? ctx.rawText : t); },
+    test: function (t, ctx) { return has(t, /(交接|hand[- ]?off)/) && !isPastedSummary(ctx && ctx.rawText ? ctx.rawText : t); },
     run: function (ctx) {
       var c = ctx.chatObj || {}, ho = c.handoff || {};
-      var proj = ctx.project ? ctx.project.name + '（' + ctx.cwd + '）' : '（這個對話不在專案裡）';
-      var lines = ['交接摘要', '- 專案：' + proj, '- 目前做到：' + (ho.done || c.title || '這段對話前面做的事')];
-      (ho.decisions || []).forEach(function (d, i) { lines.push((i === 0 ? '- 做過的決定：' : '  ') + d); });
-      lines.push('- 下一步：' + (ho.next || '照原本的計畫接著做'));
-      ctx.say(lines.join('\n') + '\n\n把這段貼到新的對話，新的對話就能接著做。');
+      var proj = ctx.project ? ('' + (ctx.project.name) + ' (' + (ctx.cwd) + ')') : '(this chat is not in a project)';
+      var lines = ['Hand-off summary', ('- Project: ' + (proj)), ('- Done so far: ' + (ho.done || c.title || 'what was done earlier in this chat'))];
+      (ho.decisions || []).forEach(function (d, i) { lines.push((i === 0 ? '- Decisions made: ' : '  ') + d); });
+      lines.push(('- Next step: ' + (ho.next || 'carry on with the original plan')));
+      ctx.say(('' + (lines.join('\n')) + '\n\nPaste this into a new chat, and the new chat can carry on from here.'));
       ctx.meta.handoff = true;
     }
   }, { priority: 118 });
 
   /* ================================================================== mission 5: empty AGENTS.md and VERIFY.md */
-  var SKEL_AGENTS = '# AGENTS.md（給 Codex 的長期規則）\n\n## 這個專案的規則從哪裡來\n\n## 要照什麼算\n\n## 輸出長什麼樣子\n';
-  var SKEL_VERIFY = '# VERIFY.md（驗收單）\n\n每一條都寫：看什麼、怎麼看、應該看到什麼。\n\n1.\n';
+  var SKEL_AGENTS = '# AGENTS.md (long-term rules for Codex)\n\n## Where this project\'s rules come from\n\n## How to calculate\n\n## What the output looks like\n';
+  var SKEL_VERIFY = '# VERIFY.md (verification checklist)\n\nFor each item, write: what to look at, how to look, and what you should see.\n\n1.\n';
   reg({
     id: 'w5_skeletons',
-    test: function (t) { return has(t, /agents\.md/) && has(t, /verify\.md/) && has(t, /(空殼|標題|建立|建|新增|create|make)/); },
+    test: function (t) { return has(t, /agents\.md/) && has(t, /verify\.md/) && has(t, /(空殼|標題|建立|建|新增|create|make|empty|skeleton|titles?|headings?|set up)/); },
     run: function (ctx) {
       if (!ctx.project) { ctx.say(NOT_IN_PROJECT); return; }
       var made = [], kept = [];
       [['AGENTS.md', SKEL_AGENTS], ['VERIFY.md', SKEL_VERIFY]].forEach(function (f) {
         if (ctx.exists(f[0])) kept.push(f[0]); else { ctx.write(f[0], f[1]); made.push(f[0]); }
       });
-      var s = made.length ? made.join(' 和 ') + ' 建好了，只有標題。' : '';
-      if (kept.length) s += (s ? '\n' : '') + kept.join(' 和 ') + ' 已經有了，我沒有改它。';
-      ctx.say(s + '\n內容等你寫好；寫好以後，我每次做完都會照 VERIFY.md 檢查。');
+      var s = made.length ? ('Created with headings only: ' + (made.join(' and ')) + '.') : '';
+      if (kept.length) s += ('Already existing, left unchanged: ' + ((s ? '\n' : '') + kept.join(' and ')) + '.');
+      ctx.say(('' + (s) + '\nThe content is yours to write. Once you have written it, I will check my work against VERIFY.md every time I finish.'));
       ctx.meta.skeletons = made;
     }
   }, { priority: 117 });
@@ -220,14 +219,14 @@
   /* ================================================================== mission 1: VERIFY.md, a new feature, verification, the fix */
   reg({
     id: 'w5_verify_draft',
-    test: function (t) { return has(t, /verify\.md/) && has(t, /(起草|草稿|寫一份|建立|做一份|寫一個|draft|write|create)/) && !has(t, /(修|驗證一次|照 ?verify)/); },
+    test: function (t) { return has(t, /verify\.md/) && has(t, /(起草|草稿|寫一份|建立|做一份|寫一個|draft|write|create|prepare|compose)/) && !has(t, /(修|驗證一次|照 ?verify|\bfix\b|\bonce\b|according to verify|against verify|follow verify|following verify|run verify)/); },
     run: function (ctx) {
       if (!ctx.project) { ctx.say(NOT_IN_PROJECT); return; }
-      if (!inGW(ctx)) { ctx.say('VERIFY.md 要寫什麼，要你看過這個專案的需求自己決定（作業就是在練這個）。要我先建一份只有標題的空殼嗎？'); return; }
-      if (ctx.exists('VERIFY.md')) { ctx.say('專案裡已經有 VERIFY.md 了，我沒有覆蓋它。要我照它驗證，請說「照 VERIFY.md 驗證一次」。'); return; }
+      if (!inGW(ctx)) { ctx.say('What goes into VERIFY.md is for you to decide after looking at what this project needs (that is exactly what the homework practices). Do you want me to create an empty file with only the headings first?'); return; }
+      if (ctx.exists('VERIFY.md')) { ctx.say('This project already has a VERIFY.md, so I did not overwrite it. To have me verify against it, say “Verify once against VERIFY.md”.'); return; }
       ctx.read('site/index.html');
       ctx.write('VERIFY.md', F.VERIFY_DRAFT);
-      ctx.say('起草好了 `VERIFY.md`，一共 5 條，每一條寫看什麼、怎麼看、應該看到什麼。\n第 4 條只寫了「夠大」，沒寫多大，我沒辦法檢查；你可以改成有數字的。');
+      ctx.say('I drafted `VERIFY.md` with 5 items. Each item says what to look at, how to look, and what you should see.\nItem 4 only says “big enough” and not how big, so I can\'t check it. You could change it to one with a number.');
       ctx.meta.verifyDraft = true;
     }
   }, { priority: 116 });
@@ -243,19 +242,19 @@
   }
   reg({
     id: 'w5_verify_fix',
-    test: function (t) { return has(t, /(修|fix|改好|修正)/) && has(t, /(沒過|沒通過|失敗|❌|驗證|verify|兩條|那幾條|那一條)/); },
+    test: function (t) { return has(t, /(修|fix|改好|修正|repair)/) && has(t, /(沒過|沒通過|失敗|❌|驗證|verify|兩條|那幾條|那一條|fail|didn.t pass|not pass|those items|that item)/); },
     run: function (ctx) {
-      if (!inGW(ctx)) { ctx.say(ctx.project ? '這個專案裡沒有可以照 VERIFY.md 修的網站。' : NOT_IN_GW); return; }
+      if (!inGW(ctx)) { ctx.say(ctx.project ? 'There is no website in this project that I can fix according to VERIFY.md.' : NOT_IN_GW); return; }
       // first look what fails now (without showing a table), then fix, then the whole list again
       return verifyRun(ctx).then(function (first) {
-        if (!first.ran) { ctx.say('專案裡還沒有 VERIFY.md，我不知道怎樣才算做好。要我先起草一份嗎？'); ctx.meta.verify = { ran: false }; return null; }
+        if (!first.ran) { ctx.say('This project doesn\'t have a VERIFY.md yet, so I don\'t know what counts as done. Should I draft one first?'); ctx.meta.verify = { ran: false }; return null; }
         var plan = fixPlan(first), done = [], css, renamed = {};
         if (plan.size) {
           var cur = ctx.read('site/style.css') || '';
           css = /\.spot\s*\{[^}]*\}\n?/.test(cur) ? cur.replace(/\.spot\s*\{[^}]*\}\n?/, W5.spotRule(plan.size)) : cur + W5.spotRule(plan.size);
           ctx.write('site/style.css', css);
           var row = first.rows.filter(function (r) { return r.kind === 'size' && r.result === '❌'; })[0];
-          done.push('第 ' + row.n + ' 條：把 `.spot` 改成 ' + plan.size + ' × ' + plan.size + ' px（site/style.css）。');
+          done.push(('Item ' + (row.n) + ': changed `.spot` to ' + (plan.size) + ' × ' + (plan.size) + ' px (site/style.css).'));
         }
         if (plan.photos) {
           photoMismatch(ctx.read('site/index.html') || '').forEach(function (x) {
@@ -264,15 +263,15 @@
             ctx.activity('run', 'Ran', 'mv site/photos/' + x.actual + ' site/photos/' + x.ref, null, function () { vfs.move(from, to, { by: 'codex' }); });
             renamed[x.actual] = x.ref;
             var prow = first.rows.filter(function (r) { return r.kind === 'photos'; })[0];
-            done.push('第 ' + prow.n + ' 條：把 `' + x.actual + '` 改名成 `' + x.ref + '`，和 index.html 寫的一樣。');
+            done.push(('Item ' + (prow.n) + ': renamed `' + (x.actual) + '` to `' + (x.ref) + '` so it matches what index.html says.'));
           });
         }
         return verifyRun(ctx, { css: css, renamed: renamed }).then(function (second) {
-          if (!done.length && !first.fail) ctx.say('照 VERIFY.md 檢查，沒有沒過的：');
-          else if (!done.length) ctx.say('沒過的那幾條我沒辦法自己修，你看一下證據欄：');
-          else ctx.say('修了 ' + done.length + ' 條：\n' + done.map(function (d) { return '- ' + d; }).join('\n') + '\n\n再完整驗證一次：');
+          if (!done.length && !first.fail) ctx.say('I checked against VERIFY.md and nothing failed:');
+          else if (!done.length) ctx.say('I can\'t fix the ones that failed by myself. Look at the Evidence column:');
+          else ctx.say(('Fixed ' + (done.length) + ' ' + ((done.length) == 1 ? 'item' : 'items') + ':\n' + (done.map(function (d) { return '- ' + d; }).join('\n')) + '\n\nHere is the whole list verified again:'));
           ctx.say(table(second));
-          if (second.cannot) ctx.say('⚠️ 的那一條我沒辦法檢查，請你自己試一次。');
+          if (second.cannot) ctx.say('For the item marked ⚠️, I can\'t check it myself, so please try it yourself.');
           ctx.meta.verify = metaOf(second);
           return null;
         });
@@ -282,16 +281,16 @@
 
   reg({
     id: 'w5_verify_run',
-    test: function (t) { return has(t, /verify\.md/) && has(t, /(驗證|檢查|verify|check)/) && !has(t, /(起草|草稿|修)/); },
+    test: function (t) { return has(t, /verify\.md/) && has(t, /(驗證|檢查|verify|check|validate)/) && !has(t, /(起草|草稿|修|\bdraft\b|\bfix\b)/); },
     run: function (ctx) {
-      if (!inGW(ctx)) { ctx.say(ctx.project ? '這個專案裡沒有可以照 VERIFY.md 檢查的網站。' : NOT_IN_GW); return; }
+      if (!inGW(ctx)) { ctx.say(ctx.project ? 'There is no website in this project that I can check against VERIFY.md.' : NOT_IN_GW); return; }
       return verifyRun(ctx).then(function (res) {
-        if (!res.ran) { ctx.say('專案裡還沒有 VERIFY.md，我不知道怎樣才算做好。要我先起草一份嗎？'); ctx.meta.verify = { ran: false }; return null; }
-        ctx.say('照 VERIFY.md 完整驗證了一次：');
+        if (!res.ran) { ctx.say('This project doesn\'t have a VERIFY.md yet, so I don\'t know what counts as done. Should I draft one first?'); ctx.meta.verify = { ran: false }; return null; }
+        ctx.say('I verified everything once against VERIFY.md:');
         ctx.say(table(res));
         var note = failNote(res);
         if (note) ctx.say(note);
-        if (res.fail) ctx.say('要我把沒過的修好嗎？');
+        if (res.fail) ctx.say('Should I fix the ones that failed?');
         ctx.meta.verify = metaOf(res);
         return null;
       });
@@ -300,7 +299,7 @@
 
   reg({
     id: 'w5_feature',
-    test: function (t) { return has(t, /(清單|全部景點|景點列表|\blist\b)/) && has(t, /(加|做|新增|建立|add|make)/) && !has(t, /距離/); },
+    test: function (t) { return has(t, /(清單|全部景點|景點列表|\blist\b|all spots)/) && has(t, /(加|做|新增|建立|add|make|create|build)/) && !has(t, /(距離|distance)/); },
     run: function (ctx) {
       if (!inGW(ctx)) { ctx.say(NOT_IN_GW); return; }
       var html = ctx.read('site/index.html') || '';
@@ -311,20 +310,20 @@
         ctx.write('site/index.html', html);
         made = true;
       }
-      var lead = made ? '在地圖下面加了「全部景點」清單：12 個景點，照筆畫排好（site/index.html）。' : '「全部景點」清單已經有了，我沒有再加一份。';
+      var lead = made ? 'Added the “All spots” list below the map: 12 spots, in alphabetical order (site/index.html).' : 'The “All spots” list is already there, so I did not add another one.';
       if (!namesVerify(ctx)) {
-        ctx.say(lead + '\n你可以用內建瀏覽器打開網站看看。');
+        ctx.say(('' + (lead) + '\nYou can open the website in the built-in browser to take a look.'));
         ctx.meta.verify = { ran: false };
         return null;
       }
       return verifyRun(ctx, { html: html }).then(function (res) {
         ctx.say(lead);
-        if (!res.ran) { ctx.say('AGENTS.md 要我照 VERIFY.md 驗證，可是專案裡找不到 VERIFY.md。'); ctx.meta.verify = { ran: false }; return null; }
-        ctx.say('照 AGENTS.md 的規則，我把 VERIFY.md 完整驗證了一次：');
+        if (!res.ran) { ctx.say('AGENTS.md tells me to verify against VERIFY.md, but I can\'t find a VERIFY.md in this project.'); ctx.meta.verify = { ran: false }; return null; }
+        ctx.say('Following the rules in AGENTS.md, I verified everything in VERIFY.md once:');
         ctx.say(table(res));
         var note = failNote(res);
         if (note) ctx.say(note);
-        if (res.fail) ctx.say('要我把沒過的' + (res.fail > 1 ? ' ' + res.fail + ' 條' : '那一條') + '修好嗎？');
+        if (res.fail) ctx.say(('Should I fix ' + (res.fail > 1 ? ('the ' + (res.fail) + ' ' + ((res.fail) == 1 ? 'item' : 'items') + ' that failed') : 'the one that failed') + '?'));
         ctx.meta.verify = metaOf(res);
         return null;
       });
@@ -332,29 +331,28 @@
   }, { priority: 113 });
 
   /* ================================================================== mission 4: distances, with what this chat still remembers */
-  function fmtDist(m, unit) { return unit === 'm' ? m + ' 公尺' : (m / 1000).toFixed(1) + ' 公里'; }
+  function fmtDist(m, unit) { return unit === 'm' ? ('' + (m) + ' meters') : ('' + ((m / 1000).toFixed(1)) + ' km'); }
   reg({
     id: 'w5_distance',
-    test: function (t) { return has(t, /距離/); },
+    test: function (t) { return has(t, /(距離|distance)/); },
     run: function (ctx) {
       if (!inGW(ctx)) { ctx.say(NOT_IN_GW); return; }
       var ag = ctx.agents || {}, all = String(ag.text || '');
       Object.keys(ag.files || {}).forEach(function (k) { all += '\n' + (ag.files[k] || ''); });
       var facts = ctx.facts || {};
-      var unit = /公尺/.test(all) ? 'm' : (/公里/.test(all) ? 'km' : (facts.unit || 'km'));
+      var unit = /(公尺|\bmeters?\b|\bmetres?\b)/i.test(all) ? 'm' : (/(公里|\bkm\b|\bkilomet(?:er|re)s?\b)/i.test(all) ? 'km' : (facts.unit || 'km'));
       var start = all.indexOf(W5.START) >= 0 ? W5.START : (facts.start || W5.WRONG_START);
       var from = W5.SPOTS.filter(function (s) { return s.name === start; })[0] || W5.SPOTS[0];
       var lines = W5.SPOTS.filter(function (s) { return s !== from; }).map(function (s) {
         var dx = (s.x - from.x) * 24, dy = (s.y - from.y) * 18, m = Math.round(Math.sqrt(dx * dx + dy * dy) / 10) * 10;
         return { name: s.name, m: m };
       }).sort(function (a, b) { return a.m - b.m; });
-      var items = [from.name + '（起點）'].concat(lines.map(function (l) { return l.name + ' · ' + fmtDist(l.m, unit); }));
+      var items = [('' + (from.name) + ' (start)')].concat(lines.map(function (l) { return l.name + ' · ' + fmtDist(l.m, unit); }));
       var html = ctx.read('site/index.html') || '';
       var sec = W5.listSection(items);
       html = /<section class="list">[\s\S]*?<\/section>\n?/.test(html) ? html.replace(/  <section class="list">[\s\S]*?<\/section>\n?/, sec) : html.replace('</main>', sec + '</main>');
       ctx.write('site/index.html', html);
-      ctx.say('在「全部景點」清單加上了從' + from.name + '走過去的距離（site/index.html）：\n' +
-        lines.slice(0, 4).map(function (l) { return '- ' + l.name + '　' + fmtDist(l.m, unit); }).join('\n') + '\n（其他 ' + (lines.length - 4) + ' 個也加好了。）');
+      ctx.say(('I added the walking distance from ' + (from.name) + ' to the “All spots” list (site/index.html):\n' + (lines.slice(0, 4).map(function (l) { return ('- ' + (l.name) + ': ' + (fmtDist(l.m, unit))); }).join('\n')) + '\n(The other ' + (lines.length - 4) + ' spots are done too.)'));
       ctx.meta.distance = { unit: unit, start: from.name };
       ctx.meta.correct = unit === 'm';
     }
@@ -363,25 +361,25 @@
   /* ================================================================== mission 3: search (no permission) and download (Allow / Deny) */
   reg({
     id: 'w5_search',
-    test: function (t) { return has(t, /(上網|搜尋|search|google|查一下|找一下|網路上)/); },
+    test: function (t) { return has(t, /(上網|搜尋|search|google|查一下|找一下|網路上|look up|look for|on the web|online)/); },
     run: function (ctx) {
       var od = W5.opendata || { dataset: W5.OD_URL };
-      ctx.activity('search', 'Searched the web', '銀杏 行道樹 公開資料', ['query: 銀杏 行道樹 公開資料', '→ 銀杏行道樹位置｜城市開放資料平台　' + od.dataset, '→ 行道樹介紹（不是資料檔）']);
-      ctx.activity('search', 'Searched the web', 'opendata 銀杏 csv', ['query: opendata 銀杏 csv', '→ ' + od.dataset + '/ginkgo-trees.csv', '→ ' + W5.MIRROR_URL]);
+      ctx.activity('search', 'Searched the web', 'ginkgo street trees open data', ['query: ginkgo street trees open data', ('→ Ginkgo Street Tree Locations | City Open Data Portal  ' + (od.dataset)), '→ About street trees (not a data file)']);
+      ctx.activity('search', 'Searched the web', 'opendata ginkgo csv', ['query: opendata ginkgo csv', '→ ' + od.dataset + '/ginkgo-trees.csv', '→ ' + W5.MIRROR_URL]);
       ctx.cost(6);
       if (ctx.facts) ctx.facts.source = od.dataset;
-      ctx.say('找到了：城市開放資料平台（虛構）有一份「銀杏行道樹位置」，提供單位是（虛構）市政府公園處，有 CSV 可以下載，20 筆。\n\n來源：' + od.dataset + '（查詢日期 ' + today() + '）');
+      ctx.say(('Found it: the City Open Data Portal (fictional) has a dataset called “Ginkgo Street Tree Locations”. It is provided by the City Parks Department (fictional) and has a CSV you can download, with 20 rows.\n\nSource: ' + (od.dataset) + ' (accessed on ' + (today()) + ')'));
       ctx.meta.search = { url: od.dataset };
     }
   }, { priority: 111 });
 
   reg({
     id: 'w5_download',
-    test: function (t) { return has(t, /(下載|download|抓下來)/); },
+    test: function (t) { return has(t, /(下載|download|抓下來|fetch|grab)/); },
     run: function (ctx) {
       if (!ctx.project) { ctx.say(NOT_IN_PROJECT); return; }
       var raw = ctx.rawText, facts = ctx.facts || {};
-      var official = /opendata/i.test(raw) || (facts.mirrorDenied && /(剛剛|確認|那個網站|來源|官方|原本)/.test(raw));
+      var official = /opendata/i.test(raw) || (facts.mirrorDenied && /(剛剛|確認|那個網站|來源|官方|原本|just (?:now )?(?:checked|confirmed|verified)|confirmed|checked|that site|that website|source|official|original)/i.test(raw));
       var url = official ? W5.CSV_URL : W5.MIRROR_URL;
       var host = official ? W5.OD_HOST : W5.MIRROR_HOST;
       var cmd = 'curl -L -o data/ginkgo-trees.csv ' + url;
@@ -389,14 +387,14 @@
         ctx.meta.download = { host: host, decision: dec };
         if (dec !== 'allow') {
           if (!official) facts.mirrorDenied = true;
-          ctx.say(official ? '好，不下載。' : '好，我不從 ' + host + ' 下載。要從哪裡下載？例如你剛剛確認過的網站。');
+          ctx.say(official ? 'OK, I won\'t download it.' : ('OK, I won\'t download from ' + (host) + '. Where should I download it from? For example, the website you just checked.'));
           return null;
         }
         var size = String(F.TREES_CSV.length);
         ctx.activity('run', 'Ran', cmd, ['  % Total    % Received % Xferd  Average Speed   Time', '100  ' + size + '  100  ' + size + '    0     0  12.4k      0 --:--:-- --:--:-- --:--:-- 12.4k']);
         ctx.write('data/ginkgo-trees.csv', F.TREES_CSV);
         ctx.cost(4);
-        ctx.say('下載好了：`data/ginkgo-trees.csv`（20 筆，欄位：編號、路名、樹齡（年）、地圖X、地圖Y）。\n來源：' + url);
+        ctx.say(('Downloaded: `data/ginkgo-trees.csv` (20 rows; columns: ID, Street, Age (years), Map X, Map Y).\nSource: ' + (url)));
         return null;
       });
     }
@@ -405,21 +403,21 @@
   /* ================================================================== the built-in browser, and where Codex is working */
   reg({
     id: 'w5_open_site',
-    test: function (t) { return has(t, /(內建瀏覽器|built-in browser|\bbrowser\b)/) && has(t, /(打開|開|看|open|show)/); },
+    test: function (t) { return has(t, /(內建瀏覽器|built[- ]?in browser|\bbrowser\b)/) && has(t, /(打開|開|看|open|show|view|launch)/); },
     run: function (ctx) {
       if (!inGW(ctx)) { ctx.say(NOT_IN_GW); return; }
-      if (!ctx.browser) { ctx.say('這個練習版沒有內建瀏覽器。'); return; }
+      if (!ctx.browser) { ctx.say('This practice version has no built-in browser.'); return; }
       ctx.activity('run', 'Used the browser', 'site/index.html', null, function () { ctx.browser.open({ target: W5.HTML, by: 'codex' }); });
-      ctx.say('用內建瀏覽器打開了 site/index.html。要看手機的寬度，按瀏覽器右上的「⋯」› Device toolbar › Show device toolbar，把寬度改成 390。');
+      ctx.say('I opened site/index.html in the built-in browser. To see the phone width, click “…” › Device toolbar › Show device toolbar at the top right of the browser, and change the width to 390.');
     }
   }, { priority: 109 });
 
   reg({
     id: 'w5_project_path',
-    test: function (t) { return has(t, /(資料夾|folder|路徑|path)/) && has(t, /(哪|什麼|告訴|which|where|what)/) && !has(t, /(上網|下載|搜尋|建立|新增)/); },
+    test: function (t) { return has(t, /(資料夾|folder|路徑|path|directory)/) && has(t, /(哪|什麼|告訴|which|where|what|tell me)/) && !has(t, /(上網|下載|搜尋|建立|新增|search|download|create|\badd\b|\bmake\b)/); },
     run: function (ctx) {
-      if (ctx.project) ctx.say('我現在開在這個專案資料夾：\n' + ctx.cwd);
-      else ctx.say('這個對話沒有專案，所以我暫時使用 ' + ctx.cwd + '。要開在專案資料夾，先把資料夾拖到左邊的側邊欄，按 Trust folder。');
+      if (ctx.project) ctx.say(('I\'m working in this project folder now:\n' + (ctx.cwd)));
+      else ctx.say(('This chat has no project, so I\'m using ' + (ctx.cwd) + ' for now. To work in a project folder, first drag the folder into the sidebar on the left and click Trust folder.'));
       ctx.meta.projectPath = ctx.project ? ctx.cwd : null;
     }
   }, { priority: 108 });
@@ -429,7 +427,7 @@
     id: 'w5_fallback',
     test: function () { return true; },
     run: function (ctx) {
-      ctx.say('這個練習版的 Codex 只聽得懂這週任務的幾種請求，例如：\n• 幫我起草一份 VERIFY.md\n• 在地圖下面加一個「全部景點」清單\n• 照 VERIFY.md 驗證一次\n• 請寫一段交接摘要\n• 上網查銀杏行道樹的公開資料\n（這是教學用的模擬，不是真的 AI。任務卡上的句子可以按「複製」。）');
+      ctx.say('This practice version of Codex only understands a few kinds of requests from this week\'s missions, for example:\n• Draft a VERIFY.md for me\n• Add an “All spots” list below the map\n• Verify everything once against VERIFY.md\n• Please write a hand-off summary\n• Search the web for public data on ginkgo street trees\n(This is a teaching simulation, not a real AI. You can click “Copy” on the sentences in the mission cards.)');
     }
   }, { priority: -0.5 });
 

@@ -12,9 +12,9 @@
 
   var FM = W4.FM, HW = W4.HW, REPO = W4.REPO;
   var HW_ARCH = HW + '/ARCHITECTURE.md', HW_CSS = HW + '/site/style.css';
-  var G_HW = '作業（影片 04）';
-  var TAG = 'Week 4 作業';
-  var MAP = 'GitHub 雲端倉庫 ⇄ 你電腦上的倉庫資料夾 · clone 拿一份回家 · add＋commit 存一個版本（只在你的電腦）· push 送上雲 · pull 拿回最新';
+  var G_HW = 'Homework (Video 04)';
+  var TAG = 'Week 4 Homework';
+  var MAP = 'GitHub cloud repository ⇄ the repository folder on your computer · clone brings a copy home · add + commit saves a version (only on your computer) · push sends it up to the cloud · pull brings back the latest';
   var T_TERM = K.T_TERM;
   var sfAddress = K.inWins('safari', 'sf-address');
   var T_SAFARI = K.chain(sfAddress, K.dock('safari'));
@@ -67,15 +67,15 @@
   function cleanFiles() {
     var f = W4.files;
     return {
-      'AGENTS.md': f.AGENTS.replace(/^- 作者資料.*\n/m, ''),
+      'AGENTS.md': f.AGENTS.replace(/^- (?:作者資料|Author).*\n/m, ''),
       'ARCHITECTURE.md': f.ARCHITECTURE,
       'data/museums.md': f.MUSEUMS,
-      'site/index.html': f.SITE_HTML.replace(/<footer>.*<\/footer>/, '<footer>製作：小安</footer>'),
+      'site/index.html': f.SITE_HTML.replace(/<footer>.*<\/footer>/, '<footer>Made by Xiao An</footer>'),
       'site/style.css': f.SITE_CSS
     };
   }
   function diamondArch() {
-    return W4.files.ARCHITECTURE.replace('    B --> C[整理成表格]', '    B --> G{資料完整嗎？}\n    G -->|是| C[整理成表格]\n    G -->|否| A');
+    return W4.files.ARCHITECTURE.replace('    B --> C[Organize into a table]', '    B --> G{Is the data complete?}\n    G -->|Yes| C[Organize into a table]\n    G -->|No| A');
   }
   function resetWorld() {
     LAB.github.reset();
@@ -113,8 +113,8 @@
     var made = LAB.github.createRepo({ name: 'firenze-museums-hw', visibility: 'public', readme: true, ageMs: 4 * 3600 * 1000 });
     var key = made.key;
     var files = cleanFiles();
-    LAB.github.commitFiles(key, files, '放上 Week 3 的美術館專案', { ageMs: 3 * 3600 * 1000 });
-    if (stage >= 3) LAB.github.commitFiles(key, { 'ARCHITECTURE.md': diamondArch() }, '用 Mermaid 加上資料檢查', { ageMs: 40 * 60 * 1000 });
+    LAB.github.commitFiles(key, files, 'Add the Week 3 museum project', { ageMs: 3 * 3600 * 1000 });
+    if (stage >= 3) LAB.github.commitFiles(key, { 'ARCHITECTURE.md': diamondArch() }, 'Add a data check with Mermaid', { ageMs: 40 * 60 * 1000 });
     LAB.shell.gitExt.cloneInto(HW, key);
     // Codex: the clone is a project and the open chat is its chat (an Annotate comment goes to the open chat and must reach the project)
     try { if (LAB.codex && LAB.codex.addProject && stage >= 3) LAB.codex.addProject(HW, { trust: true, select: true }); } catch (e) { /* ignore */ }
@@ -167,7 +167,7 @@
     return K.chain(K.inWins(app, 'gh-new-repo'), K.inWins(app, 'gh-plus'), fallback)();
   }
 
-  var NOT_IN_HW = '這個對話不在 firenze-museums-hw 底下（輸入框上方沒有「firenze-museums-hw」標籤），所以它找不到專案裡的網站。點 Codex 左邊的 firenze-museums-hw，在專案底下再試一次。';
+  var NOT_IN_HW = 'This chat isn\'t inside firenze-museums-hw (there is no “firenze-museums-hw” label above the input box), so it can\'t find the site in the project. Click firenze-museums-hw on the left of Codex and try again inside the project.';
   function hwChatTrap(ev, api) {
     if (!ev || ev.name !== 'codex:reply' || !ev.data) return null;
     var d = ev.data;
@@ -175,26 +175,26 @@
   }
 
   /* git said 「not a git repository」: the terminal does not stand inside the clone (the step before left it on the Desktop or in ~) */
-  var NOT_A_REPO = '這裡不是倉庫：先 `cd ~/Desktop/firenze-museums-hw` 走進 clone 的資料夾（提示字元最後一個字要是 firenze-museums-hw），再輸入。';
+  var NOT_A_REPO = 'This is not a repository. First `cd ~/Desktop/firenze-museums-hw` to go into the cloned folder (the last word of the prompt must be firenze-museums-hw), then type the command again.';
   function notRepoTrap(ev, api) {
     var c = ev && api.termCmd(ev, function (x) { return x.name === 'git' && x.status === 128 && /not a git repository/.test(x.out || ''); });
     return c ? NOT_A_REPO : null;
   }
 
-  var VIDEO_NAME = '（影片裡的示範帳號是 xiaoan-demo，這裡是 an；真正做作業時，換成你自己的帳號。）';
+  var VIDEO_NAME = '(The demo account in the video is xiaoan-demo; here it is an. When you do the real homework, use your own account.)';
 
   /* ================================================================== 9 · 作業 ①：放上 GitHub */
   LAB.missions.register({
     id: 'w4-hw1-github',
     week: 4, order: 9,
     group: G_HW,
-    title: '作業 ①：放上 GitHub',
+    title: 'Homework 1: Put it on GitHub',
     minutes: 10,
     tag: TAG,
     map: MAP,
     resetsFiles: true,
     needs: [FM],
-    intro: '這是 Week 4 作業的模擬，分成三個任務。第一個任務：把 Week 3 的美術館專案放上 GitHub。這台電腦已經登入 GitHub 帳號 an，git 的名字和 email 也設定好了。' + VIDEO_NAME + '專案裡的學號和電話是假的，只是練習用。',
+    intro: ('This is a simulation of the Week 4 homework, split into three missions. First mission: put the Week 3 museum project on GitHub. This computer is already signed in to the GitHub account an, and git\'s name and e-mail are set up. ' + (VIDEO_NAME) + ' The student ID and phone number in the project are fake and only for practice.'),
     prepare: function (api) {
       resetWorld();
       K.ensureBase4(api);
@@ -205,9 +205,9 @@
     steps: [
       {
         id: 's1',
-        text: '到 Safari 打開 `github.com`，按右上角「＋」›「New repository」，建一個叫 `firenze-museums-hw` 的倉庫：選 Public，打開 Add README，按 Create repository。',
-        hint: '名字別跟 Week 3 的資料夾 Firenze-Museums 同名：電腦不分大小寫，Firenze-Museums 和 firenze-museums 是同一個名字，clone 的時候會撞名。Public 才能讓老師看到；Add README 會讓倉庫一開始就有一個 README.md。',
-        answer: 'Safari › github.com › ＋ › New repository › Repository name：firenze-museums-hw › Public › Add README › Create repository。',
+        text: 'In Safari, open `github.com`, click “+” at the top right › “New repository”, and create a repository named `firenze-museums-hw`: choose Public, turn on Add README, and click Create repository.',
+        hint: 'Don\'t give it the same name as the Week 3 folder Firenze-Museums: the computer doesn\'t tell upper and lower case apart, so Firenze-Museums and firenze-museums are the same name, and the names will clash when you clone. Public lets the teacher see it; Add README gives the repository a README.md from the start.',
+        answer: 'Safari › github.com › + › New repository › Repository name: firenze-museums-hw › Public › Add README › Create repository.',
         target: function () { return newRepoCue('safari', T_SAFARI); },
         check: function (ev, api) {
           var d = api.seen('github:repo-created', function (x) { return x.visibility === 'public' && x.readme; }, { since: 'mission' });
@@ -216,16 +216,16 @@
         },
         trap: function (ev) {
           if (!ev || ev.name !== 'github:repo-created' || !ev.data) return null;
-          if (ev.data.visibility !== 'public') return '作業要交公開的倉庫（Public），不然老師看不到。再建一個 Public 的，名字換一個，例如 firenze-museums-hw2。';
-          if (!ev.data.readme) return '沒有打開 Add README：倉庫一開始是空的，clone 不到東西。再建一個，記得打開它（名字換一個）。';
+          if (ev.data.visibility !== 'public') return 'The homework must be a public repository (Public), or the teacher can\'t see it. Create another Public one with a different name, for example firenze-museums-hw2.';
+          if (!ev.data.readme) return 'Add README wasn\'t turned on: the repository starts out empty, so there is nothing to clone. Create another one and remember to turn it on (use a different name).';
           return null;
         }
       },
       {
         id: 's2',
-        text: '按綠色的「Code」按鈕複製網址，打開終端機，用 `cd Desktop` 走到桌面，再用 `git clone ` 加上網址，把倉庫拿回家。按 Return（Windows 鍵盤是 Enter）。',
-        hint: '和 clone 任務一樣：先走到想放的地方，再 git clone 加網址（Command+V 貼上）。clone 會新增一個和倉庫同名的資料夾。',
-        answer: '`cd ~/Desktop`，Return；`git clone https://github.com/an/firenze-museums-hw.git`，Return。（倉庫換了名字，網址跟著換。）',
+        text: 'Click the green “Code” button to copy the address, open Terminal, go to the Desktop with `cd Desktop`, then type `git clone ` followed by the address to bring the repository home. Press Return (Enter on a Windows keyboard).',
+        hint: 'Same as in the clone mission: first go to the place where you want it, then type git clone and the address (paste with Command+V). Cloning creates a new folder with the same name as the repository.',
+        answer: '`cd ~/Desktop`, Return; `git clone https://github.com/an/firenze-museums-hw.git`, Return. (If you named the repository differently, change the address to match.)',
         replay: 'mission',
         // the address is copied first (Code button, then the copy button), then the Terminal
         target: function (api) {
@@ -237,17 +237,17 @@
           var key = repoKey(api);
           var clash = !!key && /^an\/firenze-museums$/i.test(key);
           var c = api.termCmd(ev, function (x) { return x.name === 'git' && x.args[0] === 'clone' && x.status !== 0; });
-          if (!c) return clash && !cloneDir(api) ? '這個倉庫叫 ' + key.split('/')[1] + '，和桌面的 Firenze-Museums 是同一個名字（電腦不分大小寫），直接 clone 會撞名。在網址後面加一個新的資料夾名字，例如 `git clone 網址 firenze-museums-hw`。' : null;
-          if (/already exists/.test(c.out || '')) return clash ? '撞名了：桌面已經有 Firenze-Museums（電腦不分大小寫）。在網址後面加一個新的資料夾名字，例如 `git clone 網址 firenze-museums-hw`。' : '這個資料夾已經存在了。先用 `ls` 看看桌面，再決定要刪掉哪一個，或在網址後面加一個新的資料夾名字。';
-          if (/not found/.test(c.out || '')) return '找不到這個倉庫。網址要從 GitHub 的 Code 按鈕複製，不要自己打。';
+          if (!c) return clash && !cloneDir(api) ? ('This repository is called ' + (key.split('/')[1]) + ', which is the same name as Firenze-Museums on the Desktop (the computer doesn\'t tell upper and lower case apart), so cloning it directly would clash. Add a new folder name after the address, for example `git clone URL firenze-museums-hw`.') : null;
+          if (/already exists/.test(c.out || '')) return clash ? 'The names clash: the Desktop already has Firenze-Museums (the computer doesn\'t tell upper and lower case apart). Add a new folder name after the address, for example `git clone URL firenze-museums-hw`.' : 'This folder already exists. First use `ls` to look at the Desktop, then decide which one to delete, or add a new folder name after the address.';
+          if (/not found/.test(c.out || '')) return 'That repository can\'t be found. Copy the address from GitHub\'s Code button; don\'t type it yourself.';
           return null;
         }
       },
       {
         id: 's3',
-        text: '把 Week 3 的檔案（AGENTS.md、ARCHITECTURE.md、data、site）搬進剛剛 clone 的資料夾。',
-        hint: '用 Week 3 學的 `mv 東西 地方`：可以一次寫好幾個東西，最後一個是目的地。不會搬的話，也可以請 Codex 幫你。',
-        answer: '在桌面：`mv Firenze-Museums/AGENTS.md Firenze-Museums/ARCHITECTURE.md Firenze-Museums/data Firenze-Museums/site firenze-museums-hw`',
+        text: 'Move the Week 3 files (AGENTS.md, ARCHITECTURE.md, data, site) into the folder you just cloned.',
+        hint: 'Use `mv thing place`, which you learned in Week 3: you can list several things at once, and the last one is the destination. If you don\'t know how to move them, you can also ask Codex to help.',
+        answer: 'On the Desktop: `mv Firenze-Museums/AGENTS.md Firenze-Museums/ARCHITECTURE.md Firenze-Museums/data Firenze-Museums/site firenze-museums-hw`',
         replay: 'mission',
         target: T_TERM,
         check: function (ev, api) {
@@ -257,17 +257,17 @@
         },
         trap: function (ev, api) {
           var d = cloneDir(api);
-          if (d && api.exists(d + '/Firenze-Museums')) return '檔案多包了一層資料夾：clone 的資料夾裡出現了 Firenze-Museums。要搬的是裡面的 AGENTS.md、ARCHITECTURE.md、data、site，不是整個資料夾。把它們再搬出來。';
+          if (d && api.exists(d + '/Firenze-Museums')) return 'The files got wrapped in an extra folder: Firenze-Museums now appears inside the cloned folder. What you should move are the AGENTS.md, ARCHITECTURE.md, data and site inside it, not the whole folder. Move them out again.';
           return null;
         }
       },
       {
         id: 's4',
-        text: 'push 之前先檢查：Public 的倉庫誰都看得到，不要放學號、電話這些個人資料。找出來刪掉，再存檔。',
-        hint: '專案裡有兩個地方寫了學號和電話。可以用 `grep -rn 學號 .` 在整個資料夾找，再用文字編輯或 Code 把那一行刪掉、存檔。在 Finder 按兩下 AGENTS.md 就會用文字編輯打開；index.html 按兩下只會預覽，要改請按右鍵 › 打開方式 › 文字編輯。「學號」兩個字要用中文輸入法打，打完再切回英文（ABC）。',
-        answer: '刪掉 AGENTS.md 和 site/index.html 裡寫著學號和電話的那兩行（`grep -rn 學號 .` 會告訴你在哪裡），Command+S。（index.html：Finder 對它按右鍵 › 打開方式 › 文字編輯。）',
+        text: 'Check before you push: anyone can see a public repository, so don\'t put personal data such as a student ID or phone number in it. Find them, delete them, and save.',
+        hint: 'The project has two places that contain a student ID and a phone number. You can search the whole folder with `grep -rn "student ID" .`, then delete that line with TextEdit or Code and save. Double-clicking AGENTS.md in Finder opens it in TextEdit; double-clicking index.html only shows a preview, so to edit it, right-click it › Open With › TextEdit.',
+        answer: 'Delete the two lines in AGENTS.md and site/index.html that contain the student ID and phone number (`grep -rn "student ID" .` tells you where), Command+S. (index.html: in Finder, right-click it › Open With › TextEdit.)',
         replay: 'mission',
-        menuPath: ['打開方式', '文字編輯'],      // index.html opens as a preview on a double click: right-click it, 打開方式, 文字編輯
+        menuPath: ['Open With', 'TextEdit'],      // index.html opens as a preview on a double click: right-click it, 打開方式, 文字編輯
         // an editor window that shows a file which still has the data (TextEdit or Code) -> its text; else the Terminal for grep;
         // after grep the Finder walk to the first such file (cue audit 2026-10-14: this step had no cue at all)
         target: function (api) {
@@ -293,9 +293,9 @@
       },
       {
         id: 's5',
-        text: '在 clone 的資料夾裡，把整個專案存成一個版本並送上去：`git add .`、`git commit -m "放上 Week 3 的美術館專案"`、`git push`。',
-        hint: '要先走進 clone 的資料夾（提示字元最後一個字要是 firenze-museums-hw）。add 選檔案（. 代表全部）、commit 存一個版本、push 送上雲端。引號裡的說明要寫清楚這次做了什麼。',
-        answer: '`cd ~/Desktop/firenze-museums-hw`，Return；`git add .`，Return；`git commit -m "放上 Week 3 的美術館專案"`，Return；`git push`，Return。',
+        text: 'In the cloned folder, save the whole project as one version and send it up: `git add .`, `git commit -m "Add the Week 3 museum project"`, `git push`.',
+        hint: 'First go into the cloned folder (the last word of the prompt must be firenze-museums-hw). add chooses the files (. means all of them), commit saves a version, push sends it up to the cloud. The message in the quotes should say clearly what you did this time.',
+        answer: '`cd ~/Desktop/firenze-museums-hw`, Return; `git add .`, Return; `git commit -m "Add the Week 3 museum project"`, Return; `git push`, Return.',
         replay: 'mission',
         target: T_TERM,
         check: function (ev, api) {
@@ -309,18 +309,18 @@
           var nr = notRepoTrap(ev, api);
           if (nr) return nr;
           if (ev && ev.name === 'github:push' && key && ev.data && ev.data.repo === key && treeHasPersonal(remoteTree(key))) {
-            return '剛剛送上去的檔案裡還有學號或電話。刪掉之後，再 add、commit、push 一次。';
+            return 'The files you just pushed still contain a student ID or phone number. Delete them, then add, commit and push again.';
           }
           var c = api.termCmd(ev, function (x) { return x.name === 'git' && x.status !== 0; });
-          if (c && /Author identity unknown/.test(c.out || '')) return 'git 還不知道你是誰：輸入 `git config --global user.name "An"` 和 `git config --global user.email "an@example.com"`，再 commit 一次。';
+          if (c && /Author identity unknown/.test(c.out || '')) return 'git doesn\'t know who you are yet: type `git config --global user.name "An"` and `git config --global user.email "an@example.com"`, then commit again.';
           return null;
         }
       },
       {
         id: 's6',
-        text: '回 Safari 重新整理倉庫頁面，確認檔案都在上面。',
-        hint: '應該看到 AGENTS.md、ARCHITECTURE.md、data、site 和 README.md。',
-        answer: '重新載入倉庫頁面。',
+        text: 'Go back to Safari and reload the repository page to check that all the files are there.',
+        hint: 'You should see AGENTS.md, ARCHITECTURE.md, data, site and README.md.',
+        answer: 'Reload the repository page.',
         replay: 'mission',
         target: T_SAFARI_RELOAD,
         check: function (ev, api) {
@@ -334,7 +334,7 @@
         }
       }
     ],
-    outro: '第一個任務完成：專案在 GitHub 上了。下一個任務在這個倉庫上畫流程圖，再確認圖在 GitHub 上畫得出來。'
+    outro: 'Mission 1 complete: the project is on GitHub. In the next mission you draw a flowchart in this repository and check that it is drawn on GitHub.'
   });
 
   /* ================================================================== 10 · 作業 ②：Mermaid */
@@ -342,13 +342,13 @@
     id: 'w4-hw2-mermaid',
     week: 4, order: 10,
     group: G_HW,
-    title: '作業 ②：畫流程圖，確認 GitHub 畫得出來',
+    title: 'Homework 2: Draw a flowchart and check that GitHub draws it',
     minutes: 6,
     tag: TAG,
     map: MAP,
     resetsFiles: true,
     needs: [HW],
-    intro: '接續作業：專案已經在 GitHub 上了（倉庫有兩個版本）。這個任務在 ARCHITECTURE.md 加上判斷，送上 GitHub，再確認圖在網頁上畫得出來。' + VIDEO_NAME,
+    intro: ('Continuing the homework: the project is already on GitHub (the repository has two versions). In this mission you add a decision to ARCHITECTURE.md, push it to GitHub, and check that the diagram is drawn on the web page. ' + (VIDEO_NAME)),
     prepare: function (api) {
       pushedState(api, 2);
       dropBrowser();
@@ -356,11 +356,11 @@
     steps: [
       {
         id: 's1',
-        text: '在 Code 打開桌面 firenze-museums-hw 裡的 ARCHITECTURE.md，加一個菱形判斷和一條有字的箭頭，存檔，預覽要畫得出來。',
-        hint: '菱形用 { }，箭頭上寫字用 -->|字|，例如 B --> G{資料完整嗎？}、G -->|否| A。括號和箭頭都要用半形。預覽按鈕在標籤列右邊。',
-        answer: '例：`B --> G{資料完整嗎？}`、`G -->|是| C`、`G -->|否| A`，Command+S。',
+        text: 'In Code, open ARCHITECTURE.md in firenze-museums-hw on the Desktop, add a diamond decision and an arrow with text on it, and save. The preview must be able to draw it.',
+        hint: 'Use { } for a diamond and -->|text| for text on an arrow, for example B --> G{Is the data complete?} and G -->|No| A. Brackets and arrows must be half-width (normal English characters). The preview button is at the right of the tab bar.',
+        answer: 'For example: `B --> G{Is the data complete?}`, `G -->|Yes| C`, `G -->|No| A`, Command+S.',
         replay: 'mission',
-        menuPath: ['打開方式', 'Code'],
+        menuPath: ['Open With', 'Code'],
         target: K.codeFlow(HW_ARCH, HW),
         check: function (ev, api) {
           var ast = K.fileAst(api, HW_ARCH);
@@ -370,9 +370,9 @@
       },
       {
         id: 's2',
-        text: '在終端機，把這次修改存成版本並送上去，說明寫清楚，例如「用 Mermaid 加上資料檢查」。按 Return（Windows 鍵盤是 Enter）。',
-        hint: '走到桌面的 firenze-museums-hw，再 add、commit -m "說明"、push，三步。',
-        answer: '`cd ~/Desktop/firenze-museums-hw`，Return；`git add .`；`git commit -m "用 Mermaid 加上資料檢查"`；`git push`。',
+        text: 'In Terminal, save this change as a version and push it, with a clear message, for example “Add a data check with Mermaid”. Press Return (Enter on a Windows keyboard).',
+        hint: 'Go to firenze-museums-hw on the Desktop, then add, commit -m "message", push: three steps.',
+        answer: '`cd ~/Desktop/firenze-museums-hw`, Return; `git add .`; `git commit -m "Add a data check with Mermaid"`; `git push`.',
         replay: 'mission',
         target: T_TERM,
         check: function (ev, api) {
@@ -384,15 +384,15 @@
           var nr = notRepoTrap(ev, api);
           if (nr) return nr;
           var c = api.termCmd(ev, function (x) { return x.name === 'git' && x.args[0] === 'push' && x.status === 0 && /Everything up-to-date/.test(x.out || ''); });
-          if (c) return '沒有東西可以送：先存檔、add、commit，再 push。';
+          if (c) return 'There\'s nothing to push: save the file first, then add and commit, then push.';
           return null;
         }
       },
       {
         id: 's3',
-        text: '到 GitHub 打開 ARCHITECTURE.md，確認圖有畫出來。',
-        hint: '在倉庫頁點 ARCHITECTURE.md；GitHub 會把 mermaid 區塊畫成圖。圖沒有出來的話，回頭檢查括號和箭頭是不是半形。',
-        answer: 'Safari › github.com/an/firenze-museums-hw › ARCHITECTURE.md。',
+        text: 'Open ARCHITECTURE.md on GitHub and check that the diagram is drawn.',
+        hint: 'On the repository page, click ARCHITECTURE.md; GitHub draws a mermaid block as a diagram. If the diagram doesn\'t appear, go back and check that the brackets and arrows are half-width.',
+        answer: 'Safari › github.com/an/firenze-museums-hw › ARCHITECTURE.md.',
         replay: 'mission',
         target: K.chain(ghLink('ARCHITECTURE.md'), T_SAFARI),
         check: function (ev, api) {
@@ -400,7 +400,7 @@
         }
       }
     ],
-    outro: '圖畫出來了。GitHub 看得懂 .md 裡的 mermaid 區塊，所以 ARCHITECTURE.md 在網頁上就是一張流程圖。下一個任務：用內建瀏覽器檢查網站，最後交出網址。'
+    outro: 'The diagram is drawn. GitHub understands mermaid blocks in .md files, so ARCHITECTURE.md is a flowchart on the web page. Next mission: check the site with the built-in browser and finally hand in the address.'
   });
 
   /* ================================================================== 11 · 作業 ③④：檢查網站、交出網址 */
@@ -408,13 +408,13 @@
     id: 'w4-hw3-finish',
     week: 4, order: 11,
     group: G_HW,
-    title: '作業 ③④：檢查網站、交出網址',
+    title: 'Homework 3–4: Check the site and hand in the address',
     minutes: 9,
     tag: TAG,
     map: MAP,
     resetsFiles: true,
     needs: [HW],
-    intro: '作業的最後：請 Codex 用內建瀏覽器檢查網站在手機上有沒有跑版，自己再看一次，存成版本送上去；最後照老師的清單檢查，複製要交的網址。' + VIDEO_NAME,
+    intro: ('The last part of the homework: ask Codex to use the built-in browser to check whether the site breaks on a phone, look at it yourself again, save the changes as a version and push them; finally go through the teacher\'s checklist and copy the address you hand in. ' + (VIDEO_NAME)),
     prepare: function (api) {
       pushedState(api, 3);
       dropBrowser();
@@ -422,9 +422,9 @@
     steps: [
       {
         id: 's1',
-        text: '在 Codex 點 firenze-museums-hw，請它用手機的寬度檢查網站，有跑版的地方修好：[[請用內建瀏覽器打開 site/index.html，用手機的寬度看一遍，有跑版的地方修好]]',
-        hint: '手機寬度大約是 390 像素。Codex 會自己打開網頁、換寬度、截圖、修好、再看一次。輸入框上方要看到 firenze-museums-hw 這個標籤。',
-        answer: '貼上那句，按 Return。',
+        text: 'In Codex, click firenze-museums-hw and ask it to check the site at phone width and fix anything that is broken in the layout: [[Please open site/index.html in the built-in browser, look at it at phone width, and fix anything that is broken in the layout]]',
+        hint: 'Phone width is about 390 pixels. Codex opens the page, changes the width, takes screenshots, fixes the problems and looks again by itself. You should see the label firenze-museums-hw above the input box.',
+        answer: 'Paste that sentence and press Return.',
         replay: 'mission',
         // the composer only while the open chat is the clone's; after a mistake in New chat the project row comes first
         target: K.chain(function (api) {
@@ -444,9 +444,9 @@
       },
       {
         id: 's2',
-        text: '用標註框一個你想改的地方，留言：[[標題字太小，改大一點]]（也可以寫別的）',
-        hint: '按網址列右邊的標註按鈕（對話框圖示，滑鼠移上去會寫 Annotate），點一個元素，在留言框寫一句話，按 Send。',
-        answer: '網址列右邊的標註按鈕（對話框圖示）› 點標題 › 貼上留言 › Send。',
+        text: 'Use Annotate to draw a box around one thing you want to change, and leave a comment: [[The heading is too small, please make it bigger]] (you can write something else, too)',
+        hint: 'Click the Annotate button at the right of the address bar (a speech-bubble icon; it says Annotate when you hover over it), click an element, write one sentence in the comment box, and click Send.',
+        answer: 'The Annotate button at the right of the address bar (speech-bubble icon) › click the heading › paste the comment › Send.',
         replay: 'mission',
         // Annotate -> the heading of the page (a transparent box over it) -> the comment box, then its Send button once something is written;
         // nothing while Codex answers the comment that was just sent (the ring must not jump back to Annotate)
@@ -466,9 +466,9 @@
       },
       {
         id: 's3',
-        text: 'Codex 說修好了，你也自己再看一次：在內建瀏覽器用手機的寬度看一遍，確認沒有東西超出畫面。',
-        hint: '自己確認，不要只相信它的回報。Codex 剛剛已經用手機寬度看過（網址列下面那一條 Device toolbar，寬 390），所以按網址列左邊的重新整理就好。那一條不見了的話：按右上的「⋯」› Device toolbar › Show device toolbar，把寬度改成 390。',
-        answer: '按重新整理（Device toolbar 不見了的話：「⋯」› Device toolbar › Show device toolbar，寬度改成 390）。',
+        text: 'Codex says it\'s fixed, but check again yourself: in the built-in browser, look at the site at phone width and make sure nothing sticks out of the screen.',
+        hint: 'Check for yourself; don\'t just trust its report. Codex has already looked at the site at phone width (the Device toolbar under the address bar, width 390), so just click Reload at the left of the address bar. If that bar is gone: click “…” at the top right › Device toolbar › Show device toolbar, and change the width to 390.',
+        answer: 'Click Reload (if the Device toolbar is gone: “…” › Device toolbar › Show device toolbar, and change the width to 390).',
         // already in a phone's width (Codex measured it in step 1, the Device toolbar is on at 390): the reload button counts too; else
         // ⋯ › Device toolbar › Show device toolbar › the width box (cxbrowser-r2; the practice-only Phone button is gone)
         target: K.chain(function () {
@@ -488,9 +488,9 @@
       },
       {
         id: 's4',
-        text: '把這次的修改存成版本並送上去，說明寫清楚，例如「修好手機上的卡片排版」。按 Return（Windows 鍵盤是 Enter）。',
-        hint: '走到桌面的 firenze-museums-hw，再 add、commit -m "說明"、push。說明要讓別人看得懂你做了什麼。',
-        answer: '`cd ~/Desktop/firenze-museums-hw`，Return；`git add .`；`git commit -m "修好手機上的卡片排版"`；`git push`。',
+        text: 'Save this change as a version and push it, with a clear message, for example “Fix the card layout on phones”. Press Return (Enter on a Windows keyboard).',
+        hint: 'Go to firenze-museums-hw on the Desktop, then add, commit -m "message", push. The message should let other people understand what you did.',
+        answer: '`cd ~/Desktop/firenze-museums-hw`, Return; `git add .`; `git commit -m "Fix the card layout on phones"`; `git push`.',
         replay: 'mission',
         target: T_TERM,
         check: function (ev, api) {
@@ -502,15 +502,15 @@
           var nr = notRepoTrap(ev, api);
           if (nr) return nr;
           var c = api.termCmd(ev, function (x) { return x.name === 'git' && x.args[0] === 'push' && x.status === 0 && /Everything up-to-date/.test(x.out || ''); });
-          if (c) return '沒有東西可以送：Codex 改的檔案還沒 add、commit。先 `git add .`，再 `git commit -m "說明"`，最後 push。';
+          if (c) return 'There\'s nothing to push: the files Codex changed haven\'t been added and committed yet. First `git add .`, then `git commit -m "message"`, and finally push.';
           return null;
         }
       },
       {
         id: 's5',
-        text: '交作業前照清單檢查。先到 GitHub 看倉庫：點倉庫頁上的「commits」，確認至少 3 個 commit，每個都有一句說明。',
-        hint: '老師的清單有四項：倉庫是公開的；至少 3 個 commit、每個都有說明；ARCHITECTURE.md 的圖在 GitHub 上畫得出來；網站在手機寬度不跑版。後兩項你已經做過了。',
-        answer: 'Safari › github.com/an/firenze-museums-hw › commits。',
+        text: 'Go through the checklist before you hand in. First look at the repository on GitHub: click “Commits” on the repository page and check that there are at least 3 commits, each with a one-line message.',
+        hint: 'The teacher\'s checklist has four items: the repository is public; at least 3 commits, each with a message; the ARCHITECTURE.md diagram is drawn on GitHub; the site doesn\'t break at phone width. You have already done the last two.',
+        answer: 'Safari › github.com/an/firenze-museums-hw › Commits.',
         replay: 'mission',
         target: K.chain(K.inWins('safari', 'gh-commits-link'), T_SAFARI),
         check: function (ev, api) {
@@ -519,9 +519,9 @@
       },
       {
         id: 's6',
-        text: '複製倉庫網址：這就是要交的東西。（真正的作業要貼到課程 Discord 的交作業區，這裡不用貼。）',
-        hint: '網址的形式是 github.com/你的帳號/倉庫名。用 Safari 網址列旁的分享按鈕，或倉庫頁上的 Code 按鈕都可以複製；要在倉庫首頁按（commits 頁的網址是另一個）。',
-        answer: 'Safari 的分享按鈕（拷貝網址），或 Code › HTTPS 旁邊的拷貝。',
+        text: 'Copy the repository address: this is what you hand in. (In the real homework you paste it into the homework submission channel of the course Discord; you don\'t need to paste it here.)',
+        hint: 'The address has the form github.com/your-account/repository-name. You can copy it with the Share button next to Safari\'s address bar, or with the Code button on the repository page; do it on the repository\'s front page (the commits page has a different address).',
+        answer: 'Safari\'s Share button (copy URL), or the copy button next to Code › HTTPS.',
         // the repository's front page: Safari's share button; the commits page of step 5 (or any other page of it): the repository name first,
         // because the share button copies the address of THIS page and only the front page's address is what to hand in (cue audit 2026-10-14)
         target: K.chain(function () {
@@ -537,11 +537,11 @@
         trap: function (ev) {
           if (!ev || ev.name !== 'safari:share' || !ev.data) return null;
           var u = String(ev.data.url || '');
-          if (/github\.com\/[^\/]+\/[^\/]+\/./.test(u)) return '分享按鈕複製的是「這一頁」的網址（' + u.replace(/^https?:\/\//, '') + '），要交的是倉庫首頁的網址。先點頁面上方的倉庫名稱 firenze-museums-hw 回到倉庫首頁，再按分享或 Code。';
+          if (/github\.com\/[^\/]+\/[^\/]+\/./.test(u)) return ('The Share button copied the address of “this page” (' + (u.replace(/^https?:\/\//, '')) + '), but what you hand in is the address of the repository\'s front page. First click the repository name firenze-museums-hw at the top of the page to go back to the front page, then click Share or Code.');
           return null;
         }
       }
     ],
-    outro: '作業完成。這次一起用上三樣東西：GitHub 存版本、Mermaid 畫流程、內建瀏覽器檢查網站。真正的作業要把倉庫網址貼到課程 Discord 的交作業區，截止時間看 Discord 公告。'
+    outro: 'Homework complete. This time you used three things together: GitHub to save versions, Mermaid to draw a flowchart, and the built-in browser to check the site. In the real homework, paste the repository address into the homework submission channel of the course Discord; see the Discord announcement for the deadline.'
   });
 })(window.LAB);

@@ -35,7 +35,7 @@
   function clampDev(n) { n = Math.round(Number(n) || 0); return Math.max(DEV_MIN, Math.min(DEV_MAX, n)); }
   var NATIVE_MIN_W = 440;          // the made-up public pages are laid out at the panel's own width (scale 1), never narrower than this
   var SEARCH_HOST = 'search.example';
-  var START_QUERY = '佛羅倫斯 美術館';
+  var START_QUERY = 'Florence museums';
   var CSP = "default-src 'none'; style-src 'unsafe-inline'; img-src data:";
 
   function emit(name, payload) { return LAB.bus.emit(name, payload); }
@@ -59,7 +59,7 @@
   LAB.icons.add('cxb-sidepanel', glyph('<rect x="3.5" y="5" width="17" height="14" rx="2.5"/><path d="M14.5 5v14"/>'));
   LAB.icons.add('cxb-rotate', glyph('<rect x="8.5" y="8" width="11" height="12" rx="1.8"/><path d="M4.5 13.5V8a3 3 0 0 1 3-3h4"/><path d="M9.5 3l2 2-2 2"/>'));
   LAB.icons.add('cxb-chev-down', glyph('<path d="M7.5 10l4.5 4.5 4.5-4.5"/>'));
-  function practiceOnly() { try { LAB.ui.toast('練習版沒有這個功能'); } catch (e) { /* no toast */ } }
+  function practiceOnly() { try { LAB.ui.toast('This feature isn\'t available (practice version).'); } catch (e) { /* no toast */ } }
   function ico(name, size) { return LAB.icons.el(name, { size: size || 16 }); }
 
   /* ======================================================================== */
@@ -721,7 +721,7 @@
           if (!doc) {
             S.unreadable = true;
             f.hidden = true;
-            showNative(offlinePage('', '這個瀏覽器不讓練習版讀取網頁，所以畫不出來。請改用最新版的 Chrome、Edge 或 Safari 開啟這個練習。'), 'Not available');
+            showNative(offlinePage('', 'This browser does not let the practice version read web pages, so the page cannot be drawn. Please open this practice in the latest version of Chrome, Edge or Safari.'), 'Not available');
           } else {
             S.unreadable = false;
             var info = fillDoc(doc, src);
@@ -907,7 +907,7 @@
       var ta = h('textarea', { class: 'cxb-comment-input', rows: '3', placeholder: 'Describe the change', 'aria-label': 'Comment', spellcheck: 'false', dataset: { lab: 'cxb-comment-input' } });
       var send = h('button', { type: 'button', class: 'cxb-btn cxb-btn-pri', disabled: true, dataset: { lab: 'cxb-comment-send' }, on: { click: function () { doSend(); } } }, 'Send');
       var cancel = h('button', { type: 'button', class: 'cxb-btn cxb-btn-sec', dataset: { lab: 'cxb-comment-cancel' }, on: { click: function () { clearSelection(); } } }, 'Cancel');
-      var busyLine = h('div', { class: 'cxb-comment-busy', hidden: true, role: 'status', dataset: { lab: 'cxb-comment-busy' } }, 'Codex 還在回答，等它說完再送出');
+      var busyLine = h('div', { class: 'cxb-comment-busy', hidden: true, role: 'status', dataset: { lab: 'cxb-comment-busy' } }, 'Codex is still answering. Wait until it has finished, then send.');
       var what = h('div', { class: 'cxb-comment-what' }, h('span', { class: 'cxb-comment-tag' }, '<' + s.tag + '>'), s.text ? h('span', { class: 'cxb-comment-text' }, s.text) : null);
       var card = h('div', { class: 'cxb-comment', role: 'dialog', 'aria-label': 'Comment on the selected element', dataset: { lab: 'cxb-comment' } },
         what, ta, busyLine, h('div', { class: 'cxb-comment-row' }, cancel, send));
@@ -1017,7 +1017,7 @@
       it.appendChild(u); it.appendChild(a); it.appendChild(sn); list.appendChild(it);
     });
     root.appendChild(list);
-    var foot = el('div', 'cxb-note'); foot.textContent = '練習版：這是模擬的搜尋結果，網站和內容都是虛構的。';
+    var foot = el('div', 'cxb-note'); foot.textContent = 'Practice version: these are simulated search results, and the sites and their content are made up.';
     root.appendChild(foot);
     return root;
   }
@@ -1025,7 +1025,7 @@
     var root = el('div', 'cxb-off'), t = el('div', 'cxb-off-t'), p = el('div', 'cxb-off-p'), u = el('div', 'cxb-off-u');
     t.textContent = why ? 'This page can’t be shown' : 'This page can’t be reached';
     u.textContent = url;
-    p.textContent = why || '練習版：這台練習用的電腦沒有連到網際網路，只打得開練習準備好的頁面。';
+    p.textContent = why || 'Practice version: this practice computer is not connected to the internet and can only open the pages prepared for the practice.';
     root.appendChild(t); root.appendChild(u); root.appendChild(p);
     return root;
   }
@@ -1033,7 +1033,7 @@
     var root = el('div', 'cxb-off'), t = el('div', 'cxb-off-t'), u = el('div', 'cxb-off-u'), p = el('div', 'cxb-off-p');
     t.textContent = 'File not found';
     u.textContent = path;
-    p.textContent = '找不到這個檔案。請確認路徑，或請 Codex 再開一次。';
+    p.textContent = 'File not found. Check the path, or ask Codex to open it again.';
     root.appendChild(t); root.appendChild(u); root.appendChild(p);
     return root;
   }

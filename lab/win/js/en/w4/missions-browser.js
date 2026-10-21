@@ -15,9 +15,9 @@
   var CSS = SITE + '/style.css';
   var NOTES = FM + '/notes.md';
 
-  var GROUP = '內建瀏覽器（影片 01、02）';
-  var TAG_V1 = 'Week 4 影片 01';
-  var TAG_V2 = 'Week 4 影片 02';
+  var GROUP = 'Built-in browser (videos 01 and 02)';
+  var TAG_V1 = 'Week 4 Video 01';
+  var TAG_V2 = 'Week 4 Video 02';
 
   /* ------------------------------------------------------------------ helpers */
   function same(api, a, b) { try { return !!api.same(a, b); } catch (e) { return false; } }
@@ -53,7 +53,7 @@
     var b = cxb(api);
     try { if (b && b.reset) b.reset(); } catch (e) { /* ignore */ }
   }
-  var NOT_IN_PROJECT = '這個對話不在 Firenze-Museums 底下（輸入框上方沒有「Firenze-Museums」標籤），所以它找不到專案裡的網站。點 Codex 左邊的 Firenze-Museums，在專案底下再試一次。';
+  var NOT_IN_PROJECT = 'This chat is not under Firenze-Museums (there is no “Firenze-Museums” tag above the input box), so Codex cannot find the website in the project. Click Firenze-Museums on the left of Codex and try again under the project.';
   function replyIs(ids) {
     return function (d) { return !!d && ids.indexOf(d.intent) >= 0; };
   }
@@ -185,11 +185,11 @@
     week: 4, order: 1,
     group: GROUP,
     tag: TAG_V1,
-    title: '打開內建瀏覽器',
+    title: 'Open the Built-in Browser',
     minutes: 6,
     resetsFiles: true,
     needs: [FM],
-    intro: 'Codex 自己帶了一個瀏覽器。你和 Codex 在對話旁邊看同一個網頁，它可以幫你開網頁、點按鈕、打字。這個任務先把它叫出來，再看看它卡住的時候要怎麼辦：不一定每次都順利，遇到錯誤很正常。',
+    intro: 'Codex comes with its own browser. You and Codex look at the same web page next to the chat, and Codex can open pages, click buttons and type for you. In this mission you first bring the browser up, then see what to do when Codex gets stuck. It will not always go smoothly, and errors are normal.',
     prepare: function (api) {
       ensureBase4(api);
       freshSite(api);
@@ -200,9 +200,9 @@
     steps: [
       {
         id: 's1',
-        text: '點工作列上的「Codex」，再點左邊側邊欄的 Firenze-Museums，在專案底下開始對話。',
-        hint: '輸入框上方要看到「Firenze-Museums」這個標籤，代表這個對話在專案裡（Week 3 學過）。',
-        answer: '點一下工作列上的「Codex」，再點側邊欄的 Firenze-Museums。',
+        text: 'Click “Codex” on the taskbar, then click Firenze-Museums in the sidebar on the left to start a chat under the project.',
+        hint: 'You should see the “Firenze-Museums” tag above the input box. That means this chat is inside the project (you learned this in Week 3).',
+        answer: 'Click “Codex” on the taskbar, then click Firenze-Museums in the sidebar.',
         target: T_PROJECT,
         check: function (ev, api) {
           return !!api.seen('codex:select-project', function (d) { return same(api, d.path, FM); });
@@ -210,24 +210,24 @@
       },
       {
         id: 's2',
-        text: '請 Codex 打開內建瀏覽器：點「複製」，貼進輸入框，再按 Enter。[[打開內建瀏覽器，並隨意搜尋做測試]]',
-        hint: '這就是影片 01 示範的那一句。送出之後，Codex 視窗右邊會多出一個瀏覽器面板，由 Codex 幫你操作網頁。',
-        answer: '把那句貼到輸入框，按 Enter。',
+        text: 'Ask Codex to open the built-in browser: click “Copy”, paste it into the input box, then press Enter. [[Open the built-in browser and search for anything as a test]]',
+        hint: 'This is the sentence shown in video 01. After you send it, a browser panel appears on the right side of the Codex window, and Codex operates the web page for you.',
+        answer: 'Paste that sentence into the input box and press Enter.',
         target: T_COMPOSER,
         check: function (ev, api) {
           return !!(api.seen('codex:reply', replyIs(['browser_open'])) && api.seen('cxbrowser:open'));
         },
         trap: function (ev, api) {
           if (!ev || ev.name !== 'codex:reply' || !ev.data) return null;
-          if (ev.data.intent !== 'browser_open') return '這一步要請它打開內建瀏覽器：把上面那句話原樣貼進輸入框（句子裡要有「內建瀏覽器」和「打開」）。';
+          if (ev.data.intent !== 'browser_open') return 'This step asks Codex to open the built-in browser: paste the sentence above into the input box exactly as it is (the sentence must contain “built-in browser” and “open”).';
           return null;
         }
       },
       {
         id: 's3',
-        text: '接著請它打開你專案裡的網站：[[請用內建瀏覽器打開 site/index.html]]',
-        hint: 'site/index.html 是 Week 3 做的展示網站。這一步它多半會卡住，這是故意安排的，跟影片 01 一樣：不一定每次都順利，遇到錯誤很正常。',
-        answer: '貼上那句，按 Enter。',
+        text: 'Next, ask it to open the website in your project: [[Please open site/index.html in the built-in browser]]',
+        hint: 'site/index.html is the demo website you made in Week 3. Codex will most likely get stuck in this step. That is on purpose, just like in video 01: it does not always go smoothly, and errors are normal.',
+        answer: 'Paste that sentence and press Enter.',
         target: T_COMPOSER,
         check: function (ev, api) {
           return !!(api.seen('codex:reply', replyIs(['browser_stuck'])) && api.seen('cxbrowser:stuck'));
@@ -241,9 +241,9 @@
       },
       {
         id: 's4',
-        text: '它說卡在哪裡了？遇到錯誤不用怕，繼續請 AI 幫忙就好：回它一句話，請它自己想辦法修好，再繼續。',
-        hint: '想一想：如果是你，會怎麼回它？不用自己修，也不用看懂那個檔名；把問題交還給它，請它修好之後繼續剛剛的事。',
-        answer: '貼上這句，按 Enter：[[請幫我修復無法開啟瀏覽器的問題，修好之後繼續打開 site/index.html]]',
+        text: 'Where does it say it is stuck? Do not be afraid of errors. Just keep asking the AI for help: reply with one sentence that asks it to find a way to fix the problem itself, and then continue.',
+        hint: 'Think about it: what would you say back to it? You do not have to fix it yourself, and you do not need to understand that file name. Hand the problem back and ask it to fix it and then carry on with what it was doing.',
+        answer: 'Paste this sentence and press Enter: [[Please fix the problem that stops the browser from opening, then continue opening site/index.html]]',
         target: T_COMPOSER,
         check: function (ev, api) {
           return !!(api.seen('codex:reply', replyIs(['browser_fix'])) &&
@@ -252,22 +252,22 @@
         trap: function (ev, api) {
           if (!ev || ev.name !== 'codex:reply' || !ev.data) return null;
           if (ev.data.intent === 'browser_stuck') return null;            // the reply that just finished step 3
-          if (ev.data.intent !== 'browser_fix') return '它還卡在同一個地方。請它自己修好，再繼續剛剛的事。';
+          if (ev.data.intent !== 'browser_fix') return 'It is still stuck in the same place. Ask it to fix the problem itself, and then continue with what it was doing.';
           return null;
         }
       },
       {
         id: 's5',
-        text: '看右邊的網頁：這是你專案裡的 site/index.html。到檔案總管找到它在哪裡。',
-        hint: '瀏覽器網址列寫的就是這個檔案的位置。專案資料夾在桌面：桌面 › Firenze-Museums › site。',
-        answer: '檔案總管 › 桌面 › Firenze-Museums › site。',
+        text: 'Look at the web page on the right: this is site/index.html in your project. Find where it is in File Explorer.',
+        hint: 'The address bar of the browser shows where this file is. The project folder is on the desktop: Desktop › Firenze-Museums › site.',
+        answer: 'File Explorer › Desktop › Firenze-Museums › site.',
         target: finderWalk([SITE, FM]),
         check: function (ev, api) {
           return !!api.seen('finder:navigate', function (d) { return same(api, d.path, SITE); });
         }
       }
     ],
-    outro: 'Codex 自己帶了瀏覽器，可以直接幫你開網頁。卡住時它會說卡在哪裡，你只要請它自己修好，再繼續；遇到錯誤很正常，繼續請 AI 幫忙就好。內建瀏覽器用的設定檔和你平常的瀏覽器分開，不會共用你的分頁和登入。'
+    outro: 'Codex comes with its own browser and can open web pages for you directly. When it gets stuck, it tells you where; you only need to ask it to fix the problem itself and then continue. Errors are normal, so just keep asking the AI for help. The built-in browser uses its own settings, separate from your everyday browser, so it does not share your tabs or logins.'
   });
 
   /* ================================================================== 2 · 看：用手機的寬度檢查網站 */
@@ -276,11 +276,11 @@
     week: 4, order: 2,
     group: GROUP,
     tag: TAG_V2,
-    title: '看：用手機的寬度檢查網站',
+    title: 'Look: Check a Website at Phone Width',
     minutes: 7,
     resetsFiles: true,
     needs: [FM],
-    intro: '做好的網站，在手機上常常會跑版：字超出卡片、東西擠在一起。請 Codex 用內建瀏覽器，用手機的寬度幫你看一遍，有問題再請它修。',
+    intro: 'A finished website often breaks on a phone: text sticks out of the cards and things get squeezed together. Ask Codex to look at it in the built-in browser at phone width, and ask it to fix any problem it finds.',
     prepare: function (api) {
       ensureBase4(api);
       freshSite(api);
@@ -290,9 +290,9 @@
     steps: [
       {
         id: 's1',
-        text: '在 Codex 點 Firenze-Museums，請它用手機的寬度檢查網站，但先不要改：[[請用內建瀏覽器打開 site/index.html，用手機的寬度看一遍，告訴我哪裡跑版，先不要改]]',
-        hint: '手機寬度大約是 390 像素。Codex 會自己打開網頁、切換寬度，再告訴你它看到什麼。',
-        answer: '貼上那句，按 Enter。',
+        text: 'In Codex, click Firenze-Museums and ask it to check the website at phone width, without changing anything yet: [[Please open site/index.html in the built-in browser and look at it at phone width. Tell me what is broken in the layout. Don\'t change anything yet.]]',
+        hint: 'Phone width is about 390 pixels. Codex will open the page by itself, switch the width, and then tell you what it sees.',
+        answer: 'Paste that sentence and press Enter.',
         target: T_COMPOSER,
         check: function (ev, api) {
           return !!(api.seen('codex:reply', replyIs(['browser_check_mobile', 'browser_fix_layout'])) &&
@@ -302,15 +302,15 @@
           if (!ev || ev.name !== 'codex:reply' || !ev.data) return null;
           var d = ev.data;
           if (isNullish(d.projectPath) && /^browser_/.test(d.intent)) return NOT_IN_PROJECT;
-          if (d.intent === 'browser_open_site' || d.intent === 'browser_open') return '它只打開了網頁，沒有用手機的寬度看。這一步要請它用手機的寬度（句子裡有「手機」）看一遍。';
+          if (d.intent === 'browser_open_site' || d.intent === 'browser_open') return 'It only opened the web page and did not look at it at phone width. In this step, ask it to look at the page at phone width (your sentence needs the word “phone”).';
           return null;
         }
       },
       {
         id: 's2',
-        text: '看右邊手機寬度的畫面和 Codex 的回報，再請它修：[[只修跑版的地方，修好之後再看一次確認]]',
-        hint: '跑版就是字超出卡片、東西擠在一起、要左右捲動才看得到。請它只修這些，其他設計不要動。',
-        answer: '貼上那句，按 Enter。',
+        text: 'Look at the phone-width view on the right and at Codex\'s report, then ask it to fix the problem: [[Fix only the layout problems, then check again to confirm.]]',
+        hint: 'A broken layout means text that sticks out of a card, things squeezed together, or having to scroll left and right to see everything. Ask it to fix only these, and leave the rest of the design alone.',
+        answer: 'Paste that sentence and press Enter.',
         target: T_COMPOSER,
         replay: 'mission',
         check: function (ev, api) {
@@ -326,9 +326,9 @@
       },
       {
         id: 's3',
-        text: '打開 site/style.css，看 Codex 到底改了什麼。',
-        hint: 'Codex 通常會在檔案最後面加一段只給小螢幕用的設定（`@media`）。用 Visual Studio Code（影片裡的 VS Code）或記事本打開都可以。',
-        answer: '檔案總管 › 桌面 › Firenze-Museums › site › 按兩下 style.css。',
+        text: 'Open site/style.css and see what Codex actually changed.',
+        hint: 'Codex usually adds a block at the very end of the file that applies only to small screens (`@media`). You can open the file with Visual Studio Code (the VS Code from the video) or Notepad.',
+        answer: 'File Explorer › Desktop › Firenze-Museums › site › double-click style.css.',
         target: finderWalk([CSS, SITE, FM]),
         check: function (ev, api) {
           return !!api.seen('editor:open', function (d) { return same(api, d.path, CSS); });
@@ -337,16 +337,16 @@
       {
         id: 's4',
         optional: true,
-        text: '自己再看一次：按網址列下面那一條 Device toolbar 最右邊的 ×，回到一般的寬度，確認電腦上的樣子沒有被改壞。',
-        hint: '修手機的時候，不能把電腦上原本好好的樣子改壞。Device toolbar 是 Codex 剛剛用手機寬度看網頁時打開的那一條（Dimensions、寬 × 高）；關掉它就回到一般的寬度。',
-        answer: '按 Device toolbar 最右邊的 ×。',
+        text: 'Check it yourself once more: click the × at the far right of the Device toolbar under the address bar to go back to the normal width, and make sure the desktop view has not been broken.',
+        hint: 'Fixing the phone view must not break the desktop view that was fine before. The Device toolbar is the bar that Codex opened when it looked at the page at phone width (Dimensions, width × height); closing it returns to the normal width.',
+        answer: 'Click the × at the far right of the Device toolbar.',
         target: T_DESKTOP,
         check: function (ev, api) {
           return !!api.seen('cxbrowser:viewport', function (d) { return d.mode === 'desktop' && d.by === 'user'; });
         }
       }
     ],
-    outro: 'Codex 會自己打開網頁、換成手機寬度、發現問題、修好，再看一次確認。你的工作是看它改了什麼：只改跑版的地方，其他不動。'
+    outro: 'Codex opens the page by itself, switches to phone width, finds the problems, fixes them, and checks again. Your job is to look at what it changed: only the broken layout was changed, and nothing else.'
   });
 
   /* ================================================================== 3 · 改：框起來，用說的就好 */
@@ -355,11 +355,11 @@
     week: 4, order: 3,
     group: GROUP,
     tag: TAG_V2,
-    title: '改：框起來，用說的就好',
+    title: 'Edit: Select It and Just Say What to Change',
     minutes: 6,
     resetsFiles: true,
     needs: [FM],
-    intro: '不會寫程式也能改設計：在網頁上框出想改的地方，用一句話說明，Codex 就照著改。這個任務練習瀏覽器面板上的標註（Annotate）：網址列右邊那個對話框圖示。瀏覽器已經幫你打開了。',
+    intro: 'You can change a design without writing code: select the part of the page you want to change, say what you want in one sentence, and Codex makes the change. This mission practices Annotate on the browser panel: the speech-bubble icon at the right end of the address bar. The browser is already open for you.',
     prepare: function (api) {
       ensureBase4(api);
       freshSite(api);
@@ -370,9 +370,9 @@
     steps: [
       {
         id: 's1',
-        text: '按網址列右邊的標註按鈕（對話框圖示，滑鼠移上去會寫 Annotate），進入標註模式。',
-        hint: '按下去以後那個圖示會變藍。進入之後，滑鼠移到網頁上會出現一個框，表示可以選這個地方。',
-        answer: '點一下網址列右邊的對話框圖示（標註按鈕）。',
+        text: 'Click the Annotate button at the right end of the address bar (the speech-bubble icon; the tooltip says Annotate) to enter annotation mode.',
+        hint: 'After you click it, the icon turns blue. In this mode, when you move the mouse over the page, a box appears to show that you can select that spot.',
+        answer: 'Click the speech-bubble icon at the right end of the address bar (the Annotate button).',
         target: T_ANNOTATE,
         check: function (ev, api) {
           return !!api.seen('cxbrowser:annotate-mode', function (d) { return d.on === true; });
@@ -380,9 +380,9 @@
       },
       {
         id: 's2',
-        text: '點一下網頁最上面的大標題。',
-        hint: '點一個元素，或是拖出一個範圍都可以。選好之後旁邊會出現留言框。',
-        answer: '點一下「佛羅倫斯美術館」那行大字。',
+        text: 'Click the big title at the top of the web page.',
+        hint: 'You can click one element or drag out an area. After you select it, a comment box appears next to it.',
+        answer: 'Click the big “Florence Museums” heading.',
         target: T_PAGE_H1,
         check: function (ev, api) {
           return !!api.seen('cxbrowser:annotate-select');
@@ -394,35 +394,35 @@
       },
       {
         id: 's3',
-        text: '在留言框裡寫一句話，按 Send：[[標題字太小，改大一點]]',
-        hint: '留言框裡寫你想要的樣子，例如「字太小」「這兩張卡片靠太近」。你選的那個元素會跟著留言一起交給 Codex，所以不用解釋是哪一個。',
-        answer: '把那句貼到留言框，按 Send。',
+        text: 'Write one sentence in the comment box and click Send: [[The title text is too small. Make it bigger.]]',
+        hint: 'Write the change you want in the comment box, for example “The text is too small” or “Put more space between these two cards”. The element you selected is handed to Codex together with your comment, so you do not need to explain which one it is.',
+        answer: 'Paste that sentence into the comment box and click Send.',
         target: whileIdle(T_COMMENT),
         check: function (ev, api) {
           return !!(api.seen('codex:reply', replyIs(['annotate_edit'])) && codexWrote(api, CSS));
         },
         trap: function (ev, api) {
           if (ev && ev.name === 'cxbrowser:annotate-select' && ev.data && ev.data.tag !== 'h1') {
-            return '你選的是「' + (ev.data.text || ev.data.selector || '').slice(0, 24) + '」（' + ev.data.selector + '），沒關係，下一步的留言會改這個地方。想改標題的話，再點一下最上面的大標題。';
+            return ('You selected “' + ((ev.data.text || ev.data.selector || '').slice(0, 24)) + '” (' + (ev.data.selector) + '). That is fine: the comment in the next step will change this spot. If you want to change the title, click the big title at the top again.');
           }
           if (ev && ev.name === 'codex:reply' && ev.data && ev.data.intent === 'annotate_edit' && !codexWrote(api, CSS)) {
-            return 'Codex 還不確定你想怎麼改。留言寫得更具體一點，例如「標題字太小，改大一點」，再框一次、按 Send。';
+            return 'Codex is not sure how you want to change it. Make your comment more specific, for example “The title text is too small. Make it bigger.”, then select the element again and click Send.';
           }
           return null;
         }
       },
       {
         id: 's4',
-        text: '看右邊的網頁：標題變大了嗎？再打開 site/style.css，找到 h1 那一段，看 Codex 改了什麼。',
-        hint: '它只改你框起來的那一個地方，其他地方沒有動。',
-        answer: '按兩下 site/style.css（檔案總管或 Visual Studio Code），找 `h1`。',
+        text: 'Look at the web page on the right: did the title get bigger? Then open site/style.css, find the h1 section, and see what Codex changed.',
+        hint: 'It changed only the one spot you selected. Nothing else was touched.',
+        answer: 'Double-click site/style.css (in File Explorer or Visual Studio Code) and find `h1`.',
         target: finderWalk([CSS, SITE, FM]),
         check: function (ev, api) {
           return !!api.seen('editor:open', function (d) { return same(api, d.path, CSS); });
         }
       }
     ],
-    outro: '標註（Annotate，網址列右邊的對話框圖示）：點元素、寫留言、送出，Codex 就知道你指的是哪裡。如果想先試試看再決定，內建瀏覽器還有 Adjust 可以先預覽，不滿意再取消。'
+    outro: 'Annotate (the speech-bubble icon at the right end of the address bar): click an element, write a comment, send it, and Codex knows which place you mean. If you want to try a change first and decide later, the built-in browser also has Adjust, which lets you preview a change and cancel it if you do not like it.'
   });
 
   /* ================================================================== 4 · 查：整理公開網頁，附上網址 */
@@ -431,11 +431,11 @@
     week: 4, order: 4,
     group: GROUP,
     tag: TAG_V2,
-    title: '查：整理公開網頁，附上網址',
+    title: 'Look Up: Summarize a Public Web Page and Add the URL',
     minutes: 6,
     resetsFiles: true,
     needs: [FM],
-    intro: 'Codex 可以幫你看公開網頁：開頁面、點分頁、往下捲、讀完整理成筆記。網頁上寫的不一定可靠，所以一定要附來源。練習版的網頁是一間虛構的美術館。',
+    intro: 'Codex can look at public web pages for you: open pages, click tabs, scroll down, read, and then summarize what it found in notes. What a web page says is not always reliable, so always include the source. The web page in the practice version is a made-up museum.',
     prepare: function (api) {
       ensureBase4(api);
       ensureProject(api, false);
@@ -445,9 +445,9 @@
     steps: [
       {
         id: 's1',
-        text: '在 Firenze-Museums 的對話裡，請 Codex 去看這間美術館的官網，把開放時間和票價整理到 notes.md，並附上網址：[[請用內建瀏覽器打開 https://museo-esempio.example，點 Visit 分頁，把開放時間和票價整理到 notes.md，並附上網址]]',
-        hint: 'Codex 會自己開網頁、點分頁、往下捲、讀內容。練習版的網站是虛構的，資料都是假的。',
-        answer: '貼上那句，按 Enter。',
+        text: 'In the Firenze-Museums chat, ask Codex to look at this museum\'s official website, put the opening hours and ticket prices into notes.md, and include the URL: [[Open https://museo-esempio.example in the built-in browser, click the Visit tab, put the opening hours and ticket prices into notes.md, and include the URL.]]',
+        hint: 'Codex will open the page, click the tab, scroll down and read the content by itself. The website in the practice version is made up, and all its information is fake.',
+        answer: 'Paste that sentence and press Enter.',
         target: T_COMPOSER,
         check: function (ev, api) {
           return !!(api.seen('codex:reply', replyIs(['browser_lookup'])) && api.exists(NOTES));
@@ -455,15 +455,15 @@
         trap: function (ev, api) {
           if (!ev || ev.name !== 'codex:reply' || !ev.data) return null;
           var d = ev.data;
-          if (d.intent === 'browser_lookup' && !api.exists(NOTES)) return '這個對話不在 Firenze-Museums 底下，或網頁打不開，所以沒有寫出 notes.md。點 Codex 左邊的 Firenze-Museums，在專案底下再試一次。';
+          if (d.intent === 'browser_lookup' && !api.exists(NOTES)) return 'This chat is not under Firenze-Museums, or the web page could not be opened, so notes.md was not written. Click Firenze-Museums on the left of Codex and try again under the project.';
           return null;
         }
       },
       {
         id: 's2',
-        text: '打開 notes.md，看 Codex 整理了什麼：每一條資料有沒有附上網址？',
-        hint: '查來的資料要附來源，之後才查得到它從哪裡來。',
-        answer: '檔案總管 › 桌面 › Firenze-Museums › 按兩下 notes.md。',
+        text: 'Open notes.md and see what Codex wrote down: does every piece of information include the URL?',
+        hint: 'Information you look up needs a source, so that you can later find out where it came from.',
+        answer: 'File Explorer › Desktop › Firenze-Museums › double-click notes.md.',
         target: finderWalk([NOTES, FM]),
         check: function (ev, api) {
           return !!api.seen('editor:open', function (d) { return same(api, d.path, NOTES); });
@@ -471,9 +471,9 @@
       },
       {
         id: 's3',
-        text: '網頁上寫的不一定可靠，自己點開來源看一次：打開 Microsoft Edge（按開始，點 Microsoft Edge），把 notes.md 裡的網址複製起來，貼到 Edge 的網址列，按 Enter。',
-        hint: '開始選單的釘選區裡有 Microsoft Edge，圖示是藍綠色的波浪，網址列在視窗最上面。網址在 notes.md 裡選取後按 Ctrl+C 複製，到網址列按 Ctrl+V 貼上。Codex 整理得再好，也要自己看一次原始網頁。',
-        answer: 'Edge 網址列貼上 `https://museo-esempio.example/visit`，Enter。',
+        text: 'What a web page says is not always reliable, so open the source yourself and look: open Microsoft Edge (click Start, then click Microsoft Edge), copy the URL from notes.md, paste it into the Edge address bar, and press Enter.',
+        hint: 'Microsoft Edge is in the Pinned section of the Start menu; its icon is a blue-green wave, and the address bar is at the top of the window. Select the URL in notes.md and press Ctrl+C to copy it, then click the address bar and press Ctrl+V to paste it. However well Codex summarizes, you should still look at the original web page yourself.',
+        answer: 'Paste `https://museo-esempio.example/visit` into the Edge address bar and press Enter.',
         target: T_EDGE,
         check: function (ev, api) {
           return !!api.seen('web:visit', function (d) {
@@ -483,9 +483,9 @@
       },
       {
         id: 's4',
-        text: '看看網頁最下面寫的最後更新日期，請 Codex 把它補進筆記：[[請在 notes.md 補上這個網頁最後更新的日期]]',
-        hint: '資料可能已經過時，所以日期也要記下來。',
-        answer: '回到 Codex，貼上那句，按 Enter。',
+        text: 'Look at the last-updated date written at the bottom of the web page, then ask Codex to add it to the notes: [[Add the date this page was last updated to notes.md.]]',
+        hint: 'The information may be out of date, so the date needs to be written down too.',
+        answer: 'Go back to Codex, paste that sentence, and press Enter.',
         target: T_COMPOSER,
         check: function (ev, api) {
           if (!api.seen('codex:reply', replyIs(['notes_update']))) return false;
@@ -494,6 +494,6 @@
         }
       }
     ],
-    outro: '查資料的三件事：讓 Codex 去讀、請它附上網址、自己點開來源看一次。需要用你已經登入的網頁（例如學校系統）時，內建瀏覽器幫不上忙，要改用瀏覽器擴充功能。'
+    outro: 'Three things to do when you look up information: let Codex read it, ask it to include the URL, and open the source yourself to check it. When you need a page where you are already signed in (for example a school system), the built-in browser cannot help, and you need to use a browser extension instead.'
   });
 })(window.LAB);

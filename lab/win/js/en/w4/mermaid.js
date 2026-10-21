@@ -63,7 +63,7 @@
 
     // the English block counts lines from the `flowchart` line (as Mermaid does); the practice hint talks about the line the student sees in the file
     function fl(ln) { return startLine ? startLine + ln - 1 : ln; }
-    function lineNote(ln) { return startLine ? '（上面英文訊息裡的 line ' + ln + '，是從 flowchart 那一行算起的第 ' + ln + ' 行。）' : ''; }
+    function lineNote(ln) { return startLine ? ('(The “line ' + (ln) + '” in the message above counts from the flowchart line as line 1, so this is line ' + (ln) + ' counting from there.)') : ''; }
 
     /* build the Mermaid-style error block: line, the line itself, a caret under the column, then what was expected */
     function fail(ln, col, expecting, gotCh, kind, extra) {
@@ -77,13 +77,13 @@
       var caret = new Array(Math.max(0, col + shift) + 1).join('-') + '^';
       var plain = kind === 'header' && extra;                      // the diagram type was not recognised: Mermaid prints no position
       var text = plain ? extra : 'Parse error on line ' + ln + ':\n' + ctx + '\n' + caret + '\n' + (extra || ('Expecting ' + expecting + ', got ' + tokenName(gotCh)));
-      var hint = '練習版提示：';
-      if (kind === 'fullwidth') hint += '第 ' + fl(ln) + ' 行的「' + gotCh + '」是全形符號。括號、箭頭、| 都要用半形（英文輸入法下打的那種）。' + lineNote(ln);
-      else if (kind === 'unclosed') hint += '第 ' + fl(ln) + ' 行有括號沒有關起來（[ 要有 ]，( 要有 )，{ 要有 }）。問題有時在這一行，有時在前一行。' + lineNote(ln);
-      else if (kind === 'arrow') hint += '第 ' + fl(ln) + ' 行的箭頭要寫 -->（兩個減號加一個大於符號）。' + lineNote(ln);
-      else if (kind === 'header') hint += '第一行要寫 flowchart TD（由上往下）或 flowchart LR（由左往右）。注意英文字母的大小寫。';
-      else if (kind === 'unsupported') hint += '練習版的 Mermaid 只畫流程圖（flowchart），這個功能還沒有做。' + lineNote(ln);
-      else hint += '第 ' + fl(ln) + ' 行有看不懂的地方。檢查括號有沒有關起來、箭頭是不是 -->、符號是不是半形。錯誤訊息說的行號，問題常在前一行。' + lineNote(ln);
+      var hint = 'Practice version hint: ';
+      if (kind === 'fullwidth') hint += ('On line ' + (fl(ln)) + ', “' + (gotCh) + '” is a full-width character. Brackets, arrows and | must be half-width (the kind you type with an English keyboard). ' + (lineNote(ln)));
+      else if (kind === 'unclosed') hint += ('Line ' + (fl(ln)) + ' has a bracket that isn\'t closed (every [ needs a ], every ( needs a ), every { needs a }). The problem is sometimes on this line and sometimes on the line before. ' + (lineNote(ln)));
+      else if (kind === 'arrow') hint += ('On line ' + (fl(ln)) + ', the arrow must be written --> (two hyphens and one greater-than sign). ' + (lineNote(ln)));
+      else if (kind === 'header') hint += 'The first line must be flowchart TD (top to bottom) or flowchart LR (left to right). Mind the upper and lower case of the letters.';
+      else if (kind === 'unsupported') hint += ('The practice version of Mermaid only draws flowcharts (flowchart); this feature isn\'t available yet. ' + (lineNote(ln)));
+      else hint += ('Something on line ' + (fl(ln)) + ' can\'t be understood. Check that the brackets are closed, the arrow is -->, and the symbols are half-width. The problem is often on the line before the line number in the error message. ' + (lineNote(ln)));
       throw new Fail({ line: ln, col: col, text: text, hint: hint, kind: kind || 'syntax' });
     }
 
@@ -580,7 +580,7 @@
     var id = 'mm' + (++svgSeq);
     var svg = sv('svg', {
       xmlns: SVGNS, viewBox: '0 0 ' + lay.width + ' ' + lay.height, width: lay.width, height: lay.height, class: 'mm-svg', role: 'img',
-      'aria-label': '流程圖，' + ast.nodes.length + ' 個方塊'
+      'aria-label': ('Flowchart, nodes: ' + (ast.nodes.length))
     });
     svg.style.minWidth = Math.round(lay.width * 0.62) + 'px';
     svg.style.maxWidth = '100%';
@@ -663,7 +663,7 @@
     if (!ast.ok) return { ok: false, error: ast.error, ast: ast };
     if (!ast.nodes.length) {
       ast.ok = false;
-      ast.error = { line: 1, col: 0, text: 'Nothing to draw: the diagram has no nodes yet.', hint: '練習版提示：先在 flowchart 那一行下面寫一行，例如 A[開始] --> B[結束]。', kind: 'empty' };
+      ast.error = { line: 1, col: 0, text: 'Nothing to draw: the diagram has no nodes yet.', hint: 'Practice version hint: write a line under the flowchart line first, for example A[Start] --> B[End].', kind: 'empty' };
       return { ok: false, error: ast.error, ast: ast };
     }
     var lay = layout(ast);

@@ -44,8 +44,7 @@
   function def(d, pri) { LAB.codex.registerIntent(d, { priority: pri }); }
 
   function notFoundText(ctx) {
-    return '我在 ' + ctx.cwd + ' 裡找不到 site/index.html。' +
-      (ctx.project ? '請確認專案裡有 site 資料夾，或告訴我網頁在哪裡。' : '\n這個對話不在專案裡（輸入框上方沒有專案標籤），所以我看不到專案的檔案。請先點左邊的專案，再在專案底下的對話請我做。');
+    return ('I can\'t find site/index.html in ' + (ctx.cwd) + '. ' + (ctx.project ? 'Please make sure the project has a site folder, or tell me where the web page is.' : '\nThis chat is not in a project (there is no project tag above the input box), so I can\'t see the project\'s files. Please click the project on the left first, then ask me again in a chat under the project.'));
   }
 
   /* =============================================================== opening the browser */
@@ -61,10 +60,10 @@
         target = C.searchUrl(q);
       }
       ctx.step('Used the browser', function () { C.open({ target: target, by: 'codex' }); });
-      if (url) ctx.say('已在右邊的內建瀏覽器打開 ' + url + '。');
-      else ctx.say('已在右邊打開內建瀏覽器，並搜尋了「' + q + '」。');
-      ctx.say('這個瀏覽器有自己的分頁和設定；我可以在裡面開網頁、點按鈕、往下捲，你也可以在旁邊看同一個畫面。');
-      if (!url) ctx.say('（練習版：搜尋結果是模擬的，網站和內容都是虛構的。）');
+      if (url) ctx.say(('Opened ' + (url) + ' in the built-in browser on the right.'));
+      else ctx.say(('Opened the built-in browser on the right and searched for “' + (q) + '”.'));
+      ctx.say('This browser has its own tabs and settings. I can open pages, click buttons and scroll down in it, and you can watch the same screen next to me.');
+      if (!url) ctx.say('(Practice version: the search results are simulated, and the sites and their content are made up.)');
     }
   }, 89);
 
@@ -81,11 +80,11 @@
       var site = C.siteFor(ctx.cwd);
       if (!site) { ctx.say(notFoundText(ctx)); return; }
       ctx.step('Used the browser', function () { C.showStuck(site.file, 'codex'); });
-      ctx.say('已送出在內建瀏覽器開啟 `' + site.rel + '` 的指令，App 回報排隊中。');
+      ctx.say(('Sent the command to open `' + (site.rel) + '` in the built-in browser. The app reports that it is queued.'));
       ctx.say('');
-      ctx.say('**網頁尚未打開。**瀏覽器控制工具仍缺少 `26.928.20755/browser-service.mjs`，因此無法操作頁面；需先修復 Browser 元件才能繼續。');
+      ctx.say('**The page has not opened.** The browser control tool is still missing `26.928.20755/browser-service.mjs`, so I can\'t operate the page. The Browser component has to be repaired before I can continue.');
       ctx.say('');
-      ctx.say('（練習版：這是故意安排的。真的 Codex 也不一定每次都順利；遇到錯誤，繼續請它幫忙就好，不要怕。）');
+      ctx.say('(Practice version: this is on purpose. The real Codex does not always succeed every time either. When you get an error, just keep asking it for help. Don\'t worry.)');
     }
   }, 96);
 
@@ -96,7 +95,7 @@
       var site = C.siteFor(ctx.cwd);
       if (!site) { ctx.say(notFoundText(ctx)); return; }
       ctx.step('Used the browser', function () { C.open({ target: site.file, by: 'codex' }); });
-      ctx.say('已在右邊的內建瀏覽器打開 `' + site.rel + '`。你和我看的是同一個網頁，它讀的是這個專案裡的檔案。');
+      ctx.say(('Opened `' + (site.rel) + '` in the built-in browser on the right. You and I are looking at the same page, and it reads the file in this project.'));
     }
   }, 90);
 
@@ -113,11 +112,11 @@
         C.fixStuck();
         if (file) C.open({ target: file, by: 'codex' });
       });
-      ctx.say('原因已定位：工具指向一個不存在的版本目錄，而本機另有完整的瀏覽器元件。我用現有元件建立了可回復的相容副本、保留原件，並做了實際連線測試。');
+      ctx.say('Found the cause: the tool points to a version folder that does not exist, while a complete browser component is installed on this computer. I used the existing component to make a compatible copy that can be rolled back, kept the original, and ran a real connection test.');
       ctx.say('');
-      if (file) ctx.say('內建瀏覽器的控制連線已恢復，`' + (site ? site.rel : 'site/index.html') + '` 已在右邊打開。');
-      else ctx.say('內建瀏覽器的控制連線已恢復。');
-      ctx.say('（遇到錯誤時，像這樣繼續請 AI 處理就可以了。）');
+      if (file) ctx.say(('The browser control connection works again, and `' + (site ? site.rel : 'site/index.html') + '` is open on the right.'));
+      else ctx.say('The browser control connection works again.');
+      ctx.say('(When you get an error, you can keep asking the AI to handle it, like this.)');
     }
   }, 97);
 
@@ -126,17 +125,17 @@
     id: 'browser_stuck_again',
     test: function () { var st = C.stuckState(); return st.hit && !st.fixed; },
     run: function (ctx) {
-      ctx.say('我還是卡在同一個地方：瀏覽器控制工具缺少 `26.928.20755/browser-service.mjs`，所以網頁還沒打開。');
-      ctx.say('（遇到錯誤，繼續請我處理就好，不要怕。）');
+      ctx.say('I am still stuck in the same place: the browser control tool is missing `26.928.20755/browser-service.mjs`, so the page has not opened yet.');
+      ctx.say('(When you get an error, just keep asking me to handle it. Don\'t worry.)');
     }
   }, 5);
 
   /* =============================================================== looking at it on a phone, and fixing the layout */
   function reasonOf(it) {
     var d = it.decls.join(' ');
-    if (it.kind === 'edge') return /flex: 1 1 100%/.test(d) ? '寬度固定，一個接一個排成一排，超出畫面' : '寬度比畫面還大';
-    if (it.kind === 'box') return /flex-wrap/.test(d) ? '裡面的東西排成一排、不換行' : '裡面的東西比它自己還寬';
-    return '文字沒有換行，超出方塊';
+    if (it.kind === 'edge') return /flex: 1 1 100%/.test(d) ? 'the width is fixed and the items line up one after another in a row, wider than the screen' : 'the width is larger than the screen';
+    if (it.kind === 'box') return /flex-wrap/.test(d) ? 'the items inside line up in a row and don\'t wrap' : 'the content inside is wider than the box itself';
+    return 'the text doesn\'t wrap and runs out of the box';
   }
   function blockText(items, pass) {
     var by = [], map = {};
@@ -152,13 +151,13 @@
     lines.push('}');
     return lines.join('\n');
   }
-  var NOTE = '/* 手機寬度：避免超出畫面（Codex 加入） */';
+  var NOTE = '/* Phone width: keep things inside the screen (added by Codex) */';
   function appendBlock(css, block) {
     return css.replace(/\s+$/, '') + '\n\n' + NOTE + '\n' + block + '\n';
   }
   function itemList(items) {
     return items.slice(0, 6).map(function (it) {
-      return '• `' + it.simple + '`' + (it.count > 1 ? '（' + it.count + ' 個）' : '') + '：超出畫面約 ' + it.over + ' px，' + reasonOf(it);
+      return ('• `' + (it.simple) + '`' + (it.count > 1 ? (' (' + (it.count) + ' ' + ((it.count) == 1 ? 'item' : 'items') + ')') : '') + ': goes past the screen by about ' + (it.over) + ' px because ' + (reasonOf(it)));
     }).join('\n');
   }
 
@@ -173,15 +172,15 @@
       ctx.step('Used the browser', function () { C.open({ target: site.file, mode: 'phone', by: 'codex' }); C.announceMeasure(before, 'codex'); });
       var n = before.items.length;
       if (!fix) {
-        if (before.overflow === 0) { ctx.say('我用手機的寬度（390 px）看了 `' + site.rel + '`，沒有看到跑版：沒有東西超出畫面。'); return; }
-        ctx.say('我用手機的寬度（390 px）看了 `' + site.rel + '`，有 ' + n + ' 種東西超出畫面，要左右捲動才看得到：');
+        if (before.overflow === 0) { ctx.say(('I looked at `' + (site.rel) + '` at phone width (390 px) and saw no layout problems: nothing sticks out of the screen.')); return; }
+        ctx.say(('I looked at `' + (site.rel) + '` at phone width (390 px). ' + (n) + ' ' + ((n) == 1 ? 'item' : 'items') + ' stick out of the screen, so you have to scroll sideways to see them:'));
         ctx.say(itemList(before.items));
         ctx.say('');
-        ctx.say('電腦的寬度看起來是正常的。我先不改；需要的話，請我只修跑版的地方。');
+        ctx.say('The desktop width looks fine. I won\'t change anything yet. If you want, ask me to fix only the layout problems.');
         return;
       }
-      if (before.overflow === 0) { ctx.say('我用手機的寬度（390 px）看過了，沒有東西超出畫面，所以不需要修改。'); return; }
-      if (cssRel === null || css === null) { ctx.say('手機寬度下有東西超出畫面，但我找不到這個網頁用的 css 檔，不知道該改哪裡。請告訴我樣式放在哪個檔案。'); return; }
+      if (before.overflow === 0) { ctx.say('I looked at it at phone width (390 px) and nothing sticks out of the screen, so no changes are needed.'); return; }
+      if (cssRel === null || css === null) { ctx.say('Something sticks out of the screen at phone width, but I can\'t find the css file this page uses, so I don\'t know what to change. Please tell me which file holds the styles.'); return; }
       var cur = css, curItems = before.items, pass = 1, blocks = [];
       function attempt() {
         var block = blockText(curItems, pass);
@@ -198,21 +197,21 @@
       return attempt().then(function (after) {
         ctx.write(cssRel, cur);
         ctx.step('Used the browser, ran commands', function () { C.reload('codex'); C.announceMeasure(after, 'codex'); });
-        ctx.say('手機寬度（390 px）下，這些地方超出畫面：');
+        ctx.say('At phone width (390 px), these things stick out of the screen:');
         ctx.say(itemList(before.items));
         ctx.say('');
         if (after.overflow === 0) {
-          ctx.say('我只在 `' + cssRel + '` 的最後面加了一段只給小螢幕用的設定，原本的樣式沒有動：');
+          ctx.say(('I only added a block for small screens at the very end of `' + (cssRel) + '`. The original styles were not touched:'));
           ctx.say('```\n' + blocks.join('\n\n') + '\n```');
-          ctx.say('修好之後我重新看了一次：手機寬度下沒有東西超出畫面了；電腦寬度的樣子不受影響。');
+          ctx.say('After fixing it I looked again: at phone width nothing sticks out of the screen any more, and the desktop view is not affected.');
         } else {
-          ctx.say('我在 `' + cssRel + '` 加了一段只給小螢幕用的設定，但重新看過之後，還有東西超出畫面（約 ' + after.overflow + ' px）：');
+          ctx.say(('I added a block for small screens to `' + (cssRel) + '`, but after looking again something still sticks out of the screen (about ' + (after.overflow) + ' px):'));
           ctx.say(itemList(after.items));
-          ctx.say('我沒辦法完全修好。你可以告訴我想讓它怎麼排，我再調整。');
+          ctx.say('I couldn\'t fix it completely. Tell me how you want it laid out, and I will adjust it.');
         }
       });
     }, function (err) {
-      ctx.say('我沒辦法在這個瀏覽器裡量版面（練習版的限制）。請確認網頁檔案存在，再試一次。');
+      ctx.say('I can\'t measure the layout in this browser (a limit of the practice version). Please make sure the web page file exists, and try again.');
     });
   }
 
@@ -327,21 +326,21 @@
     test: function (t, ctx) { return !!(ctx && ctx.annotation); },
     run: function (ctx) {
       var a = ctx.annotation, raw = ctx.rawText;
-      var tagText = '`<' + a.tag + '>`' + (a.text ? '「' + a.text + '」' : '');
+      var tagText = '`<' + a.tag + '>`' + (a.text ? ('“' + (a.text) + '”') : '');
       if (!ctx.project) {
-        ctx.say('我看到你框的是 ' + tagText + '，但這個對話不在專案裡（輸入框上方沒有專案標籤），我找不到專案裡的 site/style.css。請點左邊的專案，在專案底下的對話再用一次標註（網址列右邊的對話框圖示）。');
+        ctx.say(('I can see you selected ' + (tagText) + ', but this chat is not in a project (there is no project tag above the input box), so I can\'t find site/style.css in the project. Click the project on the left, then use Annotate again (the speech-bubble icon at the right end of the address bar) in a chat under the project.'));
         return;
       }
       var site = C.siteFor(ctx.cwd);
-      if (!site || !site.cssRels.length) { ctx.say('我看到你框的是 ' + tagText + '，但我在這個專案裡找不到網頁用的 css 檔，不知道該改哪裡。'); return; }
+      if (!site || !site.cssRels.length) { ctx.say(('I can see you selected ' + (tagText) + ', but I can\'t find the css file for the web page in this project, so I don\'t know what to change.')); return; }
       var edits = decide(raw);
       if (!edits.length) {
-        ctx.say('我看到你框的是 ' + tagText + '。你想怎麼改？可以說得更具體，例如：字改大、換顏色、置中、加大間距。');
+        ctx.say(('I can see you selected ' + (tagText) + '. How would you like to change it? You can be more specific, for example: make the text bigger, change the color, center it, add more space.'));
         return;
       }
       var cssRel = site.cssRels[0];
       var css = ctx.read(cssRel);
-      if (css === null) { ctx.say('我讀不到 ' + cssRel + '。'); return; }
+      if (css === null) { ctx.say(('I can\'t read ' + (cssRel) + '.')); return; }
       var cands = a.candidates && a.candidates.length ? a.candidates : [a.selector];
       return C.probe('desktop', site.file, function (doc, win) {
         var el = null;
@@ -382,15 +381,15 @@
         });
         ctx.write(cssRel, next);
         ctx.step('Used the browser', function () { C.reload('codex'); });
-        ctx.say('收到，你框的是 ' + tagText + '。我只改了跟它有關的地方：');
+        ctx.say(('Got it, you selected ' + (tagText) + '. I only changed what is related to it:'));
         notes.forEach(function (n) {
           var r = n.r;
-          ctx.say('• `' + cssRel + '` 的 `' + r.sel + '`：`' + n.prop + '` ' + (r.old ? '從 ' + r.old + ' 改成 ' + r.newVal : (r.found ? '加上 ' : '新增 ') + r.newVal));
+          ctx.say(('• In `' + (cssRel) + '`, `' + (r.sel) + '`: `' + (n.prop) + '` ' + (r.old ? ('changed from ' + (r.old) + ' to ' + (r.newVal)) : (r.found ? 'added ' : 'added in a new rule: ') + r.newVal)));
         });
         ctx.say('');
-        ctx.say('其他地方都沒有動。右邊的網頁已經重新載入，你可以看看是不是你想要的樣子。');
+        ctx.say('Nothing else was touched. The web page on the right has been reloaded, so you can check whether it looks the way you wanted.');
       }, function () {
-        ctx.say('我沒辦法在瀏覽器裡讀這個網頁（練習版的限制），所以沒有改。');
+        ctx.say('I can\'t read this web page in the browser (a limit of the practice version), so I made no changes.');
       });
     }
   }, 98);
@@ -411,8 +410,8 @@
     if (!d || !d.hours || host !== m.host) return null;
     return {
       name: d.name,
-      hours: d.hours.map(function (r) { return r[0] + '：' + r[1]; }).concat(d.hoursNote ? [d.hoursNote] : []),
-      prices: (d.prices || []).map(function (r) { return r[0] + '：' + r[1]; }),
+      hours: d.hours.map(function (r) { return ('' + (r[0]) + ': ' + (r[1])); }).concat(d.hoursNote ? [d.hoursNote] : []),
+      prices: (d.prices || []).map(function (r) { return ('' + (r[0]) + ': ' + (r[1])); }),
       updated: [d.updatedLine || ('Last updated: ' + d.updated)]
     };
   }
@@ -429,8 +428,8 @@
       var cls = C.classify(url);
       if (cls.kind !== 'web') {
         ctx.step('Used the browser', function () { C.open({ target: url, by: 'codex' }); });
-        ctx.say('我在內建瀏覽器試著打開 ' + url + '，但打不開：練習用的電腦沒有連到網際網路，只打得開練習準備好的頁面。所以我沒有寫 notes.md。');
-        ctx.say('（真的上網時，找不到頁面也要照實說，不能編資料。）');
+        ctx.say(('I tried to open ' + (url) + ' in the built-in browser, but it would not open: the practice computer is not connected to the internet and can only open the pages prepared for the practice. So I did not write notes.md.'));
+        ctx.say('(When you really go online, if a page cannot be found, say so honestly. Never make up data.)');
         return;
       }
       var wantVisit = /visit/i.test(raw);
@@ -444,16 +443,16 @@
       ctx.step('Used the browser, ran commands', function () { C.scrollToEnd(); });
       var facts = museumFacts(cls.host) || lookupFacts(page);
       var title = facts.name || (home && home.title) || (page && page.title) || cls.host;
-      var out = ['# 美術館資訊：' + String(title).replace(/\s*[\-—|·].*$/, ''), '', '來源：' + where + '（查詢日期：' + today() + '）', '', '## 開放時間'];
-      out.push(facts.hours.length ? bullets(facts.hours) : '- （我在頁面上沒有讀到開放時間）');
-      out.push('', '## 票價');
-      out.push(facts.prices.length ? bullets(facts.prices) : '- （我在頁面上沒有讀到票價）');
+      var out = [('# Museum information: ' + (String(title).replace(/\s*[\-—|·].*$/, ''))), '', ('Source: ' + (where) + ' (looked up on ' + (today()) + ')'), '', '## Opening hours'];
+      out.push(facts.hours.length ? bullets(facts.hours) : '- (I couldn\'t read any opening hours on the page)');
+      out.push('', '## Ticket prices');
+      out.push(facts.prices.length ? bullets(facts.prices) : '- (I couldn\'t read any ticket prices on the page)');
       ctx.write('notes.md', out.join('\n') + '\n');
-      ctx.say('我在內建瀏覽器打開了 ' + url + (wantVisit ? '，點了 Visit 分頁' : '') + '，往下捲到最後，把讀到的整理進 `notes.md`，來源網址也附上了：');
-      ctx.say('• 開放時間：' + (facts.hours.length ? facts.hours.length + ' 條' : '沒有讀到'));
-      ctx.say('• 票價：' + (facts.prices.length ? facts.prices.length + ' 條' : '沒有讀到'));
+      ctx.say(('I opened ' + (url) + (wantVisit ? ', clicked the Visit tab' : '') + ', scrolled down to the end, put what I read into `notes.md`, and added the source URL:'));
+      ctx.say(('• Opening hours: ' + (facts.hours.length ? ('' + (facts.hours.length) + ' ' + ((facts.hours.length) == 1 ? 'item' : 'items')) : 'none found')));
+      ctx.say(('• Ticket prices: ' + (facts.prices.length ? ('' + (facts.prices.length) + ' ' + ((facts.prices.length) == 1 ? 'item' : 'items')) : 'none found')));
       ctx.say('');
-      ctx.say('網頁上寫的不一定可靠，請你自己打開來源確認一次。（練習版：這個網站是虛構的，資料都是假的。）');
+      ctx.say('What a web page says is not always reliable, so please open the source yourself and check it once. (Practice version: this website is made up, and all its data is fake.)');
     }
   }, 93);
 
@@ -462,19 +461,19 @@
     test: function (t) { return (t.indexOf('notes.md') >= 0 || t.indexOf('筆記') >= 0) && /日期|更新|date|updated/i.test(t); },
     run: function (ctx) {
       var notes = ctx.read('notes.md');
-      if (notes === null) { ctx.say('這個資料夾裡還沒有 notes.md。請先請我去查網頁、整理成筆記。'); return; }
+      if (notes === null) { ctx.say('There is no notes.md in this folder yet. Please ask me to look up a web page and put it into the notes first.'); return; }
       var m = /https?:\/\/[^\s，。、；;（）()」』"'<>]+/.exec(notes);
       var src = m ? m[0] : '';
       var page = src ? C.peekWeb(src) : null;
       var host = (/^https?:\/\/([^\/]+)/i.exec(src) || [])[1] || '';
       var facts = museumFacts(host) || lookupFacts(page);
       var line = facts.updated.length ? facts.updated[facts.updated.length - 1] : '';
-      if (/2025/.test(notes) && line && notes.indexOf(line) >= 0) { ctx.say('notes.md 裡已經有網頁的更新日期了：' + line); return; }
+      if (/2025/.test(notes) && line && notes.indexOf(line) >= 0) { ctx.say(('notes.md already has the date the page was updated: ' + (line))); return; }
       ctx.step('Used the browser', function () { C.open({ target: src || undefined, by: 'codex' }); });
-      if (!line) { ctx.say('我重新看了網頁，但找不到寫著更新日期的地方，所以沒有改 notes.md。'); return; }
-      ctx.write('notes.md', notes.replace(/\s+$/, '') + '\n\n## 頁面更新日期\n- 網頁最下面寫：' + line + '\n- 資料可能已經過時，使用前要再確認。\n');
-      ctx.say('我看了網頁最下面，寫著「' + line + '」。已經補進 `notes.md`。');
-      ctx.say('資料可能已經過時，所以要記下日期。');
+      if (!line) { ctx.say('I looked at the page again, but I couldn\'t find where an update date is written, so I did not change notes.md.'); return; }
+      ctx.write('notes.md', ('' + (notes.replace(/\s+$/, '')) + '\n\n## Page last updated\n- The bottom of the page says: ' + (line) + '\n- The information may be out of date, so check it again before you use it.\n'));
+      ctx.say(('I looked at the bottom of the page. It says “' + (line) + '”. I added it to `notes.md`.'));
+      ctx.say('The information may be out of date, so the date needs to be written down.');
     }
   }, 92);
 
@@ -504,7 +503,7 @@
   function listFrom(raw) {
     var q = firstQuote(raw);
     var parts = (q || '').split(/[、，,；;→>]+|->|=>/).map(trim).filter(Boolean);
-    if (parts.length < 2) parts = ['收集資料', '整理資料', '做成網站'];
+    if (parts.length < 2) parts = ['Collect data', 'Organize data', 'Build a website'];
     return parts.slice(0, 8);
   }
 
@@ -513,10 +512,10 @@
     test: function (t) { return (t.indexOf('mermaid') >= 0 || t.indexOf('architecture.md') >= 0 || t.indexOf('流程圖') >= 0) && /出不來|錯誤|error|修|壞|fix|無法|parse|失敗|不能顯示/i.test(t); },
     run: function (ctx) {
       var rel = ctx.exists('ARCHITECTURE.md') ? 'ARCHITECTURE.md' : null;
-      if (!rel) { ctx.say('這個資料夾裡沒有 ARCHITECTURE.md，我不知道要修哪一張圖。'); return; }
+      if (!rel) { ctx.say('There is no ARCHITECTURE.md in this folder, so I don\'t know which diagram to fix.'); return; }
       var md = ctx.read(rel);
       var blocks = blocksOf(md || '');
-      if (!blocks.length) { ctx.say('我在 ARCHITECTURE.md 裡沒有找到 mermaid 區塊。圖要用三個反引號加 mermaid 包起來。'); return; }
+      if (!blocks.length) { ctx.say('I couldn\'t find a mermaid block in ARCHITECTURE.md. A diagram has to be wrapped in three backticks followed by the word mermaid.'); return; }
       var out = md, changed = [], shift = 0;
       blocks.forEach(function (b) {
         var fixed = b.src.split('\n').map(function (ln, i) {
@@ -527,12 +526,12 @@
         out = out.slice(0, b.start + shift) + fixed + out.slice(b.end + shift);
         shift += fixed.length - b.src.length;
       });
-      if (!changed.length) { ctx.say('我看了 ARCHITECTURE.md 裡的 mermaid 圖，沒有看到全形符號或沒關的括號。如果預覽有錯誤訊息，請把整段貼給我。'); return; }
+      if (!changed.length) { ctx.say('I looked at the mermaid diagram in ARCHITECTURE.md and didn\'t see any full-width symbols or unclosed brackets. If the preview shows an error message, please paste the whole message to me.'); return; }
       ctx.write(rel, out);
-      ctx.say('我修好了 ' + changed.length + ' 行（多半是括號沒關，或符號打成全形）：');
-      changed.slice(0, 6).forEach(function (c) { ctx.say('• `' + c.from + '` 改成 `' + c.to + '`'); });
+      ctx.say(('I fixed ' + (changed.length) + ' ' + ((changed.length) == 1 ? 'line' : 'lines') + ' (mostly brackets that were not closed, or symbols typed in full-width):'));
+      changed.slice(0, 6).forEach(function (c) { ctx.say(('• `' + (c.from) + '` changed to `' + (c.to) + '`')); });
       ctx.say('');
-      ctx.say('括號和箭頭都要用半形。存檔後，預覽會自己更新。');
+      ctx.say('Brackets and arrows must all be half-width. After you save, the preview updates by itself.');
     }
   }, 92);
 
@@ -543,8 +542,8 @@
       // not in a project (the New chat box): there is no project folder, so no ARCHITECTURE.md to add to. Say so, as the other Week 4 replies
       // do, instead of writing a new one into ~/Documents (lab-fixes-r1: Week 4 mission 8 step 8 used to tick anyway)
       if (!ctx.project) {
-        ctx.say('這個對話不在專案裡（輸入框上方沒有專案標籤），所以我看不到專案的檔案，不知道要把圖加進哪一個 ARCHITECTURE.md。');
-        ctx.say('請先點左邊的專案（還沒有的話，把專案資料夾拖進左邊的側邊欄），再在專案底下的對話請我做。');
+        ctx.say('This chat is not in a project (there is no project tag above the input box), so I can\'t see the project\'s files and don\'t know which ARCHITECTURE.md to add the diagram to.');
+        ctx.say('Please click the project on the left first (if there is no project yet, drag the project folder into the sidebar on the left), then ask me in a chat under the project.');
         return;
       }
       var items = listFrom(ctx.rawText);
@@ -553,14 +552,14 @@
       items.forEach(function (it, i) { if (i > 0) lines.push('    ' + ids[i - 1] + ' --> ' + ids[i] + '[' + it.replace(/[\[\](){}|]/g, '') + ']'); });
       lines[1] = lines[1].replace(/^(\s+)(A)( --> )/, '$1A[' + items[0].replace(/[\[\](){}|]/g, '') + ']$3');
       var body = lines.join('\n') + '\n';
-      if (!mermaidOk(body)) body = 'flowchart TD\n    A[開始] --> B[完成]\n';
+      if (!mermaidOk(body)) body = 'flowchart TD\n    A[Start] --> B[Done]\n';
       var rel = 'ARCHITECTURE.md';
       var cur = ctx.exists(rel) ? ctx.read(rel) : null;
-      var add = '## 流程圖（Codex 新增）\n\n```mermaid\n' + body + '```\n';
-      ctx.write(rel, cur === null ? '# 系統架構\n\n' + add : cur.replace(/\s+$/, '') + '\n\n' + add);
-      ctx.say((cur === null ? '已建立 ARCHITECTURE.md，並' : '已在 ARCHITECTURE.md 的最後面') + '新增一段 Mermaid 流程圖，原本的圖沒有動：');
+      var add = ('## Flowchart (added by Codex)\n\n```mermaid\n' + (body) + '```\n');
+      ctx.write(rel, cur === null ? ('# System Architecture\n\n' + (add)) : cur.replace(/\s+$/, '') + '\n\n' + add);
+      ctx.say(('' + (cur === null ? 'I created ARCHITECTURE.md and ' : 'At the end of ARCHITECTURE.md I ') + 'added a new Mermaid flowchart. The original diagram was not touched:'));
       ctx.say('```\n' + body.replace(/\n$/, '') + '\n```');
-      ctx.say('用 Code 的預覽，或放上 GitHub，就能看到這張圖。');
+      ctx.say('To see the diagram, use the preview in Code, or put it on GitHub.');
     }
   }, 91);
 })(window.LAB);

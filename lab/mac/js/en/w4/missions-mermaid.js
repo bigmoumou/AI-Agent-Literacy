@@ -9,9 +9,9 @@
   var W4 = LAB.w4 = LAB.w4 || {};
   var FM = W4.FM || '/Users/an/Desktop/Firenze-Museums';
   var ARCH = FM + '/ARCHITECTURE.md';
-  var G_MERMAID = 'Mermaid（Week 4 補充 2）';
-  var TAG = 'Week 4 補充 2';
-  var MAP = '用三個反引號加 mermaid 把圖包起來 · flowchart TD 由上往下、LR 由左往右 · A[方塊] · ( ) 圓角 · { } 菱形 · --> 箭頭 · -->|字| 箭頭上寫字';
+  var G_MERMAID = 'Mermaid (Week 4 Extra 2)';
+  var TAG = 'Week 4 Extra 2';
+  var MAP = 'Wrap the diagram in three backticks plus mermaid · flowchart TD top to bottom, LR left to right · A[box] · ( ) rounded corners · { } diamond · --> arrow · -->|text| text on an arrow';
 
   /* ------------------------------------------------------------------ the kit (shared with missions-hw.js) */
   function same(api, a, b) { try { return !!api.same(a, b); } catch (e) { return false; } }
@@ -167,11 +167,11 @@
       if (!ev || ev.name !== 'mermaid:render' || !ev.data || !renderOf(ev.data, path || ARCH)) return null;
       if (ev.data.ok) return '';          // it draws now: the earlier complaint is settled, the quiet line goes away (the engine takes '' as 「resolved」)
       var er = ev.data.error || {};
-      if (er.kind === 'fullwidth') return '預覽出不來：有符號打成全形了（例如 ［ ］、－－＞、｜）。括號、箭頭、| 都要用半形，輸入法切到英文（ABC）再打。';
-      if (er.kind === 'unclosed') return '預覽出不來：有括號沒關起來。[ 要有 ]，( 要有 )，{ 要有 }。看看錯誤訊息說的那一行，也看看它的前一行。';
-      if (er.kind === 'arrow') return '預覽出不來：箭頭要寫 -->（兩個減號加一個大於符號）。';
-      if (er.kind === 'header') return '預覽出不來：第一行要寫 flowchart TD 或 flowchart LR，英文字母的大小寫要一樣。';
-      return '預覽出不來。照紅色錯誤訊息裡的行號，找找那一行和它前一行有沒有打錯。看不懂的話，整段貼給 Codex 請它修。';
+      if (er.kind === 'fullwidth') return 'The preview can\'t be drawn: a symbol was typed as a full-width character (the wide kind you get with a Chinese or Japanese input method, in brackets, arrows or |). Brackets, arrows and | must be half-width; switch the input source to English (ABC) first, then type them again.';
+      if (er.kind === 'unclosed') return 'The preview can\'t be drawn: a bracket isn\'t closed. Every [ needs a ], every ( needs a ), every { needs a }. Look at the line the error message names, and also at the line before it.';
+      if (er.kind === 'arrow') return 'The preview can\'t be drawn: the arrow must be written --> (two hyphens and one greater-than sign).';
+      if (er.kind === 'header') return 'The preview can\'t be drawn: the first line must be flowchart TD or flowchart LR, with the same upper and lower case.';
+      return 'The preview can\'t be drawn. Use the line number in the red error message to look at that line and the line before it for typing mistakes. If you can\'t make sense of it, paste the whole thing to Codex and ask it to fix it.';
     };
   }
 
@@ -201,7 +201,7 @@
     try { c = api.codex.activeChat(); } catch (e) { c = null; }
     return c && !isNullish(c.projectPath) && same(api, c.projectPath, FM) ? cxComposer() : cxProject(FM)();
   }
-  var NOT_IN_FM = '這個對話不在 Firenze-Museums 底下（輸入框上方沒有「Firenze-Museums」標籤），Codex 找不到專案裡的 ARCHITECTURE.md。先把桌面的 Firenze-Museums 拖進 Codex 左邊的側邊欄、按 Trust folder，在專案底下的對話再問一次。';
+  var NOT_IN_FM = 'This chat isn\'t inside Firenze-Museums (there is no “Firenze-Museums” label above the input box), so Codex can\'t find ARCHITECTURE.md in the project. First drag Firenze-Museums from the Desktop into the sidebar on the left of Codex and click Trust folder, then ask again in a chat under the project.';
 
   function trusted(fn) { fn.trusted = true; return fn; }      // the function already checked that its element is visible (chain takes it as it is)
   W4.kit = {
@@ -217,13 +217,13 @@
     id: 'w4-m1-mermaid',
     week: 4, order: 8,
     group: G_MERMAID,
-    title: '用 Mermaid 畫流程圖',
+    title: 'Draw a flowchart with Mermaid',
     minutes: 9,
     tag: TAG,
     map: MAP,
     resetsFiles: true,
     needs: [FM],
-    intro: 'Mermaid 用幾行字畫流程圖。放在 .md 檔裡，用三個反引號加 mermaid 把圖包起來；作業的 ARCHITECTURE.md 就是這樣。',
+    intro: 'Mermaid draws a flowchart from a few lines of text. Put it in a .md file and wrap the diagram in three backticks plus mermaid; the ARCHITECTURE.md in the homework is written exactly like that.',
     prepare: function (api) {
       ensureBase4(api);
       api.ensureSeed(ARCH, { overwrite: true });          // the diagram as the Week 3 homework left it
@@ -233,11 +233,11 @@
     steps: [
       {
         id: 's1',
-        text: '用 Code（就是影片裡的 VS Code）打開 Firenze-Museums 資料夾，點開 ARCHITECTURE.md，再按編輯器右上角的預覽按鈕，圖就畫出來了。',
-        hint: '在 Finder 對 Firenze-Museums 按右鍵 › 打開方式 › Code。預覽按鈕在標籤列的右邊，滑鼠移上去會寫 Open Preview to the Side。預覽太擠的話，按 Command+B 收起左邊的檔案列表。',
-        answer: 'Finder › 桌面 › Firenze-Museums › 右鍵 › 打開方式 › Code；點 ARCHITECTURE.md；按右上角的預覽按鈕（或 Shift+Command+V）。',
+        text: 'Open the Firenze-Museums folder with Code (the VS Code from the video), click ARCHITECTURE.md, then click the preview button at the top right of the editor, and the diagram is drawn.',
+        hint: 'In Finder, right-click Firenze-Museums › Open With › Code. The preview button is at the right of the tab bar; when you hover over it, it says Open Preview to the Side. If the preview is too cramped, press Command+B to hide the file list on the left.',
+        answer: 'Finder › Desktop › Firenze-Museums › right-click › Open With › Code; click ARCHITECTURE.md; click the preview button at the top right (or Shift+Command+V).',
         replay: 'mission',
-        menuPath: ['打開方式', 'Code'],
+        menuPath: ['Open With', 'Code'],
         target: codeFlow(ARCH, FM),
         check: function (ev, api) {
           var opened = api.seen('editor:open', function (d) { return d.appId === 'code' && same(api, d.path, ARCH); });
@@ -248,8 +248,8 @@
       },
       {
         id: 's2',
-        text: '把第一行的 `flowchart LR` 改成 `flowchart TD`，看預覽：圖變成由上往下。',
-        hint: 'TD 是 Top Down，由上往下；LR 是 Left to Right，由左往右。改完預覽會自己更新。',
+        text: 'Change `flowchart LR` on the first line to `flowchart TD` and look at the preview: the diagram now runs from top to bottom.',
+        hint: 'TD is Top Down, from top to bottom; LR is Left to Right, from left to right. After you change it, the preview updates by itself.',
         answer: '`flowchart TD`',
         replay: 'mission',
         target: editTarget(ARCH),
@@ -260,9 +260,9 @@
       },
       {
         id: 's3',
-        text: '在圖的最後面新增一個方塊，接在 F 後面：`F --> H[交作業]`',
-        hint: '`A[文字]` 的 A 是代號，[ ] 裡是方塊上的字，--> 是箭頭。F 已經有了，同一個代號寫第二次，就是接回同一個方塊。括號和箭頭都要用半形。',
-        answer: '新增一行（前面空四格）：`    F --> H[交作業]`',
+        text: 'Add a new box at the end of the diagram, connected after F: `F --> H[Hand in homework]`',
+        hint: 'In `A[text]`, A is the id, the text inside [ ] is what is written on the box, and --> is the arrow. F already exists; writing the same id a second time connects back to the same box. Brackets and arrows must be half-width.',
+        answer: 'Add a new line (indented four spaces): `    F --> H[Hand in homework]`',
         replay: 'mission',
         target: editTarget(ARCH),
         check: function (ev, api) {
@@ -272,9 +272,9 @@
       },
       {
         id: 's4',
-        text: '加一個要判斷的地方，用菱形：在 B 和 C 中間放一個「資料完整嗎？」。',
-        hint: '菱形用大括號 { }，圓角用小括號 ( )。把 B 接到新的代號 G，G 再接到 C。',
-        answer: '`B --> G{資料完整嗎？}` 和 `G --> C`（原來的 `B --> C` 可以刪掉）',
+        text: 'Add a place where a decision is made, using a diamond: put “Is the data complete?” between B and C.',
+        hint: 'Use curly braces { } for a diamond and round brackets ( ) for rounded corners. Connect B to the new id G, and G to C.',
+        answer: '`B --> G{Is the data complete?}` and `G --> C` (you can delete the original `B --> C`)',
         replay: 'mission',
         target: editTarget(ARCH),
         check: function (ev, api) {
@@ -284,9 +284,9 @@
       },
       {
         id: 's5',
-        text: '讓箭頭上有字：把 G 接到 C 的箭頭寫上「是」，再新增一條「否」的箭頭，回到 A。',
-        hint: '箭頭上寫字：`-->|字|`。「否」接回前面的代號 A，圖會自己繞回去。',
-        answer: '`G -->|是| C` 和 `G -->|否| A`',
+        text: 'Put text on the arrows: write “Yes” on the arrow from G to C, then add a “No” arrow that goes back to A.',
+        hint: 'To put text on an arrow, write `-->|text|`. Connect “No” back to the earlier id A, and the diagram loops back by itself.',
+        answer: '`G -->|Yes| C` and `G -->|No| A`',
         replay: 'mission',
         target: editTarget(ARCH),
         check: function (ev, api) {
@@ -296,8 +296,8 @@
       },
       {
         id: 's6',
-        text: '按 Command+S 存檔，預覽沒有出現紅色錯誤。',
-        hint: '存好之後，這個檔案才能 commit、push 到 GitHub；GitHub 也會用同樣的字把圖畫出來。',
+        text: 'Press Command+S to save. The preview shows no red error.',
+        hint: 'Once it is saved, this file can be committed and pushed to GitHub; GitHub draws the diagram from the same text.',
         answer: 'Command+S',
         replay: 'mission',
         target: editTarget(ARCH),
@@ -309,16 +309,16 @@
         trap: function (ev, api) {
           var t = mermaidTrap(ARCH)(ev, api);
           if (t) return t;
-          if (ev && ev.name === 'editor:save' && ev.data && same(api, ev.data.path, ARCH)) return '存好了，但檔案裡還缺東西：要有接在 F 後面的新方塊、一個菱形，和菱形出來有字的箭頭。看看預覽。';
+          if (ev && ev.name === 'editor:save' && ev.data && same(api, ev.data.path, ARCH)) return 'It\'s saved, but the file is still missing something: it needs the new box after F, a diamond, and an arrow with text coming out of the diamond. Look at the preview.';
           return t;                                 // '' (the diagram draws again: clear the line) or null
         }
       },
       {
         id: 's7',
         optional: true,
-        text: '故意弄壞一次：把某一行的 `[` 改成全形的 `［`，看看預覽怎麼說，再改回來。',
-        hint: '圖出不來最常見的原因：括號沒關，或是打成全形。錯誤訊息會說第幾行；問題常在前一行。看不懂英文沒關係，整段貼給 Codex 修。',
-        answer: '把 `[` 改成 `［`，看預覽的錯誤，再改回 `[`。',
+        text: 'Break it on purpose once: on one line, delete the `]` that closes a box opened by `[`, look at what the preview says, then put it back.',
+        hint: 'The most common reasons a diagram doesn\'t appear: a bracket isn\'t closed, or a symbol was typed full-width. The error message names a line number; the problem is often on the line before. If the English is hard to read, that\'s fine: paste the whole thing to Codex and ask it to fix it.',
+        answer: 'Delete the closing bracket of a box that opens with `[`, read the error in the preview, then put it back: `[` starts the text and `]` ends it.',
         target: editTarget(ARCH),
         check: function (ev, api) {
           if (ev && ev.name === 'mermaid:render' && ev.data && renderOf(ev.data, ARCH)) {
@@ -331,9 +331,9 @@
       {
         id: 's8',
         optional: true,
-        text: '圖出不來、或不會寫的時候，請 Codex 幫你：[[請把「收集資料、檢查資料、整理成表格、做成網站」的流程畫成 Mermaid，加進 ARCHITECTURE.md]]',
-        hint: '要在 Firenze-Museums 專案的對話裡問（輸入框上方有「Firenze-Museums」標籤）。Codex 左邊還沒有這個專案的話，先把桌面上的 Firenze-Museums 拖進 Codex 左邊的側邊欄，按 Trust folder。Codex 會把整段圖寫進檔案，你可以在 Code 的預覽看到結果。',
-        answer: '把桌面的 Firenze-Museums 拖進 Codex 左邊、按 Trust folder（已經有就點左邊的 Firenze-Museums）；在它底下的對話貼上那句，按 Return。',
+        text: 'If the diagram won\'t appear, or you don\'t know how to write it, ask Codex to help: [[Please draw the flow “Collect data, Check data, Organize into a table, Make a website” as a Mermaid diagram and add it to ARCHITECTURE.md]]',
+        hint: 'Ask in the chat of the Firenze-Museums project (there is a “Firenze-Museums” label above the input box). If the project isn\'t on the left of Codex yet, first drag Firenze-Museums from the Desktop into Codex\'s sidebar on the left and click Trust folder. Codex writes the whole diagram into the file, and you can see the result in Code\'s preview.',
+        answer: 'Drag Firenze-Museums from the Desktop into the left side of Codex and click Trust folder (if it\'s already there, click Firenze-Museums on the left); in a chat under it, paste that sentence and press Return.',
         target: chain(T_FM_CHAT, dock('codex')),
         // only in the Firenze-Museums chat: from New chat Codex says it is not in a project and writes nothing
         check: function (ev, api) {
@@ -346,6 +346,6 @@
         }
       }
     ],
-    outro: 'Mermaid：一行 flowchart、代號加方塊文字、箭頭；{ } 是要判斷的地方，-->|字| 在箭頭上寫字。括號和箭頭都要用半形；圖出不來時，看錯誤訊息的行號，問題常在前一行。'
+    outro: 'Mermaid: one flowchart line, an id plus the box text, and arrows; { } marks a place where you decide, and -->|text| puts text on an arrow. Brackets and arrows must be half-width; when a diagram won\'t appear, look at the line number in the error message, and remember that the problem is often on the line before.'
   });
 })(window.LAB);

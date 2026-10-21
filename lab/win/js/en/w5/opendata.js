@@ -15,12 +15,12 @@
   var HOST = W5.OD_HOST, BASE = 'https://' + HOST;
   var DS = '/dataset/ginkgo-street-trees';
   var DATA = {
-    title: '銀杏行道樹位置',
-    office: '（虛構）市政府公園處',
+    title: 'Ginkgo Street Tree Locations',
+    office: 'City Parks Department (fictional)',
     updated: '2026-09-30',
-    license: '開放資料（練習用，可自由使用）',
+    license: 'Open data (for practice, free to use)',
     rows: 20,
-    fields: [['編號', '每一棵樹的代號'], ['路名', '樹種在哪一條路'], ['樹齡（年）', '估計的樹齡'], ['地圖X', '在練習地圖上的左右位置（0–100）'], ['地圖Y', '在練習地圖上的上下位置（0–100）']]
+    fields: [['ID', 'A code for each tree'], ['Street', 'The street the tree is on'], ['Age (years)', 'Estimated age of the tree'], ['Map X', 'Left-to-right position on the practice map (0–100)'], ['Map Y', 'Top-to-bottom position on the practice map (0–100)']]
   };
   W5.opendata = { host: HOST, base: BASE, dataset: BASE + DS, csv: BASE + DS + '/ginkgo-trees.csv', data: DATA };
 
@@ -29,10 +29,10 @@
     return h('div', { class: 'od-page', dataset: { lab: 'web-opendata', page: page } },
       h('header', { class: 'od-top' },
         h('span', { class: 'od-logo', 'aria-hidden': 'true' }),
-        L('/', '城市開放資料平台（虛構）', 'od-brand'),
-        h('nav', { class: 'od-nav' }, L('/', '首頁'), L(DS, '資料集'))),
+        L('/', 'City Open Data Portal (fictional)', 'od-brand'),
+        h('nav', { class: 'od-nav' }, L('/', 'Home'), L(DS, 'Datasets'))),
       h('main', { class: 'od-main' }, body),
-      h('footer', { class: 'od-foot' }, '練習版：這不是真的網站，網址 opendata.city.example 也不存在。'));
+      h('footer', { class: 'od-foot' }, 'Practice version: this is not a real website, and the address opendata.city.example does not exist either.'));
   }
 
   function build(info, ctx) {
@@ -40,39 +40,39 @@
     var L = function (to, text, cls) { return LAB.web.link(ctx, BASE + to, text, cls ? { class: cls } : null); };
     if (path === '/') {
       return chrome('home', ctx, h('div', null,
-        h('h1', null, '城市開放資料平台'),
-        h('p', { class: 'od-lead' }, '市政府各單位公開的資料，都可以在這裡下載（練習用的虛構網站）。'),
-        h('section', { class: 'od-card' }, h('h2', null, L(DS, DATA.title)), h('p', null, DATA.office + '　·　更新日期 ' + DATA.updated + '　·　CSV'))));
+        h('h1', null, 'City Open Data Portal'),
+        h('p', { class: 'od-lead' }, 'Data published by the city government\'s departments can all be downloaded here (a made-up website for practice).'),
+        h('section', { class: 'od-card' }, h('h2', null, L(DS, DATA.title)), h('p', null, ('' + (DATA.office) + '  ·  Updated ' + (DATA.updated) + '  ·  CSV')))));
     }
     if (path === DS) {
-      var fields = h('table', { class: 'od-table' }, h('tr', null, h('th', null, '欄位'), h('th', null, '說明')));
+      var fields = h('table', { class: 'od-table' }, h('tr', null, h('th', null, 'Field'), h('th', null, 'Description')));
       DATA.fields.forEach(function (f) { fields.appendChild(h('tr', null, h('td', null, f[0]), h('td', null, f[1]))); });
       var preview = h('pre', { class: 'od-pre' }, W5.files.TREES_CSV.split('\n').slice(0, 6).join('\n'));
       return chrome('dataset', ctx, h('div', null,
-        h('p', { class: 'od-crumb' }, L('/', '首頁'), ' › 資料集'),
+        h('p', { class: 'od-crumb' }, L('/', 'Home'), ' › Datasets'),
         h('h1', null, DATA.title),
         h('dl', { class: 'od-meta' },
-          h('dt', null, '提供單位'), h('dd', null, DATA.office),
-          h('dt', null, '更新日期'), h('dd', { dataset: { lab: 'od-updated' } }, DATA.updated),
-          h('dt', null, '筆數'), h('dd', null, DATA.rows + ' 筆'),
-          h('dt', null, '授權'), h('dd', null, DATA.license)),
-        h('h2', null, '欄位'), fields,
-        h('h2', null, '資料預覽（前 5 筆）'), preview,
-        h('p', null, L(DS + '/ginkgo-trees.csv', '下載 CSV（ginkgo-trees.csv）', 'od-btn'))));
+          h('dt', null, 'Provided by'), h('dd', null, DATA.office),
+          h('dt', null, 'Updated'), h('dd', { dataset: { lab: 'od-updated' } }, DATA.updated),
+          h('dt', null, 'Rows'), h('dd', null, ('' + (DATA.rows) + ' ' + ((DATA.rows) == 1 ? 'row' : 'rows'))),
+          h('dt', null, 'License'), h('dd', null, DATA.license)),
+        h('h2', null, 'Field'), fields,
+        h('h2', null, 'Data preview (first 5 rows)'), preview,
+        h('p', null, L(DS + '/ginkgo-trees.csv', 'Download CSV (ginkgo-trees.csv)', 'od-btn'))));
     }
     if (path === DS + '/ginkgo-trees.csv') {
       return chrome('csv', ctx, h('div', null, h('p', { class: 'od-crumb' }, L(DS, DATA.title), ' › ginkgo-trees.csv'), h('pre', { class: 'od-pre' }, W5.files.TREES_CSV)));
     }
-    return chrome('404', ctx, h('div', null, h('h1', null, '找不到這一頁'), h('p', null, L('/', '回到首頁'))));
+    return chrome('404', ctx, h('div', null, h('h1', null, 'Page not found'), h('p', null, L('/', 'Back to home'))));
   }
 
   LAB.web.register({
     host: HOST,
     title: function (info) {
       var p = (info.path || '/').replace(/\/+$/, '');
-      if (p === DS) return DATA.title + '｜城市開放資料平台';
+      if (p === DS) return ('' + (DATA.title) + ' | City Open Data Portal');
       if (p === DS + '/ginkgo-trees.csv') return 'ginkgo-trees.csv';
-      return '城市開放資料平台';
+      return 'City Open Data Portal';
     },
     build: build
   });

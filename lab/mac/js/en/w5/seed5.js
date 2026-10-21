@@ -32,9 +32,9 @@
 
   /* the 12 spots: name, photo number, position on the map (% of width, % of height). Spot 1 is where the walk starts. */
   var SPOTS = [
-    ['銀杏坂公園', 1, 18, 62], ['黃葉橋', 2, 34, 48], ['北門行道樹', 3, 52, 18], ['老郵局前', 4, 46, 72],
-    ['河岸步道', 5, 68, 58], ['圖書館廣場', 6, 60, 36], ['學園路', 7, 26, 28], ['舊車站', 8, 80, 26],
-    ['小丘涼亭', 9, 86, 74], ['市場口', 10, 38, 88], ['水門公園', 11, 72, 86], ['東坡步道', 12, 92, 48]
+    ['Ginkgo Slope Park', 1, 18, 62], ['Yellow Leaf Bridge', 2, 34, 48], ['North Gate Street Trees', 3, 52, 18], ['Old Post Office', 4, 46, 72],
+    ['Riverside Walk', 5, 68, 58], ['Library Plaza', 6, 60, 36], ['Campus Road', 7, 26, 28], ['Old Station', 8, 80, 26],
+    ['Hilltop Pavilion', 9, 86, 74], ['Market Entrance', 10, 38, 88], ['Floodgate Park', 11, 72, 86], ['East Slope Trail', 12, 92, 48]
   ];
   W5.SPOTS = SPOTS.map(function (s) { return { name: s[0], n: s[1], x: s[2], y: s[3], photo: 'ginkgo-' + (s[1] < 10 ? '0' : '') + s[1] + '.jpg' }; });
   W5.START = SPOTS[0][0];
@@ -56,34 +56,12 @@
   }
   W5.sortedNames = sortedNames;
   function listSection(lines) {
-    return '  <section class="list">\n    <h2>全部景點</h2>\n    <ol>\n' + lines.map(function (l) { return '      <li>' + l + '</li>\n'; }).join('') + '    </ol>\n  </section>\n';
+    return ('  <section class="list">\n    <h2>All spots</h2>\n    <ol>\n' + (lines.map(function (l) { return '      <li>' + l + '</li>\n'; }).join('')) + '    </ol>\n  </section>\n');
   }
   W5.listSection = listSection;
 
   function html(withList) {
-    return '<!doctype html>\n' +
-      '<html lang="en">\n' +
-      '<head>\n' +
-      '<meta charset="utf-8">\n' +
-      '<meta name="viewport" content="width=device-width, initial-scale=1">\n' +
-      '<title>銀杏散步地圖</title>\n' +
-      '<link rel="stylesheet" href="style.css">\n' +
-      '</head>\n' +
-      '<body>\n' +
-      '<header>\n' +
-      '  <h1>銀杏散步地圖</h1>\n' +
-      '  <p class="lede">12 個看銀杏的地方（練習用的虛構地圖）</p>\n' +
-      '</header>\n' +
-      '<main>\n' +
-      '  <div class="map" role="img" aria-label="銀杏散步地圖">\n' +
-      '    <span class="river"></span><span class="road r1"></span><span class="road r2"></span>\n' +
-      W5.SPOTS.map(spotLine).join('') +
-      '  </div>\n' +
-      (withList ? listSection(sortedNames()) : '') +
-      '</main>\n' +
-      '<footer>照片和地點都是練習用的虛構資料。</footer>\n' +
-      '</body>\n' +
-      '</html>\n';
+    return ('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>Ginkgo Walking Map</title>\n<link rel="stylesheet" href="style.css">\n</head>\n<body>\n<header>\n  <h1>Ginkgo Walking Map</h1>\n  <p class="lede">12 places to see ginkgo (a made-up map for practice)</p>\n</header>\n<main>\n  <div class="map" role="img" aria-label="Ginkgo Walking Map">\n    <span class="river"></span><span class="road r1"></span><span class="road r2"></span>\n' + (W5.SPOTS.map(spotLine).join('')) + '  </div>\n' + (withList ? listSection(sortedNames()) : '') + '</main>\n<footer>The photos and places are all made-up practice data.</footer>\n</body>\n</html>\n');
   }
   function spotRule(px) {
     var half = px / 2;
@@ -112,36 +90,27 @@
       'footer { padding: 12px 20px 28px; color: #8a8270; font-size: 13px; text-align: center; }\n';
   }
 
-  var AGENTS_BASE = '# AGENTS.md：銀杏散步地圖\n\n' +
-    '- 回覆和說明用繁體中文\n' +
-    '- 網站放在 site/，照片放在 site/photos/\n' +
-    '- 改完說明改了哪些檔案\n';
-  var VERIFY_LINE = '每次做完一個新功能，都要把 VERIFY.md 完整驗證一次，確保全部通過。';
-  var VERIFY_DRAFT = '# VERIFY.md：銀杏散步地圖的驗收單\n\n' +
-    '每做完一個新功能，照這份清單從頭檢查一次，結果寫成一張表。\n\n' +
-    '1. 地圖上有 12 個景點標記：數 site/index.html 裡 class="spot" 的標記，應該是 12 個。\n' +
-    '2. 寬 390 px 時不會左右捲動：用內建瀏覽器切到手機寬度，頁面不能比畫面寬。\n' +
-    '3. 照片都打得開：site/index.html 裡每個照片檔名，和 site/photos/ 裡的檔名一字不差（大小寫也要一樣）。\n' +
-    '4. 在手機上，地圖上的景點標記要夠大，手指點得到。\n' +
-    '5. 在手機上用手指點標記，會跳出那個景點的照片。\n';
+  var AGENTS_BASE = '# AGENTS.md: Ginkgo Walking Map\n\n- Write replies and explanations in English\n- The website is in site/ and the photos are in site/photos/\n- After each change, say which files you changed\n';
+  var VERIFY_LINE = 'After finishing each new feature, run the whole VERIFY.md and make sure everything passes.';
+  var VERIFY_DRAFT = '# VERIFY.md: verification checklist for the Ginkgo Walking Map\n\nAfter finishing each new feature, check this list from the top and write the results as a table.\n\n1. The map has 12 spot markers: count the markers with class="spot" in site/index.html. There should be 12.\n2. No sideways scrolling at 390 px width: switch the built-in browser to phone width. The page must not be wider than the screen.\n3. All photos open: every photo file name in site/index.html must match the file names in site/photos/ exactly (upper and lower case too).\n4. On a phone, the spot markers on the map must be big enough to tap with a finger.\n5. On a phone, tap a marker with your finger and the photo of that spot pops up.\n';
   W5.files = {
     html: html, css: css,
     AGENTS_BASE: AGENTS_BASE,
     AGENTS_VERIFIED: AGENTS_BASE + '- ' + VERIFY_LINE + '\n',
     VERIFY_LINE: VERIFY_LINE,
     VERIFY_DRAFT: VERIFY_DRAFT,
-    VERIFY_DONE: VERIFY_DRAFT.replace('4. 在手機上，地圖上的景點標記要夠大，手指點得到。', '4. 寬 390 px 時，每個標記至少 44 px。')
+    VERIFY_DONE: VERIFY_DRAFT.replace('4. On a phone, the spot markers on the map must be big enough to tap with a finger.', '4. At 390 px width, each marker is at least 44 px.')
   };
 
   /* the homework folder: stand-ins with one sentence (SPEC-w5 §5, owner's decision 6) */
-  var STAND_IN = '練習版：這是替身檔，真正的作業檔請從課程網站 Week 5 下載。';
+  var STAND_IN = 'Practice version: this is a stand-in file. Download the real homework files from Week 5 on the course site.';
   W5.files.HW_CSV = STAND_IN + '\n';
-  W5.files.HW_RULES = '# 評分說明（練習版替身）\n\n' + STAND_IN + '\n';
+  W5.files.HW_RULES = ('# grading-notes (practice stand-in)\n\n' + (STAND_IN) + '\n');
 
   /* the downloaded open data (mission 3): 20 made-up trees, map coordinates instead of real places */
-  var STREETS = ['銀杏坂', '學園路', '北門街', '河岸路', '郵局巷', '市場街', '舊站前路', '水門路', '東坡路', '圖書館路'];
+  var STREETS = ['Ginkgo Slope', 'Campus Road', 'North Gate Street', 'Riverside Road', 'Post Office Lane', 'Market Street', 'Old Station Road', 'Floodgate Road', 'East Slope Road', 'Library Road'];
   W5.files.TREES_CSV = (function () {
-    var out = ['編號,路名,樹齡（年）,地圖X,地圖Y'];
+    var out = ['ID,Street,Age (years),Map X,Map Y'];
     for (var i = 1; i <= 20; i++) {
       out.push('G' + (i < 10 ? '0' : '') + i + ',' + STREETS[(i * 7) % STREETS.length] + ',' + (18 + (i * 13) % 41) + ',' + (8 + (i * 37) % 84) + ',' + (6 + (i * 53) % 88));
     }
@@ -169,7 +138,7 @@
       });
       an.Downloads.c['week5-hw'] = h.D('2026-10-16 09:20', {
         'grades.csv': h.F('2026-10-16 09:20', W5.files.HW_CSV),
-        '評分說明.md': h.F('2026-10-16 09:20', W5.files.HW_RULES)
+        'grading-notes.md': h.F('2026-10-16 09:20', W5.files.HW_RULES)
       });
     });
   }

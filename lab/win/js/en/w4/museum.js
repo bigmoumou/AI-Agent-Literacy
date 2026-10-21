@@ -94,7 +94,7 @@
       nav.appendChild(LAB.web.link(ctx, BASE + n[0], n[1], { class: body.page === n[2] ? 'is-on' : '' }));
     });
     var head = h('header', { class: 'mu-head' }, LAB.web.link(ctx, BASE + '/', data.name, { class: 'mu-brand' }), nav);
-    var foot = h('footer', { class: 'mu-foot' }, h('p', null, '© ' + data.name + '. A fictional museum.'), h('p', { class: 'mu-practice' }, '練習版：虛構的美術館，資料都是假的。'));
+    var foot = h('footer', { class: 'mu-foot' }, h('p', null, '© ' + data.name + '. A fictional museum.'), h('p', { class: 'mu-practice' }, 'Practice version: a made-up museum, and all the data is fake.'));
     var root = h('div', { class: 'mu-page', dataset: { lab: 'web-museum', page: body.page } }, head, body.node, foot);
     root._webTitle = body.title + ' · ' + data.name;
     return root;

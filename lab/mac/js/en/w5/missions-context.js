@@ -9,7 +9,7 @@
   if (!LAB.missions || !K || !LAB.codex5) return;
 
   var GW = W5.GW, AGENTS = W5.AGENTS, F = W5.files;
-  var GROUP = '模型與 context window（影片 02、補充 1、補充 2）';
+  var GROUP = 'Models and the context window (Video 02, Extra 1, Extra 2)';
   var same = K.same, chain = K.chain, dock = K.dock;
   var T_COMPOSER = K.composerIn(GW);
 
@@ -25,32 +25,32 @@
   var T_RING = K.inWinSel('codex', '[data-lab=cx-context-ring]');
 
   /* ================================================================== 2 · 開工前選好模型 */
-  var C2 = '整理景點清單';
+  var C2 = 'Organize the spot list';
   var HANDOFF = {
-    done: '12 個景點的清單整理好了，照筆畫排在地圖下面；每個景點的照片檔名都檢查過',
-    decisions: ['景點名稱用正式名稱，不用簡稱', '清單照筆畫排', '照片檔名一律小寫'],
-    next: '幫每個景點寫一句介紹（30 字以內），放在清單裡'
+    done: 'The list of 12 spots is finished and sorted in alphabetical order below the map; the photo file name of every spot has been checked',
+    decisions: ['Use the official spot names, not short names', 'Sort the list in alphabetical order', 'Photo file names must always be lowercase'],
+    next: 'Write a one-sentence description for each spot (up to 30 characters) and put it in the list'
   };
   var C2_TURNS = [
-    ['先看一下 site/index.html 有哪些景點', '一共 12 個景點：銀杏坂公園、黃葉橋、北門行道樹、老郵局前、河岸步道、圖書館廣場、學園路、舊車站、小丘涼亭、市場口、水門公園、東坡步道。', ['Read site/index.html']],
-    ['名稱都用正式名稱，不要簡稱', '好，清單和標記的名稱都用正式名稱。'],
-    ['在地圖下面加一個全部景點的清單', '加好了：「全部景點」清單在地圖下面，12 個。', ['Edited site/index.html']],
-    ['清單照筆畫排', '改好了，清單照筆畫排。', ['Edited site/index.html']],
-    ['照片檔名要一律小寫', '檢查過了：12 張照片的檔名都是小寫，和 index.html 寫的一樣。', ['Ran ls site/photos']],
-    ['照 VERIFY.md 驗證一次', '驗證過了，1 到 4 都是 ✅；第 5 條要你用手機試。', ['Read VERIFY.md', 'Used the browser  手機寬度 390 px']],
-    ['清單的字可以大一點嗎', '可以，清單的字改成 16 px。', ['Edited site/style.css']],
-    ['好，這樣先可以', '好。下一步可以幫每個景點寫一句介紹。']
+    ['First, look at which spots are in site/index.html', 'There are 12 spots in total: Ginkgo Slope Park, Yellow Leaf Bridge, North Gate Street Trees, Old Post Office, Riverside Walk, Library Plaza, Campus Road, Old Station, Hilltop Pavilion, Market Entrance, Floodgate Park, East Slope Trail.', ['Read site/index.html']],
+    ['Use the official names everywhere, not short names', 'OK, the list and the markers will both use the official names.'],
+    ['Add a list of all the spots below the map', 'Done: an “All spots” list is below the map, with 12 spots.', ['Edited site/index.html']],
+    ['Sort the list in alphabetical order', 'Done, the list is now in alphabetical order.', ['Edited site/index.html']],
+    ['Photo file names must be all lowercase', 'Checked: all 12 photo file names are lowercase, the same as in index.html.', ['Ran ls site/photos']],
+    ['Verify it once using VERIFY.md', 'Verified: items 1 to 4 are all ✅. Item 5 needs you to try it on a phone.', ['Read VERIFY.md', 'Used the browser  phone width 390 px']],
+    ['Can the text in the list be a bit bigger?', 'Yes, I changed the list text to 16 px.', ['Edited site/style.css']],
+    ['OK, that\'s enough for now', 'OK. Next, I can write a one-sentence description for each spot.']
   ];
   LAB.missions.register({
     id: 'w5-02-model',
     week: 5, order: 2,
     group: GROUP,
-    tag: 'Week 5 影片 02',
-    title: '開工前選好模型',
+    tag: 'Week 5 Video 02',
+    title: 'Pick the model before you start',
     minutes: 7,
     resetsFiles: true,
     needs: [GW],
-    intro: '每個模型都有自己的 context window。中途換模型，新模型要把整段對話從頭讀一遍，暫存也用不到，那一輪用量會一次跳很高、回應也比較慢。這個任務練兩件事：開工前選好模型；真的要換，先請原本的模型寫交接摘要，再開新對話換。',
+    intro: 'Every model has its own context window. If you switch models in the middle of a chat, the new model has to read the whole conversation from the beginning, and it can\'t use the cache either. That turn uses a lot more of your usage at once, and the reply is slower. This mission practices two things: pick the model before you start; and if you really have to switch, first ask the original model to write a hand-off summary, then start a new chat and switch there.',
     prepare: function (api) {
       W5.restore(api, 'verified');
       K.resetCodex(api);
@@ -63,17 +63,17 @@
     steps: [
       {
         id: 's1',
-        text: '先打開用量顯示：點 Codex 左下角的 Settings，在 General 打開「Show context window usage」。',
-        hint: '打開以後，輸入框下面那一排會多一個小圓環，滑過去會顯示這段對話用了幾 %。Codex 的設定也可以從選單列 Codex › 設定⋯ 打開。',
-        answer: 'Codex 左下角 Settings › General › 打開 Show context window usage，再按左上的 Back to app。',
+        text: 'First turn on the usage display: click Settings at the bottom left of Codex, and in General turn on “Show context window usage”.',
+        hint: 'After you turn it on, a small ring appears in the row below the message box. Hover over it to see what % of the context window this chat has used. You can also open Codex\'s settings from the menu bar: Codex › Settings….',
+        answer: 'At the bottom left of Codex: Settings › General › turn on Show context window usage, then click Back to app at the top left.',
         target: T_SETTINGS,
         check: function () { return LAB.codex5.contextUsage(); }
       },
       {
         id: 's2',
-        text: '回到「整理景點清單」這段對話，把滑鼠移到輸入框下面的小圓環上，看用了幾 %。',
-        hint: '對話越長，context window 裝得越滿；每一輪都會把整段對話送出去。設定頁還開著的話，先按左上的 Back to app。',
-        answer: '點側邊欄的「整理景點清單」，把滑鼠移到輸入框下面那一排的小圓環上，停一下。',
+        text: 'Go back to the “Organize the spot list” chat. Move the mouse over the small ring below the message box and see what % is used.',
+        hint: 'The longer the chat, the fuller the context window gets; every turn sends the whole conversation again. If the Settings page is still open, first click Back to app at the top left.',
+        answer: 'Click “Organize the spot list” in the sidebar, then hold the mouse over the small ring in the row below the message box for a moment.',
         replay: 'mission',
         target: function (api) {
           if (LAB.codex5.settingsOpen()) return K.inWinSel('codex', '[data-lab=cx-settings-back]')();
@@ -84,24 +84,24 @@
       },
       {
         id: 's3',
-        text: '你想換成 GPT-6.1 Sol 做下一件事。先別換，請 Luna 寫交接摘要：[[請寫一段交接摘要：目前做到哪裡、做了哪些決定、下一步要做什麼]]',
-        hint: '中途換模型，Sol 要把整段對話從頭讀一遍；先請原本的模型整理重點，新的對話只要讀摘要就好。',
-        answer: '在「整理景點清單」貼上這句，按 Return（Windows 鍵盤是 Enter）。',
+        text: 'You want to switch to GPT-6.1 Sol for the next task. Don\'t switch yet. First ask Luna to write a hand-off summary: [[Write a hand-off summary: where we are, what we decided, what\'s next]]',
+        hint: 'If you switch models in the middle of a chat, Sol has to read the whole conversation from the beginning. First ask the original model to sum up the key points; then the new chat only needs to read the summary.',
+        answer: 'In “Organize the spot list”, paste this sentence and press Return (Enter on a Windows keyboard).',
         replay: 'mission',
         target: function (api) { return K.composerOfChat(function () { return chatId(api, C2); })(api); },
         check: function (ev, api) { var id = chatId(api, C2); return !!api.seen('codex:reply', function (d) { return d.intent === 'w5_handoff' && d.chatId === id; }); },
         trap: function (ev, api) {
           if (!ev || ev.name !== 'codex:model' || !ev.data) return null;
-          if (ev.data.chatId === chatId(api, C2) && ev.data.turns > 0) return '這段對話已經用 GPT-6 Luna 講了一陣子；中途換，Sol 要把整段從頭讀一遍，暫存也用不到。先請 Luna 寫交接摘要，再開新對話換。';
+          if (ev.data.chatId === chatId(api, C2) && ev.data.turns > 0) return 'This chat has been running on GPT-6 Luna for a while. If you switch in the middle, Sol has to read the whole chat from the beginning, and it can\'t use the cache. First ask Luna to write a hand-off summary, then start a new chat and switch there.';
           return null;
         }
       },
       {
         id: 's4',
         optional: true,
-        text: '按回覆下面的複製按鈕，把交接摘要複製起來。',
-        hint: '摘要要貼到新的對話；也可以寫進 progress.md。自己選起來按 Command+C 也可以。',
-        answer: '把滑鼠移到 Luna 寫的摘要上，按下面的複製圖示（Copy）。',
+        text: 'Click the copy button below the reply to copy the hand-off summary.',
+        hint: 'Paste the summary into a new chat. You can also write it into progress.md. Selecting it yourself and pressing Command+C works too.',
+        answer: 'Hover over the summary Luna wrote and click the copy icon (Copy) below it.',
         target: function (api) {
           var id = chatId(api, C2), c = K.info();
           if (!c || c.id !== id) return openChatRow(function () { return id; })(api);
@@ -112,9 +112,9 @@
       },
       {
         id: 's5',
-        text: '開一段新的對話（點側邊欄的 ginkgo-walk），還沒送出之前，先在輸入框下面的模型選單選「GPT-6.1 Sol」。',
-        hint: '開工前選好模型：新的對話第一句送出之前就選好，這段對話就一路用它。',
-        answer: '點側邊欄的 ginkgo-walk，再點輸入框下面的「GPT-6 Luna」，選 GPT-6.1 Sol。',
+        text: 'Start a new chat (click ginkgo-walk in the sidebar). Before you send anything, choose “GPT-6.1 Sol” in the model menu below the message box.',
+        hint: 'Pick the model before you start: choose it before you send the first message of a new chat, and the chat keeps using it from then on.',
+        answer: 'Click ginkgo-walk in the sidebar, then click “GPT-6 Luna” below the message box and choose GPT-6.1 Sol.',
         target: function (api) {
           var c = K.info();
           if (c && c.projectPath && same(api, c.projectPath, GW) && c.turns === 0) {
@@ -131,15 +131,15 @@
         },
         trap: function (ev, api) {
           if (!ev || ev.name !== 'codex:model' || !ev.data) return null;
-          if (ev.data.chatId !== chatId(api, C2) && ev.data.turns > 0) return '這段新的對話已經開始了；下次在第一句送出之前就選好模型。點側邊欄的 ginkgo-walk 再開一段。';
+          if (ev.data.chatId !== chatId(api, C2) && ev.data.turns > 0) return 'This new chat has already started. Next time, choose the model before you send the first message. Click ginkgo-walk in the sidebar to start another chat.';
           return null;
         }
       },
       {
         id: 's6',
-        text: '在新的對話貼上交接摘要，後面加一句下一步，送出。[[請照這份摘要接著做下一步]]',
-        hint: 'Sol 只讀摘要就能接著做；小圓環也從很少開始。先按 Command+V 貼上摘要，再接著貼這一句。',
-        answer: '在新的對話按 Command+V（Windows 鍵盤是 Ctrl+V）貼上摘要，後面加「請照這份摘要接著做下一步」，按 Return。',
+        text: 'In the new chat, paste the hand-off summary, add a sentence about the next step after it, and send. [[Please continue with the next step from this summary]]',
+        hint: 'Sol can carry on by reading only the summary; the small ring also starts very low. First press Command+V to paste the summary, then paste this sentence after it.',
+        answer: 'In the new chat, press Command+V (Ctrl+V on a Windows keyboard) to paste the summary, add “Please continue with the next step from this summary” after it, and press Return.',
         target: T_COMPOSER,
         check: function (ev, api) {
           var c2 = chatId(api, C2);
@@ -149,12 +149,12 @@
           if (!ev || ev.name !== 'codex:reply' || !ev.data) return null;
           var d = ev.data;
           if (d.chatId === chatId(api, C2) || d.intent === 'w5_handoff_resume') return null;
-          if (d.model === 'sol') return 'Sol 沒看過前面的對話：先貼上 Luna 寫的交接摘要（第一行是「交接摘要」），再送出。';
+          if (d.model === 'sol') return 'Sol hasn\'t seen the earlier chat. First paste the hand-off summary that Luna wrote (its first line is “Hand-off summary”), then send.';
           return null;
         }
       }
     ],
-    outro: '開工前選好模型，選好了這段對話就一路用它。真的要換：交接摘要 → 新的對話 → 換模型 → 貼上摘要；摘要也可以寫進 `progress.md` 或 `AGENTS.md`。影片裡的面板和數字是示意。'
+    outro: 'Pick the model before you start, and the chat keeps using it. If you really have to switch: hand-off summary → new chat → switch model → paste the summary. You can also write the summary into `progress.md` or `AGENTS.md`. The panels and numbers in the video are illustrations.'
   });
 
   /* ================================================================== 3 · 按下 Enter 之後：看活動紀錄 */
@@ -169,12 +169,12 @@
     id: 'w5-03-activity',
     week: 5, order: 3,
     group: GROUP,
-    tag: 'Week 5 補充 1',
-    title: '按下 Enter 之後：看活動紀錄',
+    tag: 'Week 5 Extra 1',
+    title: 'After you press Enter: read the activity log',
     minutes: 8,
     resetsFiles: true,
     needs: [GW],
-    intro: '模型在 OpenAI 的伺服器上，只會讀內容、寫回覆；真正在你電腦上讀檔、跑指令、寫檔的是 Codex app。網路搜尋在 OpenAI 那邊，不用你允許；下載是在你電腦上跑的終端機指令，要你允許。按之前先看清楚它要連去哪、下載什麼。',
+    intro: 'The model runs on OpenAI\'s servers; it only reads content and writes replies. The Codex app is what really reads files, runs commands and writes files on your computer. A web search happens on OpenAI\'s side, so you don\'t need to allow it. A download is a terminal command that runs on your computer, so you do need to allow it. Before you click, look carefully at where it wants to connect and what it wants to download.',
     prepare: function (api) {
       W5.restore(api, 'verified');
       api.remove(W5.CSV);
@@ -184,18 +184,18 @@
     steps: [
       {
         id: 's1',
-        text: '在 Codex 的 ginkgo-walk 請它上網查：[[上網查「銀杏行道樹」的公開資料在哪裡下載，附上來源網址]]',
-        hint: '網路搜尋是 OpenAI 提供的工具，預設查的是 OpenAI 整理好的快取索引，不用你允許。可以複製上面這句，貼到輸入框。',
-        answer: '點 Codex 側邊欄的 ginkgo-walk，貼上這句，按 Return（Windows 鍵盤是 Enter）。',
+        text: 'In ginkgo-walk in Codex, ask it to search the web: [[Search the web for public data on ginkgo street trees and where to download it. Include the source URL.]]',
+        hint: 'Web search is a tool provided by OpenAI. By default it looks in a cached index that OpenAI has prepared, so it needs no permission from you. You can copy the sentence above and paste it into the message box.',
+        answer: 'Click ginkgo-walk in the Codex sidebar, paste this sentence, and press Return (Enter on a Windows keyboard).',
         replay: 'mission',
         target: T_COMPOSER,
         check: function (ev, api) { return !!api.seen('codex:reply', K.replyIs('w5_search')); }
       },
       {
         id: 's2',
-        text: '點回覆上面的「Worked for …」打開活動紀錄，再點「Searched the web」那一列，看它查了哪些字。',
-        hint: '「Worked for …」收著 Codex 做了哪些事：讀了哪個檔、搜了什麼、跑了什麼指令。點一下打開，再點其中一列看細節。',
-        answer: '點回覆上面的「Worked for …」，再點「Searched the web 銀杏 行道樹 公開資料」，看展開的查詢字和找到的網址。',
+        text: 'Click “Worked for …” above the reply to open the activity log, then click the “Searched the web” row to see which words it searched for.',
+        hint: '“Worked for …” holds what Codex did: which file it read, what it searched for, which commands it ran. Click it once to open it, then click one of the rows to see the details.',
+        answer: 'Click “Worked for …” above the reply, then click “Searched the web ginkgo street trees open data” to see the search words and the URLs it found.',
         replay: 'mission',
         // the search row once its answer is open, else the 「Worked for …」 of that answer
         target: function () {
@@ -208,18 +208,18 @@
       },
       {
         id: 's3',
-        text: '自己點開它附的來源網址，確認真的有這份資料。',
-        hint: '查到的東西請它附上來源網址，自己點開確認：資料名稱、提供單位、更新日期對不對。',
-        answer: '點回覆裡的 `https://opendata.city.example/dataset/ginkgo-street-trees`，會用 Safari 打開，看資料名稱和更新日期。',
+        text: 'Open the source URL it gave you yourself and check that this data really exists.',
+        hint: 'When Codex finds something, ask it to include the source URL, then open it yourself and check: are the dataset name, the publisher and the update date right?',
+        answer: 'Click `https://opendata.city.example/dataset/ginkgo-street-trees` in the reply. It opens in Safari. Look at the dataset name and the update date.',
         replay: 'mission',
         target: K.inWinSel('codex', '[data-lab=cx-link][data-url^="https://opendata.city.example"]'),
         check: function (ev, api) { return !!api.seen('web:visit', function (d) { return d.host === OD; }); }
       },
       {
         id: 's4',
-        text: '請它下載：[[把這份資料下載到 data/ 資料夾]] 看清楚它要連去哪；不是剛剛確認過的網站，就按「Deny」（拒絕）。',
-        hint: '下載是 Codex 在你電腦上跑的指令，預設的沙箱不能連網，所以要你允許。看指令裡加粗的網址：是你剛剛點開確認過的網站嗎？',
-        answer: '它要連去 `files.free-mirror.example`，不是 `opendata.city.example`，按「Deny」。',
+        text: 'Ask it to download: [[Download this data to the data/ folder]] Look carefully at where it wants to connect. If it is not the website you just checked, click “Deny”.',
+        hint: 'A download is a command that Codex runs on your computer. The default sandbox has no network access, so you have to allow it. Look at the URL in bold in the command: is it the website you just opened and checked?',
+        answer: 'It wants to connect to `files.free-mirror.example`, not `opendata.city.example`. Click “Deny”.',
         replay: 'mission',
         target: K.whileIdle(T_COMPOSER),
         check: function (ev, api) {
@@ -228,15 +228,15 @@
         },
         trap: function (ev) {
           if (!ev || ev.name !== 'codex:approval' || !ev.data) return null;
-          if (ev.data.host === MIRROR && ev.data.decision === 'allow') return '你允許它從 files.free-mirror.example 下載了；那不是你剛剛確認過的網站。下次按之前先看指令裡的網址。';
+          if (ev.data.host === MIRROR && ev.data.decision === 'allow') return 'You allowed it to download from files.free-mirror.example. That is not the website you just checked. Next time, look at the URL in the command before you click.';
           return null;
         }
       },
       {
         id: 's5',
-        text: '跟它說只能從剛剛確認過的網站下載：[[只從 opendata.city.example 下載]] 看清楚再按「Allow」（允許）。',
-        hint: '允許之前看兩件事：連去哪個網站、把檔案存到哪裡。',
-        answer: '貼上這句按 Return；提示卡寫 `curl … https://opendata.city.example/…/ginkgo-trees.csv`，存到 `data/`，按「Allow」。',
+        text: 'Tell it to download only from the website you just checked: [[Download only from opendata.city.example]] Look carefully, then click “Allow”.',
+        hint: 'Before you allow, check two things: which website it connects to, and where it saves the file.',
+        answer: 'Paste this sentence and press Return. The approval card shows `curl … https://opendata.city.example/…/ginkgo-trees.csv` and saves to `data/`. Click “Allow”.',
         replay: 'mission',
         target: K.whileIdle(T_COMPOSER),
         check: function (ev, api) { return !!api.seen('codex:approval', function (d) { return d.host === OD && d.decision === 'allow'; }) && api.exists(W5.CSV); },
@@ -244,50 +244,50 @@
           if (!ev || ev.name !== 'codex:approval' || !ev.data) return null;
           if (ev.data.host !== MIRROR) return null;
           // Allow on the mirror ticks step 4 at once, so its line shows here: say what happened, then what to do
-          if (ev.data.decision === 'allow') return '你允許它從 files.free-mirror.example 下載了；那不是你剛剛確認過的網站。下次按之前先看指令裡的網址。現在跟它說「只從 opendata.city.example 下載」，再下載一次。';
-          return '這張提示卡還是連去 files.free-mirror.example。跟它說「只從 opendata.city.example 下載」。';
+          if (ev.data.decision === 'allow') return 'You allowed it to download from files.free-mirror.example. That is not the website you just checked. Next time, look at the URL in the command before you click. Now tell it “Download only from opendata.city.example” and download again.';
+          return 'This approval card still connects to files.free-mirror.example. Tell it “Download only from opendata.city.example”.';
           return null;
         }
       },
       {
         id: 's6',
         optional: true,
-        text: '選做：在 Finder 打開 ginkgo-walk 的 `data`，選 `ginkgo-trees.csv` 按空白鍵，看看下載了什麼。',
-        hint: '下載的是 Codex 在你電腦上存的真檔案；用空白鍵快速查看就好。',
-        answer: 'Finder › 桌面 › ginkgo-walk › data › 選 ginkgo-trees.csv，按空白鍵。',
+        text: 'Optional: in Finder, open the `data` folder of ginkgo-walk, select `ginkgo-trees.csv`, and press the Space bar to see what was downloaded.',
+        hint: 'What was downloaded is a real file that Codex saved on your computer. Just preview it with the Space bar.',
+        answer: 'Finder › Desktop › ginkgo-walk › data › select ginkgo-trees.csv, then press the Space bar.',
         target: K.finderWalk([W5.CSV, W5.DATA, GW], GW),
         check: function (ev, api) {
           return !!(api.seen('ql:show', function (d) { return same(api, d.path, W5.CSV); }) || api.seen('editor:open', function (d) { return same(api, d.path, W5.CSV); }));
         }
       }
     ],
-    outro: '按一次 Enter，背後來回很多次：讀檔、搜尋、跑指令，每一步的結果都疊進 context window。查到的東西附上來源網址，自己點開確認；要下載、要連網的指令，按允許之前先看它連去哪。'
+    outro: 'Pressing Enter once sets off many round trips behind the scenes: reading files, searching, running commands. The result of every step piles up in the context window. When Codex finds something, ask for the source URL and open it yourself. For commands that download or connect to the internet, look at where they connect before you click Allow.'
   });
 
   /* ================================================================== 4 · 對話滿了：重要的事寫進檔案 */
-  var C4 = '規劃散步路線';
+  var C4 = 'Plan the walking route';
   var C4_TURNS = [
-    ['我想規劃一條銀杏散步路線，從銀杏坂公園出發', '好，路線從銀杏坂公園出發。'],
-    ['距離一律用公尺，不要用公里', '好，之後的距離都用公尺。'],
-    ['照片檔名一律小寫', '好，照片檔名一律小寫；現在 12 張都是小寫。', ['Ran ls site/photos']],
-    ['先列出每個景點的位置', '列好了：12 個景點在地圖上的位置（左右、上下的百分比）。', ['Read site/index.html']],
-    ['哪幾個景點靠河邊', '河岸步道、黃葉橋、水門公園靠河邊。'],
-    ['路線先走河邊那幾個', '好，路線先走河岸步道、黃葉橋、水門公園。'],
-    ['每一段要走多久', '照一分鐘走 70 公尺算，每一段 4 到 12 分鐘。'],
-    ['整條路線大約多長', '大約 6800 公尺，走 1 小時 40 分鐘左右。'],
-    ['可以把路線畫在地圖上嗎', '可以，之後用虛線連起來。'],
-    ['先不用畫，等一下再說', '好，先不畫。']
+    ['I want to plan a ginkgo walking route that starts at Ginkgo Slope Park', 'OK, the route starts at Ginkgo Slope Park.'],
+    ['Always use meters for distances, not km', 'OK, all distances from now on will be in meters.'],
+    ['Photo file names must always be lowercase', 'OK, photo file names must always be lowercase. All 12 are lowercase now.', ['Ran ls site/photos']],
+    ['First list the position of every spot', 'Done: the positions of the 12 spots on the map (percentages from the left and from the top).', ['Read site/index.html']],
+    ['Which spots are next to the river?', 'Riverside Walk, Yellow Leaf Bridge and Floodgate Park are next to the river.'],
+    ['Start the route with the spots by the river', 'OK, the route starts with Riverside Walk, Yellow Leaf Bridge and Floodgate Park.'],
+    ['How long does each leg take to walk?', 'At 70 meters per minute, each leg takes 4 to 12 minutes.'],
+    ['About how long is the whole route?', 'About 6800 meters, around 1 hour 40 minutes of walking.'],
+    ['Can you draw the route on the map?', 'Yes, I can connect the spots with a dashed line later.'],
+    ['No need to draw it yet, let\'s do that later', 'OK, I won\'t draw it for now.']
   ];
   LAB.missions.register({
     id: 'w5-04-compact',
     week: 5, order: 4,
     group: GROUP,
-    tag: 'Week 5 補充 2',
-    title: '對話滿了：重要的事寫進檔案',
+    tag: 'Week 5 Extra 2',
+    title: 'When the chat is full: write important things in a file',
     minutes: 7,
     resetsFiles: true,
     needs: [GW],
-    intro: '對話快滿的時候，Codex 會自動壓縮：把前面換成一份比較短的精簡版，再接著做，你不用按什麼。精簡版留的是重點，細節可能就不在了，模型會開始「記錯」。這個任務練兩個習慣：重要的決定寫進 `AGENTS.md`；一件事一段對話。',
+    intro: 'When a chat is almost full, Codex compacts it automatically: it replaces the earlier part with a shorter summary and carries on, and you don\'t have to press anything. The summary keeps the key points, so some details may be gone, and the model starts to “misremember”. This mission practices two habits: write important decisions into `AGENTS.md`; one task, one chat.',
     prepare: function (api) {
       W5.restore(api, 'verified');
       K.resetCodex(api);
@@ -300,9 +300,9 @@
     steps: [
       {
         id: 's1',
-        text: '打開「規劃散步路線」這段對話，把滑鼠移到輸入框下面的小圓環上，看用了幾 %。',
-        hint: '小圓環是 Settings › General › Show context window usage 打開的；快滿的時候 Codex 會自動壓縮。',
-        answer: '點側邊欄的「規劃散步路線」，把滑鼠移到輸入框下面那一排的小圓環上，停一下。',
+        text: 'Open the “Plan the walking route” chat. Move the mouse over the small ring below the message box and see what % is used.',
+        hint: 'The small ring is turned on in Settings › General › Show context window usage. When the chat is almost full, Codex compacts it automatically.',
+        answer: 'Click “Plan the walking route” in the sidebar, then hold the mouse over the small ring in the row below the message box for a moment.',
         replay: 'mission',
         target: function (api) {
           var c = K.info(), id = chatId(api, C4);
@@ -312,9 +312,9 @@
       },
       {
         id: 's2',
-        text: '在這段對話再請它做一件事，看回覆上面的活動紀錄多了哪一列：[[幫每個景點加上從起點走過去的距離]]',
-        hint: '快滿的時候 Codex 自己會壓縮，你不用按什麼；回覆上面會多一列「Context automatically compacted」。',
-        answer: '在「規劃散步路線」貼上這句，按 Return（Windows 鍵盤是 Enter），看回覆上面多了哪一列。',
+        text: 'In this chat, ask it for one more thing and see which row is added to the activity log above the reply: [[Add the walking distance from the start to each spot]]',
+        hint: 'When the chat is almost full, Codex compacts it by itself, so you don\'t have to press anything. A row “Context automatically compacted” appears above the reply.',
+        answer: 'In “Plan the walking route”, paste this sentence and press Return (Enter on a Windows keyboard), and see which row was added above the reply.',
         replay: 'mission',
         target: function (api) { return K.composerOfChat(function () { return chatId(api, C4); })(api); },
         check: function (ev, api) {
@@ -324,33 +324,33 @@
       },
       {
         id: 's3',
-        text: '它記錯了：前面說好距離用公尺、從銀杏坂公園出發。在 VS Code 打開 `AGENTS.md`，把三個決定寫進去，存檔：[[- 距離一律用公尺。照片檔名一律小寫。路線從銀杏坂公園出發。]]',
-        hint: '檔案存在你的電腦上，壓縮只動對話、不動檔案；Codex 每次回答前都會讀專案裡的 AGENTS.md。決定很多的時候，也可以寫在 decisions.md，再在 AGENTS.md 加一句「每次開工前，先讀 decisions.md」。VS Code 還沒打開 ginkgo-walk 的話：點 Dock 上的 VS Code › Open Folder › 桌面的 ginkgo-walk › 打開（或在終端機打 `cd ~/Desktop/ginkgo-walk`、`code .`）。',
-        answer: 'VS Code 左邊點 `AGENTS.md`，在最後一行下面貼上這句，按 Command+S（Windows 鍵盤是 Ctrl+S）。（VS Code 還沒打開這個資料夾：Open Folder › 桌面 › ginkgo-walk › 打開，或終端機 `cd ~/Desktop/ginkgo-walk`、`code .`。）',
+        text: 'It misremembered: you had agreed to use meters for distances and to start at Ginkgo Slope Park. In VS Code, open `AGENTS.md`, write the three decisions into it, and save: [[- Always use meters for distances. Photo file names are always lowercase. The route starts at Ginkgo Slope Park.]]',
+        hint: 'The file is on your computer, and compaction only changes the chat, not your files. Codex reads the project\'s AGENTS.md before every answer. If you have many decisions, you can also write them in decisions.md and add one sentence to AGENTS.md: “Before starting work, read decisions.md”. If VS Code doesn\'t have ginkgo-walk open yet: click VS Code in the Dock › Open Folder › Desktop › ginkgo-walk › Open (or type `cd ~/Desktop/ginkgo-walk` and `code .` in the Terminal).',
+        answer: 'Click `AGENTS.md` on the left of VS Code, paste this sentence below the last line, and press Command+S (Ctrl+S on a Windows keyboard). (If VS Code hasn\'t opened this folder yet: Open Folder › Desktop › ginkgo-walk › Open, or in the Terminal type `cd ~/Desktop/ginkgo-walk` and `code .`.)',
         target: K.codeFlow(AGENTS),
         check: function (ev, api) {
           var a = api.read(AGENTS) || '';
-          if (/公尺/.test(a)) return true;
+          if (/(公尺|\bmeters?\b)/i.test(a)) return true;
           var named = (a.match(/[A-Za-z0-9_\-.]+\.md\b/g) || []).filter(function (n) { return !/^(agents|verify)\.md$/i.test(n); });
-          return named.some(function (n) { return /公尺/.test(api.read(GW + '/' + n) || ''); });
+          return named.some(function (n) { return /(公尺|\bmeters?\b)/i.test(api.read(GW + '/' + n) || ''); });
         },
         trap: function (ev, api) {
           // a new chat asked before the decisions are in a file: it gets them wrong too
           if (ev && ev.name === 'codex:reply' && ev.data && ev.data.intent === 'w5_distance' && !ev.data.correct && ev.data.chatId !== chatId(api, C4)) {
-            return '新的對話也記錯了：它只讀檔案，看不到舊對話裡講好的事。先把三個決定寫進 AGENTS.md，再開新的對話。';
+            return 'The new chat misremembers too: it only reads files and cannot see what was agreed in the old chat. First write the three decisions into AGENTS.md, then start a new chat.';
           }
           if (!ev || !((ev.name === 'editor:save' || ev.name === 'fs:change') && ev.data && /\.md$/i.test(ev.data.path || ''))) return null;
           var p = ev.data.path, a = api.read(AGENTS) || '';
-          if (same(api, p, AGENTS) || /公尺/.test(a)) return null;
-          if (/公尺/.test(api.read(p) || '') && a.indexOf(LAB.vfs.basename(p)) < 0) return 'Codex 不會自己去讀 ' + LAB.vfs.basename(p) + '；在 AGENTS.md 加一句「每次開工前，先讀 ' + LAB.vfs.basename(p) + '」。';
+          if (same(api, p, AGENTS) || /(公尺|\bmeters?\b)/i.test(a)) return null;
+          if (/(公尺|\bmeters?\b)/i.test(api.read(p) || '') && a.indexOf(LAB.vfs.basename(p)) < 0) return ('Codex won\'t read ' + (LAB.vfs.basename(p)) + ' on its own. Add a line to AGENTS.md: “Before starting work, read ' + (LAB.vfs.basename(p)) + '”.');
           return null;
         }
       },
       {
         id: 's4',
-        text: '一件事一段對話：舊的那段快滿了、也被壓縮過，在 ginkgo-walk 專案開一段新的對話。',
-        hint: '長對話和多次壓縮可能讓模型比較不準；一件事做完，就開一段新的對話。在專案的頁面輸入，新的對話就會開在這個專案底下。',
-        answer: '點 Codex 側邊欄的 ginkgo-walk（或它旁邊的 ＋）。',
+        text: 'One task, one chat: the old chat is almost full and has been compacted. Start a new chat in the ginkgo-walk project.',
+        hint: 'Long chats and repeated compaction can make the model less accurate. When one task is done, start a new chat. Type on the project\'s page, and the new chat opens under this project.',
+        answer: 'Click ginkgo-walk in the Codex sidebar (or the + next to it).',
         target: K.newChatIn(GW),
         check: function (ev, api) {
           var c = K.info();
@@ -359,17 +359,17 @@
       },
       {
         id: 's5',
-        text: '只下一句指令，看這次對不對：[[幫每個景點加上從起點走過去的距離]]',
-        hint: 'Codex 這次是從 AGENTS.md 讀到這些決定，不是從對話裡。',
-        answer: '在新的對話貼上這句，按 Return：距離都是公尺、從銀杏坂公園出發。',
+        text: 'Give just one instruction and see if it is right this time: [[Add the walking distance from the start to each spot]]',
+        hint: 'This time Codex read these decisions from AGENTS.md, not from the chat.',
+        answer: 'Paste this sentence in the new chat and press Return: the distances are in meters and start at Ginkgo Slope Park.',
         target: T_COMPOSER,
         check: function (ev, api) { var c4 = chatId(api, C4); return !!api.seen('codex:reply', function (d) { return d.intent === 'w5_distance' && d.correct && d.chatId !== c4; }); },
         trap: function (ev, api) {
           if (!ev || ev.name !== 'codex:reply' || !ev.data || ev.data.intent !== 'w5_distance' || ev.data.correct) return null;
-          return '它又用了公里：AGENTS.md 裡還沒有「距離一律用公尺」，它只讀得到檔案裡寫的事。';
+          return 'It used km again: AGENTS.md doesn\'t say “Always use meters for distances” yet, and it can only read what is written in files.';
         }
       }
     ],
-    outro: '長對話和多次壓縮可能讓模型比較不準。一件事一段對話；要一直遵守的事寫進 `AGENTS.md`，或寫在另一個檔案（例如 `decisions.md`），再在 AGENTS.md 要求每次都讀。壓縮只動對話，不動檔案。'
+    outro: 'Long chats and repeated compaction can make the model less accurate. One task, one chat. Write what must always be followed in `AGENTS.md`, or in another file (for example `decisions.md`) and ask AGENTS.md to read it every time. Compaction only changes the chat, not your files.'
   });
 })(window.LAB);

@@ -15,69 +15,13 @@
   W4.REPO = 'an/firenze-museums-hw';
   W4.PERSONAL = ['S1234567', '0912-345-678'];         // the fake personal data the homework check looks for
 
-  var AGENTS = '# 專案規則\n' +
-    '- 報告和說明用繁體中文\n' +
-    '- 資料存在 data/museums.md\n' +
-    '- 作者資料：小安，學號 S1234567，電話 0912-345-678\n';
+  var AGENTS = '# Project rules\n- Write reports and explanations in English\n- Store the data in data/museums.md\n- Author info: Xiao An, student ID S1234567, phone 0912-345-678\n';
 
-  var ARCHITECTURE = '# 系統架構\n\n' +
-    '這個專案把佛羅倫斯美術館的開放時間和票價整理成一個展示網站。資料流程如下：\n\n' +
-    '```mermaid\n' +
-    'flowchart LR\n' +
-    '    A[Codex 收集資料] --> B[data/museums.md]\n' +
-    '    B --> C[整理成表格]\n' +
-    '    C --> D[site/index.html]\n' +
-    '    D --> E[用瀏覽器檢查]\n' +
-    '    E --> F[放上 GitHub]\n' +
-    '```\n';
+  var ARCHITECTURE = '# System Architecture\n\nThis project turns the opening hours and ticket prices of the Florence museums into a demo website. The data flow is as follows:\n\n```mermaid\nflowchart LR\n    A[Codex collects data] --> B[data/museums.md]\n    B --> C[Organize into a table]\n    C --> D[site/index.html]\n    D --> E[Check in the browser]\n    E --> F[Push to GitHub]\n```\n';
 
-  var MUSEUMS = '# 佛羅倫斯美術館（練習用的假資料）\n\n' +
-    '| 美術館 | 開放時間 | 全票（€） | 優待票（€） |\n' +
-    '|---|---|---|---|\n' +
-    '| Museo di Esempio | 週二至週日 09:00–18:00，週一休館 | 12 | 6 |\n' +
-    '| Galleria Fittizia | 每天 10:00–17:00 | 9 | 4.5 |\n' +
-    '| Palazzo di Prova | 週三至週一 08:30–19:00，週二休館 | 15 | 7.5 |\n';
+  var MUSEUMS = '# Florence Museums (made-up practice data)\n\n| Museum | Opening hours | Adult (€) | Reduced (€) |\n|---|---|---|---|\n| Museo di Esempio | Tuesday to Sunday 09:00–18:00, closed on Monday | 12 | 6 |\n| Galleria Fittizia | Daily 10:00–17:00 | 9 | 4.5 |\n| Palazzo di Prova | Wednesday to Monday 08:30–19:00, closed on Tuesday | 15 | 7.5 |\n';
 
-  var SITE_HTML = '<!doctype html>\n' +
-    '<html lang="en">\n' +
-    '<head>\n' +
-    '<meta charset="utf-8">\n' +
-    '<meta name="viewport" content="width=device-width, initial-scale=1">\n' +
-    '<title>佛羅倫斯美術館</title>\n' +
-    '<link rel="stylesheet" href="style.css">\n' +
-    '</head>\n' +
-    '<body>\n' +
-    '<header>\n' +
-    '  <h1>佛羅倫斯美術館</h1>\n' +
-    '  <p class="lede">開放時間與票價一覽（練習用的假資料）</p>\n' +
-    '</header>\n' +
-    '<main>\n' +
-    '  <section class="cards">\n' +
-    '    <article class="card">\n' +
-    '      <h2>Museo di Esempio</h2>\n' +
-    '      <p>週二至週日 09:00–18:00</p>\n' +
-    '      <p class="price">全票 €12　優待票 €6</p>\n' +
-    '    </article>\n' +
-    '    <article class="card">\n' +
-    '      <h2>Galleria Fittizia</h2>\n' +
-    '      <p>每天 10:00–17:00</p>\n' +
-    '      <p class="price">全票 €9　優待票 €4.5</p>\n' +
-    '    </article>\n' +
-    '    <article class="card">\n' +
-    '      <h2>Palazzo di Prova</h2>\n' +
-    '      <p>週三至週一 08:30–19:00</p>\n' +
-    '      <p class="price">全票 €15　優待票 €7.5</p>\n' +
-    '    </article>\n' +
-    '  </section>\n' +
-    '  <div class="actions">\n' +
-    '    <a class="btn" href="#">查看開放時間</a>\n' +
-    '    <a class="btn" href="#">買票說明</a>\n' +
-    '    <a class="btn" href="#">交通方式</a>\n' +
-    '  </div>\n' +
-    '</main>\n' +
-    '<footer>製作：小安（學號 S1234567）・電話 0912-345-678</footer>\n' +
-    '</body>\n' +
-    '</html>\n';
+  var SITE_HTML = '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>Florence Museums</title>\n<link rel="stylesheet" href="style.css">\n</head>\n<body>\n<header>\n  <h1>Florence Museums</h1>\n  <p class="lede">Opening hours and ticket prices at a glance (made-up practice data)</p>\n</header>\n<main>\n  <section class="cards">\n    <article class="card">\n      <h2>Museo di Esempio</h2>\n      <p>Tuesday to Sunday 09:00–18:00</p>\n      <p class="price">Adult €12 · Reduced €6</p>\n    </article>\n    <article class="card">\n      <h2>Galleria Fittizia</h2>\n      <p>Daily 10:00–17:00</p>\n      <p class="price">Adult €9 · Reduced €4.5</p>\n    </article>\n    <article class="card">\n      <h2>Palazzo di Prova</h2>\n      <p>Wednesday to Monday 08:30–19:00</p>\n      <p class="price">Adult €15 · Reduced €7.5</p>\n    </article>\n  </section>\n  <div class="actions">\n    <a class="btn" href="#">See opening hours</a>\n    <a class="btn" href="#">Ticket information</a>\n    <a class="btn" href="#">Getting there</a>\n  </div>\n</main>\n<footer>Made by Xiao An (student ID S1234567) · Phone 0912-345-678</footer>\n</body>\n</html>\n';
 
   /* On purpose, a layout that is fine on a desktop and breaks at phone width (390 px): three fixed-width cards that never wrap
      (.cards, .card) and three fixed-width buttons (.actions, .btn) are wider than the screen. The h1 is small (28 px) so that

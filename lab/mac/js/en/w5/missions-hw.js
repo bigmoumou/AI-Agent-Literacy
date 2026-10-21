@@ -12,7 +12,7 @@
   var HW_DL = W5.HW_DL, DESKTOP = W5.DESKTOP;
   var same = K.same, chain = K.chain, dock = K.dock;
   var NAME = 'An', EMAIL = 'an@example.com';
-  var FILES = ['grades.csv', '評分說明.md'];
+  var FILES = ['grades.csv', 'grading-notes.md'];
 
   function resetWorld(api) {
     LAB.github.reset();
@@ -67,18 +67,18 @@
     return false;
   }
   var T_SAFARI_RELOAD = chain(function () { return showsRepo() ? K.inWins('safari', 'sf-reload')() : null; }, sfAddress, dock('safari'));
-  var NOT_A_REPO = '這裡不是倉庫：先 `cd ~/Desktop/grades-report` 走進 clone 的資料夾（提示字元最後一個字要是 grades-report），再輸入。';
+  var NOT_A_REPO = 'This is not a repository. First type `cd ~/Desktop/grades-report` to go into the cloned folder (the last word of the prompt should be grades-report), then try again.';
 
   LAB.missions.register({
     id: 'w5-hw-prep',
     week: 5, order: 5,
-    group: '作業準備（影片 03）',
-    tag: 'Week 5 作業',
-    title: '作業前的準備：專案要有這四樣',
+    group: 'Homework preparation (Video 03)',
+    tag: 'Week 5 Homework',
+    title: 'Before the homework: your project needs these four things',
     minutes: 10,
     resetsFiles: true,
-    map: 'GitHub 公開倉庫 ⇄ 桌面的 grades-report · 作業檔放進去 · Codex 開在這個資料夾 · AGENTS.md、VERIFY.md 先放空殼 · 第一個 commit',
-    intro: '作業「成績分析小報告」的專案要有四樣：Codex 開在專案資料夾、`AGENTS.md`、`VERIFY.md`、公開的 GitHub 倉庫。這個任務只練準備：把資料夾、作業檔、Codex、兩份空殼和 GitHub 都接好。要照什麼算、檢查哪些事，是作業本身，要你讀過評分說明自己想、自己寫。（練習裡的作業檔是替身，只有一句說明。）',
+    map: 'Public GitHub repository ⇄ grades-report on the Desktop · homework files go in · Codex opened in this folder · empty AGENTS.md and VERIFY.md · first commit',
+    intro: 'The project for the homework “A Short Grade-Analysis Report” needs four things: Codex opened in the project folder, `AGENTS.md`, `VERIFY.md`, and a public GitHub repository. This mission practices only the preparation: connecting the folder, the homework files, Codex, the two empty files and GitHub. What to calculate and what to check is the homework itself: read the grading notes, think it through, and write it yourself. (The homework files in this practice are stand-ins with just one line of explanation.)',
     prepare: function (api) {
       resetWorld(api);
       K.resetCodex(api);
@@ -86,23 +86,23 @@
     steps: [
       {
         id: 's1',
-        text: '到 Safari 打開 `github.com`，按右上角「＋」›「New repository」，建一個公開的倉庫 `grades-report`：選 Public，打開 Add README，按 Create repository。',
-        hint: '作業要交公開的倉庫（Public），老師才看得到。Add README 會讓倉庫一開始就有一個 README.md。Week 4 的作業 ① 練過。',
-        answer: 'Safari › github.com › ＋ › New repository › Repository name：grades-report › Public › Add README › Create repository。',
+        text: 'Open `github.com` in Safari, click “+” at the top right › “New repository”, and create a public repository called `grades-report`: choose Public, turn on Add README, and click Create repository.',
+        hint: 'The homework must be a public repository (Public), or the teacher can\'t see it. Add README makes the repository start with a README.md. You practiced this in Week 4, homework ①.',
+        answer: 'Safari › github.com › + › New repository › Repository name: grades-report › Public › Add README › Create repository.',
         target: newRepoCue,
         check: function (ev, api) { return !!repoKey(api); },
         trap: function (ev) {
           if (!ev || ev.name !== 'github:repo-created' || !ev.data) return null;
-          if (ev.data.visibility !== 'public') return '作業要交公開的倉庫（Public），這個倉庫是 Private。再建一個 Public 的，名字換一個，例如 grades-report2。';
-          if (!ev.data.readme) return '沒有打開 Add README：倉庫一開始是空的。clone 下來也能做，只是頁面上會先空空的。';
+          if (ev.data.visibility !== 'public') return 'The homework must be a public repository (Public), and this repository is Private. Create another Public one with a different name, for example grades-report2.';
+          if (!ev.data.readme) return 'Add README was not turned on, so the repository starts out empty. You can still clone it and carry on, but the page will be empty at first.';
           return null;
         }
       },
       {
         id: 's2',
-        text: '按綠色的「Code」按鈕複製網址，打開終端機，用 `cd Desktop` 走到桌面，再用 `git clone ` 加上網址，把倉庫拿回家。按 Return（Windows 鍵盤是 Enter）。',
-        hint: '先走到想放的地方，再 git clone 加網址（Command+V 貼上）。clone 會新增一個和倉庫同名的資料夾。',
-        answer: '`cd ~/Desktop`，Return；`git clone https://github.com/an/grades-report.git`，Return。（倉庫換了名字，網址跟著換。）',
+        text: 'Click the green “Code” button to copy the URL, open Terminal, type `cd Desktop` to go to the Desktop, then type `git clone ` followed by the URL to bring the repository home. Press Return (Enter on a Windows keyboard).',
+        hint: 'First go to the place where you want it, then type git clone and the URL (paste with Command+V). Clone creates a new folder with the same name as the repository.',
+        answer: '`cd ~/Desktop`, Return; `git clone https://github.com/an/grades-report.git`, Return. (If you named the repository something else, the URL changes too.)',
         replay: 'mission',
         where: DESKTOP,
         target: function (api) {
@@ -113,16 +113,16 @@
         trap: function (ev, api) {
           var c = api.termCmd(ev, function (x) { return x.name === 'git' && x.args[0] === 'clone' && x.status !== 0; });
           if (!c) return null;
-          if (/already exists/.test(c.out || '')) return '這個資料夾已經存在了。先用 `ls` 看看桌面，再決定要刪掉哪一個，或在網址後面加一個新的資料夾名字。';
-          if (/not found/.test(c.out || '')) return '找不到這個倉庫。網址要從 GitHub 的 Code 按鈕複製，不要自己打。';
+          if (/already exists/.test(c.out || '')) return 'This folder already exists. Use `ls` to look at the Desktop first, then decide which one to delete, or add a new folder name after the URL.';
+          if (/not found/.test(c.out || '')) return 'The repository was not found. Copy the URL from the Code button on GitHub; don\'t type it yourself.';
           return null;
         }
       },
       {
         id: 's3',
-        text: '把下載項目 `week5-hw` 裡的兩個作業檔（grades.csv、評分說明.md）搬進剛剛 clone 的資料夾。',
-        hint: 'Finder 拖過去，或用 Week 3 學的 `mv 東西 地方`：可以一次寫好幾個東西，最後一個是目的地。兩個都要搬。',
-        answer: '在終端機：`mv ~/Downloads/week5-hw/* ~/Desktop/grades-report/`（或在 Finder 把兩個檔拖進 grades-report）。',
+        text: 'Move the two homework files (grades.csv and grading-notes.md) from the `week5-hw` folder in Downloads into the folder you just cloned.',
+        hint: 'Drag them over in Finder, or use `mv thing place`, which you learned in Week 3: you can write several things at once, and the last one is the destination. Move both files.',
+        answer: 'In Terminal: `mv ~/Downloads/week5-hw/* ~/Desktop/grades-report/` (or drag the two files into grades-report in Finder).',
         replay: 'mission',
         target: function (api) {
           var d = cloneDir(api);
@@ -135,17 +135,17 @@
         },
         trap: function (ev, api) {
           var d = cloneDir(api);
-          if (d && api.exists(d + '/week5-hw')) return '檔案多包了一層資料夾：grades-report 裡出現了 week5-hw。要搬的是裡面的兩個檔，不是整個資料夾。';
+          if (d && api.exists(d + '/week5-hw')) return 'The files are wrapped in an extra folder: week5-hw appeared inside grades-report. Move the two files inside it, not the whole folder.';
           return null;
         }
       },
       {
         id: 's4',
-        text: '在 Codex 打開 clone 的資料夾：把桌面的 `grades-report` 拖到 Codex 的側邊欄，按「Trust folder」。',
-        hint: 'Codex 要開在專案資料夾，才看得到這個資料夾裡的檔，也才會讀這裡的 AGENTS.md。也可以在 Finder 對資料夾按右鍵 › 打開方式 › Codex。',
-        answer: '把桌面的 grades-report 拖到 Codex 視窗左邊的側邊欄 → 「Trust folder」。',
+        text: 'Open the cloned folder in Codex: drag `grades-report` from the Desktop into the Codex sidebar and click “Trust folder”.',
+        hint: 'Codex must be opened in the project folder so it can see the files in it and read the AGENTS.md here. You can also right-click the folder in Finder › Open With › Codex.',
+        answer: 'Drag grades-report from the Desktop to the sidebar on the left of the Codex window → “Trust folder”.',
         replay: 'mission',
-        menuPath: ['打開方式', 'Codex'],
+        menuPath: ['Open With', 'Codex'],
         target: function (api) {
           var d = cloneDir(api);
           var trust = K.inWinSel('codex', '[data-lab=cx-modal-trust]')();
@@ -161,9 +161,9 @@
       },
       {
         id: 's5',
-        text: '請 Codex 回報它開在哪個資料夾：[[你現在開在哪個資料夾？告訴我完整路徑]]',
-        hint: '作業的 report.md 要附上 Codex 回報的專案路徑，證明它開在專案資料夾。輸入框上方要看到「grades-report」這個標籤。',
-        answer: '在 grades-report 專案的輸入框貼上這句，按 Return：它回 `/Users/an/Desktop/grades-report`。',
+        text: 'Ask Codex to report which folder it is opened in: [[Which folder are you working in now? Tell me the full path.]]',
+        hint: 'The homework\'s report.md must include the project path that Codex reports, to show it was opened in the project folder. You should see the “grades-report” label above the message box.',
+        answer: 'In the grades-report project, paste this sentence into the message box and press Return: it answers `/Users/an/Desktop/grades-report`.',
         replay: 'mission',
         target: function (api) { var d = cloneDir(api); return K.composerIn(d || W5.HW)(api); },
         check: function (ev, api) {
@@ -172,23 +172,23 @@
         },
         trap: function (ev, api) {
           if (!ev || ev.name !== 'codex:reply' || !ev.data || ev.data.intent !== 'w5_project_path') return null;
-          return ev.data.projectPath ? null : '這段對話不在專案裡，所以它回的是暫時的資料夾。點 Codex 側邊欄的 grades-report，在專案底下再問一次。';
+          return ev.data.projectPath ? null : 'This chat is not in a project, so it answered with a temporary folder. Click grades-report in the Codex sidebar and ask again under the project.';
         }
       },
       {
         id: 's6',
-        text: '請 Codex 建兩份空殼：[[在這個專案建立 AGENTS.md 和 VERIFY.md，先只放標題，內容我自己寫]]',
-        hint: '空殼只有標題；要照什麼算、檢查哪些事，要你讀過評分說明自己寫，這正是作業要練的。自己用 `touch AGENTS.md VERIFY.md` 建也可以。',
-        answer: '貼上這句，按 Return。',
+        text: 'Ask Codex to create two empty files: [[Create AGENTS.md and VERIFY.md in this project with only a heading each. I will write the content myself.]]',
+        hint: 'The empty files contain only headings. What to calculate and what to check, you write yourself after reading the grading notes. That is exactly what the homework practices. You can also create them yourself with `touch AGENTS.md VERIFY.md`.',
+        answer: 'Paste this sentence and press Return.',
         replay: 'mission',
         target: function (api) { var d = cloneDir(api); return K.composerIn(d || W5.HW)(api); },
         check: function (ev, api) { var d = cloneDir(api); return !!d && api.exists(d + '/AGENTS.md') && api.exists(d + '/VERIFY.md'); }
       },
       {
         id: 's7',
-        text: '第一個 commit：在 clone 的資料夾 `git add .`、`git commit -m "建立專案：作業檔和兩份空殼"`、`git push`，再回 Safari 重新整理倉庫頁面。',
-        hint: 'commit 看得出你一步一步怎麼做；這一個寫「建立專案」就好。要先走進 clone 的資料夾（提示字元最後一個字要是 grades-report）。',
-        answer: '`cd ~/Desktop/grades-report`，Return；`git add .`，Return；`git commit -m "建立專案：作業檔和兩份空殼"`，Return；`git push`，Return；Safari 重新載入倉庫頁面。',
+        text: 'First commit: in the cloned folder, run `git add .`, `git commit -m "Create project: homework files and two empty files"` and `git push`, then go back to Safari and reload the repository page.',
+        hint: 'A commit shows how you worked, step by step; for this one, a message like “Create project” is enough. First go into the cloned folder (the last word of the prompt should be grades-report).',
+        answer: '`cd ~/Desktop/grades-report`, Return; `git add .`, Return; `git commit -m "Create project: homework files and two empty files"`, Return; `git push`, Return; reload the repository page in Safari.',
         replay: 'mission',
         where: W5.HW,
         target: function (api) {
@@ -205,11 +205,11 @@
           var c = api.termCmd(ev, function (x) { return x.name === 'git' && x.status === 128 && /not a git repository/.test(x.out || ''); });
           if (c) return NOT_A_REPO;
           var e2 = api.termCmd(ev, function (x) { return x.name === 'git' && x.status !== 0 && /Author identity unknown/.test(x.out || ''); });
-          if (e2) return 'git 還不知道你是誰：輸入 `git config --global user.name "An"` 和 `git config --global user.email "an@example.com"`，再 commit 一次。';
+          if (e2) return 'Git doesn\'t know who you are yet: type `git config --global user.name "An"` and `git config --global user.email "an@example.com"`, then commit again.';
           return null;
         }
       }
     ],
-    outro: '準備好了。接下來是作業本身：在你自己的電腦上讀 `評分說明.md`、想清楚，自己寫 AGENTS.md 和 VERIFY.md；寫好以後開一段新的對話只下一句指令，看 Codex 能不能靠這兩份檔自己做對。'
+    outro: 'You\'re ready. Next comes the homework itself: on your own computer, read `grading-notes.md`, think it through, and write AGENTS.md and VERIFY.md yourself. Then start a new chat with just one instruction and see whether Codex can do it right using only those two files.'
   });
 })(window.LAB);

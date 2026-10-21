@@ -27,7 +27,7 @@
     settings: 'Settings',
     backToApp: 'Back to app',
     nav: ['General', 'Configuration', 'Personalization', 'MCP servers', 'Git', 'Environments', 'Worktrees', 'Archived threads'],
-    notInPractice: '練習版沒有這一頁',
+    notInPractice: 'This page isn\'t in the practice version.',
     general: 'General',
     theme: 'Theme', themeValue: 'System',
     contextUsage: 'Show context window usage',

@@ -203,7 +203,7 @@
     return LAB.codex5.addChat({ title: o.title, projectPath: o.projectPath || GW, messages: msgs, fields: o.fields || {}, select: !!o.select });
   }
 
-  var NOT_IN_GW = '這段對話不在 ginkgo-walk 專案裡（輸入框上方沒有「ginkgo-walk」標籤）。點 Codex 側邊欄的 ginkgo-walk，在專案底下再試一次。';
+  var NOT_IN_GW = 'This chat is not in the ginkgo-walk project (there is no “ginkgo-walk” tag above the input box). Click ginkgo-walk in the Codex sidebar and try again under the project.';
   function notInGwTrap(intents) {
     return function (ev, api) {
       if (!ev || ev.name !== 'codex:reply' || !ev.data) return null;
@@ -221,15 +221,15 @@
   };
 
   /* ================================================================== 1 · 怎樣才算做好：寫 VERIFY.md */
-  var GROUP = '驗證清單（影片 01）';
+  var GROUP = 'Verification checklist (video 01)';
   /* the item the student makes checkable: no line says 點得到 without a number, and one line about the markers carries a size (not 390, not 12) */
   function markerItem(api) {
     var t = api.read(VERIFY);
     if (t === null) return { missing: true };
     var lines = String(t).split(/\r?\n/), px = null, vague = false;
     lines.forEach(function (l) {
-      if (/點得到/.test(l) && !/\d/.test(l)) vague = true;
-      if (!/(標記|spot)/i.test(l)) return;
+      if (/(點得到|big enough|large enough)/i.test(l) && !/\d/.test(l)) vague = true;
+      if (!/(標記|spot|marker)/i.test(l)) return;
       var nums = (l.match(/\d+/g) || []).map(Number).filter(function (n) { return n !== 390 && n !== 12; });
       if (nums.length) px = Math.max(px || 0, nums[nums.length - 1]);
     });
@@ -244,19 +244,19 @@
     id: 'w5-01-verify',
     week: 5, order: 1,
     group: GROUP,
-    tag: 'Week 5 影片 01',
-    title: '怎樣才算做好：寫 VERIFY.md',
+    tag: 'Week 5 Video 01',
+    title: 'What Counts as Done: Write VERIFY.md',
     minutes: 10,
     resetsFiles: true,
     needs: [GW],
-    intro: '「做好了」是 Codex 自己判斷的；沒寫清楚的地方，每次可能不一樣。這個任務請 Codex 起草一份驗收單 `VERIFY.md`，你用 VS Code 把檢查不了的那一條改成檢查得了的，再在 `AGENTS.md` 指名它，讓 Codex 每次做完都照它驗證。',
+    intro: '“Done” is something Codex decides for itself, and anything that isn\'t written clearly may turn out differently each time. In this mission you ask Codex to draft a verification checklist, `VERIFY.md`. Then you use VS Code to turn the item that can\'t be checked into one that can, and name the file in `AGENTS.md` so that Codex verifies against it every time it finishes.',
     prepare: function (api) {
       W5.restore(api, 'base');
       resetCodex(api);
       gwProject(api, false);
       seedChat({
-        title: '做銀杏散步地圖',
-        turns: [['幫我把銀杏散步地圖全部做好', '做好了：site/index.html 有 12 個景點標記，每個標記連到一張照片；site/style.css 調了顏色和大小。你可以打開看看。', ['Read AGENTS.md', 'Edited site/index.html', 'Edited site/style.css'], 9]],
+        title: 'Build the Ginkgo Walking Map',
+        turns: [['Please finish the whole Ginkgo Walking Map for me', 'Done: site/index.html has 12 spot markers, and each marker links to a photo; site/style.css has the colors and sizes adjusted. You can open it and take a look.', ['Read AGENTS.md', 'Edited site/index.html', 'Edited site/style.css'], 9]],
         fields: { model: 'sol', ctxPct: 12 }
       });
       gwProject(api, true);
@@ -264,9 +264,9 @@
     steps: [
       {
         id: 's1',
-        text: '先請 Codex 起草驗收單：點 Codex 側邊欄的 ginkgo-walk，貼上這句，按 Return（Windows 鍵盤是 Enter）。[[幫我起草一份 VERIFY.md：每一條都寫看什麼、怎麼看、應該看到什麼]]',
-        hint: '`AGENTS.md` 寫「怎麼做」，`VERIFY.md` 寫「怎樣算做好、怎麼檢查」。可以複製上面這句，貼到輸入框。輸入框上方要看到「ginkgo-walk」這個標籤。',
-        answer: '在 Codex 的 ginkgo-walk 專案輸入框貼上這句，按 Return。',
+        text: 'First ask Codex to draft the verification checklist: click ginkgo-walk in the Codex sidebar, paste this sentence, and press Return (Enter on a Windows keyboard). [[Draft a VERIFY.md for me: for each item, write what to look at, how to look, and what you should see]]',
+        hint: '`AGENTS.md` says “how to do the work”, and `VERIFY.md` says “what counts as done and how to check it”. You can copy the sentence above and paste it into the input box. You should see the “ginkgo-walk” tag above the input box.',
+        answer: 'Paste this sentence into the input box of the ginkgo-walk project in Codex and press Return.',
         replay: 'mission',
         target: T_COMPOSER,
         check: function (ev, api) { return !!api.seen('codex:reply', replyIs('w5_verify_draft', function (d) { return d.verifyDraft; })) && api.exists(VERIFY); },
@@ -274,51 +274,51 @@
       },
       {
         id: 's2',
-        text: '第 4 條只寫「要夠大」，沒寫多大，Codex 沒辦法檢查。在 VS Code 打開 `VERIFY.md`，把第 4 條換成 [[寬 390 px 時，每個標記至少 44 px]]，存檔。',
-        hint: '手指點得準的大小大約是 44 px，寬 390 px 是手機的寬度；寫成數字，看得出對錯，Codex 才檢查得了。用 VS Code 打開整個 ginkgo-walk 資料夾：點 Dock 上的 VS Code，按左邊的「Open Folder」，在「桌面」點 ginkgo-walk，按「打開」。也可以在終端機打 `cd ~/Desktop/ginkgo-walk`，再打 `code .`。打開以後點 VS Code 左邊的 VERIFY.md。',
-        answer: 'Dock 點 VS Code › Open Folder › 桌面 › 點 ginkgo-walk › 打開（或在終端機打 `cd ~/Desktop/ginkgo-walk`、`code .`）。VS Code 左邊點 `VERIFY.md`，把第 4 條「在手機上，地圖上的景點標記要夠大，手指點得到。」換成「寬 390 px 時，每個標記至少 44 px。」，按 Command+S（Windows 鍵盤是 Ctrl+S）。',
+        text: 'Item 4 only says “big enough” and not how big, so Codex can\'t check it. Open `VERIFY.md` in VS Code, replace item 4 with [[At 390 px width, each marker is at least 44 px]], and save.',
+        hint: 'A size a finger can tap accurately is about 44 px, and 390 px is the width of a phone. When an item is written with numbers, you can tell whether it is right or wrong, and only then can Codex check it. Open the whole ginkgo-walk folder in VS Code: click VS Code in the Dock, click “Open Folder” on the left, click ginkgo-walk in “Desktop”, and click “Open”. You can also type `cd ~/Desktop/ginkgo-walk` in Terminal and then `code .`. After it opens, click VERIFY.md on the left side of VS Code.',
+        answer: 'Dock: click VS Code › Open Folder › Desktop › click ginkgo-walk › Open (or type `cd ~/Desktop/ginkgo-walk` and `code .` in Terminal). Click `VERIFY.md` on the left side of VS Code, replace item 4, “On a phone, the spot markers on the map must be big enough to tap with a finger.”, with “At 390 px width, each marker is at least 44 px.”, and press Command+S (Ctrl+S on a Windows keyboard).',
         target: codeFlow(VERIFY),
         check: function (ev, api) { var r = markerItem(api); return !r.missing && !r.vague && r.px >= 40; },
         trap: function (ev, api) {
           if (!ev || !((ev.name === 'editor:save' || ev.name === 'fs:change') && ev.data && same(api, ev.data.path, VERIFY))) return null;
           var r = markerItem(api);
-          if (r.vague || !r.px) return '第 4 條還是只寫「要夠大」，沒寫多大。把它換成看得出對錯的句子：「寬 390 px 時，每個標記至少 44 px」。';
-          if (r.px < 40) return '這個數字太小，手指點不準；一般建議至少 44 px。';
+          if (r.vague || !r.px) return 'Item 4 still only says “big enough” and not how big. Replace it with a sentence that can be checked as right or wrong: “At 390 px width, each marker is at least 44 px”.';
+          if (r.px < 40) return 'That number is too small for a finger to tap accurately; at least 44 px is the usual recommendation.';
           return null;
         }
       },
       {
         id: 's3',
-        text: '在 VS Code 打開 `AGENTS.md`，在最後加上這一句，存檔：[[- 每次做完一個新功能，都要把 VERIFY.md 完整驗證一次，確保全部通過。]]',
-        hint: 'Codex 每次回答前都會讀專案裡的 AGENTS.md，但不會自己去找 VERIFY.md；要在 AGENTS.md 指名，它才會去讀。可以複製上面這句，貼在 AGENTS.md 最後一行下面。',
-        answer: 'VS Code 左邊點 `AGENTS.md`，在最後一行下面貼上這句，按 Command+S。',
+        text: 'In VS Code, open `AGENTS.md`, add this sentence at the end, and save: [[- After finishing each new feature, run the whole VERIFY.md and make sure everything passes.]]',
+        hint: 'Codex reads the AGENTS.md in the project before every answer, but it does not go looking for VERIFY.md by itself. Only when AGENTS.md names it will Codex read it. You can copy the sentence above and paste it below the last line of AGENTS.md.',
+        answer: 'Click `AGENTS.md` on the left side of VS Code, paste this sentence below the last line, and press Command+S.',
         target: codeFlow(AGENTS),
         check: function (ev, api) { return /verify\.md/i.test(api.read(AGENTS) || ''); },
         trap: function (ev) {
           // the new feature asked before AGENTS.md names VERIFY.md: no verification (any chat of the project reads the latest AGENTS.md)
-          if (ev && ev.name === 'codex:reply' && ev.data && ev.data.intent === 'w5_feature' && ev.data.verify && !ev.data.verify.ran) return 'Codex 做完了，但沒有照 VERIFY.md 檢查：AGENTS.md 裡還沒有要它照 VERIFY.md 檢查的那一句。先在 AGENTS.md 加上那一句，再請它做一次。';
+          if (ev && ev.name === 'codex:reply' && ev.data && ev.data.intent === 'w5_feature' && ev.data.verify && !ev.data.verify.ran) return 'Codex finished, but it did not check against VERIFY.md: AGENTS.md does not yet have the sentence that tells it to check against VERIFY.md. First add that sentence to AGENTS.md, then ask it to do the work again.';
           return null;
         }
       },
       {
         id: 's5',
-        text: '回到 Codex 剛剛起草 VERIFY.md 的那段對話，請它做一個新功能，做完看它的回報表：[[在地圖下面加一個「全部景點」清單，照名字排好]]',
-        hint: 'AGENTS.md 有那一句，Codex 做完功能就會照 VERIFY.md 一條一條檢查，最後給你一張回報表：✅ 過、❌ 沒過、⚠️ 沒辦法檢查。同一個專案的對話每次都會讀最新的 AGENTS.md，不用開新的對話。',
-        answer: '在 Codex 剛剛那段對話貼上這句，按 Return，等它做完。回報表第 3、4 條是 ❌。',
+        text: 'Go back to the chat where Codex drafted VERIFY.md and ask it for a new feature. When it is done, look at its report table: [[Add an “All spots” list below the map, in alphabetical order]]',
+        hint: 'Once AGENTS.md has that sentence, Codex checks VERIFY.md item by item after it finishes a feature, and gives you a report table at the end: ✅ passed, ❌ failed, ⚠️ can\'t check. Chats in the same project read the latest AGENTS.md every time, so you don\'t need to open a new chat.',
+        answer: 'Paste this sentence into that same Codex chat, press Return, and wait until it finishes. In the report table, items 3 and 4 show ❌.',
         replay: 'mission',
         target: T_COMPOSER,
         check: function (ev, api) { return !!api.seen('codex:reply', verifyReply(function (v, d) { return v.ran && d.intent === 'w5_feature'; })); },
         trap: function (ev, api) {
           if (!ev || ev.name !== 'codex:reply' || !ev.data || ev.data.intent !== 'w5_feature') return notInGwTrap(['w5_feature', 'w5_fallback'])(ev, api);
-          if (ev.data.verify && !ev.data.verify.ran) return 'Codex 做完了，但沒有照 VERIFY.md 檢查：AGENTS.md 裡還沒有要它照 VERIFY.md 檢查的那一句。先在 AGENTS.md 加上那一句，再請它做一次。';
+          if (ev.data.verify && !ev.data.verify.ran) return 'Codex finished, but it did not check against VERIFY.md: AGENTS.md does not yet have the sentence that tells it to check against VERIFY.md. First add that sentence to AGENTS.md, then ask it to do the work again.';
           return null;
         }
       },
       {
         id: 's6',
-        text: '請它修好沒過的，再完整驗證一次：[[照 VERIFY.md 把沒過的修好，再完整驗證一次]]',
-        hint: '修完一定要再驗一次，才知道有沒有修好、有沒有弄壞別的地方。⚠️ 的那一條是 Codex 照實說它沒辦法檢查。',
-        answer: '貼上這句按 Return。第二張回報表 1 到 4 都是 ✅，第 5 條照樣說沒辦法檢查。',
+        text: 'Ask it to fix the ones that failed, then verify the whole list again: [[Fix the items that failed, following VERIFY.md, then verify everything once more]]',
+        hint: 'After a fix, always verify again, so you know whether it is fixed and whether anything else broke. The item marked ⚠️ is Codex honestly telling you that it can\'t check it.',
+        answer: 'Paste this sentence and press Return. In the second report table, items 1 to 4 are all ✅, and item 5 still says it can\'t check.',
         replay: 'mission',
         target: T_COMPOSER,
         check: function (ev, api) { return !!api.seen('codex:reply', verifyReply(function (v) { return v.ran && v.fail === 0; }), { since: 'step' }); },
@@ -326,9 +326,9 @@
       },
       {
         id: 's7',
-        text: '你還是要自己抽查一條：請 Codex 用內建瀏覽器打開網站，再切到手機寬度自己看。[[用內建瀏覽器打開網站]]',
-        hint: '回報表是 Codex 說的；自己點開一兩條確認。手機的寬度在內建瀏覽器右上的「⋯」› Device toolbar 裡：打開以後網址列下面多一條，可以輸入寬度。',
-        answer: '貼上這句按 Return，瀏覽器打開以後按右上的「⋯」› Device toolbar › Show device toolbar，把寬度改成 390，看標記有沒有變大、頁面會不會左右捲動。',
+        text: 'You should still spot-check one item yourself: ask Codex to open the website in the built-in browser, then switch to phone width and look for yourself. [[Open the website in the built-in browser]]',
+        hint: 'The report table is what Codex says; open an item or two yourself to confirm. The phone width is under “…” › Device toolbar at the top right of the built-in browser: once you turn it on, an extra bar appears under the address bar where you can type a width.',
+        answer: 'Paste this sentence and press Return. After the browser opens, click “…” › Device toolbar › Show device toolbar at the top right, change the width to 390, and see whether the markers got bigger and whether the page scrolls sideways.',
         // cxbrowser-r2: once the browser shows the site, ⋯ › Device toolbar › Show device toolbar › the width box (LAB.cxbrowser.deviceCue)
         target: whileIdle(chain(function () {
           var b = LAB.cxbrowser && LAB.cxbrowser.state ? LAB.cxbrowser.state() : null;
@@ -343,6 +343,6 @@
         }
       }
     ],
-    outro: '清單讓 Codex 比較可能自己發現問題，但不保證找得到全部；看它的回報表，自己抽查一兩條。發現新的問題，就加一條進驗收單。作業「成績分析小報告」也要一份 `VERIFY.md`。'
+    outro: 'A checklist makes it more likely that Codex finds problems by itself, but it does not promise to find all of them. Read its report table and spot-check an item or two yourself. When you find a new problem, add an item to the checklist. The homework, “Short Grade-Analysis Report”, also needs a `VERIFY.md`.'
   });
 })(window.LAB);

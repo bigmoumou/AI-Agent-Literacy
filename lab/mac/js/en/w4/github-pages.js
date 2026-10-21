@@ -73,7 +73,7 @@
   function enc(path) { return String(path).split('/').map(encodeURIComponent).join('/'); }
   function dec(seg) { try { return decodeURIComponent(seg); } catch (e) { return seg; } }
   function A(ctx, path, kids, attrs) { return W.link(ctx, HOST + path, kids, attrs); }
-  function inert(text) { LAB.ui.toast(text || '練習版沒有這個功能'); }
+  function inert(text) { LAB.ui.toast(text || 'This feature is not available (practice version)'); }
   function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
   function splitLines(text) {
     if (text === '' || text === null || text === undefined) return [];
@@ -207,7 +207,7 @@
     var avMenu = h('div', { class: 'gh-pop gh-menu gh-menu-right', role: 'menu' },
       h('div', { class: 'gh-menu-who' }, 'Signed in as ', h('strong', null, USER)),
       menuItem(ctx, 'Your profile', '/' + USER), menuItem(ctx, 'Your repositories', '/' + USER + '?tab=repositories'),
-      h('button', { type: 'button', class: 'gh-menu-item', role: 'menuitem', on: { click: function () { inert('練習版不會真的登出'); } } }, 'Sign out'));
+      h('button', { type: 'button', class: 'gh-menu-item', role: 'menuitem', on: { click: function () { inert('You cannot really sign out (practice version)'); } } }, 'Sign out'));
     pops.bind(plusBtn, plusMenu); pops.bind(avBtn, avMenu);
     var crumb = repo ? h('span', { class: 'gh-crumb' }, A(ctx, '/' + USER, USER), h('span', { class: 'gh-slash' }, '/'), A(ctx, '/' + USER + '/' + repo.name, h('strong', null, repo.name))) : h('span', { class: 'gh-crumb' }, A(ctx, '/', 'Dashboard'));
     var search = h('button', { type: 'button', class: 'gh-hsearch', on: { click: function () { inert(); } } }, ic('search', 14), h('span', null, 'Type '), h('kbd', null, '/'), h('span', null, ' to search'));
@@ -229,7 +229,7 @@
     root.appendChild(header(ctx, pops, repo));
     var body = content(pops);
     root.appendChild(body);
-    root.appendChild(h('footer', { class: 'gh-foot' }, h('p', null, '練習版：這不是真的 GitHub 網站。')));
+    root.appendChild(h('footer', { class: 'gh-foot' }, h('p', null, 'Practice version: this is not the real GitHub website.')));
     if (window.ResizeObserver) {
       var ro = new ResizeObserver(function () {
         if (!root.isConnected) { ro.disconnect(); return; }
@@ -246,7 +246,7 @@
       var attrs = { class: 'gh-tab' + (on ? ' is-on' : '') };
       var kids = [ic(icon, 16), h('span', null, name)];
       if (path) return A(ctx, path, kids, attrs);
-      return h('button', { type: 'button', class: attrs.class, on: { click: function () { inert('練習版只做 Code 這一頁'); } } }, kids);
+      return h('button', { type: 'button', class: attrs.class, on: { click: function () { inert('Only the Code page is available (practice version)'); } } }, kids);
     };
     var cnt = function (icon, label, n) { return h('button', { type: 'button', class: 'gh-btn gh-btn-sm', on: { click: function () { inert(); } } }, ic(icon, 16), h('span', null, label), h('span', { class: 'gh-count' }, String(n))); };
     return h('div', { class: 'gh-repohead' },
@@ -285,8 +285,8 @@
       subtabs.textContent = '';
       [['https', 'HTTPS'], ['ssh', 'SSH'], ['cli', 'GitHub CLI']].forEach(function (t) {
         subtabs.appendChild(h('button', { type: 'button', role: 'tab', class: 'gh-subtab' + (mode === t[0] ? ' is-on' : ''), 'aria-selected': mode === t[0] ? 'true' : 'false', dataset: { lab: 'gh-url-tab', tab: t[0] }, on: { click: function () {
-          if (t[0] === 'cli') { inert('練習版沒有 GitHub CLI'); return; }
-          mode = t[0]; input.value = urls[mode]; note.textContent = mode === 'ssh' ? 'Use a password-protected SSH key.（練習版的終端機只能用 HTTPS 網址）' : 'Clone using the web URL.'; drawTabs();
+          if (t[0] === 'cli') { inert('GitHub CLI is not available (practice version)'); return; }
+          mode = t[0]; input.value = urls[mode]; note.textContent = mode === 'ssh' ? 'Use a password-protected SSH key. (The practice Terminal can only use HTTPS URLs)' : 'Clone using the web URL.'; drawTabs();
         } } }, t[1]));
       });
     }
@@ -354,14 +354,14 @@
       }
       var base = '/' + USER + '/' + repo.name;
       // the bar above the table: branch, counts, Go to file, Add file, Code
-      var branchBtn = h('button', { type: 'button', class: 'gh-btn gh-btn-sm', on: { click: function () { inert('練習版只有 main 一個分支'); } } }, ic('branch', 16), h('strong', null, branch), ic('caret', 12));
+      var branchBtn = h('button', { type: 'button', class: 'gh-btn gh-btn-sm', on: { click: function () { inert('Only the main branch is available (practice version)'); } } }, ic('branch', 16), h('strong', null, branch), ic('caret', 12));
       var top = h('div', { class: 'gh-actions' },
         branchBtn,
-        h('button', { type: 'button', class: 'gh-linkbtn', on: { click: function () { inert('練習版只有 main 一個分支'); } } }, ic('branch', 16), h('strong', null, '1'), ' Branch'),
+        h('button', { type: 'button', class: 'gh-linkbtn', on: { click: function () { inert('Only the main branch is available (practice version)'); } } }, ic('branch', 16), h('strong', null, '1'), ' Branch'),
         h('button', { type: 'button', class: 'gh-linkbtn', on: { click: function () { inert(); } } }, ic('tag', 16), h('strong', null, '0'), ' Tags'),
         h('span', { class: 'gh-grow' }),
         h('button', { type: 'button', class: 'gh-btn gh-btn-sm', on: { click: function () { inert(); } } }, ic('search', 14), h('span', null, 'Go to file')),
-        h('button', { type: 'button', class: 'gh-btn gh-btn-sm', on: { click: function () { inert('練習版請用鉛筆圖示在網頁上改檔案'); } } }, ic('plus', 14), h('span', null, 'Add file'), ic('caret', 12)),
+        h('button', { type: 'button', class: 'gh-btn gh-btn-sm', on: { click: function () { inert('Use the pencil icon to edit the file on the page (practice version)'); } } }, ic('plus', 14), h('span', null, 'Add file'), ic('caret', 12)),
         codeButton(ctx, repo, pops));
       // the file table
       var table = h('div', { class: 'gh-box gh-files', role: 'table' });
@@ -439,7 +439,7 @@
         }
       }
       draw();
-      var copyText = h('button', { type: 'button', class: 'gh-iconbtn', title: 'Copy file', 'aria-label': 'Copy file', on: { click: function () { LAB.clipboard.setText(text); LAB.ui.toast('已拷貝檔案內容'); } } }, ic('copy', 16));
+      var copyText = h('button', { type: 'button', class: 'gh-iconbtn', title: 'Copy file', 'aria-label': 'Copy file', on: { click: function () { LAB.clipboard.setText(text); LAB.ui.toast('File contents copied'); } } }, ic('copy', 16));
       var pencil = A(ctx, base + '/edit/' + branch + '/' + enc(path), ic('pencil', 16), { class: 'gh-iconbtn', title: 'Edit this file', 'aria-label': 'Edit this file', dataset: { lab: 'gh-edit' } });
       var box = h('div', { class: 'gh-box gh-filebox' },
         commitBar(ctx, repo, chain, touch, false),
@@ -545,11 +545,11 @@
             h('div', { class: 'gh-muted gh-cmeta' }, avatar(authorName(c), 16), h('strong', null, authorName(c)), ' committed ' + G.ago(c.time))),
           h('div', { class: 'gh-cside' },
             A(ctx, base + '/commit/' + c.id, c.id.slice(0, 7), { class: 'gh-hash gh-hashbtn' }),
-            h('button', { type: 'button', class: 'gh-iconbtn', title: 'Copy the full SHA', 'aria-label': 'Copy the full SHA', on: { click: function () { LAB.clipboard.setText(c.id); LAB.ui.toast('已拷貝 commit 編號'); } } }, ic('copy', 16)))));
+            h('button', { type: 'button', class: 'gh-iconbtn', title: 'Copy the full SHA', 'aria-label': 'Copy the full SHA', on: { click: function () { LAB.clipboard.setText(c.id); LAB.ui.toast('Commit SHA copied'); } } }, ic('copy', 16)))));
       });
       if (!chain.length) list.appendChild(h('p', { class: 'gh-muted gh-pad' }, 'There are no commits yet.'));
       wrap.appendChild(h('div', { class: 'gh-wrap' },
-        h('div', { class: 'gh-edithead' }, h('h1', { class: 'gh-h1' }, 'Commits'), h('span', { class: 'gh-grow' }), h('button', { type: 'button', class: 'gh-btn gh-btn-sm', on: { click: function () { inert('練習版只有 main 一個分支'); } } }, ic('branch', 16), h('strong', null, branch), ic('caret', 12))),
+        h('div', { class: 'gh-edithead' }, h('h1', { class: 'gh-h1' }, 'Commits'), h('span', { class: 'gh-grow' }), h('button', { type: 'button', class: 'gh-btn gh-btn-sm', on: { click: function () { inert('Only the main branch is available (practice version)'); } } }, ic('branch', 16), h('strong', null, branch), ic('caret', 12))),
         list));
       return wrap;
     });

@@ -310,7 +310,7 @@
       return null;
     }
     if (p.scheme === 'ssh') {
-      ctx.err('（練習版只支援 HTTPS 網址：https://github.com/…，請用 GitHub 網頁上 Code 按鈕裡 HTTPS 那一欄的網址）\nfatal: Could not read from remote repository.\n\nPlease make sure you have the correct access rights\nand the repository exists.\n');
+      ctx.err('(The practice version only supports HTTPS URLs: https://github.com/… Use the URL from the HTTPS tab of the Code button on the GitHub page)\nfatal: Could not read from remote repository.\n\nPlease make sure you have the correct access rights\nand the repository exists.\n');
       return null;
     }
     var repo = G.get(p.key);
@@ -444,7 +444,7 @@
       writeConfig(vfs, root, repo);
       return 0;
     }
-    ctx.err('（練習版的 git remote 只做：git remote -v、add、remove、get-url、set-url）\n');
+    ctx.err('(In the practice version, git remote only supports: git remote -v, add, remove, get-url, set-url)\n');
     return 1;
   }
 
@@ -486,7 +486,7 @@
   }
 
   /* ------------------------------------------------------------------ pull */
-  var DIVERGED = 'hint: You have divergent branches and need to specify how to reconcile them.\nhint: You can do so by running one of the following commands sometime before\nhint: your next pull:\nhint:\nhint:   git config pull.rebase false  # merge\nhint:   git config pull.rebase true   # rebase\nhint:   git config pull.ff only       # fast-forward only\nhint:\nhint: You can replace "git config" with "git config --global" to set a default\nhint: preference for all repositories. You can also pass --rebase, --no-rebase,\nhint: or --ff-only on the command line to override the configured default per\nhint: invocation.\nfatal: Need to specify how to reconcile divergent branches.\n（練習版還沒有做合併：先用 git status 看看自己和雲端差在哪裡。）\n';
+  var DIVERGED = 'hint: You have divergent branches and need to specify how to reconcile them.\nhint: You can do so by running one of the following commands sometime before\nhint: your next pull:\nhint:\nhint:   git config pull.rebase false  # merge\nhint:   git config pull.rebase true   # rebase\nhint:   git config pull.ff only       # fast-forward only\nhint:\nhint: You can replace "git config" with "git config --global" to set a default\nhint: preference for all repositories. You can also pass --rebase, --no-rebase,\nhint: or --ff-only on the command line to override the configured default per\nhint: invocation.\nfatal: Need to specify how to reconcile divergent branches.\n(The practice version cannot merge yet: use git status to see how your computer and the cloud differ.)\n';
 
   function doPull(rest, ctx, repo, root) {
     var s = ctx.session, vfs = s.vfs;
