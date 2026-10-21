@@ -1,0 +1,8 @@
+{
+  "@keep": [
+    { "file": "codex.js", "logic": "^(call:|arr:|intent-test)" },
+    { "file": "w4/intents4.js", "logic": "^(call:|arr:|intent-test)" },
+    { "file": "codex.js", "where": "^var:WRITE_CJK" },
+    { "file": "w4/intents4.js", "where": "^var:(BROWSER|OPEN|PHONE|LOOK|SITE|SITE_WORDS|COLORS|FULL)$" }
+  ]
+}

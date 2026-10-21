@@ -1,0 +1,84 @@
+{
+  "mac": {
+    "early": [],
+    "late": [
+      "en-intents3.js"
+    ],
+    "css": [
+      "en.css"
+    ],
+    "html": [
+      [
+        "<title>練習用的 Mac｜學習分析工具</title>",
+        "<title>Practice Mac | AI Agent Literacy</title>"
+      ],
+      [
+        "content=\"在瀏覽器裡練習每週的操作：一台練習用的 Mac，可以操作終端機、Finder、Codex、Safari 和 Code。這是教學模擬，不是真的 Mac。\"",
+        "content=\"Practice each week's skills in your browser: a practice Mac where you can use Terminal, Finder, Codex, Safari and Code. This is a teaching simulation, not a real Mac.\""
+      ],
+      [
+        ">正在連線到 an 的 MacBook Air<",
+        ">Connecting to an's MacBook Air<"
+      ],
+      [
+        ">正在建立安全連線…<",
+        ">Establishing a secure connection…<"
+      ],
+      [
+        "aria-label=\"練習用的 Mac 桌面\"",
+        "aria-label=\"Practice Mac desktop\""
+      ],
+      [
+        "aria-label=\"任務卡\"",
+        "aria-label=\"Mission card\""
+      ],
+      [
+        "這個練習需要 JavaScript，請在瀏覽器裡開啟 JavaScript 後重新整理。",
+        "This practice needs JavaScript. Turn JavaScript on in your browser and reload the page."
+      ]
+    ]
+  },
+  "win": {
+    "early": [],
+    "late": [
+      "en-intents3.js"
+    ],
+    "css": [
+      "en.css"
+    ],
+    "html": [
+      [
+        "<title>練習用的電腦（Windows）｜學習分析工具</title>",
+        "<title>Practice PC (Windows) | AI Agent Literacy</title>"
+      ],
+      [
+        "content=\"在瀏覽器裡練習每週的操作：一台練習用的 Windows 11 電腦，可以操作 PowerShell 終端機、檔案總管、Codex、Edge 和 Visual Studio Code。這是教學模擬，不是真的 Windows。\"",
+        "content=\"Practice each week's skills in your browser: a practice Windows 11 PC where you can use the PowerShell terminal, File Explorer, Codex, Edge and Visual Studio Code. This is a teaching simulation, not a real Windows PC.\""
+      ],
+      [
+        ">正在連線到 AN-LAPTOP<",
+        ">Connecting to AN-LAPTOP<"
+      ],
+      [
+        ">an 的筆電<",
+        ">an's laptop<"
+      ],
+      [
+        ">正在起始遠端連線…<",
+        ">Initiating remote connection…<"
+      ],
+      [
+        "aria-label=\"練習用的 Windows 桌面\"",
+        "aria-label=\"Practice Windows desktop\""
+      ],
+      [
+        "aria-label=\"任務卡\"",
+        "aria-label=\"Mission card\""
+      ],
+      [
+        "這個練習需要 JavaScript，請在瀏覽器裡開啟 JavaScript 後重新整理。",
+        "This practice needs JavaScript. Turn JavaScript on in your browser and reload the page."
+      ]
+    ]
+  }
+}

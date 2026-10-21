@@ -1,0 +1,8 @@
+/* en.css (Mac): the English page only. Fonts for Latin text and room for English labels. */
+:root {
+  --lab-font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, "Noto Sans", system-ui, sans-serif;
+  --mac-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, "Noto Sans", system-ui, sans-serif;
+}
+
+/* English labels are longer than the Chinese ones: room where a fixed width cut them */
+.sy-am-filter { max-width: 150px; }

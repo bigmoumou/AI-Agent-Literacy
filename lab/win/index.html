@@ -54,6 +54,21 @@
 <!-- 多語系要比其他程式先載入（不要 defer）；練習版只有繁體中文，boot.js 會把 <html lang> 鎖回 zh-Hant -->
 <script src="../../assets/i18n-strings.js"></script>
 <script src="../../assets/i18n.js"></script>
+<!--lab-en:redirect-->
+<script>
+  // English (製作/english/lab-en): an English browser, or ?lang=en, gets index.en.html with the same address parameters, for the weeks that have an English version
+  // (LAB_EN_WEEKS). Not when this page sits inside another page (the Week 6 exam embeds the Chinese computer). Chinese and every other language: nothing happens here.
+  (function () {
+    var LAB_EN_WEEKS = [3, 4, 5, 7];
+    if (!(window.I18N && I18N.lang === "en" && window === window.top)) return;
+    var q = location.search, m = /[?&]week=(\d+)(?:&|$)/.exec(q) || /[?&]mission=w(\d+)-/.exec(q), wk = m ? +m[1] : 3;
+    if ([3, 4, 5, 7].indexOf(wk) < 0) wk = 3;
+    if (LAB_EN_WEEKS.indexOf(wk) < 0) return;
+    document.documentElement.style.visibility = "hidden";
+    location.replace("index.en.html" + location.search + location.hash);
+  })();
+</script>
+<!--/lab-en:redirect-->
 </head>
 <body>
 <!-- 連線畫面（Windows 遠端桌面連線的樣子）：約 2.5 秒後由 js/connect.js 移除 -->

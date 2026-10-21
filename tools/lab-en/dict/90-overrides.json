@@ -1,0 +1,24 @@
+{
+"@file:mac:seed.js": {
+"# Week 3 終端機小練習素材\n\n這份壓縮檔是「終端機介紹」小練習用的，裡面的成績都是假資料。\n\n- A.csv、B.csv、C.csv：A、B、C 三個班的小考成績，每班 40 位學生\n- 欄位：student_id（假學號）、score（0 到 100 分）\n\n看得到這個檔案，代表你已經用 cd、ls、mv、unzip 把包裹拆開了。\n": "# Week 3 terminal practice files\n\nThis archive is for the \"Intro to the Terminal\" practice. All the scores in it are made up.\n\n- A.csv, B.csv, C.csv: quiz scores of classes A, B and C, 40 students each\n- Columns: student_id (a made-up ID), score (0 to 100)\n\nIf you can see this file, you have already unpacked the parcel with cd, ls, mv and unzip.\n"
+},
+"@file:win:seed.js": {
+"# Week 3 終端機小練習素材\n\n這份壓縮檔是「終端機介紹」小練習用的，裡面的成績都是假資料。\n\n- A.csv、B.csv、C.csv：A、B、C 三個班的小考成績，每班 40 位學生\n- 欄位：student_id（假學號）、score（0 到 100 分）\n\n看得到這個檔案，代表你已經用 cd、ls、mv、tar 把包裹拆開了。\n": "# Week 3 terminal practice files\n\nThis archive is for the \"Intro to the Terminal\" practice. All the scores in it are made up.\n\n- A.csv, B.csv, C.csv: quiz scores of classes A, B and C, 40 students each\n- Columns: student_id (a made-up ID), score (0 to 100)\n\nIf you can see this file, you have already unpacked the parcel with cd, ls, mv and tar.\n"
+},
+"@file:seed.js": {
+"# 專案規則\n- 報告用繁體中文\n- 輸出的檔案放在 output/\n": "# Project rules\n- Write reports in English\n- Put output files in output/\n"
+},
+"@file:missions-week3.js": {
+"終端機的圖示是黑底，上面有 `>_`。打指令前，輸入法先切到英文：右下角顯示「中」時，按一下 Shift，變成「英」才打得出指令。": "The Terminal icon has a black background with `>_` on it. Before you type commands, make sure your input method is English.",
+"如果找不到空白處，先把檔案總管視窗拖開或最小化。新增後名字會變成可以直接輸入的狀態；輸入法先切到英文（按一下 Shift，右下角的「中」變成「英」）再打 Practice。": "If you can't find an empty spot, drag the File Explorer window aside or minimize it. After you create the folder, its name becomes editable, so you can type right away. Make sure your input method is English, then type Practice."
+},
+"@file:missions.js": {
+"看起來輸入法是中文，或是空格是全形。把工作列右下角的「中」切成「英」（按一下 Shift），再打一次。": "Your input method looks like a non-English one, or the space is a full-width space. Switch to an English input method and type it again."
+},
+"@file:sysapps.js": {
+"輸入法：注音；按 Shift 切換中／英": "Keyboard: English (United States)"
+},
+"@file:terminal-cmds.js": {
+"打指令之前，輸入法要切成英文（按一下 Shift，工作列的 中 會變成 英）。": "Before you type commands, make sure your input method is English."
+}
+}

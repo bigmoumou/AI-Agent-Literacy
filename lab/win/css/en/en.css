@@ -1,0 +1,10 @@
+/* en.css (Windows): the English page only. */
+:root {
+  --win-font: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  --lab-font-ui: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+}
+.lab-toast::before { content: "Practice computer"; }
+
+/* English labels are longer than the Chinese ones: room where a fixed width cut them */
+.lab-qsx-label { font-size: 11.5px; padding-right: 6px; white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.12; }
+.lab-qsx-tile > span, .lab-qsx-tile > div { min-width: 0; }

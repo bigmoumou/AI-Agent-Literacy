@@ -50,3 +50,9 @@ python -m http.server 8810
 設計規格見 `DESIGN.md`。
 
 Copyright © 2026 JUNHAO CHEN・程式碼 MIT・內容 CC BY-NC-SA 4.0
+
+## English version (2026-10-22)
+
+An English browser (or `?lang=en`) gets `index.en.html` instead of `index.html` (same address parameters), for the weeks listed in `LAB_EN_WEEKS` in the small redirect block at the end of `<head>` of `index.html` (Week 3 first; the block is not run inside another page, so the Week 6 exam still gets the Chinese computer). Chinese and every other language: nothing changes, the Chinese files are not touched.
+
+`index.en.html`, `js/en/**` and `css/en/en.css` are **generated** by `tools/lab-en/laben.cjs` from the Chinese files plus the dictionaries in `tools/lab-en/dict/` (see `tools/lab-en/README.md`); do not edit them by hand. After you change a Chinese file, run `node tools/lab-en/laben.cjs build mac` and `report mac`: a new Chinese string that has no English yet is listed there, and a text patch that no longer matches stops the build.
