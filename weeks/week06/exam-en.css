@@ -11,7 +11,7 @@ html[lang="en"] #guide .g-hgoal .g-k, html[lang="en"] #guide .g-hud .g-stab > .g
 html[lang="en"] #guide .g-k { letter-spacing: .14em; }
 html[lang="en"] #guide .g-keys { letter-spacing: .06em; text-transform: none; }
 
-/* HUD header: "MISSION 02 / 04" on the left, "BACK TO LEVEL 1" on the right, one line each */
+/* HUD header: "MISSION 02 / 04" on the left, "RESTART" (armed: "PRESS AGAIN") on the right, one line each, also in the 276 px box at 1024x700 */
 html[lang="en"] #guide .g-hud .g-hrow { gap: 10px; }
 html[lang="en"] #guide .g-hud .g-hrow .g-k { white-space: nowrap; letter-spacing: .1em; }
 html[lang="en"] #guide .g-hud .g-hrow .g-amber { font-size: 12.5px; }

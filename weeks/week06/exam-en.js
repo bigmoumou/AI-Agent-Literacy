@@ -22,8 +22,8 @@
     "時空穩定度": "Spacetime stability",
     "小安 ── 從裂縫的另一頭": "Xiao An ── from the other side of the rift",
     "Enter 下一句　Esc 略過": "Enter  Next line  ·  Esc  Skip",
-    "從第 1 關重來": "Back to level 1",
-    "再按一次確定重來": "Press again to confirm",
+    "從第 1 關重來": "Restart",                 // short on purpose: "Mission 02 / 04" and this button share one HUD row (276 px wide at 1024x700)
+    "再按一次確定重來": "Press again",
     "修復完成": "Repair complete",
     "訊號": "Signal",
     "收到通訊 · 小安": "Incoming call · Xiao An",
