@@ -433,7 +433,7 @@
     $("#warnWord").textContent = word; $("#warnWord").dataset.text = word;
     $("#warnSub").textContent = kind === "lock" ? "ESCAPE DENIED" : kind === "safe" ? "ESCAPE UNLOCKED" : "NO HINTS · ONLY MISSIONS";
     $("#warnSub2").textContent = "";                            // 帶子上只有英文（老師 2026-10-18：LOCKED、STABILIZED 都拿掉中文那行；讀屏軟體照樣唸中文）
-    $("#warnSay").textContent = word + "：" + ban(kind === "lock" ? 1 : kind === "safe" ? 2 : 0);
+    $("#warnSay").textContent = word + (window.ExamEN ? ": " : "：") + ban(kind === "lock" ? 1 : kind === "safe" ? 2 : 0);
     clearTimeout(bannerTimer);
     w.classList.remove("is-on", "is-short", "is-safe");
     body.classList.remove("warn-on", "warn-short", "warn-safe");
@@ -1004,7 +1004,7 @@
     const r = btn.querySelector(".lap-lid").getBoundingClientRect();
     chosenAt = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
     // 遠端電腦在後面先載入（被深空蓋住，看不到）；?connect=0 跳過練習電腦自己的「連線中」畫面
-    frame.src = `../../lab/${chosen}/?connect=0` + (EXAM_ON ? "&welcome=0&intro=0&guide=off" : "");   // 考試：不跳選任務的畫面、不顯示示範游標
+    frame.src = `../../lab/${chosen}/${window.ExamEN ? window.ExamEN.labPage : ""}?connect=0` + (EXAM_ON ? "&welcome=0&intro=0&guide=off" : "");   // 考試：不跳選任務的畫面、不顯示示範游標
     frame.hidden = false;
     connectAt = now || performance.now() / 1000;
     status.textContent = say(0);
@@ -1043,6 +1043,9 @@
     bs.sceneHalf = [(SCENE_Z + Z0) * TAN * (W / H), (SCENE_Z + Z0) * TAN];
     if (reduce) rift.draw();
   });
+
+  // 英文版（exam-en.js）是頁面載入時決定的：還沒選電腦就在中文與英文之間換語言，整頁重新載入一次（選了電腦之後不動，考到一半不會丟掉東西）
+  document.addEventListener("langchange", (e) => { if (!chosen && e.detail && (e.detail.lang === "en") !== (LANG === "en")) location.reload(); });
 
   /* ---------- 檢查用：?debug=1 時 examSeek("dive", 秒) ---------- */
   if (params.get("debug") === "1") {

@@ -139,6 +139,8 @@
 <script src="../../assets/exam-sound.js"></script>
 <script src="../../assets/blackhole.js"></script>
 <script src="exam-rules.js"></script>
+<!-- English site only: exam-en-rules.js (judging rules written in English) and exam-en.js (all the wording) must load before the files below; the other languages load nothing extra -->
+<script>if (window.I18N && I18N.lang === "en") document.write('<script src="exam-en-rules.js"><\/script><script src="exam-en.js"><\/script>');</script>
 <script src="exam-wall.js"></script>
 <script src="exam-quiz.js"></script>
 <script src="exam-guide.js"></script>

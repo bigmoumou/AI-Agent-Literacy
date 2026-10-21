@@ -15,10 +15,13 @@
 (function () {
   "use strict";
   const HOME = "/Users/an";
+  // 英文版（weeks/week06/exam-en.js，只在英文網站載入）：有 window.ExamEN 才換成英文，沒有的話下面全部照原樣
+  const EN = window.ExamEN ? window.ExamEN.guide : null;
+  const T = (zh) => (window.ExamEN && window.ExamEN.t(zh)) || zh;
   // 第 2、3 關：叫 Codex 的時候，專案裡的 .md 還沒存檔（老師 2026-10-19）；隔 30 秒以上才再說一次
-  const UNSAVED = (f, os) => ["surprised", "等等！" + f + " 好像還沒存檔？Codex 讀的是存進硬碟的檔案，要先存檔（" + (os === "win" ? "Ctrl+S" : "⌘S") + "）。"];
+  const UNSAVED = EN ? EN.UNSAVED : (f, os) => ["surprised", "等等！" + f + " 好像還沒存檔？Codex 讀的是存進硬碟的檔案，要先存檔（" + (os === "win" ? "Ctrl+S" : "⌘S") + "）。"];
   // 每一關：標題、目標、訊號、小安開頭的通訊、卡住時的提醒（秒數、表情、話）、規則被吃掉、結果不對時說的話、要亮的資料夾
-  const LV = [
+  const LV = EN ? EN.LV : [
     {
       title: "散落的座標", signal: "弱", note: "目前僅能使用鍵盤打字",   // 第 1 關鎖滑鼠：目標列上閃著提醒（老師 2026-10-17）
       goal: "把三份觀測紀錄 `obs-a`、`obs-b`、`obs-c` 都搬進桌面上的 `rescue` 資料夾。",
@@ -97,12 +100,12 @@
   ];
   // 四關都過了：幾秒後自動回到現實（exam.js 的 exitHome，老師 2026-10-18：通關後要回到首頁 Week 6 那一格，不是停在桌面）；
   // 重新整理後才看到的（quiet）就等學生自己按「中斷連線」
-  const DONE = { title: "時空穩定了", goal: "", rush: ["determined", "抓緊了——前面就是出口！"], final: ["happy", "回來了……謝謝你！下次見。"] };
-  const GOAL_AUTO = "正在帶你回到現實……（也可以直接按上方的「中斷連線」）", GOAL_LEAVE = "按上方的「中斷連線」就能離開。";
+  const DONE = EN ? EN.DONE : { title: "時空穩定了", goal: "", rush: ["determined", "抓緊了——前面就是出口！"], final: ["happy", "回來了……謝謝你！下次見。"] };
+  const GOAL_AUTO = T("正在帶你回到現實……（也可以直接按上方的「中斷連線」）"), GOAL_LEAVE = T("按上方的「中斷連線」就能離開。");
   const pad = (n) => String(n).padStart(2, "0");
   // 目標文字：`檔名` 變成小標籤（其他字照原樣、不當 HTML）
   const esc = (t) => t.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
-  const goalHTML = (t) => esc(t).replace(/`([^`]+)`([、，。）]?)/g, '<span class="g-nb"><code class="g-code">$1</code>$2</span>');   // 標點黏著前面的標籤，不會跑到行首
+  const goalHTML = (t) => esc(t).replace(EN ? /`([^`]+)`([,.;:)]?)/g : /`([^`]+)`([、，。）]?)/g, '<span class="g-nb"><code class="g-code">$1</code>$2</span>');   // 標點黏著前面的標籤，不會跑到行首
   const segs = (n) => [0, 1, 2, 3].map((k) => `<i class="${k < n ? "on" : ""}"></i>`).join("");
 
   function create(o) {
@@ -114,17 +117,17 @@
     root.innerHTML =
       '<div class="g-dim"></div><div class="g-bar g-top"></div><div class="g-bar g-bot"></div><div class="g-catch"></div>' +
       '<div class="g-title"><div class="g-k g-amber" data-g="tk"></div><h2 data-g="tt"></h2><div class="g-rule"></div>' +
-      '<div class="g-goal"><span class="g-k g-amber">目標</span><span data-g="tg"></span></div>' +
-      '<div class="g-stab"><span class="g-k">時空穩定度</span><span class="g-segs" data-g="ts"></span><span class="g-k g-pct" data-g="tp"></span></div></div>' +
+      '<div class="g-goal"><span class="g-k g-amber">' + T("目標") + '</span><span data-g="tg"></span></div>' +
+      '<div class="g-stab"><span class="g-k">' + T("時空穩定度") + '</span><span class="g-segs" data-g="ts"></span><span class="g-k g-pct" data-g="tp"></span></div></div>' +
       '<div class="g-comm" data-g="comm" role="log" aria-live="polite"><div class="g-call"><span class="g-dot"></span><span data-g="call"></span></div>' +
       '<div class="g-panel"><div class="g-face"><img alt="" data-g="face"></div><div class="g-body">' +
-      '<div class="g-who"><span class="g-k g-amber">小安 ── 從裂縫的另一頭</span><span class="g-k" data-g="sig"></span></div>' +
-      '<div class="g-lines" data-g="lines"></div><div class="g-foot"><span class="g-k" data-g="page"></span><span class="g-k g-keys">Enter 下一句　Esc 略過</span></div></div></div></div>' +
-      '<div class="g-hud" data-g="hud"><div class="g-hrow"><span class="g-k g-amber" data-g="hk"></span><button type="button" class="g-k g-reset" data-g="reset">從第 1 關重來</button></div>' +
-      '<div class="g-htitle" data-g="ht"></div><div class="g-note" data-g="note" hidden></div><p class="g-hgoal"><span class="g-k">目標</span><span data-g="hg"></span></p>' +
-      '<div class="g-stab"><span class="g-k">時空穩定度</span><span class="g-segs" data-g="hs"></span><span class="g-k g-pct" data-g="hp"></span></div></div>' +
-      '<div class="g-stamp"><div class="g-k g-amber" data-g="sk"></div><div class="g-big">修復完成</div>' +
-      '<div class="g-stab"><span class="g-k">時空穩定度</span><span class="g-segs" data-g="ss"></span><span class="g-k g-pct" data-g="sp"></span></div></div>' +
+      '<div class="g-who"><span class="g-k g-amber">' + T("小安 ── 從裂縫的另一頭") + '</span><span class="g-k" data-g="sig"></span></div>' +
+      '<div class="g-lines" data-g="lines"></div><div class="g-foot"><span class="g-k" data-g="page"></span><span class="g-k g-keys">' + T("Enter 下一句　Esc 略過") + '</span></div></div></div></div>' +
+      '<div class="g-hud" data-g="hud"><div class="g-hrow"><span class="g-k g-amber" data-g="hk"></span><button type="button" class="g-k g-reset" data-g="reset">' + T("從第 1 關重來") + '</button></div>' +
+      '<div class="g-htitle" data-g="ht"></div><div class="g-note" data-g="note" hidden></div><p class="g-hgoal"><span class="g-k">' + T("目標") + '</span><span data-g="hg"></span></p>' +
+      '<div class="g-stab"><span class="g-k">' + T("時空穩定度") + '</span><span class="g-segs" data-g="hs"></span><span class="g-k g-pct" data-g="hp"></span></div></div>' +
+      '<div class="g-stamp"><div class="g-k g-amber" data-g="sk"></div><div class="g-big">' + T("修復完成") + '</div>' +
+      '<div class="g-stab"><span class="g-k">' + T("時空穩定度") + '</span><span class="g-segs" data-g="ss"></span><span class="g-k g-pct" data-g="sp"></span></div></div>' +
       '<div class="g-ping" data-g="ping"><i></i><i></i></div>';
     document.body.append(root);
     const $ = (k) => root.querySelector(`[data-g="${k}"]`);
@@ -189,7 +192,7 @@
 
     /* ---------- 通訊：收到訊號 → 接通 → 一句一句打出來 → 斷線 ---------- */
     const comm = $("comm"), lines = $("lines");
-    const readMs = (t) => Math.max(1500, Math.min(3600, 600 + Array.from(t).length * 48));
+    const readMs = EN ? EN.readMs : (t) => Math.max(1500, Math.min(3600, 600 + Array.from(t).length * 48));
     function typeLine(c, text) {
       const p = document.createElement("p");
       lines.append(p);
@@ -205,9 +208,9 @@
           if (c.skipped) { end(); return; }
           i++;
           p.textContent = ch.slice(0, i).join("");
-          if (i % 2 === 1 && !/[，。！？……：、]/.test(ch[i - 1])) sfx("tick");
+          if (i % 2 === 1 && !(EN ? EN.tickSkip : /[，。！？……：、]/).test(ch[i - 1])) sfx("tick");
           if (i >= ch.length) { end(); return; }
-          t = setTimeout(step, /[，。！？：]/.test(ch[i - 1]) ? 140 : 30);
+          t = setTimeout(step, (EN ? EN.pause : /[，。！？：]/).test(ch[i - 1]) ? (EN ? EN.pauseMs : 140) : (EN ? EN.typeMs : 30));
         };
         c.wake = end;                                            // 打字中按 Enter：整句先出來
         step();
@@ -234,14 +237,14 @@
     }
     async function talk(c, say, signal, toast) {
       comm.classList.toggle("is-toast", !!toast);
-      $("sig").textContent = "訊號 " + signal;
-      $("call").textContent = "收到通訊 · 小安";
+      $("sig").textContent = T("訊號") + " " + signal;
+      $("call").textContent = T("收到通訊 · 小安");
       reserve(say);
       comm.classList.add("is-call");
       sfx("in");
       await c.wait(reduce ? 0 : 700);
       comm.classList.add("is-open");
-      $("call").textContent = "通訊中 · 小安";
+      $("call").textContent = T("通訊中 · 小安");
       await c.wait(reduce ? 0 : 320);
       for (let k = 0; k < say.length; k++) {
         $("face").src = faceSrc(say[k][0]);
@@ -250,7 +253,7 @@
         await c.wait(readMs(say[k][1]) + (toast ? 2600 : 0));
         if (c.skipped) break;
       }
-      $("call").textContent = "通訊結束";
+      $("call").textContent = T("通訊結束");
       comm.classList.add("is-end");
       sfx("out");
       await c.wait(reduce ? 0 : 420);
@@ -280,12 +283,12 @@
 
     /* ---------- 目標列 ---------- */
     let armT = 0;
-    const disarm = () => { clearTimeout(armT); $("reset").classList.remove("is-armed"); $("reset").textContent = "從第 1 關重來"; };
+    const disarm = () => { clearTimeout(armT); $("reset").classList.remove("is-armed"); $("reset").textContent = T("從第 1 關重來"); };
     function showHud(i) {
       disarm();
       layout();
       const lv = LV[i];
-      $("hk").textContent = i < 4 ? "任務 " + pad(i + 1) + " / 04" : "任務完成";
+      $("hk").textContent = i < 4 ? T("任務") + " " + pad(i + 1) + " / 04" : T("任務完成");
       $("ht").textContent = lv ? lv.title : DONE.title;
       $("note").textContent = (lv && lv.note) || ""; $("note").hidden = !(lv && lv.note);
       $("hg").innerHTML = goalHTML(lv ? lv.goal : DONE.goal);
@@ -300,7 +303,7 @@
       if (!o.onRestart || level < 1 || cut) return;
       const b = $("reset");
       if (!b.classList.contains("is-armed")) {
-        b.classList.add("is-armed"); b.textContent = "再按一次確定重來";
+        b.classList.add("is-armed"); b.textContent = T("再按一次確定重來");
         clearTimeout(armT); armT = setTimeout(disarm, 4000);
         return;
       }
@@ -325,7 +328,7 @@
       const lv = LV[i], c = makeCut();
       cut = c;
       root.classList.remove("is-hud");
-      $("tk").textContent = "任務 " + pad(i + 1) + " / 04";
+      $("tk").textContent = T("任務") + " " + pad(i + 1) + " / 04";
       $("tt").textContent = lv.title;
       $("tg").innerHTML = goalHTML(lv.goal);
       setStab(stab, [["ts", "tp"]]);
@@ -370,7 +373,7 @@
       stopNudges();
       hush();
       stab = Math.max(stab, i + 1);
-      $("sk").textContent = "第 " + (i + 1) + " 關";
+      $("sk").textContent = EN ? EN.levelOf(i + 1) : "第 " + (i + 1) + " 關";
       setStab(stab - 1, [["ss", "sp"]]);
       root.classList.add("is-stamp");
       sfx("stamp");
@@ -398,12 +401,12 @@
       stab = 4; level = 4;
       DONE.goal = quiet ? GOAL_LEAVE : GOAL_AUTO;
       showHud(4);
-      if (!quiet) setTimeout(() => toast(reduce ? DONE.final : DONE.rush, "穩定"), reduce ? 200 : 150);   // 在時空隧道裡就說話（老師 2026-10-18）
+      if (!quiet) setTimeout(() => toast(reduce ? DONE.final : DONE.rush, T("穩定")), reduce ? 200 : 150);   // 在時空隧道裡就說話（老師 2026-10-18）
     }
     // 衝出時空隧道的那一刻（exam.js 的 tunnelHome）：隧道裡那句先斷掉，接著道謝
     async function finale() {
       await hush();
-      toast(DONE.final, "穩定");
+      toast(DONE.final, T("穩定"));
     }
     // 重新整理後接著考：穩定度先回到已過的關數
     function resume(passedN) { stab = Math.max(0, Math.min(4, passedN)); }

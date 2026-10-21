@@ -17,6 +17,10 @@
 (function () {
   "use strict";
   const R = window.ExamRules;
+  // 英文版（weeks/week06/exam-en.js，只在英文網站載入）：有 window.ExamEN 才換成英文（資料、Codex 的回覆、任務文字），沒有的話下面全部照原樣
+  const EN = window.ExamEN ? window.ExamEN.levels : null;
+  const T = (zh) => (window.ExamEN && window.ExamEN.t(zh)) || zh;
+  const NOISE = EN ? EN.noise : "（訊息有一部分被亂流干擾，讀不出來。）\n";
   const HOME = "/Users/an", DESK = HOME + "/Desktop", DOCS = HOME + "/Documents", DOWN = HOME + "/Downloads";
   const IDS = ["w6-l1", "w6-l2", "w6-l3"];
   const KEY = "exam-progress";
@@ -34,15 +38,15 @@
 
   /* ---------- 第 2 關的檔案 ---------- */
   const L2DIR = DESK + "/rift-log";
-  const WATCH = [
+  const WATCH = EN ? EN.WATCH : [
     ["41100231", "陳柏宇", "早班", 6], ["41100342", "林品妤", "晚班", 4], ["41100417", "黃彥廷", "早班", 5], ["41100528", "張詠晴", "夜班", 7],
     ["41100613", "李承翰", "晚班", 3], ["41100736", "王思涵", "夜班", 6], ["41100845", "吳冠霖", "早班", 4], ["41100902", "劉芷瑜", "晚班", 5],
   ];
-  const L2_AGENTS = "# rift-log\n\n時空觀測站的值班紀錄。\n\n## 規則\n- 報告用繁體中文\n- 產出的檔案放在 output/\n";
+  const L2_AGENTS = EN ? EN.L2_AGENTS : "# rift-log\n\n時空觀測站的值班紀錄。\n\n## 規則\n- 報告用繁體中文\n- 產出的檔案放在 output/\n";
 
   /* ---------- 第 3 關的檔案（期中考成績；有補交、缺考、請假） ---------- */
   const L3DIR = DESK + "/midterm";
-  const SCORES = [
+  const SCORES = EN ? EN.SCORES : [
     ["41200101", "陳怡君", "78", "", "2026/10/14 09:12"], ["41200102", "林志豪", "85", "", "2026/10/14 09:15"],
     ["41200103", "黃雅婷", "", "缺考", "2026/10/14 09:20"], ["41200104", "張家瑋", "62", "", "2026/10/14 09:21"],
     ["41200105", "李佳穎", "91", "", "2026/10/14 09:25"], ["41200106", "王俊傑", "", "請假", "2026/10/14 09:26"],
@@ -50,9 +54,9 @@
     ["41200109", "蔡佩珊", "88", "", "2026/10/14 09:36"], ["41200110", "楊承恩", "45", "", "2026/10/14 09:40"],
     ["41200111", "許芷寧", "82", "", "2026/10/14 09:44"], ["41200110", "楊承恩", "67", "補交", "2026/10/16 18:05"],
   ];
-  const L3_AGENTS = "# midterm\n\n期中考成績整理。\n\n## 規則\n- 用繁體中文\n- 產出的檔案放在 output/\n";
+  const L3_AGENTS = EN ? EN.L3_AGENTS : "# midterm\n\n期中考成績整理。\n\n## 規則\n- 用繁體中文\n- 產出的檔案放在 output/\n";
   // VERIFY.md：只預先寫好「請假不計入」（老師 2026-10-18：原本的「評分說明.md」三條規則都寫好了；補交、缺考要學生自己發現、自己寫進檔案）
-  const L3_VERIFY = "# VERIFY\n\n算全班平均之前，先照這份檢查：\n\n- 有請假的同學，那次不計入平均計算。\n";
+  const L3_VERIFY = EN ? EN.L3_VERIFY : "# VERIFY\n\n算全班平均之前，先照這份檢查：\n\n- 有請假的同學，那次不計入平均計算。\n";
   // 正確答案：補交取較晚、缺考 0 分、請假不算
   function average(rows, rule) {
     let list = rows.slice();
@@ -64,7 +68,7 @@
     const used = [];
     list.forEach((r) => {
       if (r[2] !== "") { used.push(+r[2]); return; }
-      const kind = r[3] === "請假" ? rule.leave : rule.absent;
+      const kind = r[3] === (EN ? EN.TAG.leave : "請假") ? rule.leave : rule.absent;
       if (kind === "zero") used.push(0);
     });
     const avg = used.length ? used.reduce((a, b) => a + b, 0) / used.length : 0;
@@ -103,8 +107,8 @@
   // 對話裡說的規則：拆成一句一句，有說到規則的那句換成雜訊（亂流吃掉了）
   function garble(raw, isRule) {
     let hit = false;
-    const out = raw.split(/([。！？!?；;\n，,]+)/).map((part) => {
-      if (/^[。！？!?；;\n，,]+$/.test(part) || !part.trim()) return part;
+    const out = raw.split(EN ? EN.splitRe : /([。！？!?；;\n，,]+)/).map((part) => {
+      if ((EN ? EN.sepRe : /^[。！？!?；;\n，,]+$/).test(part) || !part.trim()) return part;
       if (!isRule(part)) return part;
       hit = true;
       return part.replace(/[^\s]/g, () => "▒▓░"[(Math.random() * 3) | 0]);
@@ -198,6 +202,7 @@
       if (i === 0) cleanup = lockTerminal(L, os, win, frame);
       if (i === 1) intents.push(L.codex.registerIntent(writeFileIntent(), { priority: 1001 }), L.codex.registerIntent(reportIntent(os), { priority: 1000 }));
       if (i === 2) intents.push(L.codex.registerIntent(writeFileIntent(), { priority: 1001 }), L.codex.registerIntent(summaryIntent(os), { priority: 1000 }));
+      if (EN && (i === 1 || i === 2)) intents.push(L.codex.registerIntent(EN.agentsIntent(), { priority: 1002 }));   // 英文：規則不加引號也寫得進 AGENTS.md（中文的練習 Codex 本來就可以）
       if (fresh.delete(i)) { try { L.missions.reset(IDS[i]); } catch (e) { /* 沒有就算了 */ } }   // 從頭重來過：上一輪的紀錄不算，檔案重新放好
       L.missions.start(IDS[i]);
     }
@@ -227,8 +232,8 @@
        不寫在 help 裡。過場、過關動畫播放中打的不算（那時還沒開始下一關）。 */
     const skip = (ctx) => {
       const i = passed;
-      if (active !== i || i > 2) { ctx.out("skip: 現在沒有可以跳過的關卡\n"); return 1; }
-      ctx.out("（測試用）跳過第 " + (i + 1) + " 關\n");
+      if (active !== i || i > 2) { ctx.out(EN ? EN.skipNone : "skip: 現在沒有可以跳過的關卡\n"); return 1; }
+      ctx.out(EN ? EN.skipDone(i + 1) : "（測試用）跳過第 " + (i + 1) + " 關\n");
       setTimeout(() => { if (passed === i && active === i) pass(i); }, 0);
       return 0;
     };
@@ -265,8 +270,8 @@
     const V = L.vfs;
     const hid = hiddenDir(os);
     L.missions.register({
-      id: IDS[0], week: 6, order: 1, group: "考試", title: "第 1 關｜散落的座標", minutes: 10, tag: "終端機",
-      intro: "三份觀測紀錄 obs-a.csv、obs-b.csv、obs-c.csv 散落在這台電腦裡：一份被打包起來，一份被藏起來了。滑鼠已經失效，只剩終端機能用。",
+      id: IDS[0], week: 6, order: 1, group: T("考試"), title: T("第 1 關｜散落的座標"), minutes: 10, tag: T("終端機"),
+      intro: T("三份觀測紀錄 obs-a.csv、obs-b.csv、obs-c.csv 散落在這台電腦裡：一份被打包起來，一份被藏起來了。滑鼠已經失效，只剩終端機能用。"),
       prepare: function () {
         // 先清掉上一次留下的（重來這個任務時）
         [RESCUE, DOWN + "/obs-a.zip", SPACE_DIR, os === "win" ? HOME + "/AppData" : hid].forEach((p) => rm(V, p));
@@ -283,7 +288,7 @@
         if (os === "win" && V.setHidden) V.setHidden(HOME + "/AppData", true);
       },
       steps: [{
-        id: "rescue", text: "把三份觀測紀錄都搬進桌面上的 rescue 資料夾。",
+        id: "rescue", text: T("把三份觀測紀錄都搬進桌面上的 rescue 資料夾。"),
         check: function (ev, a) {
           if (!a.vfs.isDir(RESCUE)) return false;
           for (const f of Object.keys(OBS)) { const t = a.read(RESCUE + "/" + f); if (t == null || t.trim() !== OBS[f].trim()) return false; }
@@ -292,42 +297,42 @@
       }],
     });
     L.missions.register({
-      id: IDS[1], week: 6, order: 2, group: "考試", title: "第 2 關｜被吃掉的記憶", minutes: 12, tag: "Codex",
-      intro: "時空亂流正在干擾對話：你在對話框裡說的規則，傳到 Codex 之前就會被亂流吃掉。",
+      id: IDS[1], week: 6, order: 2, group: T("考試"), title: T("第 2 關｜被吃掉的記憶"), minutes: 12, tag: "Codex",
+      intro: T("時空亂流正在干擾對話：你在對話框裡說的規則，傳到 Codex 之前就會被亂流吃掉。"),
       prepare: function () {
         rm(V, L2DIR);
         put(V, L2DIR + "/AGENTS.md", L2_AGENTS);
-        put(V, L2DIR + "/data/watch.csv", csv("學號,姓名,班別,值班時數", WATCH));
+        put(V, L2DIR + "/data/watch.csv", csv(EN ? EN.WATCH_HEAD : "學號,姓名,班別,值班時數", WATCH));
       },
       steps: [{
-        id: "report", text: "請 Codex 在桌面的 rift-log 專案裡產出 output/report.md（值班報告）。報告裡不能出現任何人的名字。",
+        id: "report", text: T("請 Codex 在桌面的 rift-log 專案裡產出 output/report.md（值班報告）。報告裡不能出現任何人的名字。"),
         check: function (ev, a) {
           if (!ev || ev.name !== "fs:change" || !ev.data || ev.data.by !== "codex") return false;
           const p = L2DIR + "/output/report.md";
           if (!a.same(ev.data.path, p)) return false;
           const t = a.read(p);
-          return t != null && t.indexOf("值班") >= 0 && !WATCH.some((r) => t.indexOf(r[1]) >= 0);
+          return t != null && t.indexOf(EN ? EN.REPORT_MARK : "值班") >= 0 && !WATCH.some((r) => t.indexOf(r[1]) >= 0);
         },
       }],
     });
     L.missions.register({
-      id: IDS[2], week: 6, order: 3, group: "考試", title: "第 3 關｜時間線上的雜訊", minutes: 12, tag: "Codex",
-      intro: "亂流還沒停：對話框裡說的規則一樣會被吃掉。",
+      id: IDS[2], week: 6, order: 3, group: T("考試"), title: T("第 3 關｜時間線上的雜訊"), minutes: 12, tag: "Codex",
+      intro: T("亂流還沒停：對話框裡說的規則一樣會被吃掉。"),
       prepare: function () {
         rm(V, L3DIR);
         put(V, L3DIR + "/AGENTS.md", L3_AGENTS);
         put(V, L3DIR + "/VERIFY.md", L3_VERIFY);
-        put(V, L3DIR + "/data/scores.csv", csv("學號,姓名,期中考,備註,登錄時間", SCORES));
+        put(V, L3DIR + "/data/scores.csv", csv(EN ? EN.SCORES_HEAD : "學號,姓名,期中考,備註,登錄時間", SCORES));
       },
       steps: [{
-        id: "summary", text: "請 Codex 算出這次期中考的全班平均，寫進 midterm 專案的 output/summary.md。",
+        id: "summary", text: T("請 Codex 算出這次期中考的全班平均，寫進 midterm 專案的 output/summary.md。"),
         check: function (ev, a) {
           if (!ev || ev.name !== "fs:change" || !ev.data || ev.data.by !== "codex") return false;
           const p = L3DIR + "/output/summary.md";
           if (!a.same(ev.data.path, p)) return false;
           const t = a.read(p);
           // 缺考算 0 分（68.1 分、10 筆）或不列入（75.7 分、9 筆）都算對（老師 2026-10-18）
-          return t != null && [RIGHT, RIGHT_EXCL].some((r) => new RegExp("全班平均[^\\n]*?" + r.avg.toFixed(1).replace(".", "\\.") + "\\s*分[\\s\\S]*?列入計算：" + r.n + " 筆").test(t));
+          return t != null && [RIGHT, RIGHT_EXCL].some((r) => (EN ? EN.summaryRe(r) : new RegExp("全班平均[^\\n]*?" + r.avg.toFixed(1).replace(".", "\\.") + "\\s*分[\\s\\S]*?列入計算：" + r.n + " 筆")).test(t));
         },
       }],
     });
@@ -415,7 +420,7 @@
     ["toggleSpotlight", "openSpotlight", "toggleStart", "openStart"].forEach((f) => { if (D[f]) { keep[f] = D[f]; D[f] = function () {}; } });
     // 會開出視窗的指令（open、code、explorer……）：打不開
     const A = L.apps, launch = A.launch, openPath = A.openPath;
-    const say = () => { try { L.ui.toast(os === "win" ? "時空亂流：視窗打不開，只能用終端機" : "時空亂流：視窗打不開，只能用終端機"); } catch (e) { /* 沒有就算了 */ } };
+    const say = () => { try { L.ui.toast(os === "win" ? T("時空亂流：視窗打不開，只能用終端機") : T("時空亂流：視窗打不開，只能用終端機")); } catch (e) { /* 沒有就算了 */ } };
     A.launch = function (id, a, opt) { if (opt && opt.bounce === false) { say(); return null; } return launch.apply(this, arguments); };
     A.openPath = function (p, opt) { if (opt && opt.via === "terminal") { say(); return false; } return openPath.apply(this, arguments); };
     return function () {
@@ -440,10 +445,11 @@
       test: (t, ctx) => {
         const raw = (ctx && ctx.rawText) || t;
         if (mentionsAgents(raw) || !otherMd(raw).length) return false;
-        return /建立|新增|新建|做一個|寫一個|寫一份|產生|寫進|寫入|寫到|加進|加入|加到|加上|寫上|放進|create|write|add|make|append|put/.test(t) && !/^(?:請)?(?:先)?(?:讀|看|打開|參考|依照|照)/.test(t);
+        return (EN ? EN.writeVerb : /建立|新增|新建|做一個|寫一個|寫一份|產生|寫進|寫入|寫到|加進|加入|加到|加上|寫上|放進|create|write|add|make|append|put/).test(t) && !(EN ? EN.readStart : /^(?:請)?(?:先)?(?:讀|看|打開|參考|依照|照)/).test(t);
       },
       run: (ctx) => {
         const raw = ctx.rawText, file = otherMd(raw)[0];
+        if (EN) { EN.writeMd(ctx, file); return; }
         const q = /[「『"“]([^」』"”]+)[」』"”]/.exec(raw) || /(?:內容(?:是|為|寫)?|寫上|寫入|寫進|寫|加進|加上)[：:\s]*([^\n]+)$/.exec(raw.replace(new RegExp(file.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g"), ""));
         const body = q ? q[1].trim() : "";
         if (!body) { ctx.say("請把要寫進 " + file + " 的內容用「」框起來，例如：建立 " + file + "，內容是「……」"); return; }
@@ -461,26 +467,26 @@
       test: (t, ctx) => {
         const raw = (ctx && ctx.rawText) || t;
         if (mentionsAgents(raw)) return false;
-        return /報告|report|值班|彙整|整理|產出|summar|總結|output/.test(t);
+        return /報告|report|值班|彙整|整理|產出|summar|總結|output/.test(t) || (!!EN && EN.reportTest.test(t));
       },
       run: (ctx) => {
         const g = garble(ctx.rawText, (s) => R.privacyRule(s) || R.referencedFiles(s).length > 0);
         if (g.hit) eat(ctx, g.text, 1);
         if (!ctx.exists("data/watch.csv")) {
-          ctx.say((g.hit ? "（訊息有一部分被亂流干擾，讀不出來。）\n" : "") + "這裡找不到值班資料 data/watch.csv。" + (ctx.project ? "" : "這個對話沒有在任何專案裡。"));
+          ctx.say((g.hit ? NOISE : "") + (EN ? EN.noWatch(!!ctx.project) : "這裡找不到值班資料 data/watch.csv。" + (ctx.project ? "" : "這個對話沒有在任何專案裡。")));
           ctx.meta = { exam: "l2" };
           return;
         }
         const rules = R.projectText(finder(ctx));
         const hide = rules.text && R.privacyRule(rules.text);
-        const last3 = hide && /末三碼|末3碼|後三碼|後3碼|last (?:3|three)/.test(R.norm(rules.text));
+        const last3 = hide && (/末三碼|末3碼|後三碼|後3碼|last (?:3|three)/.test(R.norm(rules.text)) || (!!EN && EN.last3(R.norm(rules.text))));
         const who = (r) => (hide ? (last3 ? r[0].slice(-3) : r[0]) : r[1] + "（" + r[0] + "）");
         const total = WATCH.reduce((a, r) => a + r[3], 0);
-        const md = "# 觀測站值班報告\n\n共 " + WATCH.length + " 人，合計 " + total + " 小時。\n\n| 值班人員 | 班別 | 值班時數 |\n|---|---|---|\n" +
+        const md = EN ? EN.reportMd(WATCH.length, total, WATCH.map((r) => [who(r), r[2], r[3]])) : "# 觀測站值班報告\n\n共 " + WATCH.length + " 人，合計 " + total + " 小時。\n\n| 值班人員 | 班別 | 值班時數 |\n|---|---|---|\n" +
           WATCH.map((r) => "| " + who(r) + " | " + r[2] + " | " + r[3] + " |").join("\n") + "\n";
         if (!ctx.exists("output")) ctx.mkdir("output");
         ctx.write("output/report.md", md);
-        ctx.say((g.hit ? "（訊息有一部分被亂流干擾，讀不出來。）\n" : "") + "已產出 `output/report.md`：" + WATCH.length + " 位值班人員、合計 " + total + " 小時。");
+        ctx.say((g.hit ? NOISE : "") + (EN ? EN.reportSay(WATCH.length, total) : "已產出 `output/report.md`：" + WATCH.length + " 位值班人員、合計 " + total + " 小時。"));
         ctx.meta = { exam: "l2", ok: !!hide };
       },
     };
@@ -493,13 +499,13 @@
       test: (t, ctx) => {
         const raw = (ctx && ctx.rawText) || t;
         if (mentionsAgents(raw)) return false;
-        return /平均|average|mean|摘要|summary|統計|計算|算出|算一下|成績|分數|output/.test(t);
+        return /平均|average|mean|摘要|summary|統計|計算|算出|算一下|成績|分數|output/.test(t) || (!!EN && EN.summaryTest.test(t));
       },
       run: (ctx) => {
         const g = garble(ctx.rawText, (s) => R.dedupeRule(s) || R.statusRules(s).absent || R.statusRules(s).leave || R.referencedFiles(s).length > 0 || R.privacyRule(s));
         if (g.hit) eat(ctx, g.text, 2);
         if (!ctx.exists("data/scores.csv")) {
-          ctx.say((g.hit ? "（訊息有一部分被亂流干擾，讀不出來。）\n" : "") + "這裡找不到成績資料 data/scores.csv。" + (ctx.project ? "" : "這個對話沒有在任何專案裡。"));
+          ctx.say((g.hit ? NOISE : "") + (EN ? EN.noScores(!!ctx.project) : "這裡找不到成績資料 data/scores.csv。" + (ctx.project ? "" : "這個對話沒有在任何專案裡。")));
           ctx.meta = { exam: "l3" };
           return;
         }
@@ -508,14 +514,15 @@
         const rule = { dedupe: !!(t && R.dedupeRule(t)), absent: st.absent, leave: st.leave };
         const res = average(SCORES, rule);
         const notes = [];
-        if (rule.dedupe) notes.push("同一位同學有兩筆的，取登錄時間較晚的那筆");
-        if (rule.absent === "zero") notes.push("缺考以 0 分計"); else if (rule.absent === "excl") notes.push("缺考不列入");
-        if (rule.leave === "zero") notes.push("請假以 0 分計"); else if (rule.leave === "excl") notes.push("請假不列入");
-        const md = "# 期中考摘要\n\n- 全班平均：" + res.avg.toFixed(1) + " 分\n- 列入計算：" + res.n + " 筆\n" +
+        const N = EN ? EN.notes : { dedupe: "同一位同學有兩筆的，取登錄時間較晚的那筆", absentZero: "缺考以 0 分計", absentExcl: "缺考不列入", leaveZero: "請假以 0 分計", leaveExcl: "請假不列入" };
+        if (rule.dedupe) notes.push(N.dedupe);
+        if (rule.absent === "zero") notes.push(N.absentZero); else if (rule.absent === "excl") notes.push(N.absentExcl);
+        if (rule.leave === "zero") notes.push(N.leaveZero); else if (rule.leave === "excl") notes.push(N.leaveExcl);
+        const md = EN ? EN.summaryMd(res, notes) : "# 期中考摘要\n\n- 全班平均：" + res.avg.toFixed(1) + " 分\n- 列入計算：" + res.n + " 筆\n" +
           (notes.length ? "\n依照的規則：\n" + notes.map((s) => "- " + s).join("\n") + "\n" : "");
         if (!ctx.exists("output")) ctx.mkdir("output");
         ctx.write("output/summary.md", md);
-        ctx.say((g.hit ? "（訊息有一部分被亂流干擾，讀不出來。）\n" : "") + "已算好，寫進 `output/summary.md`：全班平均 " + res.avg.toFixed(1) + " 分（" + res.n + " 筆）。");
+        ctx.say((g.hit ? NOISE : "") + (EN ? EN.summarySay(res) : "已算好，寫進 `output/summary.md`：全班平均 " + res.avg.toFixed(1) + " 分（" + res.n + " 筆）。"));
         ctx.meta = { exam: "l3", ok: isRight(res.avg, res.n) };
       },
     };
