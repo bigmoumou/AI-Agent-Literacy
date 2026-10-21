@@ -1046,13 +1046,35 @@
     const fired = examArt.step(now / 1000);
     if (fired && current() === examI) flash();
     examSound(now, fired);
+    // 2026-10-21 效能：會動的只有圖裡「動畫那一塊」（frame.json 的 fx，約整格的 65%），第一次整張畫、上傳以後，
+    // 每一格只重畫、只上傳那一塊（多包 2 像素，邊上和整張畫的一樣），貼圖其他地方不變
+    const t = tex[examI], F = examArt.fx;
+    if (F && examFx.tex === t && examFx.w === w && examFx.h === h) {
+      const x0 = Math.max(0, Math.floor(F.bx * s) - 2), y0 = Math.max(0, Math.floor(F.by * s) - 2);
+      const x1 = Math.min(w, Math.ceil((F.bx + F.bw) * s) + 2), y1 = Math.min(h, Math.ceil((F.by + F.bh) * s) + 2);
+      const rw = x1 - x0, rh = y1 - y0;
+      if (!examFx.sub) { examFx.sub = document.createElement("canvas"); examFx.subG = examFx.sub.getContext("2d"); }
+      const sub = examFx.sub, g = examFx.subG;
+      if (sub.width !== rw || sub.height !== rh) { sub.width = rw; sub.height = rh; }
+      g.setTransform(1, 0, 0, 1, 0, 0);
+      g.globalCompositeOperation = "copy"; g.drawImage(examFx.film, x0, y0, rw, rh, 0, 0, rw, rh);
+      g.globalCompositeOperation = "source-over";
+      g.setTransform(s, 0, 0, s, -x0, -y0);
+      examArt.paint(g, { rect: [x0 / s, y0 / s, rw / s, rh / s] });
+      gl.bindTexture(gl.TEXTURE_2D, t);
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+      gl.texSubImage2D(gl.TEXTURE_2D, 0, x0, h - y1, gl.RGBA, gl.UNSIGNED_BYTE, sub);   // 貼圖上下翻過：那一塊的位置從底下算
+      gl.generateMipmap(gl.TEXTURE_2D);
+      return;
+    }
     if (scratch.width !== w || scratch.height !== h) { scratch.width = w; scratch.height = h; }
     sg.setTransform(1, 0, 0, 1, 0, 0);
     sg.globalCompositeOperation = "copy"; sg.drawImage(examFx.film, 0, 0);
     sg.globalCompositeOperation = "source-over";
     sg.setTransform(s, 0, 0, s, 0, 0);
     examArt.paint(sg);
-    retex(tex[examI], scratch);
+    retex(t, scratch);
+    examFx.tex = t; examFx.w = w; examFx.h = h;
   }
   function examSound(now, fired) {
     if (!sound) return;
@@ -1080,7 +1102,9 @@
   let raf = 0, sleepTimer = 0;
   let last = 0;
   let slow = 0;           // 連續幾格畫得太慢（用來自動降低解析度）
+  let needDraw = true;    // 有人叫醒（版面、主題、指到別格……）：下一格一定要畫
   function wake() {
+    needDraw = true;
     clearTimeout(sleepTimer);
     if (!raf && !indexOpen && !fellBack) { last = 0; raf = requestAnimationFrame(tick); }
   }
@@ -1126,16 +1150,19 @@
 
     const c = current();
     if (c !== shown) showInfo(c, true);
-    let examOn = false;
+    let examOn = false, examNew = false;
     if (examFx && !document.hidden && examVisible()) {
       examOn = true;
-      if (now - examLast > 33) { examLast = now; examStep(now); }
+      if (now - examLast > 33) { examLast = now; examStep(now); examNew = true; }
     } else if (examHeard && sound) { sound.quiet(0.5); examHeard = false; }
-    draw();
+    // 2026-10-21 效能（老師：首頁也要優化，看不出差別）：膠捲停著、只有考試週那一格在動時，那一格本來就每秒只更新 30 次，
+    // 整個畫面也就跟著它每秒畫 30 次（原本每秒畫 60 次，一半是重畫一模一樣的畫面）；其他東西一動就回到每一格都畫
+    const others = pos !== target || vel !== 0 || hoverMoving || !!leaving || !!returning || now < introUntil || (studioT0 > 0 && now - studioT0 < STUDIO_FADE) ||
+      !near(col.fog[0], want.fog[0]) || !near(col.alpha, want.alpha);
+    if (others || examNew || !examOn || needDraw) { draw(); needDraw = false; }
     if (mouse && !drag && !leaving && Math.abs(target - pos) > 1e-3) setHover(pick(mouse.x, mouse.y), mouse.x, mouse.y);
 
-    const moving = pos !== target || vel !== 0 || hoverMoving || !!leaving || !!returning || now < introUntil || (studioT0 > 0 && now - studioT0 < STUDIO_FADE) || examOn ||
-      !near(col.fog[0], want.fog[0]) || !near(col.alpha, want.alpha);
+    const moving = others || examOn;
 
     // 太慢就降解析度（只在連續動畫時量，睡醒的第一格不算）
     if (measured && moving) {

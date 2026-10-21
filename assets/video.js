@@ -28,6 +28,24 @@
     return abs.startsWith(SITE) ? MEDIA + abs.slice(SITE.length) : abs;
   };
 
+  /* 封面晚一點下載（2026-10-21 效能，老師：別的地方也要優化）：一週有好幾支影片，畫面上一次只顯示一支，
+     其他支的封面（每張 1920×1080，100–170 KB）原本一開頁就全部下載，和看得到的東西搶網路。
+     頁面寫 data-poster="…"（寫 poster="…" 也照樣可以）：顯示出來的那一支馬上補上封面；其他的等網頁載完、瀏覽器有空時再在背景抓好，
+     切換影片時封面已經在快取裡，看起來和原本一樣（手機開了「節省數據」就等顯示時才抓）。 */
+  const posterOf = (v) => (v && (v.getAttribute("poster") || v.dataset.poster)) || "";
+  const setPoster = (v) => { if (v.dataset.poster && !v.getAttribute("poster")) v.setAttribute("poster", v.dataset.poster); };
+  (() => {
+    const lazy = Array.from(document.querySelectorAll("video[data-poster]"));
+    if (!lazy.length) return;
+    if (!window.IntersectionObserver) { lazy.forEach(setPoster); return; }
+    const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { setPoster(e.target); io.unobserve(e.target); } }), { rootMargin: "600px 0px" });
+    lazy.forEach((v) => io.observe(v));
+    const saveData = !!(navigator.connection && navigator.connection.saveData);
+    const rest = () => { if (!saveData) lazy.forEach(setPoster); };
+    const later = () => (window.requestIdleCallback ? window.requestIdleCallback(rest, { timeout: 4000 }) : setTimeout(rest, 1500));
+    if (document.readyState === "complete") later(); else window.addEventListener("load", later, { once: true });
+  })();
+
   /* 預覽中的段落（<section class="unit" data-preview hidden>，例如老師還在看的作業）：網址有 ?preview 才顯示，否則整段拿掉 */
   const PREVIEW = /[?&]preview(=|&|$)/.test(location.search);
   document.querySelectorAll("section.unit[data-preview]").forEach((u) => { if (PREVIEW) u.hidden = false; else u.remove(); });
@@ -50,7 +68,9 @@
     const shot = document.createElement("canvas"); shot.width = W; shot.height = H;
     const s = shot.getContext("2d"); s.fillStyle = "#121417"; s.fillRect(0, 0, W, H);
     try {   // 影片還沒播過（沒有畫面）就用封面
-      const src = vid.readyState >= 2 ? vid : poster && poster.complete && poster.naturalWidth ? poster : null;
+      const posterOn = !vid.played.length && vid.currentTime < 0.05;   // 還沒播過：畫面上是封面（不是影片第 0 秒）
+      const okP = poster && poster.complete && poster.naturalWidth;
+      const src = posterOn && okP ? poster : vid.readyState >= 2 ? vid : okP ? poster : null;
       if (src) {
         const vw = src.videoWidth || src.naturalWidth || 16, vh = src.videoHeight || src.naturalHeight || 9, k = Math.min(W / vw, H / vh);
         s.drawImage(src, (W - vw * k) / 2, (H - vh * k) / 2, vw * k, vh * k);
@@ -126,8 +146,7 @@
     const unit = stage.closest(".unit") || document;
     const vid = stage.querySelector("video"), game = stage.querySelector(".hw-game");
     const steps = Array.from(unit.querySelectorAll(".hw-step"));
-    let frame = null, loaded = false, entered = false, going = false, poster = null;
-    if (vid && vid.poster) { poster = new Image(); poster.src = vid.poster; }
+    let frame = null, loaded = false, entered = false, going = false, poster = null;   // poster：影片還沒播過時過場用的封面，要轉場時才抓（通常已經在快取裡）
     const load = () => {   // 遊戲在底下先載好（看不到），停在第一格等過場
       if (frame) return;
       frame = document.createElement("iframe");
@@ -148,6 +167,7 @@
     const toGame = () => {
       if (stage.dataset.mode === "game" || going) return;
       going = true; load();
+      if (!poster && posterOf(vid) && (vid.readyState < 2 || !vid.played.length)) { poster = new Image(); poster.src = new URL(posterOf(vid), location.href).href; }
       if (vid) vid.pause();
       // 全螢幕看影片時先退出來，過場才看得到
       try { if (document.fullscreenElement === vid) document.exitFullscreen(); else if (vid && vid.webkitDisplayingFullscreen) vid.webkitExitFullscreen(); } catch (e) { /* 無所謂 */ }
@@ -381,7 +401,7 @@
       '<span class="reel-bar" aria-hidden="true"><span></span></span>' +
       '<span class="reel-thumb"><img alt="" loading="lazy" width="800" height="450">' + (vid ? '<span class="reel-len"></span>' : "") + "</span>" +
       '<span class="reel-text"><span class="reel-n"></span></span>';
-    b.querySelector("img").src = vid ? (vid.getAttribute("poster") || "").replace(/poster\.jpg$/, "thumb.jpg") : (unit.dataset.thumb || "");
+    b.querySelector("img").src = vid ? posterOf(vid).replace(/poster\.jpg$/, "thumb.jpg") : (unit.dataset.thumb || "");
     const n = b.querySelector(".reel-n");
     const grp = GROUPS.find((g) => unit.classList.contains(g.cls));
     if (grp && num) {

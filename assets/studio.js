@@ -1160,7 +1160,7 @@
       { to: "film", move: 4.5, hold: 6 },
     ];
     const REC_ON = 0.8, REC_OFF = 0.6;
-    let act = 0, actT0 = 0, fromYaw = null, raf = 0, timer = 0, paused = false, pausedAt = 0;
+    let act = 0, actT0 = 0, fromYaw = null, raf = 0, timer = 0, paused = false, pausedAt = 0, headAt = 0;
     function yawOf(to) {
       const R = scene.rig;
       return to === "us" ? R.yawUs : to === "left" ? R.yawFilm + 0.13 : to === "right" ? R.yawFilm - 0.12 : R.yawFilm;
@@ -1189,9 +1189,11 @@
       yaw = fromYaw + (yawOf(a.to) - fromYaw) * glide(k);
       const on = t - a.move, left = a.move + a.hold - t;
       rec = a.rec ? clamp(on / REC_ON, 0, 1) * clamp(left / REC_OFF, 0, 1) : 0;
-      drawHead();
+      // 2026-10-21 效能：機頭轉得很慢（4.5–7 秒轉一次），每秒畫 30 次就看不出差別（原本跟著螢幕每秒 60–120 次）；轉到定位那一格一定畫
+      const busy = k < 1 || (a.rec && (on < REC_ON || left < REC_OFF));
+      if (!busy || now - headAt >= 32) { drawHead(); headAt = now; }
       // 還在轉、或錄影燈正在亮起／熄滅：下一格再畫；其他時候睡到下一個變化
-      if (k < 1 || (a.rec && (on < REC_ON || left < REC_OFF))) { raf = requestAnimationFrame(step); return; }
+      if (busy) { raf = requestAnimationFrame(step); return; }
       const wakeAt = a.rec && left > REC_OFF ? actT0 + (a.move + a.hold - REC_OFF) * 1000 : actT0 + (a.move + a.hold) * 1000;
       timer = setTimeout(() => { timer = 0; raf = requestAnimationFrame(step); }, Math.max(16, wakeAt - performance.now()));
     }

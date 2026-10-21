@@ -130,7 +130,7 @@ for (const page of pages) {
   if (!html.includes(REDIRECT_MARK)) error(`${rel(page)} 少了 github.io 轉址程式（從 weeks/week03/index.html 的 <head> 複製）`);
   if (!html.includes(COPYRIGHT)) error(`${rel(page)} 少了版權聲明「${COPYRIGHT}」（從 weeks/week03/index.html 的頁尾複製）`);
   if (html.includes("待填")) warn(`${rel(page)} 還有「待填」的地方`);
-  for (const m of html.matchAll(/\s(href|src|poster|data-hls|data-thumb)="([^"]*)"/g)) {
+  for (const m of html.matchAll(/\s(href|src|poster|data-poster|data-hls|data-thumb)="([^"]*)"/g)) {
     const ref = m[2];
     if (/^(https?:|mailto:|data:|javascript:|#)/.test(ref) || ref === "") continue;
     let target = resolveRef(page, ref);

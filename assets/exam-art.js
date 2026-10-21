@@ -243,6 +243,8 @@
 
   /* 畫這一格。o.split：沿著裂縫中線往兩邊撕開的距離（每邊幾個貼圖像素；中間變透明）；
      o.hole：圖裡畫好的小黑洞補掉的程度（0..1）；o.under：撕開時兩半底下墊深空（要先 loadSpace） */
+  // o.rect = [x, y, w, h]（2026-10-21 效能，首頁那一格用）：只交出這一塊（要包住動畫那一塊 data.fx）；會動的東西都畫在動畫那一塊裡，
+  // 所以合成用的畫布在那一塊外面一直是原圖，只要第一次整張蓋過，之後每一格只重畫那一塊。撕開（split、under）時不用。
   ExamArt.prototype.paint = function (g, o) {
     const F = this.fx, split = (o && o.split) || 0, holeA = (o && o.hole) || 0, under = !!(o && o.under && this.space);
     if (!F) {
@@ -250,7 +252,9 @@
       return;
     }
     const L = F.lg, T = F.tg, fw = F.gw * CELL, fh = F.gh * CELL, bx = F.bx, by = F.by;
-    L.globalCompositeOperation = "copy"; L.drawImage(this.artCv, 0, 0);
+    const rect = o && o.rect && !split && !under && F.whole ? o.rect : null;
+    if (rect) { L.clearRect(bx, by, F.bw, F.bh); L.globalCompositeOperation = "source-over"; L.drawImage(this.artCv, bx, by, F.bw, F.bh, bx, by, F.bw, F.bh); }
+    else { L.globalCompositeOperation = "copy"; L.drawImage(this.artCv, 0, 0); F.whole = true; }
     L.globalCompositeOperation = "source-over";
     if (holeA > 0 && F.hole) {
       const h = this.data.hole;
@@ -291,6 +295,7 @@
     if (F.boom > 0.02) { L.globalAlpha = Math.min(1, F.boom * 0.5); L.drawImage(F.litGlow, bx, by, F.bw, F.bh); }
     L.globalAlpha = 1; L.globalCompositeOperation = "source-over";
     // 交出去：整張，或沿著裂縫中線撕成兩半往外拉（中間透明，或墊著延伸的深空）
+    if (rect) { g.drawImage(F.lc, rect[0], rect[1], rect[2], rect[3], rect[0], rect[1], rect[2], rect[3]); return; }
     if (split < 0.05 && !under) { g.drawImage(F.lc, 0, 0); return; }
     const H = F.hg, op = g.globalCompositeOperation;
     [[F.maskL, -split, "source-over"], [F.maskR, split, "lighter"]].forEach(([mask, dx, mode]) => {
