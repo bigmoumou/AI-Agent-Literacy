@@ -105,7 +105,7 @@
     try { var w = W7.gameWindow(); if (w) w.close(); } catch (e) { /* ignore */ }
   }
   function siProject(api) { try { api.codex.addProject(SI, { trust: true, select: true }); } catch (e) { /* ignore */ } }
-  var NOT_IN_SI = '這段對話不在 sky-island 專案裡（輸入框上方沒有「sky-island」標籤）。點 Codex 側邊欄的 sky-island，在專案底下再試一次。';
+  var NOT_IN_SI = 'This chat is not inside the sky-island project (there is no “sky-island” label above the input box). Click sky-island in the Codex sidebar and try again inside the project.';
   function notInSiTrap(ev) { return ev && ev.name === 'codex:reply' && ev.data && ev.data.notInProject ? NOT_IN_SI : null; }
 
   /* ---- the checks */
@@ -117,17 +117,17 @@
   }
   function ran(api, name, sub) { return !!api.termSeen(function (c) { return c.name === name && (c.status === 0 || sub === 'test') && (!sub || c.args[0] === sub || (sub === 'test' && (c.args[0] === 't' || (c.args[0] === 'run' && c.args[1] === 'test')))) && same(api, c.cwd, SI); }); }
   function ticked(text, n) { var l = W7.stepLines(text, n); return l.length > 0 && l.every(function (x) { return /^\s*- \[[xX]\]/.test(x); }); }
-  function tddRules(api) { return /先寫(這一步的)?測試/.test(disk(api, AGENTS) || ''); }
-  var DONE = '　這次練了：';
+  function tddRules(api) { return /tests?\s+first|first[,:]?\s+write\s+(?:the\s+|this\s+step['’]s\s+)?tests?|先寫(這一步的)?測試/i.test(disk(api, AGENTS) || ''); }
+  var DONE = ' What you practiced this time: ';
   function practised(list) { return DONE + list.join(' · '); }
 
   /* the same missions on both computers: the Windows words are made from the Mac ones when a mission registers */
   var WIN = !!LAB.win;
   function os(x) {
     if (!WIN || typeof x !== 'string') return x;
-    return x.replace(/按 Return（Windows 鍵盤是 Enter）/g, '按 Enter').replace(/（Command\+S，Windows 鍵盤是 Ctrl\+S）/g, '（Ctrl+S）')
+    return x.replace(/press Return \(Enter on a Windows keyboard\)/g, 'press Enter').replace(/\(Command\+S, or Ctrl\+S on a Windows keyboard\)/g, '(Ctrl+S)')
       .replace(/cd ~\/Desktop\/sky-island/g, 'cd ~\\Desktop\\sky-island').replace(/Command\+/g, 'Ctrl+').replace(/Return/g, 'Enter')
-      .replace(/打開 Dock 上的/g, '打開工作列上的').replace(/Dock 上的/g, '工作列上的').replace(/在 Finder /g, '在檔案總管 ');
+      .replace(/ in the Dock/g, ' on the taskbar').replace(/the Dock/g, 'the taskbar').replace(/in Finder /g, 'in File Explorer ');
   }
   function register(m) {
     m.intro = os(m.intro); m.outro = os(m.outro);
@@ -135,146 +135,146 @@
     LAB.missions.register(m);
   }
 
-  var GROUP_A = '先想清楚，再讓 AI 做（作業第 1–5 點）';
-  var GROUP_B = '一步一步做（作業第 6–7 點）';
+  var GROUP_A = 'Think it through first, then let the AI build (homework points 1–5)';
+  var GROUP_B = 'Build step by step (homework points 6–7)';
 
   /* ================================================================== 1 · 先想清楚：BRIEF.md 和 VERIFY.md */
   register({
-    id: 'w7-01-verify', week: 7, order: 1, group: GROUP_A, tag: 'Week 7 作業第 1–3 點',
-    title: '先想清楚：BRIEF.md 和 VERIFY.md',
+    id: 'w7-01-verify', week: 7, order: 1, group: GROUP_A, tag: 'Week 7 homework points 1–3',
+    title: 'Think it through first: BRIEF.md and VERIFY.md',
     minutes: 8, resetsFiles: true, needs: [SI],
-    intro: '這週的作業要分批做。開工前先想清楚：`BRIEF.md` 寫做什麼，`VERIFY.md` 寫怎樣算做好。第 1 批「挖 → 掉 → 撿 → 放」用老師想的測試，第 2 批是你的點子，測試自己想。這個任務可以全部複製貼上，重點是把流程練熟。',
+    intro: 'This week\'s homework is done in batches. Before you start, think it through: `BRIEF.md` says what to build, and `VERIFY.md` says what counts as done. Batch 1, “break → drop → pick up → place”, uses the teacher\'s tests; batch 2 is your own idea, with tests you think of yourself. In this mission you can copy and paste everything; the point is to get the flow into your hands.',
     prepare: function (api) { W7.restore(api, 'base'); resetCodex(api); siProject(api); },
     steps: [
       {
         id: 's1',
-        text: '用 VS Code 打開專案：點 Dock 上的 VS Code，再把桌面上的 `sky-island` 資料夾拖進 VS Code 的視窗',
-        hint: '拖進去就會打開整個資料夾，左邊列出裡面的檔案。VS Code 的視窗擋住桌面的話，先把視窗拉小或移開一點。',
-        answer: '點 Dock 上的 VS Code，再按住桌面上的 sky-island 資料夾，拖到 VS Code 視窗裡放開。',
+        text: 'Open the project in VS Code: click VS Code in the Dock, then drag the `sky-island` folder from the desktop into the VS Code window',
+        hint: 'Dragging it in opens the whole folder, and the files in it are listed on the left. If the VS Code window covers the desktop, make the window smaller or move it a little first.',
+        answer: 'Click VS Code in the Dock, then press and hold the sky-island folder on the desktop, drag it into the VS Code window and let go.',
         target: T_OPEN,
         check: function (ev, api) { return codeOpen() || !!api.seen('code:folder', function (d) { return d && same(api, d.path, SI); }, { since: 'mission' }); }
       },
       {
         id: 's2',
-        text: '在 VS Code 左邊點 `BRIEF.md`，把整份換成這段（按「複製」再貼上），存檔（Command+S，Windows 鍵盤是 Ctrl+S）：[[' + F.BRIEF.replace(/\n$/, '') + ']]',
-        hint: 'BRIEF 寫做什麼、不做什麼、你的點子和限制。作業裡這一份要用你自己的話寫，不要請 AI 寫；練習裡先照貼。',
-        answer: 'VS Code 左邊點 `BRIEF.md`，按 Command+A 全選、Command+V 貼上，再按 Command+S。',
+        text: ('In VS Code, click `BRIEF.md` on the left and replace the whole file with this text (click “Copy”, then paste), then save (Command+S, or Ctrl+S on a Windows keyboard): [[' + (F.BRIEF.replace(/\n$/, '')) + ']]'),
+        hint: 'BRIEF says what to build and what not to build, plus your idea and the limits. In the real homework you write this one in your own words and do not ask the AI to write it; in the practice, just paste it.',
+        answer: 'Click `BRIEF.md` on the left in VS Code, press Command+A to select all, Command+V to paste, then press Command+S.',
         target: codeFlow(BRIEF),
-        check: function (ev, api) { var t = disk(api, BRIEF) || ''; return /## 要做的/.test(t) && /## 我的點子/.test(t) && /## 限制/.test(t); }
+        check: function (ev, api) { var t = disk(api, BRIEF) || ''; return /## What to build/i.test(t) && /## My ideas?/i.test(t) && /## Limits/i.test(t); }
       },
       {
         id: 's3',
-        text: '打開 `VERIFY.md`，在標題下面貼上老師想的第 1 批（和作業頁的範本一樣），存檔：[[' + F.BATCH1.replace(/\n$/, '') + ']]',
-        hint: '第 1 批「挖 → 掉 → 撿 → 放」是一整串，分成 STEP 1～4。每一條都是「我做了什麼 → 應該看到什麼」，每個 STEP 都有一條「不可以發生」。',
-        answer: 'VS Code 左邊點 `VERIFY.md`，游標放在 `# VERIFY.md` 下面一行，貼上，按 Command+S。',
+        text: ('Open `VERIFY.md` and paste the teacher\'s batch 1 (the same as the template on the homework page) below the title, then save: [[' + (F.BATCH1.replace(/\n$/, '')) + ']]'),
+        hint: 'Batch 1, “break → drop → pick up → place”, is one whole chain, split into STEP 1 to 4. Every line is “what I do → what I should see”, and every STEP has one line for something that “must not happen”.',
+        answer: 'Click `VERIFY.md` on the left in VS Code, put the cursor on the line below `# VERIFY.md`, paste, then press Command+S.',
         target: codeFlow(VERIFY),
-        check: function (ev, api) { var t = disk(api, VERIFY) || ''; return /### STEP 1/.test(t) && /### STEP 4/.test(t) && /老師想的測試/.test(t) && (t.match(/^- \[[ xX]\]/mg) || []).length >= 11; }
+        check: function (ev, api) { var t = disk(api, VERIFY) || ''; return /### STEP 1/.test(t) && /### STEP 4/.test(t) && /teacher['’]s tests/i.test(t) && (t.match(/^- \[[ xX]\]/mg) || []).length >= 11; }
       },
       {
         id: 's4',
-        text: '在 `VERIFY.md` 最後貼上你的第 2 批：你的點子是「下雨」（也可以照這個樣子自己寫），存檔：[[' + F.BATCH2.replace(/\n$/, '') + ']]',
-        hint: '第 2 批是你自己的點子，從 STEP 5 開始，至少 3 條，其中一條是「不可以發生」的事。作業裡這一批不要請 AI 想。',
-        answer: '游標移到 `VERIFY.md` 最後，空一行，貼上，按 Command+S。',
+        text: ('At the end of `VERIFY.md`, paste your batch 2. Your idea is “rain” (you can also write your own in this style). Then save: [[' + (F.BATCH2.replace(/\n$/, '')) + ']]'),
+        hint: 'Batch 2 is your own idea, starting at STEP 5, with at least 3 lines, one of them about something that “must not happen”. In the real homework, do not ask the AI to think of this batch.',
+        answer: 'Move the cursor to the end of `VERIFY.md`, leave a blank line, paste, then press Command+S.',
         target: codeFlow(VERIFY),
-        check: function (ev, api) { var t = disk(api, VERIFY) || '', l = W7.stepLines(t, 5); return /第 2 批/.test(t) && l.length >= 3 && l.some(function (x) { return /不可以|不會/.test(x); }); }
+        check: function (ev, api) { var t = disk(api, VERIFY) || '', l = W7.stepLines(t, 5); return /Batch 2/i.test(t) && l.length >= 3 && l.some(function (x) { return /不可以|不會|must not|should not|\bnot\b|n['’]t|never/i.test(x); }); }
       },
       {
         id: 's5',
-        text: '打開終端機，進到專案資料夾：[[cd ~/Desktop/sky-island]]，按 Return（Windows 鍵盤是 Enter）',
-        hint: '`cd` 是進到資料夾。git、npm test 都要在專案資料夾裡打。',
-        answer: '打開 Dock 上的終端機，打 `cd ~/Desktop/sky-island` 按 Return。',
+        text: 'Open Terminal and go into the project folder: [[cd ~/Desktop/sky-island]], then press Return (Enter on a Windows keyboard)',
+        hint: '`cd` goes into a folder. git and npm test must both be typed inside the project folder.',
+        answer: 'Open Terminal in the Dock, type `cd ~/Desktop/sky-island` and press Return.',
         target: T_TERM,
         check: function (ev, api) { return !!api.termSeen(function (c) { return (c.name === 'cd' && c.status === 0 && same(api, c.cwdAfter, SI)) || same(api, c.cwd, SI); }, { since: 'mission' }); }
       },
       {
         id: 's6',
-        text: '測試要比 PLANS 先 commit，證明是你先想的。在終端機打 [[git add .]]，再打 [[git commit -m "BRIEF 和 VERIFY"]]',
-        hint: '`git add .` 把改過的檔案放進這次的存檔點；`git commit -m "說明"` 存檔，引號裡寫一句這次做了什麼。',
-        answer: '在終端機（已經在 sky-island 裡）打 `git add .` 按 Return，再打 `git commit -m "BRIEF 和 VERIFY"` 按 Return。',
+        text: 'Commit the tests before PLANS, to show you thought of them first. In Terminal, type [[git add .]], then type [[git commit -m "BRIEF and VERIFY"]]',
+        hint: '`git add .` puts the changed files into this save point; `git commit -m "message"` saves it, and the message in quotes is one sentence about what you did this time.',
+        answer: 'In Terminal (already inside sky-island), type `git add .` and press Return, then type `git commit -m "BRIEF and VERIFY"` and press Return.',
         target: T_TERM,
-        check: function () { var v = headFile('VERIFY.md') || '', b = headFile('BRIEF.md') || ''; return /### STEP 1/.test(v) && /### STEP 5/.test(v) && /## 要做的/.test(b); },
+        check: function () { var v = headFile('VERIFY.md') || '', b = headFile('BRIEF.md') || ''; return /### STEP 1/.test(v) && /### STEP 5/.test(v) && /## What to build/i.test(b); },
         trap: function (ev, api) {
           if (!api.termCmd(ev, function (c) { return c.name === 'git' && c.args[0] === 'commit' && c.status !== 0; })) return null;
-          return '還沒有東西可以 commit：先打 `git add .`，把改過的檔案放進這次的存檔點，再 commit。';
+          return 'There is nothing to commit yet: first type `git add .` to put the changed files into this save point, then commit.';
         }
       },
       {
         id: 's7',
-        text: '看看存檔點：[[git log --oneline]]',
-        hint: '一行一個存檔點，最上面是最新的。',
-        answer: '在終端機打 `git log --oneline` 按 Return：最上面是「BRIEF 和 VERIFY」，下面是「建立專案」。',
+        text: 'Look at the save points: [[git log --oneline]]',
+        hint: 'One line per save point, the newest at the top.',
+        answer: 'In Terminal, type `git log --oneline` and press Return: at the top is “BRIEF and VERIFY”, and below it “Create the project”.',
         target: T_TERM,
         check: function (ev, api) { return ran(api, 'git', 'log'); }
       }
     ],
-    outro: '第 1 批照抄老師的，第 2 批自己想；寫完先 commit，證明是你自己先想的。' + practised(['把資料夾拖進 VS Code', '貼上、存檔', 'cd', 'git add、git commit', 'git log --oneline'])
+    outro: ('Batch 1 is copied from the teacher; batch 2 you think of yourself. Commit right after writing, to show you thought of it first.' + (practised(['dragging a folder into VS Code', 'pasting and saving', 'cd', 'git add and git commit', 'git log --oneline'])))
   });
 
   /* ================================================================== 2 · 請 Codex 挑毛病，AI 補的放進 STEP */
   register({
-    id: 'w7-02-check', week: 7, order: 2, group: GROUP_A, tag: 'Week 7 作業第 4 點',
-    title: '請 Codex 挑毛病，AI 補的放進 STEP',
+    id: 'w7-02-check', week: 7, order: 2, group: GROUP_A, tag: 'Week 7 homework point 4',
+    title: 'Ask Codex to find problems; AI additions go under a STEP',
     minutes: 7, resetsFiles: true, needs: [SI],
-    intro: '`VERIFY.md` 是你的。請 Codex 看看哪幾條太模糊、漏了什麼；它補的放進對應的 STEP，後面標「（AI 補充）」，不另外編號。你看過才留下，BRIEF 沒要的就劃掉。',
+    intro: '`VERIFY.md` is yours. Ask Codex which lines are too vague and what is missing. What it adds goes under the matching STEP, marked “(AI added)” at the end, with no separate numbering. Keep only what you have read and agree with, and cross out whatever the BRIEF did not ask for.',
     prepare: function (api) { W7.restore(api, 'verify'); resetCodex(api); siProject(api); },
     steps: [
       {
         id: 's1',
-        text: '在 Codex 的 sky-island 專案貼上這句，按 Return：[[檢查 VERIFY.md：哪幾條太模糊？漏掉的補在對應的 STEP 下面，每條後面標「（AI 補充）」，不要改我寫的。]]',
-        hint: '輸入框上方要看到「sky-island」這個標籤，Codex 才找得到你的專案。',
-        answer: '點 Codex 側邊欄的 sky-island，在輸入框貼上這句，按 Return。',
+        text: 'In the sky-island project in Codex, paste this sentence and press Return: [[Check VERIFY.md: which lines are too vague? Add anything missing under the matching STEP, and mark each added line with “(AI added)” at the end. Do not change what I wrote.]]',
+        hint: 'You need to see the “sky-island” label above the input box, or Codex cannot find your project.',
+        answer: 'Click sky-island in the Codex sidebar, paste this sentence in the input box and press Return.',
         replay: 'mission',
         target: T_COMPOSER,
-        check: function (ev, api) { return !!api.seen('codex:reply', replyIs('w7_check', function (d) { return d.check && d.check.done; })) && /（AI 補充）/.test(disk(api, VERIFY) || ''); },
+        check: function (ev, api) { return !!api.seen('codex:reply', replyIs('w7_check', function (d) { return d.check && d.check.done; })) && /\(AI added\)/.test(disk(api, VERIFY) || ''); },
         trap: notInSiTrap
       },
       {
         id: 's2',
-        text: '你同意它的建議：在 VS Code 打開 `VERIFY.md`，把 STEP 5 的「站在屋簷下 → 不會被淋到」那一行，換成這一行，存檔：[[' + F.RAIN_NEW + ']]',
-        hint: '「屋簷下」是哪一格？看不出對錯，就檢查不了。「頭上有方塊」看得出來。AI 提建議，改不改由你決定；這次你同意。',
-        answer: '在 VS Code 的 `VERIFY.md` 選取「- [ ] 站在屋簷下 → 不會被淋到」整行，貼上新的一行，按 Command+S。',
+        text: ('You agree with its suggestion: in VS Code open `VERIFY.md`, and replace the line “Stand under the edge of the roof → you don\'t get wet” under STEP 5 with this line, then save: [[' + (F.RAIN_NEW) + ']]'),
+        hint: 'Which block is “under the edge of the roof”? If you can\'t tell right from wrong, you can\'t check it. “A block is above your head” can be checked. The AI suggests and you decide; this time you agree.',
+        answer: 'In `VERIFY.md` in VS Code, select the whole line “- [ ] Stand under the edge of the roof → you don\'t get wet”, paste the new line, then press Command+S.',
         target: codeFlow(VERIFY),
-        check: function (ev, api) { var l = W7.stepLines(disk(api, VERIFY), 5); return l.some(function (x) { return /頭上有方塊/.test(x); }) && !l.some(function (x) { return /屋簷下/.test(x); }); }
+        check: function (ev, api) { var l = W7.stepLines(disk(api, VERIFY), 5); return l.some(function (x) { return /a block is above your head/i.test(x); }) && !l.some(function (x) { return /edge of the roof/i.test(x); }); }
       },
       {
         id: 's3',
-        text: 'BRIEF 沒要的就劃掉：把「### STEP 6 肚子會餓（AI 補充）」那兩行刪掉，存檔。STEP 0 和 STEP 4 補的留著。',
-        hint: 'STEP 0（小島、32 格、每秒 30 格）是 BRIEF 的限制，STEP 4（不能放在自己站的格子）是放方塊該想到的；肚子會餓 BRIEF 沒有。',
-        answer: '在 VS Code 的 `VERIFY.md` 選取最後兩行（「### STEP 6 肚子會餓（AI 補充）」和它下面那一條），按 Delete，按 Command+S。',
+        text: 'Cross out what the BRIEF did not ask for: delete the two lines “### STEP 6 Getting hungry (AI added)” and the line under it, then save. Keep what was added for STEP 0 and STEP 4.',
+        hint: 'STEP 0 (the island, 32 blocks, 30 frames per second) comes from the limits in the BRIEF, and STEP 4 (you can\'t place a block into the block you stand in) is something you should think of when placing blocks; the BRIEF says nothing about getting hungry.',
+        answer: 'In `VERIFY.md` in VS Code, select the last two lines (“### STEP 6 Getting hungry (AI added)” and the line under it), press Delete, then press Command+S.',
         target: codeFlow(VERIFY),
-        check: function (ev, api) { var t = disk(api, VERIFY) || ''; return !/肚子會餓/.test(t) && /## STEP 0/.test(t) && /不會卡在方塊裡/.test(t); },
+        check: function (ev, api) { var t = disk(api, VERIFY) || ''; return !/hungry/i.test(t) && /## STEP 0/.test(t) && /get stuck inside a block/i.test(t); },
         trap: function (ev, api) {
           if (!ev || !((ev.name === 'editor:save' || ev.name === 'fs:change') && ev.data && same(api, ev.data.path, VERIFY))) return null;
           var t = disk(api, VERIFY) || '';
-          if (!/肚子會餓/.test(t) && (!/## STEP 0/.test(t) || !/不會卡在方塊裡/.test(t))) return 'STEP 0 和 STEP 4 補的那幾條 BRIEF 有要（限制、放方塊），留著；只刪「肚子會餓」。可以按 Command+Z 復原。';
+          if (!/hungry/i.test(t) && (!/## STEP 0/.test(t) || !/get stuck inside a block/i.test(t))) return 'The lines added for STEP 0 and STEP 4 are things the BRIEF does ask for (the limits, placing blocks), so keep them; delete only “Getting hungry”. You can press Command+Z to undo.';
           return null;
         }
       },
       {
         id: 's4', solo: true,
-        text: '存檔點：一行就好，[[git commit -am "VERIFY：AI 補充，留兩條、劃掉一條"]]',
-        hint: '`-a` 會把改過的檔案一起放進這次的存檔點，`-m` 後面是說明。',
-        answer: '在終端機打 `git commit -am "VERIFY：AI 補充，留兩條、劃掉一條"` 按 Return。',
+        text: 'Save point: just one line, [[git commit -am "VERIFY: AI additions, kept two, crossed out one"]]',
+        hint: '`-a` puts the changed files into this save point too, and what follows `-m` is the message.',
+        answer: 'In Terminal, type `git commit -am "VERIFY: AI additions, kept two, crossed out one"` and press Return.',
         target: T_TERM,
-        check: function () { var v = headFile('VERIFY.md') || ''; return /頭上有方塊/.test(v) && !/肚子會餓/.test(v) && /（AI 補充）/.test(v); }
+        check: function () { var v = headFile('VERIFY.md') || ''; return /a block is above your head/i.test(v) && !/hungry/i.test(v) && /\(AI added\)/.test(v); }
       }
     ],
-    outro: 'AI 補的不另外編號，放進對應的 STEP、標「（AI 補充）」；你看過才留下，BRIEF 沒要的就劃掉。方向由你決定，不是 AI。' + practised(['請 Codex 檢查', '改 VERIFY.md、存檔', 'git commit -am'])
+    outro: ('AI additions get no separate numbers: they go under the matching STEP, marked “(AI added)”. Keep only what you have read, and cross out what the BRIEF did not ask for. You decide the direction, not the AI.' + (practised(['asking Codex to check', 'editing VERIFY.md and saving', 'git commit -am'])))
   });
 
   /* ================================================================== 3 · PLANS.md：AI 起草，你審三件事 */
   register({
-    id: 'w7-03-plans', week: 7, order: 3, group: GROUP_A, tag: 'Week 7 作業第 5 點',
-    title: 'PLANS.md：AI 起草，你審三件事',
+    id: 'w7-03-plans', week: 7, order: 3, group: GROUP_A, tag: 'Week 7 homework point 5',
+    title: 'PLANS.md: the AI drafts, you review three things',
     minutes: 8, resetsFiles: true, needs: [SI],
-    intro: '`PLANS.md` 是 AI 的：每一步怎麼做，讓它決定。你只說清楚範圍和驗收，再審三件事：每條測試都排進去了嗎？每一步都對到測試嗎？有沒有偷加 BRIEF 沒要的？不對就請它改，你不用自己改寫。',
+    intro: '`PLANS.md` belongs to the AI: how to do each step is its call. You only make clear the scope and what counts as done, and then review three things: is every test in some step? Does every step point to tests? Did it sneak in anything the BRIEF did not ask for? If something is wrong, ask it to fix the plan; you do not rewrite it yourself.',
     prepare: function (api) { W7.restore(api, 'checked'); resetCodex(api); siProject(api); },
     steps: [
       {
         id: 's1',
-        text: '請 Codex 起草（先不要寫程式）：[[根據 BRIEF.md 和 VERIFY.md 起草 PLANS.md：照 STEP 0、1、2… 的順序，一步一個 STEP，每一步寫出要通過哪個 STEP 的測試。先不要寫程式，有不清楚的先問我。]]',
-        hint: '範圍和驗收你說清楚，怎麼做交給 AI。「有不清楚的先問我」，它就不會亂猜。',
-        answer: '在 Codex 的 sky-island 專案貼上這句，按 Return。它會先問你一個問題。',
+        text: 'Ask Codex to draft it (no code yet): [[Draft PLANS.md from BRIEF.md and VERIFY.md: follow the order STEP 0, 1, 2…, one STEP per step, and for each step write which STEP\'s tests it must pass. Do not write code yet, and ask me first about anything that is unclear.]]',
+        hint: 'You make the scope and what counts as done clear; how to do it is up to the AI. If you say “ask me first about anything that is unclear”, it won\'t guess.',
+        answer: 'In the sky-island project in Codex, paste this sentence and press Return. It will first ask you one question.',
         replay: 'mission',
         target: T_COMPOSER,
         check: function (ev, api) { return !!api.seen('codex:reply', replyIs('w7_plan_ask', function (d) { return d.plan && d.plan.asked; })); },
@@ -282,42 +282,42 @@
       },
       {
         id: 's2',
-        text: '回答它的問題：[[按 R 開始下雨，再按一次停]]',
-        hint: '先問再規劃，計畫才不會猜錯方向。',
-        answer: '在同一段對話貼上這句，按 Return。它會寫好 `PLANS.md`。',
+        text: 'Answer its question: [[Press R to start the rain, and press R again to stop it]]',
+        hint: 'Ask first, plan second: that way the plan does not go in the wrong direction by guessing.',
+        answer: 'In the same chat, paste this sentence and press Return. It will write `PLANS.md`.',
         target: T_COMPOSER,
         check: function (ev, api) { return !!api.seen('codex:reply', replyIs('w7_plan_draft', function (d) { return d.plan && d.plan.drafted; })) && api.exists(PLANS); }
       },
       {
         id: 's3',
-        text: '先留一份 AI 的第一版：在終端機打 [[cp PLANS.md PLANS.v1.md]]',
-        hint: '`cp 原本的 新的` 是複製檔案。改過以後，還能拿第一版對照。',
-        answer: '在終端機（在 sky-island 裡）打 `cp PLANS.md PLANS.v1.md` 按 Return。',
+        text: 'Keep a copy of the AI\'s first version: in Terminal, type [[cp PLANS.md PLANS.v1.md]]',
+        hint: '`cp original new` copies a file. After you change the plan, you can still compare it with the first version.',
+        answer: 'In Terminal (inside sky-island), type `cp PLANS.md PLANS.v1.md` and press Return.',
         target: T_TERM,
-        check: function (ev, api) { return /合成台/.test(disk(api, W7.PLANS_V1) || ''); }
+        check: function (ev, api) { return /crafting( table)?|合成台/i.test(disk(api, W7.PLANS_V1) || ''); }
       },
       {
         id: 's4',
-        text: '用 VS Code 打開 `PLANS.md` 審三件事：每條測試都排進去了嗎？每一步都對到測試嗎？有沒有偷加 BRIEF 沒要的？找到問題，請 Codex 改。',
-        hint: '第 3 步後面沒寫「要通過 STEP 3」；第 6 步「合成台」BRIEF 沒要（BRIEF 寫了不做合成）。可以這樣說：[[第 3 步沒寫要通過哪幾條，請補上；「合成台」BRIEF 沒要，刪掉]]',
-        answer: '在 Codex 貼上這句，按 Return：[[第 3 步沒寫要通過哪幾條，請補上；「合成台」BRIEF 沒要，刪掉]]',
-        target: chain(function (api) { return /合成台/.test(disk(api, PLANS) || '') && !api.seen('editor:open', function (d) { return d && same(api, d.path, PLANS); }) ? codeFlow(PLANS)(api) : null; }, T_COMPOSER),
-        check: function (ev, api) { var p = disk(api, PLANS) || ''; return /第 3 步：[^\n]*要通過 STEP 3/.test(p) && !/合成台/.test(p); },
+        text: 'Open `PLANS.md` in VS Code and review three things: is every test in some step? Does every step point to tests? Did it sneak in anything the BRIEF did not ask for? If you find a problem, ask Codex to fix it.',
+        hint: 'Step 3 does not say “must pass STEP 3”; Step 6, “Crafting table”, was not asked for in the BRIEF (the BRIEF says no crafting). You can say it like this: [[Step 3 doesn\'t say which tests it must pass, please add them; the BRIEF didn\'t ask for the “crafting table”, so please delete it]]',
+        answer: 'Paste this sentence in Codex and press Return: [[Step 3 doesn\'t say which tests it must pass, please add them; the BRIEF didn\'t ask for the “crafting table”, so please delete it]]',
+        target: chain(function (api) { return /crafting( table)?|合成台/i.test(disk(api, PLANS) || '') && !api.seen('editor:open', function (d) { return d && same(api, d.path, PLANS); }) ? codeFlow(PLANS)(api) : null; }, T_COMPOSER),
+        check: function (ev, api) { var p = disk(api, PLANS) || ''; return /Step 3: [^\n]*must pass STEP 3/.test(p) && !/crafting( table)?|合成台/i.test(p); },
         trap: function (ev) {
-          if (ev && ev.name === 'codex:reply' && ev.data && ev.data.plan && ev.data.plan.keptV1 === false) return '先把第一版存成 `PLANS.v1.md`（`cp PLANS.md PLANS.v1.md`），改過以後才有得對照。';
+          if (ev && ev.name === 'codex:reply' && ev.data && ev.data.plan && ev.data.plan.keptV1 === false) return 'First save the first version as `PLANS.v1.md` (`cp PLANS.md PLANS.v1.md`), so you have something to compare with after the changes.';
           return null;
         }
       },
       {
         id: 's5', solo: true,
-        text: '存檔點：PLANS.v1.md 和 PLANS.md 一起，[[git add .]]、[[git commit -m "PLANS.md 第一版和改過的版本"]]',
-        hint: '和任務 1 一樣：先 add 再 commit。',
-        answer: '在終端機打 `git add .` 按 Return，再打 `git commit -m "PLANS.md 第一版和改過的版本"` 按 Return。',
+        text: 'Save point: PLANS.v1.md and PLANS.md together, [[git add .]], [[git commit -m "PLANS.md first version and revised version"]]',
+        hint: 'Same as mission 1: add first, then commit.',
+        answer: 'In Terminal, type `git add .` and press Return, then type `git commit -m "PLANS.md first version and revised version"` and press Return.',
         target: T_TERM,
-        check: function () { var p = headFile('PLANS.md') || '', v = headFile('PLANS.v1.md') || ''; return /要通過 STEP 3/.test(p) && /合成台/.test(v); }
+        check: function () { var p = headFile('PLANS.md') || '', v = headFile('PLANS.v1.md') || ''; return /must pass STEP 3/.test(p) && /crafting( table)?|合成台/i.test(v); }
       }
     ],
-    outro: '不對就請 AI 改，你不用自己改寫；`PLANS.v1.md` 留著對照。VERIFY 是你的，PLANS 交給 AI。' + practised(['請 Codex 起草', 'cp 留第一版', '審三件事', 'git add、git commit'])
+    outro: ('If something is wrong, ask the AI to fix it; you do not rewrite it yourself. Keep `PLANS.v1.md` to compare. VERIFY is yours, PLANS is the AI\'s.' + (practised(['asking Codex for a draft', 'cp to keep the first version', 'reviewing three things', 'git add and git commit'])))
   });
 
   /* ================================================================== 4 · 一步一步：先紅、再綠、再 commit（做兩輪） */
@@ -337,67 +337,67 @@
   function commitBeforeTickTrap(n) {
     return function (ev, api) {
       if (!api.termCmd(ev, function (c) { return c.name === 'git' && c.args[0] === 'commit'; })) return null;
-      return ticked(disk(api, VERIFY), n) ? null : '先在 VERIFY.md 把 STEP ' + n + ' 的每一條打勾（`- [ ]` 改成 `- [x]`），存檔，再 commit。';
+      return ticked(disk(api, VERIFY), n) ? null : ('First tick every line of STEP ' + (n) + ' in VERIFY.md (change `- [ ]` to `- [x]`), save, and then commit.');
     };
   }
   register({
-    id: 'w7-04-loop', week: 7, order: 4, group: GROUP_B, tag: 'Week 7 作業第 6–7 點',
-    title: '一步一步：先紅、再綠、再 commit（做兩輪）',
+    id: 'w7-04-loop', week: 7, order: 4, group: GROUP_B, tag: 'Week 7 homework points 6–7',
+    title: 'Step by step: red, then green, then commit (two rounds)',
     minutes: 10, resetsFiles: true, needs: [SI],
-    intro: 'TDD 交給 Codex：每一步先寫測試、跑一次確認失敗（紅），再寫程式、全部通過（綠）才 commit。你要做的是：叫它做下一步、自己跑一次測試、看存檔點、自己玩一下打勾。同一個迴圈做兩輪，第二輪「自己來」。（第 0 步「島和走路」已經做好了。）',
+    intro: 'Leave TDD to Codex: in every step it first writes the tests and runs them once to confirm they fail (red), then writes the code, and commits only when everything passes (green). What you do: tell it to do the next step, run the tests yourself, look at the save points, and play the game yourself and tick the lines. You go round the same loop twice, and the second round is “On your own”. (Step 0, “Island and walking”, is already done.)',
     prepare: function (api) { W7.restore(api, 'planned'); resetCodex(api); siProject(api); },
     steps: [
       {
         id: 's1',
-        text: '把 TDD 的規矩寫進 `AGENTS.md`：在 VS Code 打開它，貼在最後，存檔。[[' + F.TDD.replace(/\n$/, '') + ']]',
-        hint: 'Codex 每次回答前都會讀 AGENTS.md；寫進去，它每一步都照這個順序做。',
-        answer: 'VS Code 左邊點 `AGENTS.md`，游標移到最後，空一行貼上，按 Command+S。（VS Code 沒開：把桌面上的 sky-island 資料夾拖進 VS Code）',
+        text: ('Write the TDD rules into `AGENTS.md`: open it in VS Code, paste them at the end, and save. [[' + (F.TDD.replace(/\n$/, '')) + ']]'),
+        hint: 'Codex reads AGENTS.md before every answer; once the rules are in it, it follows this order in every step.',
+        answer: 'Click `AGENTS.md` on the left in VS Code, move the cursor to the end, leave a blank line, paste, then press Command+S. (If VS Code is not open: drag the sky-island folder from the desktop into VS Code.)',
         target: codeFlow(AGENTS),
         check: function (ev, api) { return tddRules(api); }
       },
       {
         id: 's2',
-        text: '跑一次測試，看現在的樣子：[[npm test]]',
-        hint: '第 0 步（島和走路）已經做好，它的 3 個測試都會過（✔）。',
-        answer: '在終端機（在 sky-island 裡）打 `npm test` 按 Return。',
+        text: 'Run the tests once to see how things stand now: [[npm test]]',
+        hint: 'Step 0 (island and walking) is already done, and its 3 tests all pass (✔).',
+        answer: 'In Terminal (inside sky-island), type `npm test` and press Return.',
         target: T_TERM,
         check: function (ev, api) { return ran(api, 'npm', 'test'); }
       },
       {
         id: 's3',
-        text: '第 1 輪：叫 Codex 做下一步，看它的回報：[[做 PLANS.md 的下一步]]',
-        hint: '回報要看到兩件事：新測試先失敗（紅）、最後全部通過（綠）；測試和程式各一個 commit。',
-        answer: '在 Codex 的 sky-island 專案貼上這句，按 Return。它做的是第 1 步「挖方塊」。',
+        text: 'Round 1: tell Codex to do the next step, and read its report: [[Do the next step in PLANS.md]]',
+        hint: 'In the report you should see two things: the new tests fail first (red) and everything passes at the end (green); the tests and the code get one commit each.',
+        answer: 'In the sky-island project in Codex, paste this sentence and press Return. It does Step 1, “Break a block”.',
         replay: 'mission',
         target: T_COMPOSER,
         check: function (ev, api) { return !!api.seen('codex:reply', replyIs('w7_next', function (d) { return d.next && d.next.n === 1; })); },
         trap: function (ev) {
-          if (ev && ev.name === 'codex:reply' && ev.data && ev.data.next && ev.data.next.noRules) return 'Codex 說 AGENTS.md 裡還沒有 TDD 的規則：先做第 1 步，把規則貼進 AGENTS.md、存檔。';
+          if (ev && ev.name === 'codex:reply' && ev.data && ev.data.next && ev.data.next.noRules) return 'Codex says AGENTS.md has no TDD rules yet: go back to step 1 of this mission, paste the rules into AGENTS.md and save.';
           return notInSiTrap(ev);
         }
       },
       {
         id: 's4',
-        text: '不要只聽 Codex 說，自己再跑一次 [[npm test]]，再看 [[git log --oneline]]：「（測試）」的 commit 在「（程式）」下面，代表測試先寫。',
-        hint: '`git log --oneline` 最上面是最新的：先有「第 1 步：挖方塊（測試）」，再有「第 1 步：挖方塊（程式）」。',
-        answer: '在終端機打 `npm test`（全部 ✔），再打 `git log --oneline`。',
+        text: 'Do not just take Codex\'s word for it: run [[npm test]] yourself again, then look at [[git log --oneline]]. The “(tests)” commit is below the “(code)” commit, which means the tests were written first.',
+        hint: '`git log --oneline` shows the newest at the top: “Step 1: Break a block (tests)” was made first, and then “Step 1: Break a block (code)”.',
+        answer: 'In Terminal, type `npm test` (all ✔), then type `git log --oneline`.',
         target: T_TERM,
         check: function (ev, api) { return ran(api, 'npm', 'test') && ran(api, 'git', 'log'); }
       },
       {
         id: 's5',
-        text: '自己玩一下：請 Codex [[打開遊戲讓我玩玩看]]，點畫面，按住左鍵挖掉一格。挖得掉，就在 `VERIFY.md` 把 STEP 1 的四條打勾（`- [ ]` 改成 `- [x]`），存檔，再 [[git commit -am "STEP 1 玩過了"]]',
-        hint: '自動測試過了，還是要自己看一次。這一版只做到第 1 步：挖得掉，但還不會掉出小方塊。玩完按 Esc 放開滑鼠。',
-        answer: '貼上「打開遊戲讓我玩玩看」→ 點遊戲畫面 → 對著地面按住左鍵到那一格不見 → Esc → VS Code 的 VERIFY.md 把 STEP 1 的 `- [ ]` 都改成 `- [x]`、Command+S → 終端機 `git commit -am "STEP 1 玩過了"`。',
+        text: 'Play it yourself: ask Codex [[Open the game so I can try playing it]], click the screen, and hold the left button to break one block. If it breaks, tick all four lines of STEP 1 in `VERIFY.md` (change `- [ ]` to `- [x]`), save, and then [[git commit -am "STEP 1 played"]]',
+        hint: 'Even when the automatic tests pass, you still look yourself. This version is built only up to Step 1: you can break a block, but no small block drops yet. When you are done, press Esc to release the mouse.',
+        answer: 'Paste “Open the game so I can try playing it” → click the game screen → hold the left button on the ground until the block is gone → Esc → in VS Code, change every `- [ ]` under STEP 1 in VERIFY.md to `- [x]` and press Command+S → in Terminal, type `git commit -am "STEP 1 played"`.',
         target: playTarget(1, 'break'),
         check: playStep(1, 'break'),
         trap: commitBeforeTickTrap(1)
       },
       {
         id: 's6', solo: true,
-        text: '第 2 輪：叫 Codex 做下一步，自己跑測試、看存檔點。',
-        hint: '和第 1 輪一樣的三個動作：[[做 PLANS.md 的下一步]]、`npm test`、`git log --oneline`。',
-        answer: '在 Codex 貼上「做 PLANS.md 的下一步」（做的是第 2 步「掉出來」），再在終端機打 `npm test`、`git log --oneline`。',
+        text: 'Round 2: tell Codex to do the next step, run the tests, and look at the save points yourself.',
+        hint: 'The same three actions as in round 1: [[Do the next step in PLANS.md]], `npm test`, `git log --oneline`.',
+        answer: 'Paste “Do the next step in PLANS.md” in Codex (it does Step 2, “It drops”), then in Terminal type `npm test` and `git log --oneline`.',
         replay: 'mission',
         target: T_COMPOSER,
         check: function (ev, api) {
@@ -407,39 +407,39 @@
       },
       {
         id: 's7', solo: true,
-        text: '玩一下（挖一格，看小方塊掉出來），STEP 2 打勾、存檔，commit。',
-        hint: '請 Codex「打開遊戲讓我玩玩看」（已經開著就按視窗上的「↻ 重新整理」），挖一格看小方塊彈出來、掉到地上；VERIFY.md 的 STEP 2 打勾；`git commit -am "STEP 2 玩過了"`。',
-        answer: '打開遊戲 → 挖一格 → 看到小方塊掉到地上 → VERIFY.md STEP 2 的兩條改成 `- [x]`、Command+S → `git commit -am "STEP 2 玩過了"`。',
+        text: 'Play (break one block and watch the small block drop out), tick STEP 2, save, and commit.',
+        hint: 'Ask Codex “Open the game so I can try playing it” (if it is already open, click “↻ Refresh” in its window), break one block and watch the small block pop out and fall to the ground; tick the lines of STEP 2 in VERIFY.md; then `git commit -am "STEP 2 played"`.',
+        answer: 'Open the game → break one block → see the small block land on the ground → change the two lines of STEP 2 in VERIFY.md to `- [x]` and press Command+S → `git commit -am "STEP 2 played"`.',
         target: playTarget(2, 'drop'),
         check: playStep(2, 'drop'),
         trap: commitBeforeTickTrap(2)
       }
     ],
-    outro: '每一步都是同一個迴圈：做下一步 → `npm test` → `git log --oneline` → 自己玩、打勾 → commit。練到不用想。' + practised(['AGENTS.md 寫 TDD 規則', '做 PLANS.md 的下一步', 'npm test', 'git log --oneline', '玩一下、打勾', 'git commit -am'])
+    outro: ('Every step is the same loop: do the next step → `npm test` → `git log --oneline` → play and tick → commit. Practice until you do not have to think.' + (practised(['writing the TDD rules in AGENTS.md', 'the prompt “Do the next step in PLANS.md”', 'npm test', 'git log --oneline', 'playing and ticking', 'git commit -am'])))
   });
 
   /* ================================================================== 5 · 一批做完：整串玩一遍，bug 先寫進 VERIFY */
   register({
-    id: 'w7-05-batch', week: 7, order: 5, group: GROUP_B, tag: 'Week 7 作業第 7 點',
-    title: '一批做完：整串玩一遍，bug 先寫進 VERIFY',
+    id: 'w7-05-batch', week: 7, order: 5, group: GROUP_B, tag: 'Week 7 homework point 7',
+    title: 'A batch is done: play the whole chain, write the bug into VERIFY first',
     minutes: 9, resetsFiles: true, needs: [SI],
-    intro: '把第 1 批做完，自己把「挖 → 掉 → 撿 → 放」整串從頭玩一遍。自動測試沒想到的，就是你要補的：發現 bug，先寫進 `VERIFY.md`（你的），再請 Codex 寫成測試、確認失敗、修好。',
+    intro: 'Finish batch 1, then play the whole chain “break → drop → pick up → place” from the start yourself. What the automatic tests did not think of is what you have to add: when you find a bug, write it into `VERIFY.md` first (it is yours), then ask Codex to turn it into a test, confirm it fails, and fix it.',
     prepare: function (api) { W7.restore(api, 'step2'); resetCodex(api); siProject(api); },
     steps: [
       {
         id: 's1', solo: true,
-        text: '把第 1 批做完：叫 Codex 做下一步兩次（第 3 步、第 4 步），每次都自己跑 `npm test`。',
-        hint: '[[做 PLANS.md 的下一步]] → `npm test` → 再一次 [[做 PLANS.md 的下一步]] → `npm test`。',
-        answer: '在 Codex 貼上「做 PLANS.md 的下一步」（第 3 步撿起來），終端機 `npm test`；再貼一次（第 4 步放回去），再 `npm test`，全部 ✔。',
+        text: 'Finish batch 1: tell Codex to do the next step twice (Step 3 and Step 4), and run `npm test` yourself each time.',
+        hint: '[[Do the next step in PLANS.md]] → `npm test` → [[Do the next step in PLANS.md]] again → `npm test`.',
+        answer: 'Paste “Do the next step in PLANS.md” in Codex (Step 3, “Pick it up”) and type `npm test` in Terminal; then paste it once more (Step 4, “Place it back”) and type `npm test` again. All ✔.',
         replay: 'mission',
         target: T_COMPOSER,
         check: function (ev, api) { return W7.level() >= 4 && !!api.seen('npm:test', function (d) { return d && d.level >= 4 && d.fail === 0; }); }
       },
       {
         id: 's2',
-        text: '一批做完，整串玩一遍：[[打開遊戲讓我玩玩看]]，先連續挖兩格（先不要撿），再走過去撿，最後放一格。方塊欄撿到幾個？',
-        hint: '挖兩格的時候先不要撿：兩格都挖掉、兩個小方塊都在地上，再走過去。放方塊是右鍵。',
-        answer: '打開遊戲 → 對著兩格地面各按住左鍵挖掉 → 走過去撿 → 選那一格按右鍵放一格。只撿到 1 個，第二個怎麼走都撿不起來：這是 bug。',
+        text: 'A batch is done, so play the whole chain: [[Open the game so I can try playing it]], first break two blocks in a row (do not pick them up yet), then walk over and pick them up, and finally place one block. How many did you pick up? Look at the hotbar.',
+        hint: 'When you break the two blocks, do not pick up yet: break both so both small blocks are on the ground, then walk over. Placing a block is a right-click.',
+        answer: 'Open the game → hold the left button on each of two blocks of ground until they are gone → walk over and pick them up → select that slot and right-click to place one block. You pick up only 1, and the second one cannot be picked up no matter how you walk: that is the bug.',
         target: function (api) { return W7.gameWindow() ? T_GAME(api) : T_COMPOSER(api); },
         check: function (ev, api) {
           var breaks = 0;
@@ -449,58 +449,58 @@
       },
       {
         id: 's3',
-        text: '只撿到 1 個：這是 bug。先寫進 `VERIFY.md`（你的）：在 STEP 3 下面貼上這一條，存檔。[[' + F.BUG_LINE + ']]',
-        hint: '發現 bug，先寫成 VERIFY.md 的一條，以後就不會再犯。VERIFY.md 是你的，Codex 不會幫你改。',
-        answer: '在 VS Code 的 `VERIFY.md` 找到「### STEP 3 撿起來」，在它下面那幾條的最後貼上這一條，按 Command+S。',
+        text: ('You picked up only 1: that is a bug. Write it into `VERIFY.md` (yours) first: paste this line under STEP 3, then save. [[' + (F.BUG_LINE) + ']]'),
+        hint: 'When you find a bug, first write it as a line in VERIFY.md, so it does not happen again. VERIFY.md is yours; Codex will not change it for you.',
+        answer: 'In `VERIFY.md` in VS Code, find “### STEP 3 Pick it up”, paste this line after the last line under it, then press Command+S.',
         target: codeFlow(VERIFY),
-        check: function (ev, api) { return W7.stepLines(disk(api, VERIFY), 3).some(function (l) { return /連續挖兩格/.test(l); }); }
+        check: function (ev, api) { return W7.stepLines(disk(api, VERIFY), 3).some(function (l) { return /two blocks in a row|two in a row|2 blocks in a row|連續挖兩格/i.test(l); }); }
       },
       {
         id: 's4',
-        text: '請 Codex 照它寫成測試、確認失敗，再修好：[[我在 VERIFY.md 的 STEP 3 加了一條，請寫成測試、確認失敗，再修好]]',
-        hint: '回報要看到：新的測試先失敗（真的抓到 bug），修好以後全部通過。',
-        answer: '在 Codex 貼上這句，按 Return。',
+        text: 'Ask Codex to turn it into a test, confirm it fails, and then fix it: [[I added a line under STEP 3 in VERIFY.md. Please write it as a test, confirm it fails, and then fix it.]]',
+        hint: 'In the report you should see: the new test fails first (it really catches the bug), and after the fix everything passes.',
+        answer: 'Paste this sentence in Codex and press Return.',
         replay: 'mission',
         target: T_COMPOSER,
         check: function (ev, api) { return !!api.seen('codex:reply', replyIs('w7_bugfix', function (d) { return d.bugfix && d.bugfix.fixed; })); },
         trap: function (ev) {
-          if (ev && ev.name === 'codex:reply' && ev.data && ev.data.bugfix && ev.data.bugfix.noLine) return '先把 bug 寫進 VERIFY.md 的 STEP 3，存檔，再請 Codex 寫成測試。';
+          if (ev && ev.name === 'codex:reply' && ev.data && ev.data.bugfix && ev.data.bugfix.noLine) return 'First write the bug into STEP 3 of VERIFY.md and save, and then ask Codex to write it as a test.';
           return notInSiTrap(ev);
         }
       },
       {
         id: 's5', solo: true,
-        text: '`npm test` 全部通過，再玩一次（連續挖兩格，兩個都撿得到），把新的那一條打勾，commit。',
-        hint: '`npm test` → 遊戲視窗按「↻ 重新整理」（或請 Codex 再打開一次）→ 連續挖兩格、走過去撿 → VERIFY.md 把「連續挖兩格」那一條打勾、存檔 → `git commit -am "STEP 3：連續挖兩格玩過了"`。',
-        answer: '終端機 `npm test`（全部 ✔）→ 重新打開遊戲，連續挖兩格，兩個都撿到 → VERIFY.md 的那一條改成 `- [x]`、Command+S → `git commit -am "STEP 3：連續挖兩格玩過了"`。',
+        text: '`npm test` all pass; play once more (break two blocks in a row, and both can be picked up), tick the new line, and commit.',
+        hint: '`npm test` → click “↻ Refresh” in the game window (or ask Codex to open it again) → break two blocks in a row and walk over to pick them up → tick the “two blocks in a row” line in VERIFY.md and save → `git commit -am "STEP 3: played two blocks in a row"`.',
+        answer: 'In Terminal, `npm test` (all ✔) → open the game again, break two blocks in a row, and pick up both → change that line in VERIFY.md to `- [x]` and press Command+S → `git commit -am "STEP 3: played two blocks in a row"`.',
         target: function (api) {
           if (!api.seen('npm:test', function (d) { return d && d.fail === 0 && !d.bug; })) return T_TERM(api);
           if (!api.seen('island:pick', function (d) { return d && d.inv >= 2 && !d.bug; })) return W7.gameWindow() ? T_GAME(api) : T_COMPOSER(api);
-          if (!W7.stepLines(disk(api, VERIFY), 3).some(function (l) { return /^- \[[xX]\][^\n]*連續挖兩格/.test(l); })) return codeFlow(VERIFY)(api);
+          if (!W7.stepLines(disk(api, VERIFY), 3).some(function (l) { return /^- \[[xX]\][^\n]*(?:two blocks in a row|two in a row|2 blocks in a row)/i.test(l); })) return codeFlow(VERIFY)(api);
           return T_TERM(api);
         },
         check: function (ev, api) {
           return !!api.seen('npm:test', function (d) { return d && d.fail === 0 && !d.bug; }) &&
             !!api.seen('island:pick', function (d) { return d && d.inv >= 2 && !d.bug; }) &&
-            W7.stepLines(headFile('VERIFY.md'), 3).some(function (l) { return /^- \[[xX]\][^\n]*連續挖兩格/.test(l); });
+            W7.stepLines(headFile('VERIFY.md'), 3).some(function (l) { return /^- \[[xX]\][^\n]*(?:two blocks in a row|two in a row|2 blocks in a row)/i.test(l); });
         }
       },
       {
         id: 's6',
-        text: '最後上傳到 GitHub。這次我們用指令自己上傳試試看（之前都是請 Codex 幫你上傳）：[[git push]]',
-        hint: '這個專案是從你的 GitHub repo 下載（clone）下來的，已經接好了，所以只要打 `git push`，這幾次的存檔點就全部送上去。交作業交的就是這個 repo 的連結。',
-        answer: '在終端機（在 sky-island 裡）打 `git push` 按 Return，看到 `main -> main` 就上傳好了。',
+        text: 'Finally, upload to GitHub. This time we try uploading by command ourselves (before, you asked Codex to upload for you): [[git push]]',
+        hint: 'This project was downloaded (cloned) from your GitHub repo and is already connected, so you only type `git push` and all these save points go up. What you hand in for the homework is the link to this repo.',
+        answer: 'In Terminal (inside sky-island), type `git push` and press Return. When you see `main -> main`, it is uploaded.',
         target: T_TERM,
         check: function () { return W7.git.pushed(SI); },
         trap: function (ev, api) {
           var c = api.termCmd(ev, function (x) { return x.name === 'git' && x.args[0] === 'push'; });
           if (!c) return null;
-          if (c.status !== 0 && !same(api, c.cwd, SI)) return '要在專案資料夾裡打：先 `cd ~/Desktop/sky-island`，再 `git push`。';
-          if (c.status === 0 && !W7.git.pushed(SI)) return '上傳的是最後一個存檔點：還有沒 commit 的改動，先 `git commit -am "說明"`，再 `git push`。';
+          if (c.status !== 0 && !same(api, c.cwd, SI)) return 'Type it inside the project folder: first `cd ~/Desktop/sky-island`, then `git push`.';
+          if (c.status === 0 && !W7.git.pushed(SI)) return 'What goes up is the last save point: you still have changes that are not committed, so first `git commit -am "message"`, then `git push`.';
           return null;
         }
       }
     ],
-    outro: '一批做完，自己從頭玩一遍；自動測試沒想到的，就是你要補的。bug 先寫進 VERIFY.md（你的），再請 Codex 寫成測試、修好，以後就不會再犯。作業就照這個迴圈，做完第 1 批再做你的第 2 批；最後 `git push`，交 GitHub repo 的連結。' + practised(['做下一步', 'npm test', '整串玩一遍', 'bug 先寫進 VERIFY.md', '請 Codex 寫成測試、修好', 'git commit -am', 'git push'])
+    outro: ('When a batch is done, play it from the start yourself; what the automatic tests did not think of is what you have to add. Write the bug into VERIFY.md (yours) first, then ask Codex to turn it into a test and fix it, so it does not happen again. For the homework, follow this loop: finish batch 1, then do your batch 2; at the end, `git push` and hand in the link to the GitHub repo.' + (practised(['doing the next step', 'npm test', 'playing the whole chain', 'writing the bug into VERIFY.md first', 'asking Codex for a test and a fix', 'git commit -am', 'git push'])))
   });
 })(window.LAB);

@@ -31,97 +31,57 @@
 
   /* ------------------------------------------------------------------ the files (what the task cards ask the student to paste, too) */
   var F = W7.files = {};
-  F.README = '# 空中之島（練習版）\n\nWeek 7 遠端練習用的專案：練「VERIFY → PLANS → 測試」的流程。\n練習裡的 Codex 不會真的寫程式；真正的作業請在你自己的電腦上做。\n';
+  F.README = '# Sky Island (practice version)\n\nA project for the Week 7 remote practice: practice the flow “VERIFY → PLANS → tests”.\nThe Codex in this practice does not really write code; do the real homework on your own computer.\n';
   F.BRIEF0 = '# BRIEF.md\n';
   F.VERIFY0 = '# VERIFY.md\n';
-  F.AGENTS0 = '# AGENTS.md\n\n- 回覆和說明用繁體中文\n- 不要讀取或複製範例網站的原始碼\n- 改完說明改了哪些檔案\n';
+  F.AGENTS0 = '# AGENTS.md\n\n- Reply and explain in English\n- Do not read or copy the source code of the example site\n- After each change, say which files you changed\n';
   F.PKG = '{\n  "name": "sky-island",\n  "version": "1.0.0",\n  "private": true,\n  "scripts": {\n    "test": "node --test"\n  }\n}\n';
   F.HTML = '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<title>Sky Island</title>\n</head>\n<body>\n<canvas id="cv"></canvas>\n<script type="module" src="game.js"></script>\n</body>\n</html>\n';
-  F.GAME0 = '// 空中之島（練習版）\n// 練習裡的 Codex 不會真的寫程式：它每做好一步，只在這裡留下一行記號。真正的程式在你自己的作業裡。\n';
+  F.GAME0 = '// Sky Island (practice version)\n// The Codex in this practice does not really write code: for every step it finishes, it only leaves one marker line here. The real code is in your own homework.\n';
 
-  F.BRIEF = '# BRIEF.md\n\n' +
-    '## 要做的\n- 在空中的小島上走、跳、看四周\n- 挖方塊、撿起來、放回去（第 1 批）\n\n' +
-    '## 不做的\n- 多人連線、打怪、合成\n\n' +
-    '## 我的點子\n- 會下雨，站在屋簷下就不會被淋到\n\n' +
-    '## 限制\n- 靜態網站，用 three.js 畫 3D，不用伺服器、帳號或遊戲引擎\n- 學校的舊電腦全螢幕也要每秒 30 格以上\n- 世界 32 × 32 × 32 格以內，材質只用素材包\n';
+  F.BRIEF = '# BRIEF.md\n\n## What to build\n- Walk, jump and look around on a small island floating in the sky\n- Break blocks, pick them up, place them back (batch 1)\n\n## What not to build\n- Multiplayer, fighting monsters, crafting\n\n## My ideas\n- It rains, and you don\'t get wet standing under the edge of the roof\n\n## Limits\n- A static website that draws 3D with three.js, with no server, accounts or game engine\n- At least 30 frames per second full screen on the school\'s old computers\n- A world no bigger than 32 × 32 × 32 blocks, with textures only from the asset pack\n';
   // 第 1 批：老師想的測試（和作業頁的範本同一份，製作/week07/tools/hw_text.py）
-  F.BATCH1 = '## 第 1 批：挖 → 掉 → 撿 → 放（老師想的測試）\n\n' +
-    '### STEP 1 挖方塊\n' +
-    '- [ ] 按住左鍵對著泥土 → 出現裂痕、越裂越大，不到 1 秒那一格不見\n' +
-    '- [ ] 只點一下左鍵 → 方塊還在（不可以發生：一點就不見）\n' +
-    '- [ ] 挖到一半放開左鍵 → 裂痕不見，再挖要從頭開始\n' +
-    '- [ ] 挖石頭 → 比泥土久，大約 2 秒\n\n' +
-    '### STEP 2 掉出來\n' +
-    '- [ ] 方塊不見時 → 原地彈出一個同種類的小方塊，慢慢轉\n' +
-    '- [ ] 小方塊落到地上停住（不可以發生：浮在空中、穿過地面）\n\n' +
-    '### STEP 3 撿起來\n' +
-    '- [ ] 走到小方塊旁邊 → 它飛到身上，方塊欄那一格的數字 +1\n' +
-    '- [ ] 站在 3 格外 → 不會被撿起來（不可以發生）\n\n' +
-    '### STEP 4 放回去\n' +
-    '- [ ] 選有數字的那一格，對地面按右鍵 → 放出一格，數字 −1\n' +
-    '- [ ] 那一格的數字是 0 → 按右鍵放不出來（不可以發生）\n' +
-    '- [ ] 整串走一遍：挖一塊 → 撿起來 → 放回去 → 數字回到原本\n';
-  F.BATCH2 = '## 第 2 批：我的點子（自己想的測試）\n\n' +
-    '### STEP 5 下雨\n' +
-    '- [ ] 按 R → 開始下雨，看得到雨滴往下掉\n' +
-    '- [ ] 站在屋簷下 → 不會被淋到\n' +
-    '- [ ] 站在屋子裡 → 雨滴不會穿過屋頂（不可以發生：雨下進屋子裡）\n';
+  F.BATCH1 = '## Batch 1: break → drop → pick up → place (the teacher\'s tests)\n\n### STEP 1 Break a block\n- [ ] Hold the left button on dirt → cracks appear and grow, and the block is gone in under 1 second\n- [ ] Click the left button just once → the block is still there (must not happen: it disappears with one click)\n- [ ] Let go of the left button halfway → the cracks go away, and breaking starts over next time\n- [ ] Break stone → takes longer than dirt, about 2 seconds\n\n### STEP 2 It drops\n- [ ] When a block disappears → a small block of the same kind pops out on the spot and turns slowly\n- [ ] The small block lands and stops (must not happen: floating in the air or falling through the ground)\n\n### STEP 3 Pick it up\n- [ ] Walk up next to the small block → it flies to you, and the number in its hotbar slot goes +1\n- [ ] Stand 3 blocks away → it is not picked up (must not happen)\n\n### STEP 4 Place it back\n- [ ] Select a slot with a number and right-click the ground → one block is placed, and the number goes −1\n- [ ] The number in that slot is 0 → right-click does not place anything (must not happen)\n- [ ] The whole chain: break one → pick it up → place it back → the number is back to what it was\n';
+  F.BATCH2 = '## Batch 2: My ideas (tests I thought of myself)\n\n### STEP 5 Rain\n- [ ] Press R → it starts raining, and you can see raindrops falling\n- [ ] Stand under the edge of the roof → you don\'t get wet\n- [ ] Stand inside the house → raindrops don\'t go through the roof (must not happen: rain falling into the house)\n';
   F.VERIFY1 = '# VERIFY.md\n\n' + F.BATCH1 + '\n' + F.BATCH2;
   // 任務 2：Codex 補的（AI 補充），學生同意 STEP 5 的建議、劃掉 STEP 6
-  F.STEP0 = '## STEP 0 小島（AI 補充）\n\n' +
-    '- [ ] 打開網頁 → 看得到浮在空中的小島，可以走、跳、看四周（AI 補充）\n' +
-    '- [ ] 世界不超過 32 × 32 × 32 格（AI 補充）\n' +
-    '- [ ] 舊電腦全螢幕 → 每秒 30 格以上（AI 補充）\n';
-  F.AI_STEP4 = '- [ ] 對自己站的那格按右鍵 → 不會放，不會卡在方塊裡（AI 補充）\n';
-  F.STEP6 = '### STEP 6 肚子會餓（AI 補充）\n- [ ] 一直走 → 肚子會餓，要吃東西才能繼續走（AI 補充）\n';
-  F.RAIN_OLD = '- [ ] 站在屋簷下 → 不會被淋到';
-  F.RAIN_NEW = '- [ ] 頭上有方塊 → 不會被雨淋到';
-  F.BUG_LINE = '- [ ] 連續挖兩格 → 兩個小方塊都撿得起來，數字 +2';
+  F.STEP0 = '## STEP 0 The island (AI added)\n\n- [ ] Open the page → you see a small island floating in the air, and can walk, jump and look around (AI added)\n- [ ] The world is no bigger than 32 × 32 × 32 blocks (AI added)\n- [ ] Old computer, full screen → 30 frames per second or more (AI added)\n';
+  F.AI_STEP4 = '- [ ] Right-click the block you are standing in → nothing is placed, so you can\'t get stuck inside a block (AI added)\n';
+  F.STEP6 = '### STEP 6 Getting hungry (AI added)\n- [ ] Keep walking → you get hungry, and must eat to keep walking (AI added)\n';
+  F.RAIN_OLD = '- [ ] Stand under the edge of the roof → you don\'t get wet';
+  F.RAIN_NEW = '- [ ] A block is above your head → you don\'t get rained on';
+  F.BUG_LINE = '- [ ] Break two blocks in a row → both small blocks can be picked up, and the number goes +2';
   /* VERIFY.md with Codex's additions put in (what w7_check writes; the student's lines are never changed) */
   W7.withAdditions = function (text) {
     var t = String(text);
     if (t.indexOf('## STEP 0') < 0) t = t.replace(/^(# VERIFY\.md[^\n]*\n)\n?/, function (m, h1) { return h1 + '\n' + F.STEP0 + '\n'; });
-    if (t.indexOf('不會卡在方塊裡') < 0) t = t.replace(/(### STEP 4[^\n]*\n(?:- \[[ xX]\][^\n]*\n)*)/, function (m) { return m + F.AI_STEP4; });
-    if (t.indexOf('肚子會餓') < 0) t = t.replace(/\n*$/, '\n\n') + F.STEP6;
+    if (t.indexOf('get stuck inside a block') < 0) t = t.replace(/(### STEP 4[^\n]*\n(?:- \[[ xX]\][^\n]*\n)*)/, function (m) { return m + F.AI_STEP4; });
+    if (t.indexOf('hungry') < 0) t = t.replace(/\n*$/, '\n\n') + F.STEP6;
     return t;
   };
   F.VERIFY2 = W7.withAdditions(F.VERIFY1).replace(F.RAIN_OLD, F.RAIN_NEW).replace('\n' + F.STEP6, '').replace(/\n+$/, '\n');
 
-  F.PLANS_V1 = '# PLANS.md（AI 起草）\n\n' +
-    '照 BRIEF.md 和 VERIFY.md，一步一個 STEP。每一步：先寫測試、確認失敗，再寫程式、全部通過才 commit。\n\n' +
-    '- [ ] 第 0 步：島和走路 → 要通過 VERIFY.md 的 STEP 0\n' +
-    '- [ ] 第 1 步：挖方塊（按住、裂痕、硬度）→ 要通過 STEP 1\n' +
-    '- [ ] 第 2 步：掉出來（彈出、落地、慢慢轉）→ 要通過 STEP 2\n' +
-    '- [ ] 第 3 步：撿起來（靠近就飛到身上、方塊欄的數字）\n' +
-    '- [ ] 第 4 步：放回去（右鍵放、數字 −1）→ 要通過 STEP 4\n' +
-    '- [ ] 第 5 步：下雨（按 R 開始、再按一次停）→ 要通過 STEP 5\n' +
-    '- [ ] 第 6 步：合成台（把方塊合成新東西）\n';
-  F.PLANS = F.PLANS_V1.replace('# PLANS.md（AI 起草）', '# PLANS.md（AI 起草，照你的意見改過）')
-    .replace('- [ ] 第 3 步：撿起來（靠近就飛到身上、方塊欄的數字）', '- [ ] 第 3 步：撿起來（靠近就飛到身上、方塊欄的數字）→ 要通過 STEP 3')
-    .replace('- [ ] 第 6 步：合成台（把方塊合成新東西）\n', '');
-  F.TDD = '## TDD 規則\n' +
-    '- 一次只做 PLANS.md 的一步，做完停下來回報\n' +
-    '- 每一步先寫這一步的測試，跑一次確認失敗，commit\n' +
-    '- 再寫程式，全部測試通過才 commit，並在 PLANS.md 勾掉這一步\n' +
-    '- 不要為了通過而修改測試\n' +
-    '- VERIFY.md 不要改，那是我的；PLANS.md 你可以自己調整，回報時說改了什麼\n';
+  F.PLANS_V1 = '# PLANS.md (drafted by AI)\n\nFollowing BRIEF.md and VERIFY.md, one STEP at a time. In every step: write the tests first and confirm they fail, then write the code, and commit only when all tests pass.\n\n- [ ] Step 0: Island and walking → must pass STEP 0 of VERIFY.md\n- [ ] Step 1: Break a block (hold, cracks, hardness) → must pass STEP 1\n- [ ] Step 2: It drops (pops out, lands, spins slowly) → must pass STEP 2\n- [ ] Step 3: Pick it up (it flies to you when you get close, the number in the hotbar)\n- [ ] Step 4: Place it back (right-click to place, number −1) → must pass STEP 4\n- [ ] Step 5: Rain (R starts it, press again to stop) → must pass STEP 5\n- [ ] Step 6: Crafting table (craft blocks into new things)\n';
+  F.PLANS = F.PLANS_V1.replace('# PLANS.md (drafted by AI)', '# PLANS.md (drafted by AI, revised as you asked)')
+    .replace('- [ ] Step 3: Pick it up (it flies to you when you get close, the number in the hotbar)', '- [ ] Step 3: Pick it up (it flies to you when you get close, the number in the hotbar) → must pass STEP 3')
+    .replace('- [ ] Step 6: Crafting table (craft blocks into new things)\n', '');
+  F.TDD = '## TDD rules\n- Do only one step of PLANS.md at a time, then stop and report\n- Every step: write this step\'s tests first, run them once to confirm they fail, then commit\n- Then write the code, commit only when all tests pass, and tick off the step in PLANS.md\n- Do not change the tests just to make them pass\n- Do not change VERIFY.md, it is mine; you may adjust PLANS.md yourself, and say what you changed in your report\n';
   F.AGENTS_TDD = F.AGENTS0 + '\n' + F.TDD;
 
   /* ------------------------------------------------------------------ the batch: what each step's tests are called (npm test) */
   W7.STEPS = [
-    { n: 0, name: '島和走路', tests: ['打開網頁 → 看得到小島，可以走、跳、看四周', '世界不超過 32 × 32 × 32 格', '舊電腦全螢幕 → 每秒 30 格以上'] },
-    { n: 1, name: '挖方塊', tests: ['按住左鍵 → 出現裂痕，不到 1 秒那一格不見', '只點一下左鍵 → 方塊還在', '挖到一半放開 → 裂痕不見、從頭開始', '挖石頭 → 比泥土久'] },
-    { n: 2, name: '掉出來', tests: ['方塊不見時 → 彈出同種類的小方塊', '小方塊落到地上停住，不會浮在空中'] },
-    { n: 3, name: '撿起來', tests: ['走到旁邊 → 飛到身上，數字 +1', '站在 3 格外 → 不會被撿起來'] },
-    { n: 4, name: '放回去', tests: ['對地面按右鍵 → 放出一格，數字 −1', '數字是 0 → 放不出來', '整串走一遍 → 數字回到原本', '對自己站的那格按右鍵 → 不會放'] }
+    { n: 0, name: 'Island and walking', tests: ['Open the page → you see the island, and can walk, jump and look around', 'The world is no bigger than 32 × 32 × 32 blocks', 'Old computer, full screen → 30 frames per second or more'] },
+    { n: 1, name: 'Break a block', tests: ['Hold the left button → cracks appear, and the block is gone in under 1 second', 'Click the left button once → the block is still there', 'Let go halfway through → the cracks go away, and breaking starts over', 'Break stone → takes longer than dirt'] },
+    { n: 2, name: 'It drops', tests: ['When a block disappears → a small block of the same kind pops out', 'The small block lands and stops, it does not float in the air'] },
+    { n: 3, name: 'Pick it up', tests: ['Walk up next to it → it flies to you, and the number goes +1', 'Stand 3 blocks away → it is not picked up'] },
+    { n: 4, name: 'Place it back', tests: ['Right-click the ground → one block is placed, and the number goes −1', 'The number is 0 → nothing is placed', 'Do the whole chain → the number is back to what it was', 'Right-click the block you stand in → it is not placed'] }
   ];
-  W7.BUG_TEST = '連續挖兩格 → 兩個小方塊都撿得起來';
-  W7.FIX_MARK = '// 修好：連續挖兩格，兩個都撿得起來';
-  W7.marker = function (n) { return '// STEP ' + n + ' ' + W7.STEPS[n].name + '：做好了'; };
+  W7.BUG_TEST = 'Break two blocks in a row → both small blocks can be picked up';
+  W7.FIX_MARK = '// Fixed: two blocks in a row, both can be picked up';
+  W7.marker = function (n) { return ('// STEP ' + (n) + ' ' + (W7.STEPS[n].name) + ': done'); };
   W7.testFile = function (n, withBug) {
     var s = W7.STEPS[n];
-    var t = '// STEP ' + n + ' ' + s.name + '：照 VERIFY.md 的 STEP ' + n + ' 寫的測試（練習版只有名字）\n' +
-      s.tests.map(function (x) { return "test('STEP " + n + ' ' + x + "', () => { /* … */ });\n"; }).join('');
+    var t = ('// STEP ' + (n) + ' ' + (s.name) + ': tests written from STEP ' + (n) + ' of VERIFY.md (the practice version has only their names)\n' + (s.tests.map(function (x) { return "test('STEP " + n + ' ' + x + "', () => { /* … */ });\n"; }).join('')));
     if (withBug) t += "test('STEP 3 " + W7.BUG_TEST + "', () => { /* … */ });\n";
     return t;
   };
@@ -345,28 +305,28 @@
     try { vfs.list(W7.TESTS).forEach(function (st) { vfs.remove(st.path, { by: 'system', force: true }); }); } catch (e) { /* fine */ }
     identity();
     W7.git.init(SI);
-    c('建立專案');
+    c('Create the project');
     W7.git.connect(SI);   // 從自己的 GitHub repo 來的（見 W7.git.connect）；之後的存檔點都還沒上傳，任務 5 最後 `git push`
-    if (at >= 1) { w(W7.BRIEF, F.BRIEF); w(W7.VERIFY, F.VERIFY1); c('BRIEF 和 VERIFY：第 1 批老師的、第 2 批我的'); }
-    if (at >= 2) { w(W7.VERIFY, F.VERIFY2); c('VERIFY：AI 補充，留兩條、劃掉一條'); }
+    if (at >= 1) { w(W7.BRIEF, F.BRIEF); w(W7.VERIFY, F.VERIFY1); c('BRIEF and VERIFY: batch 1 from the teacher, batch 2 mine'); }
+    if (at >= 2) { w(W7.VERIFY, F.VERIFY2); c('VERIFY: AI additions, kept two, crossed out one'); }
     if (at >= 3) {
-      w(W7.PLANS_V1, F.PLANS_V1); w(W7.PLANS, F.PLANS); c('PLANS.md 第一版和改過的版本');
-      w(W7.TESTS + '/step0.test.js', W7.testFile(0)); c('第 0 步：島和走路（測試）');
-      w(W7.GAME, W7.gameFile(0)); w(W7.PLANS, W7.tick(F.PLANS, 0)); c('第 0 步：島和走路（程式）');
+      w(W7.PLANS_V1, F.PLANS_V1); w(W7.PLANS, F.PLANS); c('PLANS.md first version and revised version');
+      w(W7.TESTS + '/step0.test.js', W7.testFile(0)); c('Step 0: Island and walking (tests)');
+      w(W7.GAME, W7.gameFile(0)); w(W7.PLANS, W7.tick(F.PLANS, 0)); c('Step 0: Island and walking (code)');
     }
     if (at >= 4) {
-      w(W7.AGENTS, F.AGENTS_TDD); c('AGENTS.md：TDD 規則');
+      w(W7.AGENTS, F.AGENTS_TDD); c('AGENTS.md: TDD rules');
       var plans = W7.tick(F.PLANS, 0), verify = F.VERIFY2;
       [1, 2].forEach(function (n) {
-        w(W7.TESTS + '/step' + n + '.test.js', W7.testFile(n)); c('第 ' + n + ' 步：' + W7.STEPS[n].name + '（測試）');
-        plans = W7.tick(plans, n); w(W7.GAME, W7.gameFile(n)); w(W7.PLANS, plans); c('第 ' + n + ' 步：' + W7.STEPS[n].name + '（程式）');
-        verify = W7.tickVerify(verify, n); w(W7.VERIFY, verify); c('STEP ' + n + ' 玩過了');
+        w(W7.TESTS + '/step' + n + '.test.js', W7.testFile(n)); c(('Step ' + (n) + ': ' + (W7.STEPS[n].name) + ' (tests)'));
+        plans = W7.tick(plans, n); w(W7.GAME, W7.gameFile(n)); w(W7.PLANS, plans); c(('Step ' + (n) + ': ' + (W7.STEPS[n].name) + ' (code)'));
+        verify = W7.tickVerify(verify, n); w(W7.VERIFY, verify); c(('STEP ' + (n) + ' played'));
       });
     }
     W7.state.reset();
   };
   /* PLANS.md with step n ticked; VERIFY.md with every line of STEP n ticked */
-  W7.tick = function (text, n) { return String(text).replace(new RegExp('- \\[ \\] (第 ' + n + ' 步)'), '- [x] $1'); };
+  W7.tick = function (text, n) { return String(text).replace(new RegExp(('- \\[ \\] (Step ' + (n) + ')')), '- [x] $1'); };
   W7.tickVerify = function (text, n) {
     var lines = String(text).split('\n'), on = false;
     for (var i = 0; i < lines.length; i++) {

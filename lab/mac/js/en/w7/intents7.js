@@ -16,22 +16,22 @@
   function inSI(ctx) { return !!ctx.project && vfs.same(ctx.cwd, W7.SI); }
   function disk(p) { try { return vfs.readFile(p, { by: 'system' }); } catch (e) { return null; } }
   function act(ctx, kind, verb, rest, detail, apply) { if (ctx.activity) return ctx.activity(kind, verb, rest, detail, apply); ctx.step(rest ? verb + '  ' + rest : verb, apply); return null; }
-  var NOT_IN_SI = '這段對話不在 sky-island 專案裡（輸入框上方沒有「sky-island」標籤），我找不到你的專案。先點 Codex 側邊欄的 sky-island，在專案底下再說一次。';
+  var NOT_IN_SI = 'This chat is not inside the sky-island project (there is no “sky-island” label above the input box), so I can\'t find your project. Click sky-island in the Codex sidebar first, then say it again inside the project.';
   function guard(ctx) { if (inSI(ctx)) return true; ctx.say(NOT_IN_SI); ctx.meta.notInProject = true; return false; }
   function commit(ctx, msg) {
     act(ctx, 'run', 'Ran', 'git add . && git commit -m "' + msg + '"', ['[main] ' + msg], function () { W7.git.commitAll(W7.SI, msg, 0); });
   }
-  function tddRules() { return /先寫(這一步的)?測試/.test(disk(W7.AGENTS) || ''); }
+  function tddRules() { return /tests?\s+first|first[,:]?\s+write\s+(?:the\s+|this\s+step['’]s\s+)?tests?|先寫(這一步的)?測試/i.test(disk(W7.AGENTS) || ''); }
 
   /* ================================================================== 練習版不寫真的遊戲；一次只做一步 */
   reg({
     id: 'w7_all_refuse',
-    test: function (t) { return has(t, /(一次|全部|整批|整個|所有).{0,8}(做完|做好|寫完|寫好|完成)|(做完|寫完).{0,4}(全部|整批|所有)/) && !has(t, /下一步/); },
+    test: function (t) { return has(t, /(一次|全部|整批|整個|所有).{0,8}(做完|做好|寫完|寫好|完成)|(做完|寫完).{0,4}(全部|整批|所有)|\b(?:do|build|make|finish|write|complete|implement)\s+(?:all|everything|the whole (?:thing|plan|batch)|the entire (?:plan|batch)|every step)\b|\ball (?:of )?the steps\b|\beverything at once\b|\ball at once\b|\bin one go\b/i) && !has(t, /(下一步|next step)/i); },
     run: function (ctx) {
       if (!guard(ctx)) return;
       ctx.say(tddRules()
-        ? '照 AGENTS.md 的規則，一次只做 PLANS.md 的一步，做完停下來回報。請說「做 PLANS.md 的下一步」。'
-        : '一次只做一步比較好檢查：請說「做 PLANS.md 的下一步」。也可以把「一次只做一步」寫進 AGENTS.md，我每次都會照做。');
+        ? 'According to the rules in AGENTS.md, I do only one step of PLANS.md at a time and then stop to report. Please say “Do the next step in PLANS.md”.'
+        : 'Doing one step at a time is easier to check: please say “Do the next step in PLANS.md”. You can also write “do only one step at a time” in AGENTS.md, and I will follow it every time.');
       ctx.meta.refused = true;
     }
   }, { priority: 130 });
@@ -39,24 +39,19 @@
   /* ================================================================== 任務 2：挑毛病、補漏，AI 補的放進對應的 STEP */
   reg({
     id: 'w7_check',
-    test: function (t) { return has(t, /verify/i) && has(t, /(檢查|挑毛病|模糊|漏|補)/); },
+    test: function (t) { return has(t, /verify/i) && has(t, /(檢查|挑毛病|模糊|漏|補|check|vague|missing|gaps?|find problems|point out|nitpick)/i); },
     run: function (ctx) {
       if (!guard(ctx)) return;
       var text = ctx.read('VERIFY.md');
       if (text === null || !/### STEP 1/.test(text)) {
-        ctx.say('VERIFY.md 裡還沒有第 1 批的測試。先把老師想的第 1 批（STEP 1–4）貼進去，再寫你自己的第 2 批，我再幫你檢查。');
+        ctx.say('VERIFY.md does not have the tests of batch 1 yet. First paste the teacher\'s batch 1 (STEP 1–4) into it, then write your own batch 2, and I will check it for you.');
         ctx.meta.check = { done: false };
         return;
       }
       var out = W7.withAdditions(text);
       if (out !== text) ctx.write('VERIFY.md', out);
-      var rainVague = text.indexOf('屋簷下') >= 0;
-      ctx.say((rainVague ? '**STEP 5 有一條有點模糊：**「屋簷下」是哪一格？我沒辦法檢查。建議改成「頭上有方塊 → 不會被雨淋到」。改不改由你決定，我沒有動你寫的。\n\n' : '') +
-        '**補了 4 條，都放進對應的 STEP，後面標「（AI 補充）」：**\n' +
-        '- STEP 0 小島（新的一段，放在最前面）：打開網頁看得到小島、世界不超過 32 × 32 × 32 格、舊電腦每秒 30 格以上\n' +
-        '- STEP 4：對自己站的那格按右鍵 → 不會放\n' +
-        '- STEP 6 肚子會餓（新的一段）\n\n' +
-        '這些是建議；你看過才留下，BRIEF 沒要的就刪掉。');
+      var rainVague = text.indexOf('edge of the roof') >= 0;
+      ctx.say(('' + (rainVague ? '**One line in STEP 5 is a bit vague:** which block is “under the edge of the roof”? I can\'t check that. I suggest changing it to “A block is above your head → you don\'t get rained on”. It is up to you whether to change it; I did not touch what you wrote.\n\n' : '') + '**I added the following, each under the matching STEP and marked “(AI added)” at the end:**\n- STEP 0 The island (a new section, placed first): you see the island when you open the page, the world is no bigger than 32 × 32 × 32 blocks, and 30 frames per second or more on old computers\n- STEP 4: right-click the block you stand in → nothing is placed\n- STEP 6 Getting hungry (a new section)\n\nThese are suggestions; keep only what you have read, and delete what the BRIEF did not ask for.'));
       ctx.meta.check = { done: true, vague: rainVague };
     }
   }, { priority: 120 });
@@ -64,23 +59,23 @@
   /* ================================================================== 任務 3：PLANS.md（先問、起草、留 v1、照意見改） */
   reg({
     id: 'w7_plan_fix',
-    test: function (t) { return vfs.exists(W7.PLANS) && has(t, /(第\s*3\s*步|step\s*3|合成台)/i) && has(t, /(補|刪|拿掉|改|沒寫|不要|沒要)/); },
+    test: function (t) { return vfs.exists(W7.PLANS) && has(t, /(第\s*3\s*步|step\s*3|合成台|crafting)/i) && has(t, /(補|刪|拿掉|改|沒寫|不要|沒要|add|delete|remove|take out|doesn['’]t say|does not say|didn['’]t ask|did not ask|missing)/i); },
     run: function (ctx) {
       if (!guard(ctx)) return;
       if (!ctx.exists('PLANS.v1.md')) {
-        ctx.say('改之前，要先把第一版存成 PLANS.v1.md 嗎？改了以後就沒有第一版可以對照了。在終端機打 `cp PLANS.md PLANS.v1.md`，再跟我說一次。');
+        ctx.say('Before I change it, shall I save the first version as PLANS.v1.md? After the change, there will be no first version to compare with. In Terminal, type `cp PLANS.md PLANS.v1.md`, then tell me again.');
         ctx.meta.plan = { keptV1: false };
         return;
       }
       var p = ctx.read('PLANS.md') || '', done = [];
-      if (/第\s*3\s*步|step\s*3/i.test(ctx.rawText || ctx.text) && /- \[[ x]\] 第 3 步：[^\n]*$/m.test(p) && !/第 3 步：[^\n]*要通過/.test(p)) {
-        p = p.replace(/(- \[[ x]\] 第 3 步：[^\n]*?)\s*$/m, '$1→ 要通過 STEP 3'); done.push('第 3 步補上「要通過 STEP 3」');
+      if (/第\s*3\s*步|step\s*3/i.test(ctx.rawText || ctx.text) && /- \[[ x]\] Step 3: [^\n]*$/m.test(p) && !/Step 3: [^\n]*must pass/.test(p)) {
+        p = p.replace(/(- \[[ x]\] Step 3: [^\n]*?)\s*$/m, '$1 → must pass STEP 3'); done.push('Added “must pass STEP 3” to Step 3');
       }
-      if (/合成台/.test(ctx.rawText || ctx.text) && /合成台/.test(p)) { p = p.replace(/- \[[ x]\] 第 6 步：合成台[^\n]*\n?/, ''); done.push('刪掉第 6 步「合成台」（BRIEF 沒要）'); }
-      p = p.replace('# PLANS.md（AI 起草）', '# PLANS.md（AI 起草，照你的意見改過）');
+      if (/crafting( table)?|合成台/i.test(ctx.rawText || ctx.text) && /crafting( table)?|合成台/i.test(p)) { p = p.replace(/- \[[ x]\] Step 6: Crafting table[^\n]*\n?/, ''); done.push('Deleted Step 6, “Crafting table” (the BRIEF did not ask for it)'); }
+      p = p.replace('# PLANS.md (drafted by AI)', '# PLANS.md (drafted by AI, revised as you asked)');
       if (done.length) ctx.write('PLANS.md', p);
-      ctx.say(done.length ? '照你的意見改好了 PLANS.md：\n' + done.map(function (d) { return '- ' + d; }).join('\n') + '\n\nPLANS.v1.md 留著對照。現在每一步都對到 VERIFY.md 的一個 STEP。' :
-        '我看了 PLANS.md，你說的那幾處已經改好了。');
+      ctx.say(done.length ? ('I have changed PLANS.md as you asked:\n' + (done.map(function (d) { return '- ' + d; }).join('\n')) + '\n\nPLANS.v1.md is kept for comparison. Now every step points to a STEP in VERIFY.md.') :
+        'I looked at PLANS.md, and the places you mentioned are already fixed.');
       ctx.meta.plan = { fixed: done.length > 0 };
     }
   }, { priority: 116 });
@@ -90,29 +85,29 @@
     run: function (ctx) {
       if (!guard(ctx)) return;
       var t = ctx.rawText || ctx.text;
-      if (!/(按\s*R|R\s*鍵|一直下|再按一次|按一個鍵|按鍵)/i.test(t)) {
-        ctx.say('我還在等你回答：STEP 5 的雨要一直下，還是按一個鍵才下？回答了我就起草 PLANS.md。');
+      if (!/(按\s*R|R\s*鍵|一直下|再按一次|按一個鍵|按鍵|press\s*R|R key|press (?:it |R )?again|a key|key press|keep raining|all the time|always|rain (?:constantly|continuously|forever))/i.test(t)) {
+        ctx.say('I am still waiting for your answer: should the rain in STEP 5 fall all the time, or only after you press a key? Once you answer, I will draft PLANS.md.');
         ctx.meta.plan = { asked: true };
         return;
       }
       ctx.read('BRIEF.md'); ctx.read('VERIFY.md');
       ctx.write('PLANS.md', F.PLANS_V1);
       W7.state.asked = false;
-      ctx.say('好，按 R 開始下雨、再按一次停。PLANS.md 起草好了：一步一個 STEP，第 0 步到第 6 步。\n還沒寫任何程式。你看一下方向對不對，不對就跟我說要改哪裡。');
+      ctx.say('OK, press R to start the rain, and press it again to stop. PLANS.md is drafted: one STEP per step, from Step 0 to Step 6.\nNo code is written yet. Take a look at whether the direction is right, and if it is not, tell me what to change.');
       ctx.meta.plan = { drafted: true };
     }
   }, { priority: 115 });
   reg({
     id: 'w7_plan_ask',
-    test: function (t) { return has(t, /plans/i) && has(t, /(起草|草擬|寫|規劃|計畫|擬)/); },
+    test: function (t) { return has(t, /plans/i) && has(t, /(起草|草擬|寫|規劃|計畫|擬|draft|write|outline|plan out)/i); },
     run: function (ctx) {
       if (!guard(ctx)) return;
-      if (ctx.exists('PLANS.md')) { ctx.say('專案裡已經有 PLANS.md 了，我沒有重寫。要改哪裡，直接跟我說（例如哪一步、少了什麼、多了什麼）。'); ctx.meta.plan = { exists: true }; return; }
+      if (ctx.exists('PLANS.md')) { ctx.say('PLANS.md already exists in the project, so I did not rewrite it. Tell me directly what to change (for example which step, what is missing, what is extra).'); ctx.meta.plan = { exists: true }; return; }
       var v = ctx.read('VERIFY.md') || '';
-      if (!/### STEP 1/.test(v)) { ctx.say('VERIFY.md 裡還沒有測試，我不知道每一步要通過什麼。先寫好 VERIFY.md 再起草。'); ctx.meta.plan = { noVerify: true }; return; }
+      if (!/### STEP 1/.test(v)) { ctx.say('VERIFY.md has no tests yet, so I do not know what each step has to pass. Write VERIFY.md first, then ask me to draft.'); ctx.meta.plan = { noVerify: true }; return; }
       ctx.read('BRIEF.md');
       W7.state.asked = true;
-      ctx.say('起草之前先問一件事：STEP 5 的雨要一直下，還是按一個鍵才下？（BRIEF 和 VERIFY.md 沒寫）');
+      ctx.say('One question before I draft: should the rain in STEP 5 fall all the time, or only after you press a key? (BRIEF and VERIFY.md do not say.)');
       ctx.meta.plan = { asked: true };
     }
   }, { priority: 114 });
@@ -121,38 +116,34 @@
   function nextStep() {
     var p = disk(W7.PLANS);
     if (p === null) return { none: true };
-    var m = /- \[ \] 第 (\d+) 步：([^\n→（(]+)/.exec(p);
+    var m = /- \[ \] Step (\d+): ([^\n→(]+)/.exec(p);
     return m ? { n: parseInt(m[1], 10), name: m[2].trim() } : { done: true };
   }
   reg({
     id: 'w7_next',
-    test: function (t) { return has(t, /(下一步|next step|繼續做|做第\s*\d+\s*步)/i); },
+    test: function (t) { return has(t, /(下一步|next step|繼續做|做第\s*\d+\s*步|(?:do|build|start|continue with) step\s*\d+|keep going|continue)/i); },
     run: function (ctx) {
       if (!guard(ctx)) return;
       var nx = nextStep();
-      if (nx.none) { ctx.say('專案裡還沒有 PLANS.md，我不知道下一步是什麼。先請我起草 PLANS.md，你審過再開始。'); ctx.meta.next = { none: true }; return; }
-      if (!tddRules()) { ctx.say('AGENTS.md 裡還沒有 TDD 的規則（先寫測試、確認失敗，再寫程式）。先把規則寫進 AGENTS.md，我每一步都會照做。'); ctx.meta.next = { noRules: true }; return; }
+      if (nx.none) { ctx.say('There is no PLANS.md in the project yet, so I do not know what the next step is. First ask me to draft PLANS.md, and start after you have reviewed it.'); ctx.meta.next = { none: true }; return; }
+      if (!tddRules()) { ctx.say('AGENTS.md has no TDD rules yet (write the tests first and confirm they fail, then write the code). First write the rules into AGENTS.md, and I will follow them in every step.'); ctx.meta.next = { noRules: true }; return; }
       if (nx.done || nx.n > 4) {
-        ctx.say('第 1 批（第 0～4 步）都做完了。第 5 步「下雨」是第 2 批，你自己的點子；練習版只做到第 1 批，第 2 批請在你自己的電腦上做。\n一批做完，記得自己把整串從頭玩一遍。');
+        ctx.say('Batch 1 (Step 0 to Step 4) is all done. Step 5, “Rain”, belongs to batch 2, your own idea; the practice version goes only as far as batch 1, so do batch 2 on your own computer.\nOnce a batch is done, remember to play the whole chain from the start yourself.');
         ctx.meta.next = { done: true };
         return;
       }
       var n = nx.n, s = W7.STEPS[n], k = s.tests.length;
       ctx.read('AGENTS.md'); ctx.read('PLANS.md'); ctx.read('VERIFY.md');
       var before = W7.runTests(), total = before.total + k;
-      var bugTest = n === 3 && (disk(W7.VERIFY) || '').indexOf('連續挖兩格') >= 0;
+      var bugTest = n === 3 && (disk(W7.VERIFY) || '').indexOf('two blocks in a row') >= 0;
       ctx.write('tests/step' + n + '.test.js', W7.testFile(n, false));
       act(ctx, 'run', 'Ran', 'npm test', ['ℹ tests ' + total, 'ℹ pass ' + (total - k), 'ℹ fail ' + k]);
-      commit(ctx, '第 ' + n + ' 步：' + s.name + '（測試）');
+      commit(ctx, ('Step ' + (n) + ': ' + (s.name) + ' (tests)'));
       ctx.write('game.js', W7.gameFile(n, false));
       ctx.write('PLANS.md', W7.tick(disk(W7.PLANS), n));
       act(ctx, 'run', 'Ran', 'npm test', ['ℹ tests ' + total, 'ℹ pass ' + total, 'ℹ fail 0']);
-      commit(ctx, '第 ' + n + ' 步：' + s.name + '（程式）');
-      ctx.say('**第 ' + n + ' 步：' + s.name + '**（VERIFY.md 的 STEP ' + n + '，' + k + ' 條）\n' +
-        '① 先寫這一步的測試 `tests/step' + n + '.test.js`，跑一次：**' + k + ' 個失敗**（還沒寫程式）→ commit「第 ' + n + ' 步：' + s.name + '（測試）」\n' +
-        '② 再寫程式（game.js），跑全部測試：**' + total + ' 個都通過** → commit「第 ' + n + ' 步：' + s.name + '（程式）」\n' +
-        '這一次沒有改到測試檔。PLANS.md 勾掉第 ' + n + ' 步。\n\n' +
-        '你可以自己跑一次 `npm test`、看 `git log --oneline`，再打開遊戲玩一下，把 VERIFY.md 的 STEP ' + n + ' 打勾。' + (n < 4 ? '下一步是第 ' + (n + 1) + ' 步。' : '第 1 批做完了，自己把整串從頭玩一遍。'));
+      commit(ctx, ('Step ' + (n) + ': ' + (s.name) + ' (code)'));
+      ctx.say(('**Step ' + (n) + ': ' + (s.name) + '** (STEP ' + (n) + ' of VERIFY.md, ' + (k) + ' ' + ((k) == 1 ? 'line' : 'lines') + ')\n① I first wrote this step\'s tests in `tests/step' + (n) + '.test.js` and ran them once: **' + (k) + ' tests failed** (no code written yet) → commit “Step ' + (n) + ': ' + (s.name) + ' (tests)”\n② Then I wrote the code (game.js) and ran all the tests: **all ' + (total) + ' tests pass** → commit “Step ' + (n) + ': ' + (s.name) + ' (code)”\nNo test file was changed this time. Step ' + (n) + ' is ticked off in PLANS.md.\n\nYou can run `npm test` yourself, look at `git log --oneline`, then open the game and play for a moment, and tick the lines of STEP ' + (n) + ' in VERIFY.md. ' + (n < 4 ? ('The next step is Step ' + (n + 1) + '.') : 'Batch 1 is done; play the whole chain from the start yourself.')));
       ctx.meta.next = { n: n, red: k, total: total, bugTest: bugTest };
     }
   }, { priority: 118 });
@@ -160,29 +151,26 @@
   /* ================================================================== 任務 5：bug 先寫進 VERIFY.md，再寫成測試、修好 */
   reg({
     id: 'w7_bugfix',
-    test: function (t) { return has(t, /(寫成測試|修好|修掉|bug|連續挖|撿不起來|新加了一條|加了一條)/i) && !has(t, /下一步/); },
+    test: function (t) { return has(t, /(寫成測試|修好|修掉|bug|連續挖|撿不起來|新加了一條|加了一條|write (?:it |that |this )?(?:as|into) a test|turn (?:it|that|this) into a test|as a test|fix (?:it|this|that)\b|\bbugs?\b|(?:two blocks in a row|two in a row|2 blocks in a row)|can['’]?t be picked up|cannot be picked up|added a line|added one more)/i) && !has(t, /(下一步|next step)/i); },
     run: function (ctx) {
       if (!guard(ctx)) return;
       var v = ctx.read('VERIFY.md') || '';
-      var lines = W7.stepLines(v, 3), hasLine = lines.some(function (l) { return /連續挖兩格/.test(l); });
+      var lines = W7.stepLines(v, 3), hasLine = lines.some(function (l) { return /two blocks in a row|two in a row|2 blocks in a row|連續挖兩格/i.test(l); });
       if (!hasLine) {
-        ctx.say('VERIFY.md 的 STEP 3 裡沒有新的一條。先把你發現的 bug 寫進 VERIFY.md（例如「連續挖兩格 → 兩個小方塊都撿得起來」），我再照它寫成測試、修好。VERIFY.md 是你的，我不幫你改。');
+        ctx.say('STEP 3 of VERIFY.md has no new line. First write the bug you found into VERIFY.md (for example “Break two blocks in a row → both small blocks can be picked up”), and then I will write it as a test and fix it. VERIFY.md is yours, so I do not change it for you.');
         ctx.meta.bugfix = { noLine: true };
         return;
       }
-      if (W7.level() < 3) { ctx.say('STEP 3（撿起來）還沒做，先做 PLANS.md 的下一步。'); ctx.meta.bugfix = { early: true }; return; }
-      if (!W7.bugOn()) { ctx.say('這一條的測試已經寫好了，`npm test` 全部通過。'); ctx.meta.bugfix = { already: true }; return; }
+      if (W7.level() < 3) { ctx.say('STEP 3 (Pick it up) is not done yet, so do the next step in PLANS.md first.'); ctx.meta.bugfix = { early: true }; return; }
+      if (!W7.bugOn()) { ctx.say('The test for this line is already written, and all of `npm test` passes.'); ctx.meta.bugfix = { already: true }; return; }
       var before = W7.runTests(), total = before.total + 1;
       ctx.write('tests/step3.test.js', W7.testFile(3, true));
       act(ctx, 'run', 'Ran', 'npm test', ['ℹ tests ' + total, 'ℹ pass ' + (total - 1), 'ℹ fail 1']);
-      commit(ctx, 'STEP 3：連續挖兩格都撿得起來（測試）');
+      commit(ctx, 'STEP 3: two blocks in a row can both be picked up (tests)');
       ctx.write('game.js', W7.gameFile(W7.level(), true));
       act(ctx, 'run', 'Ran', 'npm test', ['ℹ tests ' + total, 'ℹ pass ' + total, 'ℹ fail 0']);
-      commit(ctx, 'STEP 3：連續挖兩格都撿得起來（程式）');
-      ctx.say('照你在 VERIFY.md 加的那一條：\n' +
-        '① 先寫成測試（加在 `tests/step3.test.js`），跑一次：**1 個失敗**，真的抓到了 → commit\n' +
-        '② 修好：第二個小方塊彈出來時，前一個還在地上，就撿不起來。跑全部測試：**' + total + ' 個都通過** → commit\n\n' +
-        '以後再改到撿方塊，這個測試都會幫你看著。自己再玩一次，連續挖兩格試試看。');
+      commit(ctx, 'STEP 3: two blocks in a row can both be picked up (code)');
+      ctx.say(('Following the line you added to VERIFY.md:\n① I first wrote it as a test (added to `tests/step3.test.js`) and ran it once: **1 test failed**, so it really catches the bug → commit\n② The fix: when the second small block pops out, the first one is still on the ground, so it could not be picked up. I ran all the tests: **all ' + (total) + ' tests pass** → commit\n\nFrom now on, whenever you change picking up blocks, this test will watch it for you. Play once more yourself and try breaking two blocks in a row.'));
       ctx.meta.bugfix = { fixed: true, total: total };
     }
   }, { priority: 119 });
@@ -190,13 +178,13 @@
   /* ================================================================== 打開遊戲 */
   reg({
     id: 'w7_play',
-    test: function (t) { return has(t, /(打開|開啟|開一下|執行|跑).{0,6}(遊戲|網頁|網站|空中之島|index\.html)|玩玩看|玩一下|試玩|play/i); },
+    test: function (t) { return has(t, /(打開|開啟|開一下|執行|跑).{0,6}(遊戲|網頁|網站|空中之島|index\.html)|玩玩看|玩一下|試玩|play|\b(?:open|launch|start|run|show)\b.{0,16}\b(?:game|page|site|website|island|index\.html)|try (?:it|the game)/i); },
     run: function (ctx) {
       if (!guard(ctx)) return;
       var lv = W7.level();
-      act(ctx, 'run', 'Opened', 'index.html', ['空中之島（你的版本：做到 STEP ' + Math.max(0, lv) + '）'], function () { W7.openGame(); });
-      ctx.say(lv < 0 ? '打開了，可是還沒有做任何一步，只有空白的畫面。先做 PLANS.md 的下一步。' :
-        '打開了：你的版本，做到第 ' + lv + ' 步（' + W7.STEPS[lv].name + '）。點畫面開始玩，Esc 放開滑鼠。' + (lv < 4 ? '\n還沒做的步驟，玩起來就還沒有那個功能。' : ''));
+      act(ctx, 'run', 'Opened', 'index.html', [('Sky Island (your version: built up to STEP ' + (Math.max(0, lv)) + ')')], function () { W7.openGame(); });
+      ctx.say(lv < 0 ? 'Opened it, but not a single step is built yet, so you see only a blank screen. Do the next step in PLANS.md first.' :
+        ('Opened: your version, built up to Step ' + (lv) + ' (' + (W7.STEPS[lv].name) + '). Click the screen to start playing, and press Esc to release the mouse.' + (lv < 4 ? '\nSteps that are not built yet do not work in the game yet.' : '')));
       ctx.meta.play = { lv: lv };
     }
   }, { priority: 117 });

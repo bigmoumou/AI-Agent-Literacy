@@ -28,7 +28,7 @@
   };
   W7.testReport = function (res) {
     var ms = function (i) { return (1.2 + ((i * 7) % 13) / 10).toFixed(1); };
-    var out = res.rows.map(function (r, i) { return (r.ok ? '✔ ' : '✖ ') + r.name + ' (' + ms(i) + 'ms)' + (r.ok ? '' : '\n  AssertionError: 還沒有這個功能'); });
+    var out = res.rows.map(function (r, i) { return (r.ok ? '✔ ' : '✖ ') + r.name + ' (' + ms(i) + 'ms)' + (r.ok ? '' : '\n  AssertionError: this feature is not built yet'); });
     out.push('ℹ tests ' + res.total, 'ℹ suites 0', 'ℹ pass ' + res.pass, 'ℹ fail ' + res.fail);
     return out.join('\n');
   };
@@ -39,14 +39,13 @@
   function disp(p) { return WIN && LAB.win.toWin ? LAB.win.toWin(p) : p; }
   function npm(args, s, out, err) {
     var sub = args[0];
-    if (!sub || sub === '-h' || sub === '--help' || sub === 'help') { out('（練習版）這台電腦的 npm 只能跑測試：npm test\n'); return sub ? 0 : 1; }
+    if (!sub || sub === '-h' || sub === '--help' || sub === 'help') { out('(Practice version) npm on this computer can only run tests: npm test\n'); return sub ? 0 : 1; }
     if (sub === '-v' || sub === '--version' || sub === 'version') { out('11.4.2\n'); return 0; }
     var isTest = sub === 'test' || sub === 't' || sub === 'tst' || (sub === 'run' && (args[1] === 'test' || args[1] === 't'));
-    if (!isTest) { err('（練習版）這台電腦的 npm 只能跑測試：npm test\n'); return 1; }
+    if (!isTest) { err('(Practice version) npm on this computer can only run tests: npm test\n'); return 1; }
     var cwd = s.cwd, pkg = vfs.join(cwd, 'package.json');
     if (!vfs.isFile(pkg)) {
-      err('npm error code ENOENT\nnpm error syscall open\nnpm error path ' + disp(pkg) + '\nnpm error errno -2\nnpm error enoent Could not read package.json: Error: ENOENT: no such file or directory, open \'' + disp(pkg) + '\'\n' +
-        '（練習版）先 cd 進專案資料夾，例如 ' + (WIN ? 'cd ~\\Desktop\\sky-island' : 'cd ~/Desktop/sky-island') + '，再打 npm test\n');
+      err(('npm error code ENOENT\nnpm error syscall open\nnpm error path ' + (disp(pkg)) + '\nnpm error errno -2\nnpm error enoent Could not read package.json: Error: ENOENT: no such file or directory, open \'' + (disp(pkg)) + '\'\n(Practice version) First cd into the project folder, for example ' + (WIN ? 'cd ~\\Desktop\\sky-island' : 'cd ~/Desktop/sky-island') + ', then type npm test\n'));
       return 254;
     }
     if (!vfs.same(cwd, W7.SI)) { out('\n> test\n> node --test\n\nℹ tests 0\nℹ pass 0\nℹ fail 0\n'); return 0; }
@@ -77,10 +76,10 @@
       LAB.bus.emit('island:open', { lv: lv, bug: bug, again: true });
       return current.win;
     }
-    var frame = h('iframe', { class: 'w7-game-frame', title: '空中之島（你的版本）', allow: 'fullscreen', dataset: { lab: 'w7-game-frame' } });
+    var frame = h('iframe', { class: 'w7-game-frame', title: 'Sky Island (your version)', allow: 'fullscreen', dataset: { lab: 'w7-game-frame' } });
     frame.src = src(lv, bug);
-    var reload = h('button', { type: 'button', class: 'w7-game-btn', dataset: { lab: 'w7-game-reload' }, title: '重新整理（讀最新的 game.js）' }, '↻ 重新整理');
-    var note = h('span', { class: 'w7-game-note' }, '點畫面開始；Esc 放開滑鼠');
+    var reload = h('button', { type: 'button', class: 'w7-game-btn', dataset: { lab: 'w7-game-reload' }, title: 'Refresh (loads the latest game.js)' }, '↻ Refresh');
+    var note = h('span', { class: 'w7-game-note' }, 'Click the screen to start; Esc releases the mouse');
     var bar = h('div', { class: 'w7-game-bar' }, note, reload);
     var root = h('div', { class: 'w7-game', dataset: { lab: 'w7-game' } }, frame, bar);
     var win = LAB.wm.open({ appId: 'skyisland', title: title(lv), width: 820, height: 520, minW: 420, minH: 300, content: root, icon: 'app-skyisland' });
@@ -90,12 +89,12 @@
     LAB.bus.emit('island:open', { lv: lv, bug: bug });
     return win;
   }
-  function title(lv) { return '空中之島（你的版本：做到 STEP ' + Math.max(0, lv) + '）'; }
+  function title(lv) { return ('Sky Island (your version: built up to STEP ' + (Math.max(0, lv)) + ')'); }
   W7.openGame = openGame;
   W7.gameWindow = function () { return current && !current.win.closed ? current.win : null; };
 
   LAB.apps.register('skyisland', {
-    title: '空中之島', en: 'Sky Island', aliases: ['sky island', 'sky-island', '空中之島', '遊戲'], icon: 'app-skyisland', dock: false,
+    title: 'Sky Island', en: 'Sky Island', aliases: ['sky island', 'sky-island', 'Sky Island', 'game'], icon: 'app-skyisland', dock: false,
     open: function () { return openGame(); },
     canHandle: function (p) { return vfs.same(p, W7.HTML); },
     handleOpen: function () { openGame(); return true; },
@@ -104,8 +103,8 @@
   if (LAB.menu && LAB.menu.register) {
     LAB.menu.register('skyisland', function () {
       return [
-        { label: '檔案', items: [{ label: '重新整理', shortcut: '⌘R', action: openGame }, { label: '關閉視窗', shortcut: '⌘W', action: function () { var w = W7.gameWindow(); if (w) w.close(); } }] },
-        { label: '視窗', items: LAB.menu.windowMenu() }
+        { label: 'File', items: [{ label: 'Refresh', shortcut: '⌘R', action: openGame }, { label: 'Close Window', shortcut: '⌘W', action: function () { var w = W7.gameWindow(); if (w) w.close(); } }] },
+        { label: 'Window', items: LAB.menu.windowMenu() }
       ];
     });
   }
