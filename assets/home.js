@@ -1,5 +1,5 @@
 /* ==========================================================================
-   首頁膠捲：片頭 + Week 3–16 排成一圈膠捲，繞著觀眾轉。
+   首頁膠捲：片頭 + Week 1–16 排成一圈膠捲，繞著觀眾轉。
    - 畫面：原生 WebGL2（不用任何函式庫）。每一格是一段圓柱曲面，
      貼上用 2D canvas 畫的畫格（齒孔、邊緣字、畫面）。
    - 效能：只有膠捲在動的時候才重畫，停住時完全不耗顯示卡；解析度最多 1.5 倍，
@@ -417,7 +417,7 @@
     ["AI AGENT", "LITERACY"].forEach((t, k) => g.fillText(t, x + 44, y + 150 + k * 66));
     g.fillStyle = "#f0b545";
     g.font = `700 19px ${MONO}`;
-    g.fillText("NTNU・WEEK 03 — 16", x + 48, y + 368);
+    g.fillText(`NTNU・WEEK ${pad(COURSE.firstWeek)} — ${COURSE.lastWeek}`, x + 48, y + 368);
     g.fillStyle = "rgba(244,242,236,.72)";
     g.font = `500 24px ${SANS}`;
     g.fillText(tr("home.tagline"), x + 46, y + h - 44);

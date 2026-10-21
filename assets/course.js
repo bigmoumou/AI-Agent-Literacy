@@ -16,12 +16,39 @@
     title: "AI Agent Literacy",
     subtitle: "An open course on working with AI coding agents (first piloted at NTNU: Learning Analytics Tools Implementation Applications)",
     repo: "https://github.com/bigmoumou/AI-Agent-Literacy",
-    firstWeek: 3,
+    firstWeek: 1,
     lastWeek: 16,
   };
 
   /* 每週資料。沒列出來的週次會顯示「準備中」。 */
   const WEEKS = {
+    // 2026-10-21 Week 1（Week 1 + 2 對話窗）：影片 01 AI Agent Literacy、02 這門課怎麼上；由 製作/week01/tools/site_week1.py 產生
+    1: {
+      status: "ready",
+      title: "為什麼要學 AI Agent Literacy",
+      summary: "AI 從聊天走到做事：這門課練的是帶 AI 做事的素養，你給方向、設界線、驗收，AI 動手做。再看這門課怎麼上：Codex 桌面版＋VS Code、很多實作、評分看過程、卡住了照三步自學、用母語就好。",
+      href: "weeks/week01/",
+      thumb: "weeks/week01/video/01-agent-literacy/thumb.jpg",
+      still: "weeks/week01/video/01-agent-literacy/poster.jpg",
+      meta: "2 支影片・共 3 分 17 秒",
+      i18n: {
+        "zh-Hans": {
+          title: "为什么要学 AI Agent Literacy",
+          summary: "AI 从聊天走到做事：这门课练的是带 AI 做事的素养，你给方向、设界线、验收，AI 动手做。再看这门课怎么上：Codex 桌面版＋VS Code、很多动手任务、评分看过程、卡住了照三步自学、用母语就好。",
+          meta: "2 个视频・共 3 分 17 秒",
+        },
+        en: {
+          title: "Why Learn AI Agent Literacy",
+          summary: "AI has moved from chatting to doing: this course trains the literacy of leading AI to do the work, where you give direction, set limits and check the result. Then how the course runs: the Codex desktop app plus VS Code, lots of hands-on work graded on the process, three steps when you are stuck, and your own language is fine.",
+          meta: "2 videos · 3 min 17 s in total",
+        },
+        vi: {
+          title: "Vì sao cần học AI Agent Literacy",
+          summary: "AI đã chuyển từ trò chuyện sang làm việc: môn học này luyện năng lực dẫn AI làm việc, bạn định hướng, đặt giới hạn, nghiệm thu, còn AI tự tay làm. Tiếp theo là cách học môn này: Codex bản desktop cùng VS Code, nhiều bài thực hành chấm theo quá trình, bị kẹt thì theo ba bước, dùng tiếng mẹ đẻ là được.",
+          meta: "2 video · tổng cộng 3 phút 17 giây",
+        },
+      },
+    },
     3: {
       status: "ready",
       title: "AI Agent 的工作資料夾",

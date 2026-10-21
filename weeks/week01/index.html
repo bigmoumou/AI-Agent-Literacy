@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<script>
+  // 課程網址：舊的 github.io 和 learning-analytics-tools.pages.dev（2026-10-21 改名前）都轉到 ai-agent-literacy.pages.dev 的同一頁，保留 #t= 等片段
+  if (location.hostname.endsWith("github.io") || /(^|\.)learning-analytics-tools\.pages\.dev$/.test(location.hostname)) {
+    location.replace("https://ai-agent-literacy.pages.dev" + (location.pathname.replace(/^\/(Learning-Analytics-Tools|AI-Agent-Literacy)(?=\/|$)/, "") || "/") + location.search + location.hash);
+  }
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title data-i18n
+  data-zh-hans="Week 1｜为什么要学 AI Agent Literacy"
+  data-en="Week 1 | Why Learn AI Agent Literacy"
+  data-vi="Tuần 1 | Vì sao cần học AI Agent Literacy">Week 1｜為什麼要學 AI Agent Literacy</title>
+<meta name="description" content="Week 1：AI 從聊天走到做事。這門課練的是帶 AI 做事的素養（AI Agent Literacy）：你給方向、設界線、驗收，AI 動手做。再看這門課怎麼上：Codex 桌面版＋VS Code、很多實作、評分看過程、卡住了照三步自學、用母語就好。" data-i18n-attr="content"
+  data-zh-hans="Week 1：AI 从聊天走到做事。这门课练的是带 AI 做事的素养（AI Agent Literacy）：你给方向、设界线、验收，AI 动手做。再看这门课怎么上：Codex 桌面版＋VS Code、很多动手任务、评分看过程、卡住了照三步自学、用母语就好。"
+  data-en="Week 1: AI has moved from chatting to doing. This course trains AI agent literacy: you give direction, set limits and check the result while the AI does the work. Then how the course runs: the Codex desktop app plus VS Code, lots of hands-on work graded on the process, three steps when you are stuck, and your own language is fine."
+  data-vi="Tuần 1: AI đã chuyển từ trò chuyện sang làm việc. Môn học này luyện năng lực AI Agent (AI Agent Literacy): bạn định hướng, đặt giới hạn, nghiệm thu, còn AI tự tay làm. Tiếp theo là cách học môn này: Codex bản desktop cùng VS Code, nhiều bài thực hành, chấm theo quá trình, bị kẹt thì theo ba bước tự học, dùng tiếng mẹ đẻ là được.">
+<meta name="author" content="JUNHAO CHEN">
+<meta name="copyright" content="© 2026 JUNHAO CHEN">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+<link rel="stylesheet" href="../../assets/week.css">
+<!-- 多語系要比其他程式先載入（不要 defer） -->
+<script src="../../assets/i18n-strings.js"></script>
+<script src="../../assets/i18n.js"></script>
+<script src="../../assets/course.js" defer></script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23f6efdc'/%3E%3Cpath d='M9.5 24v-5M16 24v-9M22.5 24V8' stroke='%238a5400' stroke-width='4.2'/%3E%3C/svg%3E">
+</head>
+<body data-root="../../">
+<div class="page">
+  <header class="top">
+    <a class="brand" href="../../">
+      <span class="brand-name">AI Agent Literacy</span>
+      <span class="brand-sub" data-ui="brand.sub">學習分析工具・NTNU・Week 1 – 16</span>
+    </a>
+    <a class="pill nav-works" href="../../works/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H5a.5.5 0 0 1-.5-.5V5a.5.5 0 0 1 .5-.5zm9 0h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5h-5a.5.5 0 0 1-.5-.5V5a.5.5 0 0 1 .5-.5zm-9 9h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H5a.5.5 0 0 1-.5-.5v-5a.5.5 0 0 1 .5-.5zm9 0h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5h-5a.5.5 0 0 1-.5-.5v-5a.5.5 0 0 1 .5-.5z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span data-ui="nav.works">作品集</span></a>
+    <a class="pill icon-only nav-gh" href="https://github.com/bigmoumou/AI-Agent-Literacy" aria-label="GitHub 原始碼" data-ui-attr="aria-label:home.github"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2.2a9.8 9.8 0 0 0-3.1 19.1c.5.1.7-.2.7-.5v-1.7c-2.7.6-3.3-1.3-3.3-1.3-.4-1.1-1.1-1.4-1.1-1.4-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.3-1.1.6-1.3-2.2-.2-4.5-1.1-4.5-4.9 0-1.1.4-2 1-2.7-.1-.2-.4-1.2.1-2.6 0 0 .8-.3 2.7 1a9.4 9.4 0 0 1 4.9 0c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.6.6.7 1 1.6 1 2.7 0 3.8-2.3 4.7-4.5 4.9.4.3.7.9.7 1.8v2.7c0 .3.2.6.7.5A9.8 9.8 0 0 0 12 2.2z"/></svg></a>
+    <button class="pill icon-only" id="themeBtn" type="button">深色</button>
+  </header>
+
+  <main>
+    <div class="head">
+      <p class="kicker"><span class="dot" aria-hidden="true"></span>WEEK 01</p>
+      <h1 data-i18n
+        data-zh-hans="为什么要学 AI Agent Literacy"
+        data-en="Why Learn AI Agent Literacy"
+        data-vi="Vì sao cần học AI Agent Literacy">為什麼要學 AI Agent Literacy</h1>
+      <p class="lede" data-i18n
+        data-zh-hans="AI 已经不只会聊天：它会自己打开文件夹、读文件、写文件、运行命令。这门课要练的，是带 AI 做事的素养（AI Agent Literacy）：你给方向、设界线、验收，AI 动手做。这周先讲为什么要学，再看这门课怎么上。目标只有一个：成为一位厉害的 AI 驾驶员。"
+        data-en="AI no longer just chats: it opens folders, reads and writes files and runs commands on its own. This course trains AI agent literacy, the skill of leading AI to do the work: you give direction, set limits and check the result, while the AI does the work. This week covers why that matters and how the course runs. There is one goal: become a skilled AI driver."
+        data-vi="AI không còn chỉ biết trò chuyện: nó tự mở thư mục, đọc tệp, ghi tệp, chạy lệnh. Môn học này luyện năng lực dẫn AI làm việc (AI Agent Literacy): bạn định hướng, đặt giới hạn, nghiệm thu, còn AI tự tay làm. Tuần này nói vì sao cần học, rồi xem môn học diễn ra thế nào. Mục tiêu chỉ có một: trở thành một người lái AI giỏi.">AI 已經不只會聊天：它會自己打開資料夾、讀檔、寫檔、跑指令。這門課要練的，是帶 AI 做事的素養（AI Agent Literacy）：你給方向、設界線、驗收，AI 動手做。這週先講為什麼要學，再看這門課怎麼上。目標只有一個：成為一位厲害的 AI 駕駛員。</p>
+      <p class="lang-note" data-ui="video.note"></p>
+    </div>
+
+    <!-- 2026-10-21 老師：Week 1 做影片 01「為什麼要培養 AI Agent Literacy」＋02「這門課怎麼上」，做完直接上線（Week 1 + 2 對話窗，原始檔在 製作/week01/）。
+         規劃見 製作/week01-02/README.md；作品集只寫在頁面上，不放進影片。這一頁由 製作/week01/tools/site_week1.py 產生（文字四種語言都在那裡改，可以重跑）。
+         一支影片一個 section：id 和 video/ 裡的資料夾同名；影片、片段、重點都由 assets/video.js 接起來。 -->
+
+    <section class="unit" id="01-agent-literacy" aria-labelledby="u01-title">
+      <h2 class="unit-title" id="u01-title"><span class="unit-num" data-ui="video.n" data-n="01">影片 01</span><span data-i18n
+        data-zh-hans="AI 会自己动手做事了，我们要学什么？AI Agent Literacy"
+        data-en="AI Can Do the Work Itself Now. What Should We Learn? AI Agent Literacy"
+        data-vi="AI đã tự tay làm việc, vậy chúng ta cần học gì? AI Agent Literacy">AI 會自己動手做事了，我們要學什麼？AI Agent Literacy</span></h2>
+
+      <div class="film">
+        <div class="player">
+          <video controls preload="metadata" playsinline data-hls="video/01-agent-literacy/hls/index.m3u8" data-poster="video/01-agent-literacy/poster.jpg" width="1920" height="1080">
+            你的瀏覽器無法播放這支影片。
+          </video>
+        </div>
+      </div>
+
+      <ol class="chapters" aria-label="影片片段（點了直接跳到那一段）" data-ui-attr="aria-label:video.chapters">
+        <li><button type="button" data-t="0"><span class="k">00:00</span><span class="t" data-i18n data-zh-hans="开场" data-en="Opening" data-vi="Mở đầu">開場</span></button></li>
+        <li><button type="button" data-t="8"><span class="k">00:08</span><span class="t" data-i18n data-zh-hans="从聊天到做事：聊天窗口要你自己贴" data-en="From chatting to doing: a chat window needs you to paste" data-vi="Từ trò chuyện đến làm việc: cửa sổ chat cần bạn tự dán">從聊天到做事：聊天視窗要你自己貼</span></button></li>
+        <li><button type="button" data-t="25"><span class="k">00:25</span><span class="t" data-i18n data-zh-hans="AI Agent：交代一句话，它写出 report.md" data-en="An AI agent: one sentence, and it writes report.md" data-vi="AI Agent: dặn một câu, nó viết ra report.md">AI Agent：交代一句話，它寫出 report.md</span></button></li>
+        <li><button type="button" data-t="42"><span class="k">00:42</span><span class="t" data-i18n data-zh-hans="新的素养：AI Agent Literacy" data-en="A new literacy: AI agent literacy" data-vi="Năng lực mới: AI Agent Literacy">新的素養：AI Agent Literacy</span></button></li>
+        <li><button type="button" data-t="57"><span class="k">00:57</span><span class="t" data-i18n data-zh-hans="你是 AI 驾驶员" data-en="You are the AI driver" data-vi="Bạn là người lái AI">你是 AI 駕駛員</span></button></li>
+        <li><button type="button" data-t="65"><span class="k">01:05</span><span class="t" data-i18n data-zh-hans="给方向" data-en="Give direction" data-vi="Định hướng">給方向</span></button></li>
+        <li><button type="button" data-t="70"><span class="k">01:10</span><span class="t" data-i18n data-zh-hans="设界线" data-en="Set limits" data-vi="Đặt giới hạn">設界線</span></button></li>
+        <li><button type="button" data-t="74"><span class="k">01:14</span><span class="t" data-i18n data-zh-hans="验收" data-en="Check the result" data-vi="Nghiệm thu">驗收</span></button></li>
+        <li><button type="button" data-t="82"><span class="k">01:22</span><span class="t" data-i18n data-zh-hans="交出去的，你负责" data-en="What you hand in is on you" data-vi="Thứ bạn nộp, bạn chịu trách nhiệm">交出去的，你負責</span></button></li>
+        <li><button type="button" data-t="93"><span class="k">01:33</span><span class="t" data-i18n data-zh-hans="结尾" data-en="Wrap-up" data-vi="Kết">結尾</span></button></li>
+      </ol>
+
+      <ol class="points">
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;AI 从聊天走到做事。&lt;/strong&gt;同一件事（把笔记整理成一份报告）：聊天窗口看不到你的文件，要你一段一段贴给它，答案出来了，复制、粘贴、保存还是你自己来；AI Agent（例如 Codex）交代一句话就好，它自己打开文件夹、读文件、写出 &lt;code&gt;report.md&lt;/code&gt;，做完还会自己检查一遍。"
+          data-en="&lt;strong&gt;AI has moved from chatting to doing.&lt;/strong&gt; Take one task: turn your notes into a report. A chat window cannot see your files, so you paste them in piece by piece, and when the answer comes back you still copy, paste and save it yourself. With an AI agent (for example Codex) one sentence is enough: it opens the folder, reads the files, writes &lt;code&gt;report.md&lt;/code&gt; and checks its own work when it is done."
+          data-vi="&lt;strong&gt;AI đã chuyển từ trò chuyện sang làm việc.&lt;/strong&gt; Cùng một việc (gộp ghi chú thành một bản báo cáo): cửa sổ chat không thấy tệp của bạn, bạn phải dán từng đoạn cho nó, có câu trả lời rồi vẫn phải tự sao chép, dán, lưu; với AI Agent (ví dụ Codex) chỉ cần dặn một câu, nó tự mở thư mục, đọc tệp, viết ra &lt;code&gt;report.md&lt;/code&gt;, làm xong còn tự kiểm tra lại."><strong>AI 從聊天走到做事。</strong>同一件事（把筆記整理成一份報告）：聊天視窗看不到你的檔案，要你一段一段貼給它，答案出來了，複製、貼上、存檔還是你自己來；AI Agent（例如 Codex）交代一句話就好，它自己打開資料夾、讀檔、寫出 <code>report.md</code>，做完還會自己檢查一遍。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;AI Agent 素养（AI Agent Literacy）。&lt;/strong&gt;不是要你会写程序，而是会带 AI 做事：给方向、设界线、验收。AI Agent 会做的事越来越多，这三件事就是这门课一直要练的。"
+          data-en="&lt;strong&gt;AI agent literacy.&lt;/strong&gt; It is not about writing code; it is about leading AI to do the work: give direction, set limits, check the result. AI agents can do more and more, and these three skills are what this course practises all term."
+          data-vi="&lt;strong&gt;Năng lực AI Agent (AI Agent Literacy).&lt;/strong&gt; Không phải là biết viết code, mà là biết dẫn AI làm việc: định hướng, đặt giới hạn, nghiệm thu. AI Agent làm được ngày càng nhiều việc, và ba điều này là thứ môn học luyện suốt cả kỳ."><strong>AI Agent 素養（AI Agent Literacy）。</strong>不是要你會寫程式，而是會帶 AI 做事：給方向、設界線、驗收。AI Agent 會做的事越來越多，這三件事就是這門課一直要練的。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;你是 AI 驾驶员。&lt;/strong&gt;给方向：要做什么、做到什么程度；设界线：哪些不能碰、不能做；验收：到了，自己检查一遍。没有方向，AI 也会开，只是不一定开到你要的地方。"
+          data-en="&lt;strong&gt;You are the AI driver.&lt;/strong&gt; Give direction: what to do and how far to take it. Set limits: what it must not touch or do. Check the result: when it arrives, check it yourself. Without direction the AI still drives, just not necessarily to where you wanted."
+          data-vi="&lt;strong&gt;Bạn là người lái AI.&lt;/strong&gt; Định hướng: làm gì, làm tới mức nào; đặt giới hạn: chỗ nào không được đụng, việc gì không được làm; nghiệm thu: tới nơi rồi, tự kiểm tra lại. Không có hướng, AI vẫn chạy, chỉ là chưa chắc tới đúng nơi bạn muốn."><strong>你是 AI 駕駛員。</strong>給方向：要做什麼、做到什麼程度；設界線：哪些不能碰、不能做；驗收：到了，自己檢查一遍。沒有方向，AI 也會開，只是不一定開到你要的地方。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;交出去的东西，你负责。&lt;/strong&gt;AI 写的报告，交出去之前先问自己两件事：我看得懂吗？我检查过吗？看得懂、检查过，才交出去。"
+          data-en="&lt;strong&gt;What you hand in is your responsibility.&lt;/strong&gt; Before handing in a report the AI wrote, ask yourself two things: do I understand it, and have I checked it? Only when both are true do you hand it in."
+          data-vi="&lt;strong&gt;Thứ bạn nộp, bạn chịu trách nhiệm.&lt;/strong&gt; Trước khi nộp bản báo cáo do AI viết, hãy tự hỏi hai điều: mình có hiểu không? Mình đã kiểm tra chưa? Hiểu rồi, kiểm tra rồi mới nộp."><strong>交出去的東西，你負責。</strong>AI 寫的報告，交出去之前先問自己兩件事：我看得懂嗎？我檢查過嗎？看得懂、檢查過，才交出去。</p></li>
+      </ol>
+    </section>
+
+    <section class="unit" id="02-course-guide" aria-labelledby="u02-title">
+      <h2 class="unit-title" id="u02-title"><span class="unit-num" data-ui="video.n" data-n="02">影片 02</span><span data-i18n
+        data-zh-hans="这门课要怎么上，才学得最好？工具、动手做、自学"
+        data-en="How Do You Learn Best in This Course? Tools, Hands-on Work, Self-learning"
+        data-vi="Học môn này thế nào cho tốt nhất? Công cụ, thực hành, tự học">這門課要怎麼上，才學得最好？工具、實作、自學</span></h2>
+
+      <div class="film">
+        <div class="player">
+          <video controls preload="metadata" playsinline data-hls="video/02-course-guide/hls/index.m3u8" data-poster="video/02-course-guide/poster.jpg" width="1920" height="1080">
+            你的瀏覽器無法播放這支影片。
+          </video>
+        </div>
+      </div>
+
+      <ol class="chapters" aria-label="影片片段（點了直接跳到那一段）" data-ui-attr="aria-label:video.chapters">
+        <li><button type="button" data-t="0"><span class="k">00:00</span><span class="t" data-i18n data-zh-hans="开场" data-en="Opening" data-vi="Mở đầu">開場</span></button></li>
+        <li><button type="button" data-t="6"><span class="k">00:06</span><span class="t" data-i18n data-zh-hans="工具：两个就够（Codex＋VS Code）" data-en="Tools: two are enough (Codex + VS Code)" data-vi="Công cụ: hai là đủ (Codex + VS Code)">工具：兩個就夠（Codex＋VS Code）</span></button></li>
+        <li><button type="button" data-t="20"><span class="k">00:20</span><span class="t" data-i18n data-zh-hans="从 CLI 到桌面版" data-en="From the CLI to the desktop app" data-vi="Từ CLI đến bản desktop">從 CLI 到桌面版</span></button></li>
+        <li><button type="button" data-t="37"><span class="k">00:37</span><span class="t" data-i18n data-zh-hans="很多动手任务，评分看过程" data-en="Lots of hands-on work, graded on the process" data-vi="Nhiều bài thực hành, chấm theo quá trình">很多實作，評分看過程</span></button></li>
+        <li><button type="button" data-t="52"><span class="k">00:52</span><span class="t" data-i18n data-zh-hans="AI 时代，更注重自学" data-en="In the AI era, learning on your own matters more" data-vi="Thời AI, càng coi trọng tự học">AI 時代，更注重自學</span></button></li>
+        <li><button type="button" data-t="61"><span class="k">01:01</span><span class="t" data-i18n data-zh-hans="卡住了，照这三步来" data-en="Stuck? Take these three steps" data-vi="Bị kẹt thì làm theo ba bước">卡住了，照這三步來</span></button></li>
+        <li><button type="button" data-t="66"><span class="k">01:06</span><span class="t" data-i18n data-zh-hans="用母语就好" data-en="Your own language is fine" data-vi="Dùng tiếng mẹ đẻ là được">用母語就好</span></button></li>
+        <li><button type="button" data-t="76"><span class="k">01:16</span><span class="t" data-i18n data-zh-hans="课程地图：一周一站" data-en="Course map: one stop a week" data-vi="Bản đồ môn học: mỗi tuần một trạm">課程地圖：一週一站</span></button></li>
+        <li><button type="button" data-t="88"><span class="k">01:28</span><span class="t" data-i18n data-zh-hans="结尾" data-en="Wrap-up" data-vi="Kết">結尾</span></button></li>
+      </ol>
+
+      <ol class="points">
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;工具：两个就够。&lt;/strong&gt;Codex 桌面版让 AI 动手做；VS Code 让你看、改 AI 写的文件。两个看的是同一个文件夹。建议自费买 AI，上课效果会更好：ChatGPT（Codex）或 Claude 都可以。"
+          data-en="&lt;strong&gt;Tools: two are enough.&lt;/strong&gt; The Codex desktop app lets the AI do the work; VS Code lets you read and edit the files the AI writes. Both look at the same folder. We suggest paying for an AI plan yourself, as you will get more out of the class: ChatGPT (Codex) or Claude both work."
+          data-vi="&lt;strong&gt;Công cụ: hai là đủ.&lt;/strong&gt; Codex bản desktop để AI tự tay làm; VS Code để bạn xem và sửa các tệp AI viết. Cả hai cùng nhìn một thư mục. Gợi ý: tự mua gói AI thì học sẽ hiệu quả hơn, ChatGPT (Codex) hay Claude đều được."><strong>工具：兩個就夠。</strong>Codex 桌面版讓 AI 動手做；VS Code 讓你看、改 AI 寫的檔案。兩個看的是同一個資料夾。建議自費買 AI，上課效果會更好：ChatGPT（Codex）或 Claude 都可以。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;从 CLI 到桌面版。&lt;/strong&gt;工程师过去习惯用 CLI（Command Line Interface，命令行界面），在终端里打字下命令，例如 Codex CLI、Claude Code。到 2026 年 10 月，桌面版（Codex、Claude 桌面版）的功能已经能取代 CLI，而且对新手友好：把文件夹拖进去就是项目、看得到改了哪里、有内置浏览器。这门课用桌面版。"
+          data-en="&lt;strong&gt;From the CLI to the desktop app.&lt;/strong&gt; Engineers used to work in a CLI (command line interface), typing commands in a terminal, for example Codex CLI or Claude Code. As of October 2026 the desktop apps (Codex and Claude desktop) can replace the CLI and are friendly to beginners: drag a folder in and it becomes a project, you can see what changed, and there is a built-in browser. This course uses the desktop app."
+          data-vi="&lt;strong&gt;Từ CLI đến bản desktop.&lt;/strong&gt; Trước đây kỹ sư quen dùng CLI (Command Line Interface, giao diện dòng lệnh), gõ lệnh trong terminal, ví dụ Codex CLI, Claude Code. Đến tháng 10/2026, bản desktop (Codex, Claude desktop) đã thay thế được CLI và thân thiện với người mới: kéo thư mục vào là thành dự án, thấy được đã sửa chỗ nào, có trình duyệt tích hợp. Môn học này dùng bản desktop."><strong>從 CLI 到桌面版。</strong>工程師過去習慣用 CLI（Command Line Interface，指令列介面），在終端機裡打字下指令，例如 Codex CLI、Claude Code。到 2026 年 10 月，桌面版（Codex、Claude 桌面版）的功能已經能取代 CLI，而且對新手友善：拖資料夾進去就是專案、看得到改了哪裡、有內建瀏覽器。這門課用桌面版。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;很多动手任务，评分看过程。&lt;/strong&gt;每周都有动手做的任务。评分不只看成品，也看过程：你写的 BRIEF.md、VERIFY.md 和 git 记录。你自己想的部分最重要；交出去的东西，你负责。"
+          data-en="&lt;strong&gt;Lots of hands-on work, graded on the process.&lt;/strong&gt; Every week has tasks you do yourself. Grading looks not only at the result but also at the process: the BRIEF.md and VERIFY.md you write and your git history. The part you think through yourself matters most, and what you hand in is your responsibility."
+          data-vi="&lt;strong&gt;Nhiều bài thực hành, chấm theo quá trình.&lt;/strong&gt; Tuần nào cũng có nhiệm vụ tự tay làm. Chấm điểm không chỉ xem thành phẩm mà còn xem quá trình: BRIEF.md, VERIFY.md bạn viết và lịch sử git. Phần bạn tự suy nghĩ là quan trọng nhất; thứ bạn nộp, bạn chịu trách nhiệm."><strong>很多實作，評分看過程。</strong>每週都有動手做的任務。評分不只看成品，也看過程：你寫的 BRIEF.md、VERIFY.md 和 git 紀錄。你自己想的部分最重要；交出去的東西，你負責。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;卡住了，照这三步来。&lt;/strong&gt;AI 时代更注重自学：① 先自己试；② 问 Codex，把错误信息贴给它：“这个错误是什么意思？怎么修？”；③ 回看视频章节：点视频下面的片段，直接跳到那一段。"
+          data-en="&lt;strong&gt;Stuck? Take these three steps.&lt;/strong&gt; In the AI era, learning on your own matters more: ① try it yourself first; ② ask Codex, pasting in the error message: “What does this error mean? How do I fix it?”; ③ go back to the video chapter: click a segment under the video to jump straight to it."
+          data-vi="&lt;strong&gt;Bị kẹt thì làm theo ba bước.&lt;/strong&gt; Thời AI càng coi trọng tự học: ① tự thử trước; ② hỏi Codex, dán thông báo lỗi cho nó: “Lỗi này nghĩa là gì? Sửa thế nào?”; ③ xem lại chương trong video: bấm vào đoạn bên dưới video để nhảy thẳng tới đó."><strong>卡住了，照這三步來。</strong>AI 時代更注重自學：① 先自己試；② 問 Codex，把錯誤訊息貼給它：「這個錯誤是什麼意思？怎麼修？」；③ 回看影片章節：點影片下面的片段，直接跳到那一段。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;用母语就好。&lt;/strong&gt;用你最熟的语言跟 AI 说话：繁體中文、简体中文、English、Tiếng Việt 都可以。这是 AI 时代的优势。"
+          data-en="&lt;strong&gt;Your own language is fine.&lt;/strong&gt; Talk to the AI in the language you know best: Traditional Chinese, Simplified Chinese, English or Vietnamese all work. That is an advantage of the AI era."
+          data-vi="&lt;strong&gt;Dùng tiếng mẹ đẻ là được.&lt;/strong&gt; Hãy nói chuyện với AI bằng ngôn ngữ bạn quen nhất: tiếng Trung phồn thể, giản thể, English hay Tiếng Việt đều được. Đó là lợi thế của thời AI."><strong>用母語就好。</strong>用你最熟的語言跟 AI 說話：繁體中文、简体中文、English、Tiếng Việt 都可以。這是 AI 時代的優勢。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;一周一站，作品放进作品集。&lt;/strong&gt;课程地图上一周一站，每一站都要动手做，后面的周次陆续开放。同学做的作业网页，会放在网站的&lt;a href=&#x27;../../works/&#x27;&gt;作品集&lt;/a&gt;，学号会遮住。"
+          data-en="&lt;strong&gt;One stop a week, and your work goes into the Showcase.&lt;/strong&gt; The course map has one stop per week, each with hands-on work, and later weeks open as the term goes on. The web pages you make for homework are shown in the site’s &lt;a href=&#x27;../../works/&#x27;&gt;Showcase&lt;/a&gt;, with student IDs masked."
+          data-vi="&lt;strong&gt;Mỗi tuần một trạm, sản phẩm được đưa vào mục Tác phẩm.&lt;/strong&gt; Trên bản đồ môn học, mỗi tuần là một trạm, trạm nào cũng phải tự tay làm; các tuần sau sẽ lần lượt mở. Trang web bài tập của các bạn sẽ được đặt trong mục &lt;a href=&#x27;../../works/&#x27;&gt;Tác phẩm&lt;/a&gt; của trang, mã số sinh viên được che đi."><strong>一週一站，作品放進作品集。</strong>課程地圖上一週一站，每一站都要動手做，後面的週次陸續開放。同學做的作業網頁，會放在網站的<a href='../../works/'>作品集</a>，學號會遮住。</p></li>
+      </ol>
+    </section>
+
+    <nav class="pager" id="pager" data-week="1" aria-label="其他週次" data-ui-attr="aria-label:pager.label"></nav>
+  </main>
+
+  <footer class="foot">
+    <span>Learning Analytics Tools Implementation Applications (NTNU)</span>
+    <span><span data-ui="footer.copyright">Copyright © 2026 JUNHAO CHEN・程式碼 MIT・內容 CC BY-NC-SA 4.0</span> <a class="foot-lic" href="https://github.com/bigmoumou/AI-Agent-Literacy#授權" data-ui="footer.license" data-ui-attr="href:footer.licenseUrl">授權說明</a></span>
+    <a href="../../" data-ui="nav.home">回到課程首頁</a>
+  </footer>
+</div>
+
+<!-- 先 hls.js、再 video.js（播放、片段、#t= 連結都在 video.js） -->
+<script src="../../assets/vendor/hls.light.min.js"></script>
+<script src="../../assets/video.js"></script>
+</body>
+</html>

@@ -8,7 +8,7 @@
 window.I18N_STRINGS = {
   "zh-Hant": {
     "lang.label": "語言",
-    "brand.sub": "學習分析工具・NTNU・Week 3 – 16",
+    "brand.sub": "學習分析工具・NTNU・Week 1 – 16",
     "theme.dark": "深色",
     "theme.light": "淺色",
     "theme.toDark": "切換成深色",
@@ -90,7 +90,7 @@ window.I18N_STRINGS = {
   },
   "zh-Hans": {
     "lang.label": "语言",
-    "brand.sub": "学习分析工具・NTNU・Week 3 – 16",
+    "brand.sub": "学习分析工具・NTNU・Week 1 – 16",
     "theme.dark": "深色",
     "theme.light": "浅色",
     "theme.toDark": "切换成深色",
@@ -172,7 +172,7 @@ window.I18N_STRINGS = {
   },
   en: {
     "lang.label": "Language",
-    "brand.sub": "Learning Analytics Tools · NTNU · Week 3 – 16",
+    "brand.sub": "Learning Analytics Tools · NTNU · Week 1 – 16",
     "theme.dark": "Dark",
     "theme.light": "Light",
     "theme.toDark": "Switch to dark mode",
@@ -254,7 +254,7 @@ window.I18N_STRINGS = {
   },
   vi: {
     "lang.label": "Ngôn ngữ",
-    "brand.sub": "Learning Analytics Tools · NTNU · Tuần 3 – 16",
+    "brand.sub": "Learning Analytics Tools · NTNU · Tuần 1 – 16",
     "theme.dark": "Tối",
     "theme.light": "Sáng",
     "theme.toDark": "Chuyển sang giao diện tối",
