@@ -25,8 +25,8 @@ An open course on working with AI coding agents<br>
 <table>
 <tr><td><b>Pilot site</b></td><td>National Taiwan Normal University (NTNU), 2026, in the course <i>Learning Analytics Tools Implementation Applications</i></td></tr>
 <tr><td><b>Format</b></td><td>Weekly microlearning videos (1–5 min) with chapters and key points; a browser-based practice computer; a scenario-based exam</td></tr>
-<tr><td><b>Published</b></td><td>Weeks 1 and 3–8: 31 videos, about 95 minutes (October 2026), updated weekly</td></tr>
-<tr><td><b>Languages</b></td><td>Site in English, Traditional Chinese, Simplified Chinese and Vietnamese, chosen from the browser's language. Weeks 3–7 are fully in English too: every video, the practice computers and the Week 6 exam. Other videos show Traditional Chinese on screen</td></tr>
+<tr><td><b>Published</b></td><td>Weeks 1–8: 35 videos, about 102 minutes (October 2026), updated weekly</td></tr>
+<tr><td><b>Languages</b></td><td>Site in English, Traditional Chinese, Simplified Chinese and Vietnamese, chosen from the browser's language. Weeks 1 and 3–7 are fully in English too: every video, the practice computers and the Week 6 exam. Other videos show Traditional Chinese on screen</td></tr>
 <tr><td><b>Licenses</b></td><td>Code <a href="LICENSE">MIT</a>; videos and course content <a href="LICENSE-CONTENT.md">CC BY-NC-SA 4.0</a></td></tr>
 </table>
 
@@ -59,6 +59,9 @@ An open course on working with AI coding agents<br>
 | | [02 How Do You Learn Best in This Course? Tools, Hands-on Work, Self-learning](https://ai-agent-literacy.pages.dev/weeks/week01/?lang=en#02-course-guide) | 1:51 |
 | | [03 A First Run with an AI Agent: From One Sentence to a Finished Page](https://ai-agent-literacy.pages.dev/weeks/week01/?lang=en#03-first-run) | 1:52 |
 | | [Extra 1 Installing Codex and VS Code](https://ai-agent-literacy.pages.dev/weeks/week01/?lang=en#s1-install) ・ [Extra 2 Files and File Extensions](https://ai-agent-literacy.pages.dev/weeks/week01/?lang=en#s2-files) | 2:05 ・ 1:53 |
+| Week 2 | [01 One Task: How Do You Ask So It Gets Done Right? Goal, Materials, Limits, What Counts as Done](https://ai-agent-literacy.pages.dev/weeks/week02/?lang=en#01-clear-ask) | 1:55 |
+| | [02 It Can Act on Your Computer, So Who Decides? Approvals and Permissions](https://ai-agent-literacy.pages.dev/weeks/week02/?lang=en#02-approval) | 1:54 |
+| | [Extra 1 VS Code and Markdown](https://ai-agent-literacy.pages.dev/weeks/week02/?lang=en#s1-vscode-md) ・ [Extra 2 Why AI Gets Things Wrong: Models, Tokens, Usage](https://ai-agent-literacy.pages.dev/weeks/week02/?lang=en#s2-why-wrong) | 1:35 ・ 1:39 |
 | Week 3 | [01 The Journey of report.md](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=en#01-report-journey) | 1:33 |
 | | [02 AGENTS.md and Context Management](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=en#02-agents-md-context) | 3:40 |
 | | [03 Homework: Collecting Florence Museum Data](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=en#03-homework-firenze) | 2:55 |
@@ -82,7 +85,7 @@ An open course on working with AI coding agents<br>
 | | [03 Hands-On Testing with User Stories](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=en#03-playtest) | 3:43 |
 | | [Extra 1 Branches and Pull Requests: Three People, One Project](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=en#s1-branch-pr) ・ [Extra 2 Writing Up a Bug Clearly: GitHub Issues](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=en#s2-bug-issue) | 3:34 ・ 2:48 |
 
-**Topics covered**: AI coding agents (OpenAI Codex, Claude Code), working folders and the terminal, `AGENTS.md` and the context window, the built-in browser, GitHub and Mermaid, verification checklists (`VERIFY.md`), switching models mid-task (GPT-6 Luna → GPT-6.1 Sol), the Codex agent loop and automatic compaction, test-driven development, `PLANS.md` and `TESTS.md`, mutation testing, user stories, branches and pull requests, and GitHub issues.
+**Topics covered**: AI coding agents (OpenAI Codex, Claude Code), giving clear instructions, approvals and permission modes, models, tokens and usage, working folders and the terminal, `AGENTS.md` and the context window, the built-in browser, GitHub and Mermaid, verification checklists (`VERIFY.md`), switching models mid-task (GPT-6 Luna → GPT-6.1 Sol), the Codex agent loop and automatic compaction, test-driven development, `PLANS.md` and `TESTS.md`, mutation testing, user stories, branches and pull requests, and GitHub issues.
 
 ## How it's made
 
@@ -108,7 +111,7 @@ The video streams live on a separate Cloudflare project, so a fork plays them fr
 ## Roadmap
 
 - [ ] Weeks 9–16, published as the course goes on
-- [x] Full English versions of Weeks 3–7 (October 2026): every video with English on-screen text, the practice computers and the Week 6 exam; English browsers get them automatically
+- [x] Full English versions of Weeks 1 and 3–7 (October 2026): every video with English on-screen text, the practice computers and the Week 6 exam; English browsers get them automatically
 - [ ] English versions of the other weeks
 - [ ] Claude versions of the videos: the same lessons, demonstrated with Claude (Claude Code) instead of Codex
 - [ ] Open-source the teaching-video skill (based mainly on opus-video, with our own changes), with the production prompts and the lessons learned
@@ -155,8 +158,8 @@ Thanks to the students taking the course.
 <table>
 <tr><td><b>首個示範場域</b></td><td>國立臺灣師範大學（2026），課程「學習分析工具」（Learning Analytics Tools Implementation Applications）</td></tr>
 <tr><td><b>形式</b></td><td>每週微學習影片（1–5 分鐘），附章節和重點；瀏覽器裡的練習電腦；情境式考試</td></tr>
-<tr><td><b>已公開</b></td><td>Week 1、3–8：31 支影片，約 95 分鐘（2026 年 10 月），每週更新</td></tr>
-<tr><td><b>語言</b></td><td>網站有英文、繁體中文、簡體中文、越南文，依瀏覽器語言自動選。Week 3–7 另有完整英文版：每支影片、練習電腦、Week 6 考試；其他影片畫面是繁體中文</td></tr>
+<tr><td><b>已公開</b></td><td>Week 1–8：35 支影片，約 102 分鐘（2026 年 10 月），每週更新</td></tr>
+<tr><td><b>語言</b></td><td>網站有英文、繁體中文、簡體中文、越南文，依瀏覽器語言自動選。Week 1、3–7 另有完整英文版：每支影片、練習電腦、Week 6 考試；其他影片畫面是繁體中文</td></tr>
 <tr><td><b>授權</b></td><td>程式 <a href="LICENSE">MIT</a>；影片與教材 <a href="LICENSE-CONTENT.md">CC BY-NC-SA 4.0</a></td></tr>
 </table>
 
@@ -178,6 +181,9 @@ Thanks to the students taking the course.
 | | [02 這門課要怎麼上，才學得最好？工具、實作、自學](https://ai-agent-literacy.pages.dev/weeks/week01/#02-course-guide) | 1:51 |
 | | [03 AI Agent 初次體驗：從一句話到成品](https://ai-agent-literacy.pages.dev/weeks/week01/#03-first-run) | 1:52 |
 | | [補充 1 裝好 Codex 和 VS Code](https://ai-agent-literacy.pages.dev/weeks/week01/#s1-install)・[補充 2 檔案與副檔名](https://ai-agent-literacy.pages.dev/weeks/week01/#s2-files) | 2:05・1:53 |
+| Week 2 | [01 同一件事，怎麼交代才做得對？目標、素材、界線、怎樣算做好](https://ai-agent-literacy.pages.dev/weeks/week02/#01-clear-ask) | 1:55 |
+| | [02 它能動你的電腦，那誰說了算？核准與權限](https://ai-agent-literacy.pages.dev/weeks/week02/#02-approval) | 1:54 |
+| | [補充 1 VS Code 和 Markdown](https://ai-agent-literacy.pages.dev/weeks/week02/#s1-vscode-md)・[補充 2 AI 為什麼會說錯：模型、token、用量](https://ai-agent-literacy.pages.dev/weeks/week02/#s2-why-wrong) | 1:35・1:39 |
 | Week 3 | [01 report.md 的旅程](https://ai-agent-literacy.pages.dev/weeks/week03/#01-report-journey) | 1:33 |
 | | [02 AGENTS.md 與上下文管理](https://ai-agent-literacy.pages.dev/weeks/week03/#02-agents-md-context) | 3:40 |
 | | [03 作業：佛羅倫斯美術館資料收集](https://ai-agent-literacy.pages.dev/weeks/week03/#03-homework-firenze) | 2:55 |
@@ -201,7 +207,7 @@ Thanks to the students taking the course.
 | | [03 透過 User Story 幫助實測](https://ai-agent-literacy.pages.dev/weeks/week08/#03-playtest) | 3:43 |
 | | [補充 1 分支與 Pull Request：三個人一起改同一個專案](https://ai-agent-literacy.pages.dev/weeks/week08/#s1-branch-pr)・[補充 2 把 bug 寫清楚：GitHub Issue](https://ai-agent-literacy.pages.dev/weeks/week08/#s2-bug-issue) | 3:34・2:48 |
 
-**涵蓋主題**：AI 程式助理（OpenAI Codex、Claude Code）、工作資料夾與終端機、`AGENTS.md` 與 context window、內建瀏覽器、GitHub 與 Mermaid、驗證清單（`VERIFY.md`）、做到一半換模型（GPT-6 Luna → GPT-6.1 Sol）、Codex 的 agent loop 與自動壓縮、測試驅動開發、`PLANS.md` 與 `TESTS.md`、突變測試（mutation testing）、user story、分支與 pull request、GitHub issue。
+**涵蓋主題**：AI 程式助理（OpenAI Codex、Claude Code）、把事情交代清楚、核准與權限模式、模型與 token 用量、工作資料夾與終端機、`AGENTS.md` 與 context window、內建瀏覽器、GitHub 與 Mermaid、驗證清單（`VERIFY.md`）、做到一半換模型（GPT-6 Luna → GPT-6.1 Sol）、Codex 的 agent loop 與自動壓縮、測試驅動開發、`PLANS.md` 與 `TESTS.md`、突變測試（mutation testing）、user story、分支與 pull request、GitHub issue。
 
 ### 怎麼做的
 
@@ -227,7 +233,7 @@ python -m http.server 8000
 ### 接下來
 
 - [ ] Week 9–16 依課程進度上線
-- [x] Week 3–7 全英文版（2026 年 10 月）：每支影片的畫面和字卡、練習電腦、Week 6 考試；英文瀏覽器自動切換
+- [x] Week 1、3–7 全英文版（2026 年 10 月）：每支影片的畫面和字卡、練習電腦、Week 6 考試；英文瀏覽器自動切換
 - [ ] 其他週次的英文版
 - [ ] Claude 版影片：同樣的內容，改用 Claude（Claude Code）示範（目前示範的工具是 Codex）
 - [ ] 開源這套教學影片 skill（主要參考 opus-video，再做個人化修改），以及製作用的 prompt 和製作經驗
@@ -262,8 +268,8 @@ python -m http.server 8000
 <table>
 <tr><td><b>首个示范场域</b></td><td>台湾师范大学（2026），课程“学习分析工具”（Learning Analytics Tools Implementation Applications）</td></tr>
 <tr><td><b>形式</b></td><td>每周微学习视频（1–5 分钟），附章节和要点；浏览器里的练习电脑；情境式考试</td></tr>
-<tr><td><b>已公开</b></td><td>Week 1、3–8：31 个视频，约 95 分钟（2026 年 10 月），每周更新</td></tr>
-<tr><td><b>语言</b></td><td>网站有英文、繁体中文、简体中文、越南文，按浏览器语言自动选择。Week 3–7 另有完整英文版：每个视频、练习电脑、Week 6 考试；其他视频画面是繁体中文</td></tr>
+<tr><td><b>已公开</b></td><td>Week 1–8：35 个视频，约 102 分钟（2026 年 10 月），每周更新</td></tr>
+<tr><td><b>语言</b></td><td>网站有英文、繁体中文、简体中文、越南文，按浏览器语言自动选择。Week 1、3–7 另有完整英文版：每个视频、练习电脑、Week 6 考试；其他视频画面是繁体中文</td></tr>
 <tr><td><b>许可</b></td><td>代码 <a href="LICENSE">MIT</a>；视频与教材 <a href="LICENSE-CONTENT.md">CC BY-NC-SA 4.0</a></td></tr>
 </table>
 
@@ -285,6 +291,9 @@ python -m http.server 8000
 | | [02 这门课要怎么上，才学得最好？工具、动手做、自学](https://ai-agent-literacy.pages.dev/weeks/week01/?lang=zh-Hans#02-course-guide) | 1:51 |
 | | [03 AI Agent 初次体验：从一句话到成品](https://ai-agent-literacy.pages.dev/weeks/week01/?lang=zh-Hans#03-first-run) | 1:52 |
 | | [补充 1 装好 Codex 和 VS Code](https://ai-agent-literacy.pages.dev/weeks/week01/?lang=zh-Hans#s1-install)・[补充 2 文件与扩展名](https://ai-agent-literacy.pages.dev/weeks/week01/?lang=zh-Hans#s2-files) | 2:05・1:53 |
+| Week 2 | [01 同一件事，怎么交代才做得对？目标、素材、界线、怎样算做好](https://ai-agent-literacy.pages.dev/weeks/week02/?lang=zh-Hans#01-clear-ask) | 1:55 |
+| | [02 它能动你的电脑，那谁说了算？批准与权限](https://ai-agent-literacy.pages.dev/weeks/week02/?lang=zh-Hans#02-approval) | 1:54 |
+| | [补充 1 VS Code 和 Markdown](https://ai-agent-literacy.pages.dev/weeks/week02/?lang=zh-Hans#s1-vscode-md)・[补充 2 AI 为什么会说错：模型、token、用量](https://ai-agent-literacy.pages.dev/weeks/week02/?lang=zh-Hans#s2-why-wrong) | 1:35・1:39 |
 | Week 3 | [01 report.md 的旅程](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=zh-Hans#01-report-journey) | 1:33 |
 | | [02 AGENTS.md 与上下文管理](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=zh-Hans#02-agents-md-context) | 3:40 |
 | | [03 作业：佛罗伦萨美术馆数据收集](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=zh-Hans#03-homework-firenze) | 2:55 |
@@ -308,7 +317,7 @@ python -m http.server 8000
 | | [03 通过 User Story 帮助实测](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=zh-Hans#03-playtest) | 3:43 |
 | | [补充 1 分支与 Pull Request：三个人一起改同一个项目](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=zh-Hans#s1-branch-pr)・[补充 2 把 bug 写清楚：GitHub Issue](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=zh-Hans#s2-bug-issue) | 3:34・2:48 |
 
-**涵盖主题**：AI 编程助手（OpenAI Codex、Claude Code）、工作文件夹与终端、`AGENTS.md` 与上下文窗口、内置浏览器、GitHub 与 Mermaid、验证清单（`VERIFY.md`）、做到一半换模型（GPT-6 Luna → GPT-6.1 Sol）、Codex 的 agent loop 与自动压缩、测试驱动开发、`PLANS.md` 与 `TESTS.md`、突变测试（mutation testing）、user story、分支与 pull request、GitHub issue。
+**涵盖主题**：AI 编程助手（OpenAI Codex、Claude Code）、把事情交代清楚、批准与权限模式、模型与 token 用量、工作文件夹与终端、`AGENTS.md` 与上下文窗口、内置浏览器、GitHub 与 Mermaid、验证清单（`VERIFY.md`）、做到一半换模型（GPT-6 Luna → GPT-6.1 Sol）、Codex 的 agent loop 与自动压缩、测试驱动开发、`PLANS.md` 与 `TESTS.md`、突变测试（mutation testing）、user story、分支与 pull request、GitHub issue。
 
 ### 怎么做的
 
@@ -334,7 +343,7 @@ python -m http.server 8000
 ### 接下来
 
 - [ ] Week 9–16 按课程进度上线
-- [x] Week 3–7 全英文版（2026 年 10 月）：每个视频的画面和字卡、练习电脑、Week 6 考试；英文浏览器自动切换
+- [x] Week 1、3–7 全英文版（2026 年 10 月）：每个视频的画面和字卡、练习电脑、Week 6 考试；英文浏览器自动切换
 - [ ] 其他周次的英文版
 - [ ] Claude 版视频：同样的内容，改用 Claude（Claude Code）演示（目前演示的工具是 Codex）
 - [ ] 开源这套教学视频 skill（主要参考 opus-video，再做个性化修改），以及制作用的 prompt 和制作经验
@@ -369,8 +378,8 @@ python -m http.server 8000
 <table>
 <tr><td><b>最初の実践の場</b></td><td>国立台湾師範大学（2026 年）、授業「学習分析ツール」（Learning Analytics Tools Implementation Applications）</td></tr>
 <tr><td><b>形式</b></td><td>毎週のマイクロラーニング動画（1〜5 分、チャプターと要点つき）、ブラウザ上の練習用コンピューター、シナリオ型の試験</td></tr>
-<tr><td><b>公開済み</b></td><td>Week 1・3〜8：動画 31 本、約 95 分（2026 年 10 月時点）、毎週更新</td></tr>
-<tr><td><b>言語</b></td><td>サイトは英語・繁体字中国語・簡体字中国語・ベトナム語（日本語は未対応）で、ブラウザの言語で自動選択。Week 3〜7 は動画・練習用コンピュータ・Week 6 の試験まで完全な英語版あり。その他の動画内の文字は繁体字中国語</td></tr>
+<tr><td><b>公開済み</b></td><td>Week 1〜8：動画 35 本、約 102 分（2026 年 10 月時点）、毎週更新</td></tr>
+<tr><td><b>言語</b></td><td>サイトは英語・繁体字中国語・簡体字中国語・ベトナム語（日本語は未対応）で、ブラウザの言語で自動選択。Week 1・3〜7 は動画・練習用コンピュータ・Week 6 の試験まで完全な英語版あり。その他の動画内の文字は繁体字中国語</td></tr>
 <tr><td><b>ライセンス</b></td><td>コード <a href="LICENSE">MIT</a>、動画と教材 <a href="LICENSE-CONTENT.md">CC BY-NC-SA 4.0</a></td></tr>
 </table>
 
@@ -392,6 +401,9 @@ python -m http.server 8000
 | | [02 この授業はどう受ければいちばん身につく？ツール・実践・自学](https://ai-agent-literacy.pages.dev/weeks/week01/#02-course-guide) | 1:51 |
 | | [03 AI エージェント初体験：一言から完成まで](https://ai-agent-literacy.pages.dev/weeks/week01/#03-first-run) | 1:52 |
 | | [補足 1 Codex と VS Code を入れる](https://ai-agent-literacy.pages.dev/weeks/week01/#s1-install)・[補足 2 ファイルと拡張子](https://ai-agent-literacy.pages.dev/weeks/week01/#s2-files) | 2:05・1:53 |
+| Week 2 | [01 同じ作業、どう頼めば正しくやってくれる？目標・素材・範囲・完了の基準](https://ai-agent-literacy.pages.dev/weeks/week02/#01-clear-ask) | 1:55 |
+| | [02 パソコンを操作できる AI、決めるのは誰？承認と権限](https://ai-agent-literacy.pages.dev/weeks/week02/#02-approval) | 1:54 |
+| | [補足 1 VS Code と Markdown](https://ai-agent-literacy.pages.dev/weeks/week02/#s1-vscode-md)・[補足 2 AI はなぜ間違えるのか：モデル、トークン、使用量](https://ai-agent-literacy.pages.dev/weeks/week02/#s2-why-wrong) | 1:35・1:39 |
 | Week 3 | [01 report.md の旅](https://ai-agent-literacy.pages.dev/weeks/week03/#01-report-journey) | 1:33 |
 | | [02 AGENTS.md とコンテキスト管理](https://ai-agent-literacy.pages.dev/weeks/week03/#02-agents-md-context) | 3:40 |
 | | [03 課題：フィレンツェの美術館データ収集](https://ai-agent-literacy.pages.dev/weeks/week03/#03-homework-firenze) | 2:55 |
@@ -415,7 +427,7 @@ python -m http.server 8000
 | | [03 User Story で実際に試す](https://ai-agent-literacy.pages.dev/weeks/week08/#03-playtest) | 3:43 |
 | | [補足 1 ブランチと Pull Request：3 人で同じプロジェクトを直す](https://ai-agent-literacy.pages.dev/weeks/week08/#s1-branch-pr)・[補足 2 バグをはっきり書く：GitHub Issue](https://ai-agent-literacy.pages.dev/weeks/week08/#s2-bug-issue) | 3:34・2:48 |
 
-**扱うテーマ**：AI コーディングエージェント（OpenAI Codex、Claude Code）、作業フォルダとターミナル、`AGENTS.md` とコンテキストウィンドウ、内蔵ブラウザ、GitHub と Mermaid、検証チェックリスト（`VERIFY.md`）、作業途中のモデル切り替え（GPT-6 Luna → GPT-6.1 Sol）、Codex のエージェントループと自動圧縮、テスト駆動開発、`PLANS.md` と `TESTS.md`、ミューテーションテスト、user story、ブランチと pull request、GitHub issue。
+**扱うテーマ**：AI コーディングエージェント（OpenAI Codex、Claude Code）、明確な指示の出し方、承認と権限モード、モデルとトークン使用量、作業フォルダとターミナル、`AGENTS.md` とコンテキストウィンドウ、内蔵ブラウザ、GitHub と Mermaid、検証チェックリスト（`VERIFY.md`）、作業途中のモデル切り替え（GPT-6 Luna → GPT-6.1 Sol）、Codex のエージェントループと自動圧縮、テスト駆動開発、`PLANS.md` と `TESTS.md`、ミューテーションテスト、user story、ブランチと pull request、GitHub issue。
 
 ### 作り方
 
@@ -441,7 +453,7 @@ python -m http.server 8000
 ### 今後の予定
 
 - [ ] Week 9〜16 を授業の進行に合わせて公開
-- [x] Week 3〜7 の完全英語版（2026 年 10 月）：全動画の画面とテロップ、練習用コンピュータ、Week 6 の試験。英語のブラウザでは自動で切り替え
+- [x] Week 1・3〜7 の完全英語版（2026 年 10 月）：全動画の画面とテロップ、練習用コンピュータ、Week 6 の試験。英語のブラウザでは自動で切り替え
 - [ ] ほかの週の英語版
 - [ ] 動画の Claude 版：同じ内容を Codex ではなく Claude（Claude Code）で実演
 - [ ] この教育動画用 skill（主に opus-video を参考に独自に改良したもの）をオープンソース化し、制作に使ったプロンプトと制作の知見もあわせて公開
