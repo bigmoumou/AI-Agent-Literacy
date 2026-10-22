@@ -25,7 +25,7 @@ An open course on working with AI coding agents<br>
 <table>
 <tr><td><b>Pilot site</b></td><td>National Taiwan Normal University (NTNU), 2026, in the course <i>Learning Analytics Tools Implementation Applications</i></td></tr>
 <tr><td><b>Format</b></td><td>Weekly microlearning videos (1–5 min) with chapters and key points; a browser-based practice computer; a scenario-based exam</td></tr>
-<tr><td><b>Published</b></td><td>Weeks 1 and 3–8: 26 videos, about 83 minutes (October 2026), updated weekly</td></tr>
+<tr><td><b>Published</b></td><td>Weeks 1 and 3–8: 27 videos, about 85 minutes (October 2026), updated weekly</td></tr>
 <tr><td><b>Languages</b></td><td>Site in English, Traditional Chinese, Simplified Chinese and Vietnamese, chosen from the browser's language. Weeks 3–7 are fully in English too: every video, the practice computers and the Week 6 exam. Other videos show Traditional Chinese on screen</td></tr>
 <tr><td><b>Licenses</b></td><td>Code <a href="LICENSE">MIT</a>; videos and course content <a href="LICENSE-CONTENT.md">CC BY-NC-SA 4.0</a></td></tr>
 </table>
@@ -57,6 +57,7 @@ An open course on working with AI coding agents<br>
 |---|---|---|
 | Week 1 | [01 AI Can Do the Work Itself Now. What Should We Learn? AI Agent Literacy](https://ai-agent-literacy.pages.dev/weeks/week01/?lang=en#01-agent-literacy) | 2:08 |
 | | [02 How Do You Learn Best in This Course? Tools, Hands-on Work, Self-learning](https://ai-agent-literacy.pages.dev/weeks/week01/?lang=en#02-course-guide) | 1:51 |
+| | [03 After One Instruction, What Does the AI Agent Do? From One Sentence to a Finished Page](https://ai-agent-literacy.pages.dev/weeks/week01/?lang=en#03-first-run) | 1:36 |
 | Week 3 | [01 The Journey of report.md](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=en#01-report-journey) | 1:33 |
 | | [02 AGENTS.md and Context Management](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=en#02-agents-md-context) | 3:40 |
 | | [03 Homework: Collecting Florence Museum Data](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=en#03-homework-firenze) | 2:55 |
@@ -75,11 +76,11 @@ An open course on working with AI coding agents<br>
 | | [02 Plan Big Tasks First: PLANS.md](https://ai-agent-literacy.pages.dev/weeks/week07/?lang=en#02-plans) | 4:08 |
 | | [03 Homework: Plan and Build "Sky Island"](https://ai-agent-literacy.pages.dev/weeks/week07/?lang=en#03-homework-island) | 2:52 |
 | | [Extra 1 What a Website Is Made Of](https://ai-agent-literacy.pages.dev/weeks/week07/?lang=en#s1-website-modules) ・ [Extra 2 Git: Version Control, and Your Safety Net](https://ai-agent-literacy.pages.dev/weeks/week07/?lang=en#s2-git-versions) | 3:51 ・ 2:57 |
-| Week 8 | [01 VERIFY Is Written. Is That Enough Testing? TESTS.md](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=en#01-tests) | 3:54 |
-| | [02 All Tests Pass. Are the Tests Any Good? Break a Line on Purpose](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=en#02-break) | 2:58 |
-| | [03 All Tests Pass. Ready to Hand It In? Play It Yourself](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=en#03-playtest) | 3:52 |
+| Week 8 | [01 Is VERIFY Enough? TESTS.md](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=en#01-tests) | 3:54 |
+| | [02 Mutation Testing](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=en#02-break) | 2:58 |
+| | [03 Hands-On Testing with User Stories](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=en#03-playtest) | 3:43 |
 
-**Topics covered**: AI coding agents (OpenAI Codex, Claude Code), working folders and the terminal, `AGENTS.md` and the context window, the built-in browser, GitHub and Mermaid, verification checklists (`VERIFY.md`), switching models mid-task (GPT-6 Luna → GPT-6.1 Sol), the Codex agent loop and automatic compaction, test-driven development, `PLANS.md` and `TESTS.md`.
+**Topics covered**: AI coding agents (OpenAI Codex, Claude Code), working folders and the terminal, `AGENTS.md` and the context window, the built-in browser, GitHub and Mermaid, verification checklists (`VERIFY.md`), switching models mid-task (GPT-6 Luna → GPT-6.1 Sol), the Codex agent loop and automatic compaction, test-driven development, `PLANS.md` and `TESTS.md`, mutation testing and user stories.
 
 ## How it's made
 
@@ -152,7 +153,7 @@ Thanks to the students taking the course.
 <table>
 <tr><td><b>首個示範場域</b></td><td>國立臺灣師範大學（2026），課程「學習分析工具」（Learning Analytics Tools Implementation Applications）</td></tr>
 <tr><td><b>形式</b></td><td>每週微學習影片（1–5 分鐘），附章節和重點；瀏覽器裡的練習電腦；情境式考試</td></tr>
-<tr><td><b>已公開</b></td><td>Week 1、3–8：26 支影片，約 83 分鐘（2026 年 10 月），每週更新</td></tr>
+<tr><td><b>已公開</b></td><td>Week 1、3–8：27 支影片，約 85 分鐘（2026 年 10 月），每週更新</td></tr>
 <tr><td><b>語言</b></td><td>網站有英文、繁體中文、簡體中文、越南文，依瀏覽器語言自動選。Week 3–7 另有完整英文版：每支影片、練習電腦、Week 6 考試；其他影片畫面是繁體中文</td></tr>
 <tr><td><b>授權</b></td><td>程式 <a href="LICENSE">MIT</a>；影片與教材 <a href="LICENSE-CONTENT.md">CC BY-NC-SA 4.0</a></td></tr>
 </table>
@@ -173,6 +174,7 @@ Thanks to the students taking the course.
 |---|---|---|
 | Week 1 | [01 AI 會自己動手做事了，我們要學什麼？AI Agent Literacy](https://ai-agent-literacy.pages.dev/weeks/week01/#01-agent-literacy) | 2:08 |
 | | [02 這門課要怎麼上，才學得最好？工具、實作、自學](https://ai-agent-literacy.pages.dev/weeks/week01/#02-course-guide) | 1:51 |
+| | [03 交代一句話之後，AI Agent 做了什麼？從一句話到成品](https://ai-agent-literacy.pages.dev/weeks/week01/#03-first-run) | 1:36 |
 | Week 3 | [01 report.md 的旅程](https://ai-agent-literacy.pages.dev/weeks/week03/#01-report-journey) | 1:33 |
 | | [02 AGENTS.md 與上下文管理](https://ai-agent-literacy.pages.dev/weeks/week03/#02-agents-md-context) | 3:40 |
 | | [03 作業：佛羅倫斯美術館資料收集](https://ai-agent-literacy.pages.dev/weeks/week03/#03-homework-firenze) | 2:55 |
@@ -191,11 +193,11 @@ Thanks to the students taking the course.
 | | [02 大任務，先規劃：PLANS.md](https://ai-agent-literacy.pages.dev/weeks/week07/#02-plans) | 4:08 |
 | | [03 作業：規劃並做出「空中之島」](https://ai-agent-literacy.pages.dev/weeks/week07/#03-homework-island) | 2:52 |
 | | [補充 1 網站是怎麼組成的](https://ai-agent-literacy.pages.dev/weeks/week07/#s1-website-modules)・[補充 2 Git：版本管理，也是你的安全網](https://ai-agent-literacy.pages.dev/weeks/week07/#s2-git-versions) | 3:51・2:57 |
-| Week 8 | [01 VERIFY 寫好了，這樣就測夠了嗎？TESTS.md](https://ai-agent-literacy.pages.dev/weeks/week08/#01-tests) | 3:54 |
-| | [02 測試全部通過，就代表測得好嗎？故意弄壞一行](https://ai-agent-literacy.pages.dev/weeks/week08/#02-break) | 2:58 |
-| | [03 測試都通過了，就可以交了嗎？親自玩一遍](https://ai-agent-literacy.pages.dev/weeks/week08/#03-playtest) | 3:52 |
+| Week 8 | [01 VERIFY 就夠了嗎？TESTS.md](https://ai-agent-literacy.pages.dev/weeks/week08/#01-tests) | 3:54 |
+| | [02 突變測試（Mutation Testing）](https://ai-agent-literacy.pages.dev/weeks/week08/#02-break) | 2:58 |
+| | [03 透過 User Story 幫助實測](https://ai-agent-literacy.pages.dev/weeks/week08/#03-playtest) | 3:43 |
 
-**涵蓋主題**：AI 程式助理（OpenAI Codex、Claude Code）、工作資料夾與終端機、`AGENTS.md` 與 context window、內建瀏覽器、GitHub 與 Mermaid、驗證清單（`VERIFY.md`）、做到一半換模型（GPT-6 Luna → GPT-6.1 Sol）、Codex 的 agent loop 與自動壓縮、測試驅動開發、`PLANS.md` 與 `TESTS.md`。
+**涵蓋主題**：AI 程式助理（OpenAI Codex、Claude Code）、工作資料夾與終端機、`AGENTS.md` 與 context window、內建瀏覽器、GitHub 與 Mermaid、驗證清單（`VERIFY.md`）、做到一半換模型（GPT-6 Luna → GPT-6.1 Sol）、Codex 的 agent loop 與自動壓縮、測試驅動開發、`PLANS.md` 與 `TESTS.md`、突變測試（mutation testing）與 user story。
 
 ### 怎麼做的
 
@@ -256,7 +258,7 @@ python -m http.server 8000
 <table>
 <tr><td><b>首个示范场域</b></td><td>台湾师范大学（2026），课程“学习分析工具”（Learning Analytics Tools Implementation Applications）</td></tr>
 <tr><td><b>形式</b></td><td>每周微学习视频（1–5 分钟），附章节和要点；浏览器里的练习电脑；情境式考试</td></tr>
-<tr><td><b>已公开</b></td><td>Week 1、3–8：26 个视频，约 83 分钟（2026 年 10 月），每周更新</td></tr>
+<tr><td><b>已公开</b></td><td>Week 1、3–8：27 个视频，约 85 分钟（2026 年 10 月），每周更新</td></tr>
 <tr><td><b>语言</b></td><td>网站有英文、繁体中文、简体中文、越南文，按浏览器语言自动选择。Week 3–7 另有完整英文版：每个视频、练习电脑、Week 6 考试；其他视频画面是繁体中文</td></tr>
 <tr><td><b>许可</b></td><td>代码 <a href="LICENSE">MIT</a>；视频与教材 <a href="LICENSE-CONTENT.md">CC BY-NC-SA 4.0</a></td></tr>
 </table>
@@ -277,6 +279,7 @@ python -m http.server 8000
 |---|---|---|
 | Week 1 | [01 AI 会自己动手做事了，我们要学什么？AI Agent Literacy](https://ai-agent-literacy.pages.dev/weeks/week01/?lang=zh-Hans#01-agent-literacy) | 2:08 |
 | | [02 这门课要怎么上，才学得最好？工具、动手做、自学](https://ai-agent-literacy.pages.dev/weeks/week01/?lang=zh-Hans#02-course-guide) | 1:51 |
+| | [03 交代一句话之后，AI Agent 做了什么？从一句话到成品](https://ai-agent-literacy.pages.dev/weeks/week01/?lang=zh-Hans#03-first-run) | 1:36 |
 | Week 3 | [01 report.md 的旅程](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=zh-Hans#01-report-journey) | 1:33 |
 | | [02 AGENTS.md 与上下文管理](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=zh-Hans#02-agents-md-context) | 3:40 |
 | | [03 作业：佛罗伦萨美术馆数据收集](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=zh-Hans#03-homework-firenze) | 2:55 |
@@ -295,11 +298,11 @@ python -m http.server 8000
 | | [02 大任务，先规划：PLANS.md](https://ai-agent-literacy.pages.dev/weeks/week07/?lang=zh-Hans#02-plans) | 4:08 |
 | | [03 作业：规划并做出“空中之岛”](https://ai-agent-literacy.pages.dev/weeks/week07/?lang=zh-Hans#03-homework-island) | 2:52 |
 | | [补充 1 网站是怎么组成的](https://ai-agent-literacy.pages.dev/weeks/week07/?lang=zh-Hans#s1-website-modules)・[补充 2 Git：版本管理，也是你的安全网](https://ai-agent-literacy.pages.dev/weeks/week07/?lang=zh-Hans#s2-git-versions) | 3:51・2:57 |
-| Week 8 | [01 VERIFY 写好了，这样就测够了吗？TESTS.md](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=zh-Hans#01-tests) | 3:54 |
-| | [02 测试全部通过，就代表测得好吗？故意弄坏一行](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=zh-Hans#02-break) | 2:58 |
-| | [03 测试都通过了，就可以交了吗？亲自玩一遍](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=zh-Hans#03-playtest) | 3:52 |
+| Week 8 | [01 VERIFY 就够了吗？TESTS.md](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=zh-Hans#01-tests) | 3:54 |
+| | [02 突变测试（Mutation Testing）](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=zh-Hans#02-break) | 2:58 |
+| | [03 通过 User Story 帮助实测](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=zh-Hans#03-playtest) | 3:43 |
 
-**涵盖主题**：AI 编程助手（OpenAI Codex、Claude Code）、工作文件夹与终端、`AGENTS.md` 与上下文窗口、内置浏览器、GitHub 与 Mermaid、验证清单（`VERIFY.md`）、做到一半换模型（GPT-6 Luna → GPT-6.1 Sol）、Codex 的 agent loop 与自动压缩、测试驱动开发、`PLANS.md` 与 `TESTS.md`。
+**涵盖主题**：AI 编程助手（OpenAI Codex、Claude Code）、工作文件夹与终端、`AGENTS.md` 与上下文窗口、内置浏览器、GitHub 与 Mermaid、验证清单（`VERIFY.md`）、做到一半换模型（GPT-6 Luna → GPT-6.1 Sol）、Codex 的 agent loop 与自动压缩、测试驱动开发、`PLANS.md` 与 `TESTS.md`、突变测试（mutation testing）与 user story。
 
 ### 怎么做的
 
@@ -360,7 +363,7 @@ python -m http.server 8000
 <table>
 <tr><td><b>最初の実践の場</b></td><td>国立台湾師範大学（2026 年）、授業「学習分析ツール」（Learning Analytics Tools Implementation Applications）</td></tr>
 <tr><td><b>形式</b></td><td>毎週のマイクロラーニング動画（1〜5 分、チャプターと要点つき）、ブラウザ上の練習用コンピューター、シナリオ型の試験</td></tr>
-<tr><td><b>公開済み</b></td><td>Week 1・3〜8：動画 26 本、約 83 分（2026 年 10 月時点）、毎週更新</td></tr>
+<tr><td><b>公開済み</b></td><td>Week 1・3〜8：動画 27 本、約 85 分（2026 年 10 月時点）、毎週更新</td></tr>
 <tr><td><b>言語</b></td><td>サイトは英語・繁体字中国語・簡体字中国語・ベトナム語（日本語は未対応）で、ブラウザの言語で自動選択。Week 3〜7 は動画・練習用コンピュータ・Week 6 の試験まで完全な英語版あり。その他の動画内の文字は繁体字中国語</td></tr>
 <tr><td><b>ライセンス</b></td><td>コード <a href="LICENSE">MIT</a>、動画と教材 <a href="LICENSE-CONTENT.md">CC BY-NC-SA 4.0</a></td></tr>
 </table>
@@ -381,6 +384,7 @@ python -m http.server 8000
 |---|---|---|
 | Week 1 | [01 AI が自分で作業する時代、何を学ぶべきか？AI Agent Literacy](https://ai-agent-literacy.pages.dev/weeks/week01/#01-agent-literacy) | 2:08 |
 | | [02 この授業はどう受ければいちばん身につく？ツール・実践・自学](https://ai-agent-literacy.pages.dev/weeks/week01/#02-course-guide) | 1:51 |
+| | [03 一言指示したら、AI エージェントは何をする？一言から完成まで](https://ai-agent-literacy.pages.dev/weeks/week01/#03-first-run) | 1:36 |
 | Week 3 | [01 report.md の旅](https://ai-agent-literacy.pages.dev/weeks/week03/#01-report-journey) | 1:33 |
 | | [02 AGENTS.md とコンテキスト管理](https://ai-agent-literacy.pages.dev/weeks/week03/#02-agents-md-context) | 3:40 |
 | | [03 課題：フィレンツェの美術館データ収集](https://ai-agent-literacy.pages.dev/weeks/week03/#03-homework-firenze) | 2:55 |
@@ -399,11 +403,11 @@ python -m http.server 8000
 | | [02 大きなタスクはまず計画：PLANS.md](https://ai-agent-literacy.pages.dev/weeks/week07/#02-plans) | 4:08 |
 | | [03 課題：「空中の島」を計画して作る](https://ai-agent-literacy.pages.dev/weeks/week07/#03-homework-island) | 2:52 |
 | | [補足 1 Web サイトは何でできているか](https://ai-agent-literacy.pages.dev/weeks/week07/#s1-website-modules)・[補足 2 Git：バージョン管理はセーフティネット](https://ai-agent-literacy.pages.dev/weeks/week07/#s2-git-versions) | 3:51・2:57 |
-| Week 8 | [01 VERIFY を書いたら、テストは十分？TESTS.md](https://ai-agent-literacy.pages.dev/weeks/week08/#01-tests) | 3:54 |
-| | [02 テストが全部通れば良いテスト？わざと 1 行壊す](https://ai-agent-literacy.pages.dev/weeks/week08/#02-break) | 2:58 |
-| | [03 テストが全部通ったら提出していい？自分で遊んでみる](https://ai-agent-literacy.pages.dev/weeks/week08/#03-playtest) | 3:52 |
+| Week 8 | [01 VERIFY だけで十分？TESTS.md](https://ai-agent-literacy.pages.dev/weeks/week08/#01-tests) | 3:54 |
+| | [02 ミューテーションテスト（Mutation Testing）](https://ai-agent-literacy.pages.dev/weeks/week08/#02-break) | 2:58 |
+| | [03 User Story で実際に試す](https://ai-agent-literacy.pages.dev/weeks/week08/#03-playtest) | 3:43 |
 
-**扱うテーマ**：AI コーディングエージェント（OpenAI Codex、Claude Code）、作業フォルダとターミナル、`AGENTS.md` とコンテキストウィンドウ、内蔵ブラウザ、GitHub と Mermaid、検証チェックリスト（`VERIFY.md`）、作業途中のモデル切り替え（GPT-6 Luna → GPT-6.1 Sol）、Codex のエージェントループと自動圧縮、テスト駆動開発、`PLANS.md` と `TESTS.md`。
+**扱うテーマ**：AI コーディングエージェント（OpenAI Codex、Claude Code）、作業フォルダとターミナル、`AGENTS.md` とコンテキストウィンドウ、内蔵ブラウザ、GitHub と Mermaid、検証チェックリスト（`VERIFY.md`）、作業途中のモデル切り替え（GPT-6 Luna → GPT-6.1 Sol）、Codex のエージェントループと自動圧縮、テスト駆動開発、`PLANS.md` と `TESTS.md`、ミューテーションテストと user story。
 
 ### 作り方
 
