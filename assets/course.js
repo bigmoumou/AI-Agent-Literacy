@@ -31,22 +31,22 @@
       href: "weeks/week01/",
       thumb: "weeks/week01/video/01-agent-literacy/thumb.jpg",
       still: "weeks/week01/video/01-agent-literacy/poster.jpg",
-      meta: "3 支影片＋2 支補充・共 9 分 58 秒",
+      meta: "3 支影片＋2 支補充・共 9 分 49 秒",
       i18n: {
         "zh-Hans": {
           title: "为什么要学 AI Agent Literacy",
           summary: "AI 从聊天走到做事：这门课练的是带 AI 做事的素养，你给方向、设界线、验收，AI 动手做。再看这门课怎么上：Codex 桌面版＋VS Code、很多动手任务、评分看过程、卡住了照三步自学、用母语就好。最后是 AI Agent 初次体验：交代、看它做、验收、请它修，成品就在你的电脑里。",
-          meta: "3 个视频＋2 个补充・共 9 分 58 秒",
+          meta: "3 个视频＋2 个补充・共 9 分 49 秒",
         },
         en: {
           title: "Why Learn AI Agent Literacy",
           summary: "AI has moved from chatting to doing: this course trains the literacy of leading AI to do the work, where you give direction, set limits and check the result. Then how the course runs: the Codex desktop app plus VS Code, lots of hands-on work graded on the process, three steps when you are stuck, and your own language is fine. Finally, a first run with an AI agent: instruct, watch it work, check, ask for fixes, and the result is on your computer.",
-          meta: "3 videos + 2 extras · 9 min 58 s in total",
+          meta: "3 videos + 2 extras · 9 min 49 s in total",
         },
         vi: {
           title: "Vì sao cần học AI Agent Literacy",
           summary: "AI đã chuyển từ trò chuyện sang làm việc: môn học này luyện năng lực dẫn AI làm việc, bạn định hướng, đặt giới hạn, nghiệm thu, còn AI tự tay làm. Tiếp theo là cách học môn này: Codex bản desktop cùng VS Code, nhiều bài thực hành chấm theo quá trình, bị kẹt thì theo ba bước, dùng tiếng mẹ đẻ là được. Cuối cùng là lần đầu dùng thử AI Agent: dặn việc, xem nó làm, nghiệm thu, nhờ sửa, thành phẩm nằm ngay trong máy bạn.",
-          meta: "3 video + 2 bổ sung · tổng cộng 9 phút 58 giây",
+          meta: "3 video + 2 bổ sung · tổng cộng 9 phút 49 giây",
         },
       },
     },
