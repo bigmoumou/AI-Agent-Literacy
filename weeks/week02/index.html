@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<script>
+  // 課程網址：舊的 github.io 和 learning-analytics-tools.pages.dev（2026-10-21 改名前）都轉到 ai-agent-literacy.pages.dev 的同一頁，保留 #t= 等片段
+  if (location.hostname.endsWith("github.io") || /(^|\.)learning-analytics-tools\.pages\.dev$/.test(location.hostname)) {
+    location.replace("https://ai-agent-literacy.pages.dev" + (location.pathname.replace(/^\/(Learning-Analytics-Tools|AI-Agent-Literacy)(?=\/|$)/, "") || "/") + location.search + location.hash);
+  }
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title data-i18n
+  data-zh-hans="Week 2｜开始用 Codex"
+  data-en="Week 2 | Getting Started with Codex"
+  data-vi="Tuần 2 | Bắt đầu dùng Codex">Week 2｜開始用 Codex</title>
+<meta name="description" content="Week 2：開始用 Codex。交代清楚四件事（目標、素材、界線、怎樣算做好），它就不用猜；它動你的電腦之前會先問你，看懂再按，密碼和別人的個資不要交給它。補充：用 VS Code 看、改 AI 寫的 .md，以及 AI 為什麼會說錯。" data-i18n-attr="content"
+  data-zh-hans="Week 2：开始用 Codex。交代清楚四件事（目标、素材、界线、怎样算做好），它就不用猜；它动你的电脑之前会先问你，看懂再按，密码和别人的个人资料不要交给它。补充：用 VS Code 看、改 AI 写的 .md，以及 AI 为什么会说错。"
+  data-en="Week 2: getting started with Codex. State four things clearly (goal, materials, limits, what counts as done) and it does not have to guess; before it acts on your computer it asks you first, so read before you approve, and never hand it passwords or other people&#x27;s personal data. Extras: reading and editing the .md files AI writes in VS Code, and why AI gets things wrong."
+  data-vi="Tuần 2: bắt đầu dùng Codex. Nói rõ bốn điều (mục tiêu, tư liệu, giới hạn, thế nào là xong) thì nó không phải đoán; trước khi tác động lên máy tính, nó sẽ hỏi bạn trước, hãy đọc hiểu rồi mới bấm, và đừng đưa nó mật khẩu hay dữ liệu cá nhân của người khác. Bổ sung: xem và sửa các tệp .md do AI viết bằng VS Code, và vì sao AI nói sai.">
+<meta name="author" content="JUNHAO CHEN">
+<meta name="copyright" content="© 2026 JUNHAO CHEN">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+<link rel="stylesheet" href="../../assets/week.css">
+<!-- 多語系要比其他程式先載入（不要 defer） -->
+<script src="../../assets/i18n-strings.js"></script>
+<script src="../../assets/i18n.js"></script>
+<script src="../../assets/course.js" defer></script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23f6efdc'/%3E%3Cpath d='M9.5 24v-5M16 24v-9M22.5 24V8' stroke='%238a5400' stroke-width='4.2'/%3E%3C/svg%3E">
+</head>
+<body data-root="../../">
+<div class="page">
+  <header class="top">
+    <a class="brand" href="../../">
+      <span class="brand-name">AI Agent Literacy</span>
+      <span class="brand-sub" data-ui="brand.sub">學習分析工具・NTNU・Week 1 – 16</span>
+    </a>
+    <a class="pill nav-works" href="../../works/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H5a.5.5 0 0 1-.5-.5V5a.5.5 0 0 1 .5-.5zm9 0h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5h-5a.5.5 0 0 1-.5-.5V5a.5.5 0 0 1 .5-.5zm-9 9h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H5a.5.5 0 0 1-.5-.5v-5a.5.5 0 0 1 .5-.5zm9 0h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5h-5a.5.5 0 0 1-.5-.5v-5a.5.5 0 0 1 .5-.5z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span data-ui="nav.works">作品集</span></a>
+    <a class="pill icon-only nav-gh" href="https://github.com/bigmoumou/AI-Agent-Literacy" aria-label="GitHub 原始碼" data-ui-attr="aria-label:home.github"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2.2a9.8 9.8 0 0 0-3.1 19.1c.5.1.7-.2.7-.5v-1.7c-2.7.6-3.3-1.3-3.3-1.3-.4-1.1-1.1-1.4-1.1-1.4-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.3-1.1.6-1.3-2.2-.2-4.5-1.1-4.5-4.9 0-1.1.4-2 1-2.7-.1-.2-.4-1.2.1-2.6 0 0 .8-.3 2.7 1a9.4 9.4 0 0 1 4.9 0c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.6.6.7 1 1.6 1 2.7 0 3.8-2.3 4.7-4.5 4.9.4.3.7.9.7 1.8v2.7c0 .3.2.6.7.5A9.8 9.8 0 0 0 12 2.2z"/></svg></a>
+    <button class="pill icon-only" id="themeBtn" type="button">深色</button>
+  </header>
+
+  <main>
+    <div class="head">
+      <p class="kicker"><span class="dot" aria-hidden="true"></span>WEEK 02</p>
+      <h1 data-i18n
+        data-zh-hans="开始用 Codex"
+        data-en="Getting Started with Codex"
+        data-vi="Bắt đầu dùng Codex">開始用 Codex</h1>
+      <p class="lede" data-i18n
+        data-zh-hans="Codex 已经装好了，这周开始真的用它。先学怎么交代：同一件事，说清楚四件事（目标、素材、界线、怎样算做好），它就不用猜，你验收也有标准。再学它动你的电脑之前会先问你：看懂它在问什么再按，刚开始用 Ask for approval，密码和别人的个人资料不要交给它。两个补充：用 VS Code 看、改 AI 写的 .md 文件，以及 AI 为什么会很有把握地说错。"
+        data-en="Codex is installed, so this week you start using it for real. First, how to ask: for any task, state four things clearly (goal, materials, limits, what counts as done) so it does not have to guess and you have a standard to check against. Then, before it acts on your computer it asks you first: understand what it is asking before you approve, start with Ask for approval, and never hand it passwords or other people&#x27;s personal data. Two extras: reading and editing the .md files AI writes in VS Code, and why AI can be confidently wrong."
+        data-vi="Codex đã cài xong, tuần này bắt đầu dùng thật. Trước hết là cách dặn việc: với cùng một việc, nói rõ bốn điều (mục tiêu, tư liệu, giới hạn, thế nào là xong) thì nó không phải đoán, và bạn cũng có tiêu chuẩn để nghiệm thu. Sau đó, trước khi tác động lên máy tính, nó sẽ hỏi bạn trước: hiểu nó đang hỏi gì rồi mới bấm, lúc đầu hãy dùng Ask for approval, và đừng đưa nó mật khẩu hay dữ liệu cá nhân của người khác. Hai phần bổ sung: xem và sửa các tệp .md do AI viết bằng VS Code, và vì sao AI có thể nói sai một cách rất tự tin.">Codex 已經裝好了，這週開始真的用它。先學怎麼交代：同一件事，說清楚四件事（目標、素材、界線、怎樣算做好），它就不用猜，你驗收也有標準。再學它動你的電腦之前會先問你：看懂它在問什麼再按，剛開始用 Ask for approval，密碼和別人的個資不要交給它。兩支補充：用 VS Code 看、改 AI 寫的 .md 檔，以及 AI 為什麼會很有把握地說錯。</p>
+      <p class="lang-note" data-ui="video.note"></p>
+    </div>
+
+    <!-- 2026-10-22 老師同意 Week 2 第 5 版規劃（影片 01 交代清楚、02 核准與權限、補充 1 VS Code 和 Markdown、補充 2 AI 為什麼會說錯），直接做完上線（Week 1 + 2 對話窗，原始檔在 製作/week02/）。
+         規劃見 製作/week01-02/README.md。這一頁由 製作/week02/tools/site_week2.py 產生（文字四種語言都在那裡改，可以重跑）。
+         一支影片一個 section：id 和 video/ 裡的資料夾同名；影片、片段、重點都由 assets/video.js 接起來。 -->
+
+    <section class="unit" id="01-clear-ask" aria-labelledby="u01-title">
+      <h2 class="unit-title" id="u01-title"><span class="unit-num" data-ui="video.n" data-n="01">影片 01</span><span data-i18n
+        data-zh-hans="同一件事，怎么交代才做得对？目标、素材、界线、怎样算做好"
+        data-en="One Task: How Do You Ask So It Gets Done Right? Goal, Materials, Limits, What Counts as Done"
+        data-vi="Cùng một việc, dặn thế nào để làm đúng? Mục tiêu, tư liệu, giới hạn, thế nào là xong">同一件事，怎麼交代才做得對？目標、素材、界線、怎樣算做好</span></h2>
+
+      <div class="film">
+        <div class="player">
+          <video controls preload="metadata" playsinline data-hls="video/01-clear-ask/hls/index.m3u8" data-poster="video/01-clear-ask/poster.jpg" width="1920" height="1080" data-ui="video.unsupported">
+            你的瀏覽器無法播放這支影片。
+          </video>
+        </div>
+      </div>
+
+      <ol class="chapters" aria-label="影片片段（點了直接跳到那一段）" data-ui-attr="aria-label:video.chapters">
+        <li><button type="button" data-t="0"><span class="k">00:00</span><span class="t" data-i18n data-zh-hans="开场" data-en="Opening" data-vi="Mở đầu">開場</span></button></li>
+        <li><button type="button" data-t="7"><span class="k">00:07</span><span class="t" data-i18n data-zh-hans="一句话：它只能用猜的" data-en="One sentence: it can only guess" data-vi="Một câu: nó chỉ có thể đoán">一句話：它只能用猜的</span></button></li>
+        <li><button type="button" data-t="24"><span class="k">00:24</span><span class="t" data-i18n data-zh-hans="它搬了文件，连期末报告也改了" data-en="It moved files and even changed the final report" data-vi="Nó chuyển tệp, sửa luôn cả báo cáo cuối kỳ">它搬了檔案，連期末報告也改了</span></button></li>
+        <li><button type="button" data-t="31"><span class="k">00:31</span><span class="t" data-i18n data-zh-hans="交代清楚：四件事" data-en="Asking clearly: four things" data-vi="Dặn rõ ràng: bốn điều">交代清楚：四件事</span></button></li>
+        <li><button type="button" data-t="39"><span class="k">00:39</span><span class="t" data-i18n data-zh-hans="交代 Codex，也是同样的四件事" data-en="Asking Codex takes the same four things" data-vi="Dặn Codex cũng là bốn điều đó">交代 Codex，也是同樣的四件事</span></button></li>
+        <li><button type="button" data-t="47"><span class="k">00:47</span><span class="t" data-i18n data-zh-hans="怎样算做好：你验收的标准" data-en="What counts as done: your standard for checking" data-vi="Thế nào là xong: tiêu chuẩn để bạn nghiệm thu">怎樣算做好：你驗收的標準</span></button></li>
+        <li><button type="button" data-t="54"><span class="k">00:54</span><span class="t" data-i18n data-zh-hans="一段话：它照你的意思做" data-en="One paragraph: it does what you meant" data-vi="Một đoạn: nó làm đúng ý bạn">一段話：它照你的意思做</span></button></li>
+        <li><button type="button" data-t="76"><span class="k">01:16</span><span class="t" data-i18n data-zh-hans="只多了一个文件，原本的都没动" data-en="Only one new file; the originals are untouched" data-vi="Chỉ thêm một tệp, các tệp cũ không bị đụng">只多了一個檔案，原本的都沒動</span></button></li>
+        <li><button type="button" data-t="82"><span class="k">01:22</span><span class="t" data-i18n data-zh-hans="验收：用你说的标准" data-en="Check it against the standard you set" data-vi="Nghiệm thu theo tiêu chuẩn bạn đặt">驗收：用你說的標準</span></button></li>
+        <li><button type="button" data-t="103"><span class="k">01:43</span><span class="t" data-i18n data-zh-hans="怎样算做好，由你决定" data-en="You decide what counts as done" data-vi="Thế nào là xong, do bạn quyết định">怎樣算做好，由你決定</span></button></li>
+        <li><button type="button" data-t="106"><span class="k">01:46</span><span class="t" data-i18n data-zh-hans="结尾" data-en="Wrap-up" data-vi="Kết">結尾</span></button></li>
+      </ol>
+
+      <ol class="points">
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;一句话，它只能用猜的。&lt;/strong&gt;小安要准备考试，跟 Codex 说“帮我整理笔记”。“整理”是什么意思，它不知道，只能自己猜：把文件搬进 &lt;code&gt;整理/&lt;/code&gt;、改了标题和格式，连期末报告草稿都一起改了。小安要的，其实是一份考前复习重点。"
+          data-en="&lt;strong&gt;With one sentence, it can only guess.&lt;/strong&gt; Preparing for an exam, Xiao An tells Codex “Organise my notes.” What does “organise” mean? It does not know, so it guesses: it moves the files into &lt;code&gt;整理/&lt;/code&gt;, rewrites their headings and format, and even changes the final report draft. What Xiao An actually wanted was one set of revision notes for the exam."
+          data-vi="&lt;strong&gt;Chỉ một câu, nó đành phải đoán.&lt;/strong&gt; Tiểu An chuẩn bị thi, nói với Codex “Sắp xếp ghi chú giúp mình”. “Sắp xếp” nghĩa là gì, nó không biết, nên tự đoán: chuyển các tệp vào &lt;code&gt;整理/&lt;/code&gt;, sửa tiêu đề và định dạng, sửa luôn cả bản nháp báo cáo cuối kỳ. Thứ Tiểu An thật sự cần là một bản tóm tắt ôn thi."><strong>一句話，它只能用猜的。</strong>小安要準備考試，跟 Codex 說「幫我整理筆記」。「整理」是什麼意思，它不知道，只能自己猜：把檔案搬進 <code>整理/</code>、改了標題和格式，連期末報告草稿都一起改了。小安要的，其實是一份考前複習重點。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;交代清楚四件事。&lt;/strong&gt;目标（要做出什么）、素材（用什么、在哪里）、界线（什么不能碰）、怎样算做好（你等一下怎么验收）。就像请朋友帮你买午餐：一个排骨便当、钱在这里、不要辣、12:10 前放我桌上。交代 Codex 也是同样的四件事。"
+          data-en="&lt;strong&gt;State four things clearly.&lt;/strong&gt; The goal (what to make), the materials (what to use and where it is), the limits (what must not be touched) and what counts as done (how you will check it). It is like asking a friend to buy you lunch: a pork chop bento, here is the money, not spicy, on my desk by 12:10. Asking Codex takes the same four things."
+          data-vi="&lt;strong&gt;Nói rõ bốn điều.&lt;/strong&gt; Mục tiêu (làm ra cái gì), tư liệu (dùng gì, ở đâu), giới hạn (cái gì không được đụng) và thế nào là xong (lát nữa bạn nghiệm thu thế nào). Giống như nhờ bạn mua cơm trưa: một hộp cơm sườn, tiền đây, đừng cay, đặt lên bàn mình trước 12:10. Dặn Codex cũng là bốn điều đó."><strong>交代清楚四件事。</strong>目標（要做出什麼）、素材（用什麼、在哪裡）、界線（什麼不能碰）、怎樣算做好（你等一下怎麼驗收）。就像請朋友幫你買午餐：一個排骨便當、錢在這裡、不要辣、12:10 前放我桌上。交代 Codex 也是同樣的四件事。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;一段话，它照你的意思做。&lt;/strong&gt;四件事一件一行：“帮我做一份考前复习重点，存成 複習重點.md。只用 week1.md 和 week2.md。不要改、不要搬原本的文件。每周 5 点以内、每点一行，最后列出我可能还不懂的地方。”这次它不用猜：只多了一个文件（&lt;code&gt;複習重點.md&lt;/code&gt; +19），原本的都没动。"
+          data-en="&lt;strong&gt;With one paragraph, it does what you meant.&lt;/strong&gt; One line per thing: “Make me a set of revision notes for the exam and save it as 複習重點.md. Use only week1.md and week2.md. Do not change or move the original files. At most 5 points per week, one line each, and finish with a list of what I may still not understand.” This time it does not have to guess: there is only one new file (&lt;code&gt;複習重點.md&lt;/code&gt; +19) and the originals are untouched."
+          data-vi="&lt;strong&gt;Một đoạn, nó làm đúng ý bạn.&lt;/strong&gt; Mỗi điều một dòng: “Làm giúp mình bản tóm tắt ôn thi, lưu thành 複習重點.md. Chỉ dùng week1.md và week2.md. Đừng sửa, đừng chuyển các tệp gốc. Mỗi tuần tối đa 5 ý, mỗi ý một dòng, cuối cùng liệt kê những chỗ mình có thể chưa hiểu.” Lần này nó không phải đoán: chỉ thêm một tệp (&lt;code&gt;複習重點.md&lt;/code&gt; +19), các tệp gốc không bị đụng tới."><strong>一段話，它照你的意思做。</strong>四件事一件一行：「幫我做一份考前複習重點，存成 複習重點.md。只用 week1.md 和 week2.md。不要改、不要搬原本的檔案。每週 5 點以內、每點一行，最後列出我可能還不懂的地方。」這次它不用猜：只多了一個檔案（<code>複習重點.md</code> +19），原本的都沒動。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;怎样算做好，由你决定。&lt;/strong&gt;界线和怎样算做好，就是你的验收清单：看改了哪些文件（原本的没动）、数一数每周几点、找到“我可能还不懂的”那一段。说清楚了，验收就有标准。"
+          data-en="&lt;strong&gt;You decide what counts as done.&lt;/strong&gt; Your limits and your “what counts as done” are your checklist: look at which files changed (the originals are untouched), count the points for each week, and find the “what I may still not understand” section. Once you have said it clearly, checking has a standard."
+          data-vi="&lt;strong&gt;Thế nào là xong, do bạn quyết định.&lt;/strong&gt; Giới hạn và “thế nào là xong” chính là danh sách nghiệm thu của bạn: xem những tệp nào đã đổi (tệp gốc không bị đụng), đếm mỗi tuần mấy ý, tìm phần “những chỗ mình có thể chưa hiểu”. Nói rõ rồi thì nghiệm thu có tiêu chuẩn."><strong>怎樣算做好，由你決定。</strong>界線和怎樣算做好，就是你的驗收清單：看改了哪些檔案（原本的沒動）、數一數每週幾點、找到「我可能還不懂的」那一段。說清楚了，驗收就有標準。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;自己跑一次。&lt;/strong&gt;照 Week 1 视频 03，做你自己的自我介绍网页：交代时把四件事都写到，做完用你写的“怎样算做好”一条一条验收；不对，就请它修。"
+          data-en="&lt;strong&gt;Run it yourself.&lt;/strong&gt; Following Week 1 video 03, make your own self-introduction page: when you ask, cover all four things, then check the result item by item against your own “what counts as done”; if something is wrong, ask it to fix it."
+          data-vi="&lt;strong&gt;Tự chạy một lần.&lt;/strong&gt; Theo video 03 của Tuần 1, làm trang web tự giới thiệu của chính bạn: khi dặn việc, viết đủ cả bốn điều, làm xong thì nghiệm thu từng mục theo “thế nào là xong” bạn đã viết; chỗ nào sai thì nhờ nó sửa."><strong>自己跑一次。</strong>照 Week 1 影片 03，做你自己的自我介紹網頁：交代時把四件事都寫到，做完用你寫的「怎樣算做好」一條一條驗收；不對，就請它修。</p></li>
+      </ol>
+    </section>
+
+    <section class="unit" id="02-approval" aria-labelledby="u02-title">
+      <h2 class="unit-title" id="u02-title"><span class="unit-num" data-ui="video.n" data-n="02">影片 02</span><span data-i18n
+        data-zh-hans="它能动你的电脑，那谁说了算？批准与权限"
+        data-en="It Can Act on Your Computer, So Who Decides? Approvals and Permissions"
+        data-vi="Nó tác động được lên máy tính của bạn, vậy ai quyết định? Phê duyệt và quyền hạn">它能動你的電腦，那誰說了算？核准與權限</span></h2>
+
+      <div class="film">
+        <div class="player">
+          <video controls preload="metadata" playsinline data-hls="video/02-approval/hls/index.m3u8" data-poster="video/02-approval/poster.jpg" width="1920" height="1080" data-ui="video.unsupported">
+            你的瀏覽器無法播放這支影片。
+          </video>
+        </div>
+      </div>
+
+      <ol class="chapters" aria-label="影片片段（點了直接跳到那一段）" data-ui-attr="aria-label:video.chapters">
+        <li><button type="button" data-t="0"><span class="k">00:00</span><span class="t" data-i18n data-zh-hans="开场" data-en="Opening" data-vi="Mở đầu">開場</span></button></li>
+        <li><button type="button" data-t="7"><span class="k">00:07</span><span class="t" data-i18n data-zh-hans="电脑是一栋房子：项目文件夹是工作室" data-en="Your computer is a house; the project folder is the workroom" data-vi="Máy tính là một ngôi nhà: thư mục dự án là phòng làm việc">電腦是一棟房子：專案資料夾是工作室</span></button></li>
+        <li><button type="button" data-t="19"><span class="k">00:19</span><span class="t" data-i18n data-zh-hans="要改外面的文件，先问你" data-en="Changing files outside: it asks you first" data-vi="Sửa tệp bên ngoài: nó hỏi bạn trước">要改外面的檔案，先問你</span></button></li>
+        <li><button type="button" data-t="26"><span class="k">00:26</span><span class="t" data-i18n data-zh-hans="要连网络，也先问你" data-en="Going online: it asks you first too" data-vi="Kết nối mạng: cũng hỏi bạn trước">要連網路，也先問你</span></button></li>
+        <li><button type="button" data-t="34"><span class="k">00:34</span><span class="t" data-i18n data-zh-hans="它来问你：看懂再按" data-en="When it asks: understand before you approve" data-vi="Khi nó hỏi: hiểu rồi mới bấm">它來問你：看懂再按</span></button></li>
+        <li><button type="button" data-t="48"><span class="k">00:48</span><span class="t" data-i18n data-zh-hans="看两件事：连去哪里、存到哪里" data-en="Check two things: where it connects, where it saves" data-vi="Xem hai điều: kết nối đi đâu, lưu vào đâu">看兩件事：連去哪裡、存到哪裡</span></button></li>
+        <li><button type="button" data-t="52"><span class="k">00:52</span><span class="t" data-i18n data-zh-hans="看不懂？先按 Decline request 再问" data-en="Not sure? Decline the request, then ask" data-vi="Không hiểu? Bấm Decline request rồi hỏi">看不懂？先按 Decline request 再問</span></button></li>
+        <li><button type="button" data-t="63"><span class="k">01:03</span><span class="t" data-i18n data-zh-hans="三种权限模式" data-en="Three permission modes" data-vi="Ba chế độ quyền hạn">三種權限模式</span></button></li>
+        <li><button type="button" data-t="76"><span class="k">01:16</span><span class="t" data-i18n data-zh-hans="刚开始，用 Ask for approval" data-en="Start with Ask for approval" data-vi="Lúc đầu, dùng Ask for approval">剛開始，用 Ask for approval</span></button></li>
+        <li><button type="button" data-t="86"><span class="k">01:26</span><span class="t" data-i18n data-zh-hans="有些东西，不要交给它" data-en="Some things you never hand it" data-vi="Có những thứ đừng giao cho nó">有些東西，不要交給它</span></button></li>
+        <li><button type="button" data-t="96"><span class="k">01:36</span><span class="t" data-i18n data-zh-hans="名单：名字换成代号、学号拿掉" data-en="A class list: codes for names, IDs removed" data-vi="Danh sách: đổi tên thành mã, bỏ mã số sinh viên">名單：名字換成代號、學號拿掉</span></button></li>
+        <li><button type="button" data-t="105"><span class="k">01:45</span><span class="t" data-i18n data-zh-hans="结尾" data-en="Wrap-up" data-vi="Kết">結尾</span></button></li>
+      </ol>
+
+      <ol class="points">
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;电脑是一栋房子，项目文件夹是工作室。&lt;/strong&gt;在工作室里，Codex 自己读文件、写文件、运行命令；要改工作室外面的文件、要出门连网络，它会先停下来问你。这就是 Ask for approval：工作室里自己做，出去之前先问你。"
+          data-en="&lt;strong&gt;Your computer is a house, and the project folder is the workroom.&lt;/strong&gt; Inside the workroom Codex reads and writes files and runs commands on its own; to change files outside it, or to go out onto the internet, it stops and asks you first. That is Ask for approval: it works on its own inside, and asks before it goes out."
+          data-vi="&lt;strong&gt;Máy tính là một ngôi nhà, thư mục dự án là phòng làm việc.&lt;/strong&gt; Trong phòng làm việc, Codex tự đọc tệp, ghi tệp, chạy lệnh; muốn sửa tệp bên ngoài phòng, hay ra ngoài kết nối mạng, nó sẽ dừng lại hỏi bạn trước. Đó là Ask for approval: trong phòng thì tự làm, ra ngoài thì hỏi trước."><strong>電腦是一棟房子，專案資料夾是工作室。</strong>在工作室裡，Codex 自己讀檔、寫檔、跑指令；要改工作室外面的檔案、要出門連網路，它會先停下來問你。這就是 Ask for approval：工作室裡自己做，出去之前先問你。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;它来问你，看懂再按。&lt;/strong&gt;请 Codex 从网络下载一份资料，它要连网络，会先跳出批准请求，上面是它要执行的命令。按之前看两件事：连去哪里（网址）、存到哪里（路径）。看得懂、是你要的，再按 &lt;code&gt;Approve request&lt;/code&gt;；看不懂，先按 &lt;code&gt;Decline request&lt;/code&gt;，用中文问它：“这个命令在做什么？”"
+          data-en="&lt;strong&gt;When it asks, understand before you approve.&lt;/strong&gt; Ask Codex to download some data and, because it needs the internet, it first shows an approval request with the command it wants to run. Before you click, check two things: where it connects (the URL) and where it saves (the path). If you understand it and it is what you want, click &lt;code&gt;Approve request&lt;/code&gt;; if not, click &lt;code&gt;Decline request&lt;/code&gt; and ask it in your own language: “What does this command do?”"
+          data-vi="&lt;strong&gt;Khi nó hỏi, hiểu rồi mới bấm.&lt;/strong&gt; Nhờ Codex tải một bộ dữ liệu từ mạng, vì cần kết nối mạng nên nó sẽ hiện yêu cầu phê duyệt, trên đó là lệnh nó muốn chạy. Trước khi bấm, xem hai điều: kết nối đi đâu (địa chỉ web) và lưu vào đâu (đường dẫn). Hiểu rồi và đúng ý bạn thì bấm &lt;code&gt;Approve request&lt;/code&gt;; chưa hiểu thì bấm &lt;code&gt;Decline request&lt;/code&gt; rồi hỏi nó bằng tiếng mẹ đẻ: “Lệnh này làm gì vậy?”"><strong>它來問你，看懂再按。</strong>請 Codex 從網路下載一份資料，它要連網路，會先跳出核准，上面是它要執行的指令。按之前看兩件事：連去哪裡（網址）、存到哪裡（路徑）。看得懂、是你要的，再按 <code>Approve request</code>；看不懂，先按 <code>Decline request</code>，用中文問它：「這個指令在做什麼？」</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;三种权限模式。&lt;/strong&gt;输入框底下可以换：Ask for approval（改外面的文件、连网络，都先问你）、Approve for me（它先自己判断，可能不安全的才问你）、Full access（整台电脑、网络都能用，什么都不问）。刚开始建议用 Ask for approval，每一步都看得到；Full access 等你熟了、项目有备份再考虑。"
+          data-en="&lt;strong&gt;Three permission modes.&lt;/strong&gt; You can switch them under the message box: Ask for approval (it asks before changing files outside the project or going online), Approve for me (it judges first and only asks about actions that may be unsafe) and Full access (it can use the whole computer and the internet without asking). We suggest starting with Ask for approval so you can see every step; consider Full access only once you are comfortable and your project is backed up."
+          data-vi="&lt;strong&gt;Ba chế độ quyền hạn.&lt;/strong&gt; Đổi ngay dưới ô nhập: Ask for approval (sửa tệp bên ngoài, kết nối mạng đều hỏi bạn trước), Approve for me (nó tự đánh giá trước, chỉ hỏi những việc có thể không an toàn) và Full access (dùng được cả máy tính lẫn mạng, không hỏi gì). Lúc đầu nên dùng Ask for approval để thấy rõ từng bước; Full access thì đợi khi đã quen và dự án có bản sao lưu rồi hãy cân nhắc."><strong>三種權限模式。</strong>輸入框底下可以換：Ask for approval（改外面的檔案、連網路，都先問你）、Approve for me（它先自己判斷，可能不安全的才問你）、Full access（整台電腦、網路都能用，什麼都不問）。剛開始建議用 Ask for approval，每一步都看得到；Full access 等你熟了、專案有備份再考慮。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;有些东西，不要交给它。&lt;/strong&gt;密码、API key（让程序登录服务的钥匙，和密码一样重要）、别人的个人资料（姓名、学号、电话），不要贴进对话，也不要放进项目文件夹：贴进对话的内容，会发送到 AI 的服务器。要用到别人的资料，名字换成代号、学号拿掉；怕它改坏，先备份一份文件夹。"
+          data-en="&lt;strong&gt;Some things you never hand it.&lt;/strong&gt; Passwords, API keys (the keys programs use to sign in to services, as important as passwords) and other people&#x27;s personal data (names, student IDs, phone numbers) do not go into the chat or into the project folder: whatever you paste into the chat is sent to the AI&#x27;s servers. If you need other people&#x27;s data, replace names with codes and remove the IDs; if you worry it might break something, back up the folder first."
+          data-vi="&lt;strong&gt;Có những thứ đừng giao cho nó.&lt;/strong&gt; Mật khẩu, API key (chìa khóa để chương trình đăng nhập dịch vụ, quan trọng như mật khẩu), dữ liệu cá nhân của người khác (họ tên, mã số sinh viên, số điện thoại) đừng dán vào cuộc trò chuyện, cũng đừng để trong thư mục dự án: những gì dán vào cuộc trò chuyện sẽ được gửi lên máy chủ của AI. Cần dùng dữ liệu của người khác thì đổi tên thành mã, bỏ mã số sinh viên; sợ nó làm hỏng thì sao lưu thư mục trước."><strong>有些東西，不要交給它。</strong>密碼、API key（讓程式登入服務的鑰匙，和密碼一樣重要）、別人的個資（姓名、學號、電話），不要貼進對話，也不要放進專案資料夾：貼進對話的內容，會送到 AI 的伺服器。要用到別人的資料，名字換成代號、學號拿掉；怕它改壞，先備份一份資料夾。</p></li>
+      </ol>
+    </section>
+
+    <section class="unit unit-supp" id="s1-vscode-md" aria-labelledby="us1-title">
+      <h2 class="unit-title" id="us1-title"><span class="unit-num" data-ui="video.supp" data-n="1">補充 1</span><span data-i18n
+        data-zh-hans="VS Code 和 Markdown"
+        data-en="VS Code and Markdown"
+        data-vi="VS Code và Markdown">VS Code 和 Markdown</span></h2>
+
+      <div class="film">
+        <div class="player">
+          <video controls preload="metadata" playsinline data-hls="video/s1-vscode-md/hls/index.m3u8" data-poster="video/s1-vscode-md/poster.jpg" width="1920" height="1080" data-ui="video.unsupported">
+            你的瀏覽器無法播放這支影片。
+          </video>
+        </div>
+      </div>
+
+      <ol class="chapters" aria-label="影片片段（點了直接跳到那一段）" data-ui-attr="aria-label:video.chapters">
+        <li><button type="button" data-t="0"><span class="k">00:00</span><span class="t" data-i18n data-zh-hans="开场" data-en="Opening" data-vi="Mở đầu">開場</span></button></li>
+        <li><button type="button" data-t="7"><span class="k">00:07</span><span class="t" data-i18n data-zh-hans="VS Code：看文件、改文件的地方" data-en="VS Code: where you read and edit files" data-vi="VS Code: nơi xem và sửa tệp">VS Code：看檔案、改檔案的地方</span></button></li>
+        <li><button type="button" data-t="18"><span class="k">00:18</span><span class="t" data-i18n data-zh-hans="点一下就打开" data-en="One click opens a file" data-vi="Bấm một lần là mở">點一下就打開</span></button></li>
+        <li><button type="button" data-t="24"><span class="k">00:24</span><span class="t" data-i18n data-zh-hans="改一点，记得保存" data-en="Change something, then save" data-vi="Sửa một chút, nhớ lưu">改一點，記得存檔</span></button></li>
+        <li><button type="button" data-t="35"><span class="k">00:35</span><span class="t" data-i18n data-zh-hans="没保存，Codex 读到的还是旧的" data-en="Unsaved, Codex still reads the old version" data-vi="Chưa lưu thì Codex vẫn đọc bản cũ">沒存檔，Codex 讀到的還是舊的</span></button></li>
+        <li><button type="button" data-t="41"><span class="k">00:41</span><span class="t" data-i18n data-zh-hans="Markdown：几个符号就有格式" data-en="Markdown: a few symbols give you formatting" data-vi="Markdown: vài ký hiệu là có định dạng">Markdown：幾個符號就有格式</span></button></li>
+        <li><button type="button" data-t="48"><span class="k">00:48</span><span class="t" data-i18n data-zh-hans="右边打开预览" data-en="Open the preview on the right" data-vi="Mở bản xem trước bên phải">右邊打開預覽</span></button></li>
+        <li><button type="button" data-t="55"><span class="k">00:55</span><span class="t" data-i18n data-zh-hans="列表、勾选框" data-en="Lists and checkboxes" data-vi="Danh sách, ô đánh dấu">清單、打勾框</span></button></li>
+        <li><button type="button" data-t="63"><span class="k">01:03</span><span class="t" data-i18n data-zh-hans="代码字、表格" data-en="Code text and tables" data-vi="Chữ dạng mã, bảng">程式字、表格</span></button></li>
+        <li><button type="button" data-t="76"><span class="k">01:16</span><span class="t" data-i18n data-zh-hans="这门课的 .md" data-en="The .md files in this course" data-vi="Các tệp .md của môn học">這門課的 .md</span></button></li>
+        <li><button type="button" data-t="86"><span class="k">01:26</span><span class="t" data-i18n data-zh-hans="结尾" data-en="Wrap-up" data-vi="Kết">結尾</span></button></li>
+      </ol>
+
+      <ol class="points">
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;VS Code 是看文件、改文件的地方。&lt;/strong&gt;不是写程序才用。左边 EXPLORER 是文件夹里的文件，点一下就打开；Codex 和 VS Code 看的是同一个文件夹，视频 01 Codex 写的 &lt;code&gt;複習重點.md&lt;/code&gt; 在这里就看得到。"
+          data-en="&lt;strong&gt;VS Code is where you read and edit files.&lt;/strong&gt; It is not only for writing code. The EXPLORER on the left lists the files in the folder, and one click opens a file; Codex and VS Code look at the same folder, so the &lt;code&gt;複習重點.md&lt;/code&gt; that Codex wrote in video 01 shows up here."
+          data-vi="&lt;strong&gt;VS Code là nơi xem và sửa tệp.&lt;/strong&gt; Không phải chỉ dùng để viết code. EXPLORER bên trái là các tệp trong thư mục, bấm một lần là mở; Codex và VS Code cùng nhìn một thư mục, nên &lt;code&gt;複習重點.md&lt;/code&gt; mà Codex viết trong video 01 cũng thấy ở đây."><strong>VS Code 是看檔案、改檔案的地方。</strong>不是寫程式才用。左邊 EXPLORER 是資料夾裡的檔案，點一下就打開；Codex 和 VS Code 看的是同一個資料夾，影片 01 Codex 寫的 <code>複習重點.md</code> 在這裡就看得到。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;改完记得保存。&lt;/strong&gt;⌘S（Windows：Ctrl+S）。标签页上的 × 变成白点，就是还没保存；没保存的话，Codex 读到的还是旧的。"
+          data-en="&lt;strong&gt;Save after you edit.&lt;/strong&gt; ⌘S (Windows: Ctrl+S). When the × on the tab turns into a white dot, the file is not saved yet; until you save, Codex still reads the old version."
+          data-vi="&lt;strong&gt;Sửa xong nhớ lưu.&lt;/strong&gt; ⌘S (Windows: Ctrl+S). Dấu × trên thẻ biến thành chấm trắng nghĩa là chưa lưu; chưa lưu thì Codex vẫn đọc bản cũ."><strong>改完記得存檔。</strong>⌘S（Windows：Ctrl+S）。分頁上的 × 變成白點，就是還沒存；沒存的話，Codex 讀到的還是舊的。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;Markdown：几个符号就有格式。&lt;/strong&gt;&lt;code&gt;#&lt;/code&gt; 大标题、&lt;code&gt;##&lt;/code&gt; 小标题、&lt;code&gt;-&lt;/code&gt; 列表、&lt;code&gt;- [ ]&lt;/code&gt; 勾选框、&lt;code&gt;- [x]&lt;/code&gt; 已勾选、&lt;code&gt;`文件名`&lt;/code&gt; 代码字、&lt;code&gt;|&lt;/code&gt; 表格。在标签栏右上按 Open Preview to the Side（⌘K V；Windows：Ctrl+K V），右边就看得到排好的样子。"
+          data-en="&lt;strong&gt;Markdown: a few symbols give you formatting.&lt;/strong&gt; &lt;code&gt;#&lt;/code&gt; a heading, &lt;code&gt;##&lt;/code&gt; a subheading, &lt;code&gt;-&lt;/code&gt; a list, &lt;code&gt;- [ ]&lt;/code&gt; a checkbox, &lt;code&gt;- [x]&lt;/code&gt; a ticked box, &lt;code&gt;`file name`&lt;/code&gt; code text, &lt;code&gt;|&lt;/code&gt; a table. Click Open Preview to the Side at the top right of the tab bar (⌘K V; Windows: Ctrl+K V) and the formatted result appears on the right."
+          data-vi="&lt;strong&gt;Markdown: vài ký hiệu là có định dạng.&lt;/strong&gt; &lt;code&gt;#&lt;/code&gt; tiêu đề lớn, &lt;code&gt;##&lt;/code&gt; tiêu đề nhỏ, &lt;code&gt;-&lt;/code&gt; danh sách, &lt;code&gt;- [ ]&lt;/code&gt; ô đánh dấu, &lt;code&gt;- [x]&lt;/code&gt; đã đánh dấu, &lt;code&gt;`tên tệp`&lt;/code&gt; chữ dạng mã, &lt;code&gt;|&lt;/code&gt; bảng. Bấm Open Preview to the Side ở góc trên bên phải thanh thẻ (⌘K V; Windows: Ctrl+K V), bên phải sẽ hiện bản đã trình bày."><strong>Markdown：幾個符號就有格式。</strong><code>#</code> 大標題、<code>##</code> 小標題、<code>-</code> 清單、<code>- [ ]</code> 打勾框、<code>- [x]</code> 打勾了、<code>`檔名`</code> 程式字、<code>|</code> 表格。在分頁列右上按 Open Preview to the Side（⌘K V；Windows：Ctrl+K V），右邊就看得到排好的樣子。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;这门课的 .md。&lt;/strong&gt;AGENTS.md（Week 3）、VERIFY.md（Week 5）、PLANS.md（Week 7）都是 Markdown：规则、验收清单、计划都写成 .md。你写的 AI 看得懂，AI 写的你也看得懂。"
+          data-en="&lt;strong&gt;The .md files in this course.&lt;/strong&gt; AGENTS.md (Week 3), VERIFY.md (Week 5) and PLANS.md (Week 7) are all Markdown: rules, checklists and plans are written as .md. What you write, the AI can read, and what the AI writes, you can read."
+          data-vi="&lt;strong&gt;Các tệp .md của môn học.&lt;/strong&gt; AGENTS.md (Tuần 3), VERIFY.md (Tuần 5), PLANS.md (Tuần 7) đều là Markdown: quy tắc, danh sách nghiệm thu, kế hoạch đều viết thành .md. Bạn viết thì AI đọc hiểu, AI viết thì bạn cũng đọc hiểu."><strong>這門課的 .md。</strong>AGENTS.md（Week 3）、VERIFY.md（Week 5）、PLANS.md（Week 7）都是 Markdown：規則、驗收清單、計畫都寫成 .md。你寫的 AI 看得懂，AI 寫的你也看得懂。</p></li>
+      </ol>
+    </section>
+
+    <section class="unit unit-supp" id="s2-why-wrong" aria-labelledby="us2-title">
+      <h2 class="unit-title" id="us2-title"><span class="unit-num" data-ui="video.supp" data-n="2">補充 2</span><span data-i18n
+        data-zh-hans="AI 为什么会说错：模型、token、用量"
+        data-en="Why AI Gets Things Wrong: Models, Tokens, Usage"
+        data-vi="Vì sao AI nói sai: mô hình, token, lượng dùng">AI 為什麼會說錯：模型、token、用量</span></h2>
+
+      <div class="film">
+        <div class="player">
+          <video controls preload="metadata" playsinline data-hls="video/s2-why-wrong/hls/index.m3u8" data-poster="video/s2-why-wrong/poster.jpg" width="1920" height="1080" data-ui="video.unsupported">
+            你的瀏覽器無法播放這支影片。
+          </video>
+        </div>
+      </div>
+
+      <ol class="chapters" aria-label="影片片段（點了直接跳到那一段）" data-ui-attr="aria-label:video.chapters">
+        <li><button type="button" data-t="0"><span class="k">00:00</span><span class="t" data-i18n data-zh-hans="开场" data-en="Opening" data-vi="Mở đầu">開場</span></button></li>
+        <li><button type="button" data-t="6"><span class="k">00:06</span><span class="t" data-i18n data-zh-hans="它一段一段接下去写" data-en="It writes one piece at a time" data-vi="Nó viết tiếp từng đoạn một">它一段一段接下去寫</span></button></li>
+        <li><button type="button" data-t="22"><span class="k">00:22</span><span class="t" data-i18n data-zh-hans="在乎通不通顺，不是查过对不对" data-en="It cares about sounding right, not checking facts" data-vi="Nó quan tâm trôi chảy, không phải đã kiểm tra đúng sai">在乎通不通順，不是查過對不對</span></button></li>
+        <li><button type="button" data-t="28"><span class="k">00:28</span><span class="t" data-i18n data-zh-hans="token：它读、写的单位" data-en="Tokens: the units it reads and writes" data-vi="Token: đơn vị nó đọc và viết">token：它讀、寫的單位</span></button></li>
+        <li><button type="button" data-t="44"><span class="k">00:44</span><span class="t" data-i18n data-zh-hans="知识有截止日" data-en="Its knowledge has a cutoff date" data-vi="Kiến thức có ngày dừng">知識有截止日</span></button></li>
+        <li><button type="button" data-t="60"><span class="k">01:00</span><span class="t" data-i18n data-zh-hans="请它找论文：第三篇查不到" data-en="Asked for papers: the third one does not exist" data-vi="Nhờ tìm bài báo: bài thứ ba không tra được">請它找論文：第三篇查不到</span></button></li>
+        <li><button type="button" data-t="71"><span class="k">01:11</span><span class="t" data-i18n data-zh-hans="怎么办：附来源、自己点开、照清单验收" data-en="What to do: ask for sources, open them, check against your list" data-vi="Làm sao: đòi nguồn, tự mở xem, nghiệm thu theo danh sách">怎麼辦：附來源、自己點開、照清單驗收</span></button></li>
+        <li><button type="button" data-t="74"><span class="k">01:14</span><span class="t" data-i18n data-zh-hans="用量，也是 token 算的" data-en="Usage is counted in tokens too" data-vi="Lượng dùng cũng tính bằng token">用量，也是 token 算的</span></button></li>
+        <li><button type="button" data-t="90"><span class="k">01:30</span><span class="t" data-i18n data-zh-hans="结尾" data-en="Wrap-up" data-vi="Kết">結尾</span></button></li>
+      </ol>
+
+      <ol class="points">
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;它一段一段接下去写。&lt;/strong&gt;AI 的模型每一步都挑“最可能接在后面”的那一段（简化的说法）。它在乎的是通不通顺，不是查过对不对。"
+          data-en="&lt;strong&gt;It writes one piece at a time.&lt;/strong&gt; At each step an AI model picks the piece most likely to come next (a simplified way to put it). What it cares about is whether the text flows, not whether it has checked that it is true."
+          data-vi="&lt;strong&gt;Nó viết tiếp từng đoạn một.&lt;/strong&gt; Mỗi bước, mô hình AI chọn đoạn “có khả năng đi tiếp nhất” (cách nói đơn giản hóa). Nó quan tâm câu có trôi chảy không, chứ không phải đã kiểm tra đúng hay sai."><strong>它一段一段接下去寫。</strong>AI 的模型每一步都挑「最可能接在後面」的那一段（簡化版的說法）。它在乎的是通不通順，不是查過對不對。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;token：它读、写的单位。&lt;/strong&gt;一个 token 可能是一个字、一个英文单词，或半个单词（每个模型的切法不一样）。你打的字、它读的文件、它写的回答，都是一个一个 token。"
+          data-en="&lt;strong&gt;Tokens: the units it reads and writes.&lt;/strong&gt; A token may be one Chinese character, one English word or part of a word (each model splits text differently). What you type, the files it reads and the answers it writes are all made of tokens."
+          data-vi="&lt;strong&gt;Token: đơn vị nó đọc và viết.&lt;/strong&gt; Một token có thể là một chữ Hán, một từ tiếng Anh, hoặc nửa từ (mỗi mô hình cắt khác nhau). Chữ bạn gõ, tệp nó đọc, câu trả lời nó viết đều là từng token một."><strong>token：它讀、寫的單位。</strong>一個 token 可能是一個字、一個英文單字，或半個單字（每個模型的切法不一樣）。你打的字、它讀的檔案、它寫的回答，都是一個一個 token。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;知识有截止日，也会很有把握地说错。&lt;/strong&gt;模型的知识停在训练的那一天，之后才发生的事它不一定知道（例如 2026 年 7 月起，Codex 在 ChatGPT 桌面 app 里）。不知道的时候，它也可能照样很有把握地回答。请它找论文，它可能列出一篇看起来很像真的、其实查不到的。"
+          data-en="&lt;strong&gt;Its knowledge has a cutoff date, and it can be confidently wrong.&lt;/strong&gt; A model&#x27;s knowledge stops on the day its training ended, so it may not know what happened later (for example, since July 2026 Codex lives in the ChatGPT desktop app). Even when it does not know, it may still answer with confidence. Ask it for papers and it may list one that looks real but cannot be found."
+          data-vi="&lt;strong&gt;Kiến thức có ngày dừng, và nó có thể nói sai rất tự tin.&lt;/strong&gt; Kiến thức của mô hình dừng lại ở ngày huấn luyện, những việc xảy ra sau đó nó chưa chắc biết (ví dụ từ tháng 7/2026, Codex nằm trong ứng dụng ChatGPT cho máy tính). Khi không biết, nó vẫn có thể trả lời rất tự tin. Nhờ nó tìm bài báo, nó có thể liệt kê một bài trông như thật nhưng tra không ra."><strong>知識有截止日，也會很有把握地說錯。</strong>模型的知識停在訓練的那一天，之後才發生的事它不一定知道（例如 2026 年 7 月起，Codex 在 ChatGPT 桌面 app 裡）。不知道的時候，它也可能照樣很有把握地回答。請它找論文，它可能列出一篇看起來很像真的、其實查不到的。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;怎么办。&lt;/strong&gt;请它附上来源，自己点开看；重要的事，照你的清单验收。听起来对，不等于真的对。"
+          data-en="&lt;strong&gt;What to do.&lt;/strong&gt; Ask it to include its sources and open them yourself; for anything important, check it against your list. Sounding right is not the same as being right."
+          data-vi="&lt;strong&gt;Làm sao.&lt;/strong&gt; Nhờ nó kèm nguồn, rồi tự mở ra xem; việc quan trọng thì nghiệm thu theo danh sách của bạn. Nghe có vẻ đúng không có nghĩa là đúng thật."><strong>怎麼辦。</strong>請它附上來源，自己點開看；重要的事，照你的清單驗收。聽起來對，不等於真的對。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;用量，也是 token 算的。&lt;/strong&gt;你打的、它读的、它写的都算 token：读得越多、写得越多，用得越快。方案都有上限，用完了要等一段时间才恢复；Free Plan 目前够轻量的上课使用。"
+          data-en="&lt;strong&gt;Usage is counted in tokens too.&lt;/strong&gt; What you type, what it reads and what it writes all count: the more it reads and writes, the faster you use it up. Every plan has a limit, and once you hit it you wait a while before it resets; for now the Free Plan is enough for light class work."
+          data-vi="&lt;strong&gt;Lượng dùng cũng tính bằng token.&lt;/strong&gt; Những gì bạn gõ, nó đọc, nó viết đều tính: đọc càng nhiều, viết càng nhiều thì dùng càng nhanh. Gói nào cũng có giới hạn, dùng hết thì phải đợi một thời gian mới có lại; hiện tại Free Plan đủ cho việc học nhẹ nhàng trên lớp."><strong>用量，也是 token 算的。</strong>你打的、它讀的、它寫的都算 token：讀得越多、寫得越多，用得越快。方案都有上限，用完了要等一段時間才恢復；Free Plan 目前夠輕量的上課使用。</p></li>
+      </ol>
+    </section>
+
+    <nav class="pager" id="pager" data-week="2" aria-label="其他週次" data-ui-attr="aria-label:pager.label"></nav>
+  </main>
+
+  <footer class="foot">
+    <span>Learning Analytics Tools Implementation Applications (NTNU)</span>
+    <span><span data-ui="footer.copyright">Copyright © 2026 JUNHAO CHEN・程式碼 MIT・內容 CC BY-NC-SA 4.0</span> <a class="foot-lic" href="https://github.com/bigmoumou/AI-Agent-Literacy#授權" data-ui="footer.license" data-ui-attr="href:footer.licenseUrl">授權說明</a></span>
+    <a href="../../" data-ui="nav.home">回到課程首頁</a>
+  </footer>
+</div>
+
+<!-- 先 hls.js、再 video.js（播放、片段、#t= 連結都在 video.js） -->
+<script src="../../assets/vendor/hls.light.min.js"></script>
+<script src="../../assets/video.js"></script>
+</body>
+</html>

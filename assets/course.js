@@ -52,6 +52,33 @@
         },
       },
     },
+    // 2026-10-22 Week 2（Week 1 + 2 對話窗）：影片 01 交代清楚、02 核准與權限、補充 1 VS Code 和 Markdown、補充 2 AI 為什麼會說錯；由 製作/week02/tools/site_week2.py 產生
+    2: {
+      status: "ready",
+      title: "開始用 Codex",
+      summary: "開始用 Codex：交代清楚四件事（目標、素材、界線、怎樣算做好），它就不用猜，你驗收也有標準；它動你的電腦之前會先問你，看懂再按，剛開始用 Ask for approval，密碼和別人的個資不要交給它。補充：用 VS Code 看、改 .md，以及 AI 為什麼會很有把握地說錯。",
+      href: "weeks/week02/",
+      thumb: "weeks/week02/video/01-clear-ask/thumb.jpg",
+      still: "weeks/week02/video/01-clear-ask/poster.jpg",
+      meta: "2 支影片＋2 支補充・共 7 分 3 秒",
+      i18n: {
+        "zh-Hans": {
+          title: "开始用 Codex",
+          summary: "开始用 Codex：交代清楚四件事（目标、素材、界线、怎样算做好），它就不用猜，你验收也有标准；它动你的电脑之前会先问你，看懂再按，刚开始用 Ask for approval，密码和别人的个人资料不要交给它。补充：用 VS Code 看、改 .md，以及 AI 为什么会很有把握地说错。",
+          meta: "2 个视频＋2 个补充・共 7 分 3 秒",
+        },
+        en: {
+          title: "Getting Started with Codex",
+          summary: "Getting started with Codex: state four things clearly (goal, materials, limits, what counts as done) so it does not have to guess and you have a standard to check against; before it acts on your computer it asks you first, so understand before you approve, start with Ask for approval, and never hand it passwords or other people's personal data. Extras: reading and editing .md files in VS Code, and why AI can be confidently wrong.",
+          meta: "2 videos + 2 extras · 7 min 3 s in total",
+        },
+        vi: {
+          title: "Bắt đầu dùng Codex",
+          summary: "Bắt đầu dùng Codex: nói rõ bốn điều (mục tiêu, tư liệu, giới hạn, thế nào là xong) thì nó không phải đoán, bạn cũng có tiêu chuẩn để nghiệm thu; trước khi tác động lên máy tính, nó sẽ hỏi bạn trước, hiểu rồi mới bấm, lúc đầu dùng Ask for approval, đừng đưa nó mật khẩu hay dữ liệu cá nhân của người khác. Bổ sung: xem và sửa tệp .md bằng VS Code, và vì sao AI có thể nói sai rất tự tin.",
+          meta: "2 video + 2 bổ sung · tổng cộng 7 phút 3 giây",
+        },
+      },
+    },
     3: {
       status: "ready",
       title: "AI Agent 的工作資料夾",
