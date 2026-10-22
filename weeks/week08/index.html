@@ -13,10 +13,10 @@
   data-zh-hans="Week 8｜把测试做扎实：更贴近业界的测试方式 TESTS.md"
   data-en="Week 8 | Making Tests Solid: TESTS.md, Closer to How the Industry Tests"
   data-vi="Tuần 8 | Làm kiểm thử thật chắc: TESTS.md, cách kiểm thử gần với thực tế ngành">Week 8｜把測試做紮實：更貼近業界的測試方式 TESTS.md</title>
-<meta name="description" content="Week 8：VERIFY.md 是驗收，TESTS.md 由 AI 從每一條展開成細部測試（邊界、沒想到的情況、組合、順序、迴歸），每一條都追得回來，你用三個問題審它；再故意把程式弄壞一行，看測試抓不抓得到；最後照著使用者故事親自玩一遍。三支影片。" data-i18n-attr="content"
-  data-zh-hans="Week 8：VERIFY.md 是验收，TESTS.md 由 AI 从每一条展开成细部测试（边界、没想到的情况、组合、顺序、回归），每一条都追得回来，你用三个问题审它；再故意把程序弄坏一行，看测试抓不抓得到；最后照着用户故事亲自玩一遍。三个视频。"
-  data-en="Week 8: VERIFY.md is the acceptance check; in TESTS.md the AI expands each item into detailed tests (boundaries, cases nobody thought of, combinations, order, regression), every one traceable to its source, and you review it with three questions. Then break one line of the program on purpose to see whether the tests catch it, and finally play it yourself along user stories. Three videos."
-  data-vi="Tuần 8: VERIFY.md là nghiệm thu; trong TESTS.md, AI mở rộng mỗi mục thành các kiểm thử chi tiết (biên, trường hợp chưa ai nghĩ tới, kết hợp, thứ tự, hồi quy), mỗi dòng đều truy được nguồn, và bạn duyệt bằng ba câu hỏi. Sau đó cố ý làm hỏng một dòng code để xem kiểm thử có bắt được không, và cuối cùng tự tay chơi theo các user story. Ba video.">
+<meta name="description" content="Week 8：VERIFY.md 是驗收，TESTS.md 由 AI 從每一條展開成細部測試（邊界、沒想到的情況、組合、順序、迴歸），每一條都追得回來，你用三個問題審它；再故意把程式弄壞一行，看測試抓不抓得到；最後照著使用者故事親自玩一遍。三支影片，加上兩支補充：分支與 Pull Request、把 bug 寫清楚（GitHub Issue）。" data-i18n-attr="content"
+  data-zh-hans="Week 8：VERIFY.md 是验收，TESTS.md 由 AI 从每一条展开成细部测试（边界、没想到的情况、组合、顺序、回归），每一条都追得回来，你用三个问题审它；再故意把程序弄坏一行，看测试抓不抓得到；最后照着用户故事亲自玩一遍。三个视频，加上两个补充：分支与 Pull Request、把 bug 写清楚（GitHub Issue）。"
+  data-en="Week 8: VERIFY.md is the acceptance check; in TESTS.md the AI expands each item into detailed tests (boundaries, cases nobody thought of, combinations, order, regression), every one traceable to its source, and you review it with three questions. Then break one line of the program on purpose to see whether the tests catch it, and finally play it yourself along user stories. Three videos, plus two extras: branches and pull requests, and writing up a bug clearly (GitHub Issues)."
+  data-vi="Tuần 8: VERIFY.md là nghiệm thu; trong TESTS.md, AI mở rộng mỗi mục thành các kiểm thử chi tiết (biên, trường hợp chưa ai nghĩ tới, kết hợp, thứ tự, hồi quy), mỗi dòng đều truy được nguồn, và bạn duyệt bằng ba câu hỏi. Sau đó cố ý làm hỏng một dòng code để xem kiểm thử có bắt được không, và cuối cùng tự tay chơi theo các user story. Ba video, cùng hai video bổ sung: nhánh và Pull Request, và mô tả lỗi cho rõ (GitHub Issue).">
 <meta name="author" content="JUNHAO CHEN">
 <meta name="copyright" content="© 2026 JUNHAO CHEN">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -225,6 +225,102 @@
           data-zh-hans="&lt;strong&gt;先小、再大。&lt;/strong&gt;先挑 3～5 条最重要的故事，亲自走一遍；都没问题，再扩展到更多故事、更多自动测试；最后找别人来玩，他们会走你没想到的路。"
           data-en="&lt;strong&gt;Start small, then go big.&lt;/strong&gt; First walk the 3 to 5 most important stories yourself; when they all work, expand to more stories and more automated tests; finally have other people play, because they take routes you never thought of."
           data-vi="&lt;strong&gt;Bắt đầu nhỏ, rồi mở rộng.&lt;/strong&gt; Trước tiên tự đi 3–5 câu chuyện quan trọng nhất; ổn hết rồi mới mở rộng sang nhiều câu chuyện hơn, nhiều kiểm thử tự động hơn; cuối cùng nhờ người khác chơi, họ sẽ đi những lộ trình bạn chưa nghĩ tới."><strong>先小、再大。</strong>先挑 3～5 條最重要的故事，親自走一遍；都沒問題，再擴展到更多故事、更多自動測試；最後找別人來玩，他們會走你沒想到的路。</p></li>
+      </ol>
+    </section>
+
+    <section class="unit unit-supp" id="s1-branch-pr" aria-labelledby="us1-title">
+      <h2 class="unit-title" id="us1-title"><span class="unit-num" data-ui="video.supp" data-n="1">補充 1</span><span data-i18n
+        data-zh-hans="分支与 Pull Request：三个人一起改同一个项目"
+        data-en="Branches and Pull Requests: Three People, One Project"
+        data-vi="Nhánh và Pull Request: ba người cùng sửa một dự án">分支與 Pull Request：三個人一起改同一個專案</span></h2>
+
+      <div class="film">
+        <div class="player">
+          <video controls preload="metadata" playsinline data-hls="video/s1-branch-pr/hls/index.m3u8" data-poster="video/s1-branch-pr/poster.jpg" width="1920" height="1080" data-ui="video.unsupported">
+            你的瀏覽器無法播放這支影片。
+          </video>
+        </div>
+      </div>
+
+      <ol class="chapters" aria-label="影片片段（點了直接跳到那一段）" data-ui-attr="aria-label:video.chapters">
+        <li><button type="button" data-t="0"><span class="k">00:00</span><span class="t" data-i18n data-zh-hans="开场" data-en="Opening" data-vi="Mở đầu">開場</span></button></li>
+        <li><button type="button" data-t="9"><span class="k">00:09</span><span class="t" data-i18n data-zh-hans="一起改，会怎样" data-en="What happens when everyone edits at once" data-vi="Cùng sửa thì sẽ ra sao">一起改，會怎樣</span></button></li>
+        <li><button type="button" data-t="32"><span class="k">00:32</span><span class="t" data-i18n data-zh-hans="分支：拉一条自己的绳子" data-en="Branch: hang a line of your own" data-vi="Nhánh: kéo một sợi dây của riêng mình">分支：拉一條自己的繩子</span></button></li>
+        <li><button type="button" data-t="76"><span class="k">01:16</span><span class="t" data-i18n data-zh-hans="Pull Request：看过再接回来" data-en="Pull request: review it, then join it back" data-vi="Pull Request: xem xong rồi mới nối lại">Pull Request：看過再接回來</span></button></li>
+        <li><button type="button" data-t="118"><span class="k">01:58</span><span class="t" data-i18n data-zh-hans="冲突：改到同一行" data-en="Conflict: two edits to the same line" data-vi="Xung đột: cùng sửa một dòng">衝突：改到同一行</span></button></li>
+        <li><button type="button" data-t="162"><span class="k">02:42</span><span class="t" data-i18n data-zh-hans="一起开发的五个习惯" data-en="Five habits for building together" data-vi="Năm thói quen khi cùng phát triển">一起開發的五個習慣</span></button></li>
+        <li><button type="button" data-t="182"><span class="k">03:02</span><span class="t" data-i18n data-zh-hans="结尾" data-en="Wrap-up" data-vi="Kết">結尾</span></button></li>
+      </ol>
+
+      <ol class="points">
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;三个人都直接改 main，会互相盖掉。&lt;/strong&gt;同时推上去，后推的可能把前面的盖掉；有人推了一个坏掉的版本，大家拿到的 main 都不能玩了。"
+          data-en="&lt;strong&gt;If all three edit main directly, they overwrite each other.&lt;/strong&gt; When everyone pushes at once, the last push can wipe out the earlier ones; and if someone pushes a broken version, the main everyone gets no longer plays."
+          data-vi="&lt;strong&gt;Ba người cùng sửa thẳng main thì sẽ ghi đè lên nhau.&lt;/strong&gt; Cùng đẩy lên một lúc, người đẩy sau có thể ghi đè phần của người trước; ai đó đẩy lên một bản bị hỏng thì main mọi người nhận về đều không chơi được."><strong>三個人都直接改 main，會互相蓋掉。</strong>同時推上去，後推的可能把前面的蓋掉；有人推了一個壞掉的版本，大家拿到的 main 都不能玩了。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;分支（Branch）：从 main 拉一条自己的绳子。&lt;/strong&gt;一个功能一条，名字说清楚（&lt;code&gt;add-rain&lt;/code&gt;）；你的修改都在自己这条上，main 完全没动，永远能玩。用 VS Code 打开项目（把文件夹拖进去），在终端机打 &lt;code&gt;git switch -c add-rain&lt;/code&gt;，左下角会显示现在在哪一条；改好、测试全绿就 commit，再 &lt;code&gt;git push -u origin add-rain&lt;/code&gt;。这些指令也可以请 Codex 下，但你要看得懂它在做什么。"
+          data-en="&lt;strong&gt;A branch is a line of your own, hung off main.&lt;/strong&gt; One feature per branch, with a clear name (&lt;code&gt;add-rain&lt;/code&gt;). Your changes stay on your own line, main is untouched, and it always plays. Open the project in VS Code (drag the folder in), type &lt;code&gt;git switch -c add-rain&lt;/code&gt; in the terminal, and the bottom-left corner shows which branch you are on. When your change is done and the tests are green, commit, then run &lt;code&gt;git push -u origin add-rain&lt;/code&gt;. Codex can run these commands for you too, but you need to understand what it is doing."
+          data-vi="&lt;strong&gt;Nhánh (Branch): kéo từ main ra một sợi dây của riêng mình.&lt;/strong&gt; Mỗi tính năng một nhánh, đặt tên rõ ràng (&lt;code&gt;add-rain&lt;/code&gt;); mọi thay đổi của bạn nằm trên sợi dây của mình, main không bị động tới, lúc nào cũng chơi được. Mở dự án bằng VS Code (kéo thư mục vào), gõ &lt;code&gt;git switch -c add-rain&lt;/code&gt; trong terminal, góc dưới bên trái sẽ hiện bạn đang ở nhánh nào; sửa xong, kiểm thử xanh hết thì commit, rồi &lt;code&gt;git push -u origin add-rain&lt;/code&gt;. Các lệnh này cũng có thể nhờ Codex chạy, nhưng bạn phải hiểu nó đang làm gì."><strong>分支（Branch）：從 main 拉一條自己的繩子。</strong>一個功能一條，名字說清楚（<code>add-rain</code>）；你的修改都在自己這條上，main 完全沒動，永遠能玩。用 VS Code 打開專案（把資料夾拖進去），在終端機打 <code>git switch -c add-rain</code>，左下角會顯示現在在哪一條；改好、測試全綠就 commit，再 <code>git push -u origin add-rain</code>。這些指令也可以請 Codex 下，但你要看得懂它在做什麼。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;Pull Request（PR）：请组员看过，再接回 main。&lt;/strong&gt;推上去以后，GitHub 会提醒你，按 Compare &amp;amp; pull request；说明写清楚做了什么、怎么测的。组员打开 Files changed（红色是删掉的，绿色是加上的），没问题按 Approve，有问题就留言请你改；最后 Merge，接回 main。"
+          data-en="&lt;strong&gt;A pull request (PR) asks a teammate to look before it joins main.&lt;/strong&gt; After you push, GitHub reminds you: click Compare &amp;amp; pull request and write clearly what you did and how you tested it. Your teammate opens Files changed (red is removed, green is added), clicks Approve if it looks right or leaves a comment asking for changes, and finally you Merge it back into main."
+          data-vi="&lt;strong&gt;Pull Request (PR): nhờ bạn cùng nhóm xem xong rồi mới nối lại vào main.&lt;/strong&gt; Đẩy lên xong, GitHub sẽ nhắc bạn, bấm Compare &amp;amp; pull request; phần mô tả viết rõ đã làm gì, kiểm thử thế nào. Bạn cùng nhóm mở Files changed (màu đỏ là phần xoá, màu xanh là phần thêm), ổn thì bấm Approve, có vấn đề thì để lại bình luận nhờ bạn sửa; cuối cùng Merge, nối lại vào main."><strong>Pull Request（PR）：請組員看過，再接回 main。</strong>推上去以後，GitHub 會提醒你，按 Compare &amp; pull request；說明寫清楚做了什麼、怎麼測的。組員打開 Files changed（紅色是刪掉的，綠色是加上的），沒問題按 Approve，有問題就留言請你改；最後 Merge，接回 main。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;冲突（Conflict）：两个人改到同一行。&lt;/strong&gt;Git 不知道要留哪一个，GitHub 会标出哪个文件、哪几行：上面是这条 branch 的，下面是 main 现在的，要留哪一个（或两个都要）由人决定。冲突很正常，不用怕；可以请 Codex 帮忙解，但要说清楚两边都要什么。解完一定要跑测试、自己玩一遍，再请组员看一次。"
+          data-en="&lt;strong&gt;A conflict happens when two people change the same line.&lt;/strong&gt; Git cannot tell which one to keep, so GitHub marks the file and the lines: the top part is this branch’s version, the bottom part is what main has now, and a person decides which to keep (or both). Conflicts are normal and nothing to fear. Codex can help resolve one if you say clearly what each side needs. Afterwards always run the tests, play it yourself, and ask your teammate to look again."
+          data-vi="&lt;strong&gt;Xung đột (Conflict): hai người cùng sửa một dòng.&lt;/strong&gt; Git không biết nên giữ bên nào, GitHub sẽ đánh dấu tệp nào, những dòng nào: phần trên là của nhánh này, phần dưới là của main hiện tại, giữ bên nào (hay cả hai) là do người quyết định. Xung đột là chuyện bình thường, không cần sợ; có thể nhờ Codex giải, nhưng phải nói rõ hai bên cần gì. Giải xong nhất định phải chạy kiểm thử, tự chơi lại một lượt, rồi nhờ bạn cùng nhóm xem lại."><strong>衝突（Conflict）：兩個人改到同一行。</strong>Git 不知道要留哪一個，GitHub 會標出哪個檔案、哪幾行：上面是這條 branch 的，下面是 main 現在的，要留哪一個（或兩個都要）由人決定。衝突很正常，不用怕；可以請 Codex 幫忙解，但要說清楚兩邊都要什麼。解完一定要跑測試、自己玩一遍，再請組員看一次。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;一起开发的五个习惯。&lt;/strong&gt;main 永远要能玩，不要直接在 main 上改；一个功能一条 branch，名字说清楚；发 PR，请组员看 Files changed 再合并；合并前测试全绿、自己玩过；合并完大家 &lt;code&gt;git pull&lt;/code&gt;，再开下一条。视频里的 GitHub、VS Code 和 Codex 画面是示意。"
+          data-en="&lt;strong&gt;Five habits for building together.&lt;/strong&gt; Main must always play, so never edit main directly; one feature per branch, with a clear name; open a PR and have a teammate check Files changed before merging; before merging, tests are green and you have played it yourself; after merging, everyone runs &lt;code&gt;git pull&lt;/code&gt; before starting the next branch. The GitHub, VS Code and Codex screens in the video are illustrations."
+          data-vi="&lt;strong&gt;Năm thói quen khi cùng phát triển.&lt;/strong&gt; main lúc nào cũng phải chơi được, đừng sửa thẳng trên main; mỗi tính năng một nhánh, đặt tên rõ ràng; mở PR, nhờ bạn cùng nhóm xem Files changed rồi mới merge; trước khi merge, kiểm thử xanh hết và đã tự chơi thử; merge xong mọi người &lt;code&gt;git pull&lt;/code&gt; rồi mới mở nhánh tiếp theo. Màn hình GitHub, VS Code và Codex trong video đều là minh hoạ."><strong>一起開發的五個習慣。</strong>main 永遠要能玩，不要直接在 main 上改；一個功能一條 branch，名字說清楚；發 PR，請組員看 Files changed 再合併；合併前測試全綠、自己玩過；合併完大家 <code>git pull</code>，再開下一條。影片裡的 GitHub、VS Code 和 Codex 畫面是示意。</p></li>
+      </ol>
+    </section>
+
+    <section class="unit unit-supp" id="s2-bug-issue" aria-labelledby="us2-title">
+      <h2 class="unit-title" id="us2-title"><span class="unit-num" data-ui="video.supp" data-n="2">補充 2</span><span data-i18n
+        data-zh-hans="把 bug 写清楚：GitHub Issue"
+        data-en="Writing Up a Bug Clearly: GitHub Issues"
+        data-vi="Mô tả lỗi cho rõ: GitHub Issue">把 bug 寫清楚：GitHub Issue</span></h2>
+
+      <div class="film">
+        <div class="player">
+          <video controls preload="metadata" playsinline data-hls="video/s2-bug-issue/hls/index.m3u8" data-poster="video/s2-bug-issue/poster.jpg" width="1920" height="1080" data-ui="video.unsupported">
+            你的瀏覽器無法播放這支影片。
+          </video>
+        </div>
+      </div>
+
+      <ol class="chapters" aria-label="影片片段（點了直接跳到那一段）" data-ui-attr="aria-label:video.chapters">
+        <li><button type="button" data-t="0"><span class="k">00:00</span><span class="t" data-i18n data-zh-hans="开场" data-en="Opening" data-vi="Mở đầu">開場</span></button></li>
+        <li><button type="button" data-t="9"><span class="k">00:09</span><span class="t" data-i18n data-zh-hans="“坏了”是什么意思" data-en="What does “it’s broken” mean?" data-vi="“Hỏng rồi” nghĩa là gì">「壞了」是什麼意思</span></button></li>
+        <li><button type="button" data-t="38"><span class="k">00:38</span><span class="t" data-i18n data-zh-hans="好的回报五件事" data-en="Five things a good bug report has" data-vi="Năm điều của một báo lỗi tốt">好的回報五件事</span></button></li>
+        <li><button type="button" data-t="86"><span class="k">01:26</span><span class="t" data-i18n data-zh-hans="写进 GitHub Issue" data-en="Putting it in a GitHub issue" data-vi="Ghi vào GitHub Issue">寫進 GitHub Issue</span></button></li>
+        <li><button type="button" data-t="112"><span class="k">01:52</span><span class="t" data-i18n data-zh-hans="修好、关掉 Issue" data-en="Fix it and close the issue" data-vi="Sửa xong, đóng Issue">修好、關掉 Issue</span></button></li>
+        <li><button type="button" data-t="141"><span class="k">02:21</span><span class="t" data-i18n data-zh-hans="写回报的好习惯" data-en="Good habits for bug reports" data-vi="Thói quen tốt khi báo lỗi">寫回報的好習慣</span></button></li>
+        <li><button type="button" data-t="158"><span class="k">02:38</span><span class="t" data-i18n data-zh-hans="结尾" data-en="Wrap-up" data-vi="Kết">結尾</span></button></li>
+      </ol>
+
+      <ol class="points">
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;只说“坏了”，别人很难修。&lt;/strong&gt;就像看医生：只说“我不舒服”，医生很难帮你；说清楚哪里、什么时候、怎么不舒服，医生才知道从哪里开始查。bug 回报也一样，写得越清楚，越快修好。"
+          data-en="&lt;strong&gt;“It’s broken” alone is hard to fix.&lt;/strong&gt; It’s like seeing a doctor: “I don’t feel well” gives them little to go on, but saying where, since when and how it hurts tells them where to start. Bug reports work the same way: the clearer you write, the faster it gets fixed."
+          data-vi="&lt;strong&gt;Chỉ nói “hỏng rồi” thì người khác rất khó sửa.&lt;/strong&gt; Giống như đi khám bệnh: chỉ nói “tôi thấy không khoẻ” thì bác sĩ khó giúp; nói rõ ở đâu, từ lúc nào, khó chịu thế nào thì bác sĩ mới biết bắt đầu kiểm tra từ đâu. Báo lỗi cũng vậy, viết càng rõ thì sửa càng nhanh."><strong>只說「壞了」，別人很難修。</strong>就像看醫生：只說「我不舒服」，醫生很難幫你；說清楚哪裡、什麼時候、怎麼不舒服，醫生才知道從哪裡開始查。bug 回報也一樣，寫得越清楚，越快修好。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;好的回报写五件事。&lt;/strong&gt;标题：一句话说清楚是什么问题；在哪里：哪一关、哪个画面；重现步骤（Steps to Reproduce）：一步一行，别人照着做也会发生；应该／实际（Expected／Actual）：两句放在一起，一看就知道差在哪；截图和设备：有些 bug 只在某些电脑或浏览器上才会发生。写完，自己照着步骤再做一次，确定真的会发生才送出去。"
+          data-en="&lt;strong&gt;A good report covers five things.&lt;/strong&gt; Title: one sentence that says what the problem is. Where: which level, which screen. Steps to reproduce: one step per line, so anyone who follows them sees it happen too. Expected and actual: put the two sentences side by side so the difference is obvious. Screenshot and device: some bugs only happen on certain computers or browsers. When you are done, follow your own steps once more and only send it once you are sure it really happens."
+          data-vi="&lt;strong&gt;Một báo lỗi tốt viết năm điều.&lt;/strong&gt; Tiêu đề: một câu nói rõ vấn đề là gì; ở đâu: màn nào, màn hình nào; các bước tái hiện (Steps to Reproduce): mỗi bước một dòng, người khác làm theo cũng sẽ gặp; mong đợi／thực tế (Expected／Actual): đặt hai câu cạnh nhau, nhìn là thấy khác ở đâu; ảnh chụp màn hình và thiết bị: có lỗi chỉ xảy ra trên một số máy hoặc trình duyệt. Viết xong, tự làm lại theo các bước một lần, chắc chắn lỗi thật sự xảy ra rồi mới gửi."><strong>好的回報寫五件事。</strong>標題：一句話說清楚是什麼問題；在哪裡：哪一關、哪個畫面；重現步驟（Steps to Reproduce）：一步一行，別人照著做也會發生；應該／實際（Expected／Actual）：兩句放在一起，一看就知道差在哪；截圖和裝置：有些 bug 只在某些電腦或瀏覽器上才會發生。寫完，自己照著步驟再做一次，確定真的會發生才送出去。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;写进 GitHub 的 Issues。&lt;/strong&gt;按 New issue，照五件事写，截图直接拖进框里；加上标签 bug，按 Create。一个 bug 一张单、一个编号（例如 #12），大家都看得到，修好了再关掉。"
+          data-en="&lt;strong&gt;Put it in GitHub Issues.&lt;/strong&gt; Click New issue, write the five things, and drag the screenshot straight into the box; add the bug label and click Create. One bug, one issue, one number (such as #12): everyone can see it, and it is closed once fixed."
+          data-vi="&lt;strong&gt;Ghi vào mục Issues của GitHub.&lt;/strong&gt; Bấm New issue, viết theo năm điều, kéo thẳng ảnh chụp màn hình vào ô; gắn nhãn bug, bấm Create. Mỗi lỗi một phiếu, một số hiệu (ví dụ #12), ai cũng thấy được, sửa xong mới đóng."><strong>寫進 GitHub 的 Issues。</strong>按 New issue，照五件事寫，截圖直接拖進框裡；加上標籤 bug，按 Create。一個 bug 一張單、一個編號（例如 #12），大家都看得到，修好了再關掉。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;修好，Issue 自动关掉。&lt;/strong&gt;要修的时候，把 Issue 的内容贴给 Codex：照重现步骤先写一个会失败的测试，确认失败再修好（就是视频 01 的 T3.5：回归）。PR 的说明写“Fixes #12”，合并以后 Issue #12 会自动关掉；从回报到修好，每一步都找得到。"
+          data-en="&lt;strong&gt;Fix it, and the issue closes itself.&lt;/strong&gt; When it is time to fix it, paste the issue into Codex: first write a test that follows the steps and fails, confirm it fails, then fix the code (this is T3.5 from video 01: regression). Write “Fixes #12” in the PR description, and once it is merged issue #12 closes automatically, so every step from report to fix can be found again."
+          data-vi="&lt;strong&gt;Sửa xong, Issue tự đóng.&lt;/strong&gt; Khi sửa, dán nội dung Issue cho Codex: theo các bước tái hiện, viết trước một kiểm thử sẽ thất bại, xác nhận nó thất bại rồi mới sửa (chính là T3.5 trong video 01: hồi quy). Phần mô tả PR ghi “Fixes #12”, merge xong Issue #12 sẽ tự đóng; từ lúc báo lỗi đến lúc sửa xong, bước nào cũng tìm lại được."><strong>修好，Issue 自動關掉。</strong>要修的時候，把 Issue 的內容貼給 Codex：照重現步驟先寫一個會失敗的測試，確認失敗再修好（就是影片 01 的 T3.5：迴歸）。PR 的說明寫「Fixes #12」，合併以後 Issue #12 會自動關掉；從回報到修好，每一步都找得到。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;写回报的好习惯。&lt;/strong&gt;一个 Issue 只写一个 bug；标题一句话；写重现步骤、应该／实际，附上截图；送出前自己照着步骤再做一次。收到不清楚的回报，也可以请对方照这五件事补。视频里的 GitHub 和 Codex 画面是示意。"
+          data-en="&lt;strong&gt;Good habits for bug reports.&lt;/strong&gt; One bug per issue; a one-sentence title; steps to reproduce, expected and actual, plus a screenshot; follow the steps yourself once before sending. If you get an unclear report, you can ask the sender to fill in these five things. The GitHub and Codex screens in the video are illustrations."
+          data-vi="&lt;strong&gt;Thói quen tốt khi báo lỗi.&lt;/strong&gt; Mỗi Issue chỉ ghi một lỗi; tiêu đề một câu; viết các bước tái hiện, mong đợi／thực tế, kèm ảnh chụp màn hình; trước khi gửi tự làm lại theo các bước một lần. Nhận được báo lỗi không rõ ràng, cũng có thể nhờ người gửi bổ sung theo năm điều này. Màn hình GitHub và Codex trong video đều là minh hoạ."><strong>寫回報的好習慣。</strong>一個 Issue 只寫一個 bug；標題一句話；寫重現步驟、應該／實際，附上截圖；送出前自己照著步驟再做一次。收到不清楚的回報，也可以請對方照這五件事補。影片裡的 GitHub 和 Codex 畫面是示意。</p></li>
       </ol>
     </section>
 

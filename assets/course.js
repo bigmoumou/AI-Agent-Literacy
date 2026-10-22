@@ -190,7 +190,7 @@
         },
       },
     },
-    // 2026-10-21 Week 8（教學影片製作對話窗）：影片 01 TESTS.md、02 故意弄壞一行；由 製作/week08/tools/site_week8.py 產生
+    // 2026-10-21 Week 8（教學影片製作對話窗）：影片 01–03、補充 1–2；由 製作/week08/tools/site_week8.py 產生
     8: {
       status: "ready",
       title: "把測試做紮實：更貼近業界的測試方式 TESTS.md",
@@ -198,22 +198,22 @@
       href: "weeks/week08/",
       thumb: "weeks/week08/video/01-tests/thumb.jpg",
       still: "weeks/week08/video/01-tests/poster.jpg",
-      meta: "3 支影片・共 10 分 35 秒",
+      meta: "3 支影片＋2 支補充・共 16 分 35 秒",
       i18n: {
         "zh-Hans": {
           title: "把测试做扎实：更贴近业界的测试方式 TESTS.md",
           summary: "VERIFY 是验收；TESTS.md 由 AI 从每一条展开成细部测试（边界、没想到的情况、组合、顺序、回归），每一条都追得回来，你用三个问题审。测试全部通过，就代表测得好吗？故意把程序弄坏一行，看测试抓不抓得到。最后照着用户故事亲自玩一遍，找出你和 AI 都没想到的问题。",
-          meta: "3 个视频・共 10 分 35 秒",
+          meta: "3 个视频＋2 个补充・共 16 分 35 秒",
         },
         en: {
           title: "Making Tests Solid: TESTS.md, Closer to How the Industry Tests",
           summary: "VERIFY is the acceptance check; in TESTS.md the AI expands each item into detailed tests (boundaries, cases nobody thought of, combinations, order, regression), each traceable to its source, and you review it with three questions. If every test passes, are the tests good? Break one line of the program on purpose and see whether the tests catch it. Finally, play it yourself along user stories to find what neither you nor the AI thought of.",
-          meta: "3 videos · 10 min 35 s in total",
+          meta: "3 videos + 2 extras · 16 min 35 s in total",
         },
         vi: {
           title: "Làm kiểm thử thật chắc: TESTS.md, cách kiểm thử gần với thực tế ngành",
           summary: "VERIFY là nghiệm thu; trong TESTS.md, AI mở rộng mỗi mục thành kiểm thử chi tiết (biên, trường hợp chưa ai nghĩ tới, kết hợp, thứ tự, hồi quy), dòng nào cũng truy được nguồn, và bạn duyệt bằng ba câu hỏi. Kiểm thử qua hết thì có nghĩa là kiểm thử tốt không? Cố ý làm hỏng một dòng code để xem kiểm thử có bắt được không. Cuối cùng, tự tay chơi theo các user story để tìm ra điều cả bạn lẫn AI đều không nghĩ tới.",
-          meta: "3 video · tổng cộng 10 phút 35 giây",
+          meta: "3 video + 2 bổ sung · tổng cộng 16 phút 35 giây",
         },
       },
     },
