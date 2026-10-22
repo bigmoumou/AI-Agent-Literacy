@@ -10,13 +10,13 @@
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title data-i18n
-  data-zh-hans="Week 8｜把测试做扎实：TESTS.md 与故意弄坏一行"
-  data-en="Week 8 | Making Tests Solid: TESTS.md and Breaking a Line on Purpose"
-  data-vi="Tuần 8 | Làm kiểm thử thật chắc: TESTS.md và cố ý làm hỏng một dòng">Week 8｜把測試做紮實：TESTS.md 與故意弄壞一行</title>
-<meta name="description" content="Week 8：VERIFY.md 是驗收，TESTS.md 由 AI 從每一條展開成細部測試（邊界、沒想到的情況、組合、順序、迴歸），每一條都追得回來，你用三個問題審它；再故意把程式弄壞一行，看測試抓不抓得到；最後照著使用者故事親自玩一遍。三支影片，附作業。" data-i18n-attr="content"
-  data-zh-hans="Week 8：VERIFY.md 是验收，TESTS.md 由 AI 从每一条展开成细部测试（边界、没想到的情况、组合、顺序、回归），每一条都追得回来，你用三个问题审它；再故意把程序弄坏一行，看测试抓不抓得到；最后照着用户故事亲自玩一遍。三个视频，附作业。"
-  data-en="Week 8: VERIFY.md is the acceptance check; in TESTS.md the AI expands each item into detailed tests (boundaries, cases nobody thought of, combinations, order, regression), every one traceable to its source, and you review it with three questions. Then break one line of the program on purpose to see whether the tests catch it, and finally play it yourself along user stories. Three videos, with homework."
-  data-vi="Tuần 8: VERIFY.md là nghiệm thu; trong TESTS.md, AI mở rộng mỗi mục thành các kiểm thử chi tiết (biên, trường hợp chưa ai nghĩ tới, kết hợp, thứ tự, hồi quy), mỗi dòng đều truy được nguồn, và bạn duyệt bằng ba câu hỏi. Sau đó cố ý làm hỏng một dòng code để xem kiểm thử có bắt được không, và cuối cùng tự tay chơi theo các user story. Ba video, kèm bài tập.">
+  data-zh-hans="Week 8｜把测试做扎实：更贴近业界的测试方式 TESTS.md"
+  data-en="Week 8 | Making Tests Solid: TESTS.md, Closer to How the Industry Tests"
+  data-vi="Tuần 8 | Làm kiểm thử thật chắc: TESTS.md, cách kiểm thử gần với thực tế ngành">Week 8｜把測試做紮實：更貼近業界的測試方式 TESTS.md</title>
+<meta name="description" content="Week 8：VERIFY.md 是驗收，TESTS.md 由 AI 從每一條展開成細部測試（邊界、沒想到的情況、組合、順序、迴歸），每一條都追得回來，你用三個問題審它；再故意把程式弄壞一行，看測試抓不抓得到；最後照著使用者故事親自玩一遍。三支影片。" data-i18n-attr="content"
+  data-zh-hans="Week 8：VERIFY.md 是验收，TESTS.md 由 AI 从每一条展开成细部测试（边界、没想到的情况、组合、顺序、回归），每一条都追得回来，你用三个问题审它；再故意把程序弄坏一行，看测试抓不抓得到；最后照着用户故事亲自玩一遍。三个视频。"
+  data-en="Week 8: VERIFY.md is the acceptance check; in TESTS.md the AI expands each item into detailed tests (boundaries, cases nobody thought of, combinations, order, regression), every one traceable to its source, and you review it with three questions. Then break one line of the program on purpose to see whether the tests catch it, and finally play it yourself along user stories. Three videos."
+  data-vi="Tuần 8: VERIFY.md là nghiệm thu; trong TESTS.md, AI mở rộng mỗi mục thành các kiểm thử chi tiết (biên, trường hợp chưa ai nghĩ tới, kết hợp, thứ tự, hồi quy), mỗi dòng đều truy được nguồn, và bạn duyệt bằng ba câu hỏi. Sau đó cố ý làm hỏng một dòng code để xem kiểm thử có bắt được không, và cuối cùng tự tay chơi theo các user story. Ba video.">
 <meta name="author" content="JUNHAO CHEN">
 <meta name="copyright" content="© 2026 JUNHAO CHEN">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -45,13 +45,13 @@
     <div class="head">
       <p class="kicker"><span class="dot" aria-hidden="true"></span>WEEK 08</p>
       <h1 data-i18n
-        data-zh-hans="把测试做扎实：TESTS.md 与故意弄坏一行"
-        data-en="Making Tests Solid: TESTS.md and Breaking a Line on Purpose"
-        data-vi="Làm kiểm thử thật chắc: TESTS.md và cố ý làm hỏng một dòng">把測試做紮實：TESTS.md 與故意弄壞一行</h1>
+        data-zh-hans="把测试做扎实：更贴近业界的测试方式 TESTS.md"
+        data-en="Making Tests Solid: TESTS.md, Closer to How the Industry Tests"
+        data-vi="Làm kiểm thử thật chắc: TESTS.md, cách kiểm thử gần với thực tế ngành">把測試做紮實：更貼近業界的測試方式 TESTS.md</h1>
       <p class="lede" data-i18n
-        data-zh-hans="上周的 &lt;code&gt;VERIFY.md&lt;/code&gt; 是验收：你写、条数少、人看得懂。这周把测试做扎实：&lt;code&gt;TESTS.md&lt;/code&gt; 由 AI 从每一条 VERIFY 展开成细部测试，边界、没想到的情况、组合、顺序、回归，每一条都说得出它从哪一条来；你用三个问题审它。可是测试全部通过，就代表测得好吗？故意把程序弄坏一行，看测试抓不抓得到：没抓到的那一次，就是少的那条测试。最后，人和 AI 都有盲点：照着&lt;strong&gt;用户故事&lt;/strong&gt;亲自玩一遍，才找得到没想到的问题。作业：亲自测试你的空中之岛。"
-        data-en="Last week’s &lt;code&gt;VERIFY.md&lt;/code&gt; is the acceptance check: you write it, it is short, and anyone can read it. This week we make the tests solid: in &lt;code&gt;TESTS.md&lt;/code&gt; the AI expands each VERIFY item into detailed tests (boundaries, cases nobody thought of, combinations, order, regression), and every test can say which item it came from; you review it with three questions. But if every test passes, does that mean the tests are good? Break one line of the program on purpose and see whether the tests catch it: the time they miss it shows you the test that is missing. Finally, people and AI both have blind spots: play it yourself along &lt;strong&gt;user stories&lt;/strong&gt; to find what nobody thought of. Homework: test your own Sky Island by hand."
-        data-vi="&lt;code&gt;VERIFY.md&lt;/code&gt; của tuần trước là nghiệm thu: bạn viết, ít dòng, ai đọc cũng hiểu. Tuần này làm kiểm thử thật chắc: trong &lt;code&gt;TESTS.md&lt;/code&gt;, AI mở rộng mỗi mục VERIFY thành các kiểm thử chi tiết (biên, trường hợp chưa ai nghĩ tới, kết hợp, thứ tự, hồi quy), dòng nào cũng nói được nó đến từ mục nào; bạn duyệt bằng ba câu hỏi. Nhưng kiểm thử qua hết thì có nghĩa là kiểm thử tốt không? Cố ý làm hỏng một dòng code rồi xem kiểm thử có bắt được không: lần không bắt được chính là kiểm thử còn thiếu. Cuối cùng, người và AI đều có điểm mù: tự tay chơi theo các &lt;strong&gt;user story&lt;/strong&gt; mới tìm ra điều chưa ai nghĩ tới. Bài tập: tự tay kiểm thử Đảo trên trời của bạn.">上週的 <code>VERIFY.md</code> 是驗收：你寫、條數少、人看得懂。這週把測試做紮實：<code>TESTS.md</code> 由 AI 從每一條 VERIFY 展開成細部測試，邊界、沒想到的情況、組合、順序、迴歸，每一條都說得出它從哪一條來；你用三個問題審它。可是測試全部通過，就代表測得好嗎？故意把程式弄壞一行，看測試抓不抓得到：沒抓到的那一次，就是少的那條測試。最後，人和 AI 都有盲點：照著<strong>使用者故事</strong>親自玩一遍，才找得到沒想到的問題。作業：親自測試你的空中之島。</p>
+        data-zh-hans="上周的 &lt;code&gt;VERIFY.md&lt;/code&gt; 是验收：你写、条数少、人看得懂。这周把测试做扎实：&lt;code&gt;TESTS.md&lt;/code&gt; 由 AI 从每一条 VERIFY 展开成细部测试，边界、没想到的情况、组合、顺序、回归，每一条都说得出它从哪一条来；你用三个问题审它。可是测试全部通过，就代表测得好吗？故意把程序弄坏一行，看测试抓不抓得到：没抓到的那一次，就是少的那条测试。最后，人和 AI 都有盲点：照着&lt;strong&gt;用户故事&lt;/strong&gt;亲自玩一遍，才找得到没想到的问题。"
+        data-en="Last week’s &lt;code&gt;VERIFY.md&lt;/code&gt; is the acceptance check: you write it, it is short, and anyone can read it. This week we make the tests solid: in &lt;code&gt;TESTS.md&lt;/code&gt; the AI expands each VERIFY item into detailed tests (boundaries, cases nobody thought of, combinations, order, regression), and every test can say which item it came from; you review it with three questions. But if every test passes, does that mean the tests are good? Break one line of the program on purpose and see whether the tests catch it: the time they miss it shows you the test that is missing. Finally, people and AI both have blind spots: play it yourself along &lt;strong&gt;user stories&lt;/strong&gt; to find what nobody thought of."
+        data-vi="&lt;code&gt;VERIFY.md&lt;/code&gt; của tuần trước là nghiệm thu: bạn viết, ít dòng, ai đọc cũng hiểu. Tuần này làm kiểm thử thật chắc: trong &lt;code&gt;TESTS.md&lt;/code&gt;, AI mở rộng mỗi mục VERIFY thành các kiểm thử chi tiết (biên, trường hợp chưa ai nghĩ tới, kết hợp, thứ tự, hồi quy), dòng nào cũng nói được nó đến từ mục nào; bạn duyệt bằng ba câu hỏi. Nhưng kiểm thử qua hết thì có nghĩa là kiểm thử tốt không? Cố ý làm hỏng một dòng code rồi xem kiểm thử có bắt được không: lần không bắt được chính là kiểm thử còn thiếu. Cuối cùng, người và AI đều có điểm mù: tự tay chơi theo các &lt;strong&gt;user story&lt;/strong&gt; mới tìm ra điều chưa ai nghĩ tới.">上週的 <code>VERIFY.md</code> 是驗收：你寫、條數少、人看得懂。這週把測試做紮實：<code>TESTS.md</code> 由 AI 從每一條 VERIFY 展開成細部測試，邊界、沒想到的情況、組合、順序、迴歸，每一條都說得出它從哪一條來；你用三個問題審它。可是測試全部通過，就代表測得好嗎？故意把程式弄壞一行，看測試抓不抓得到：沒抓到的那一次，就是少的那條測試。最後，人和 AI 都有盲點：照著<strong>使用者故事</strong>親自玩一遍，才找得到沒想到的問題。</p>
       <p class="lang-note" data-ui="video.note"></p>
     </div>
 
@@ -61,9 +61,9 @@
 
     <section class="unit" id="01-tests" aria-labelledby="u01-title">
       <h2 class="unit-title" id="u01-title"><span class="unit-num" data-ui="video.n" data-n="01">影片 01</span><span data-i18n
-        data-zh-hans="VERIFY 写好了，这样就测够了吗？TESTS.md"
-        data-en="VERIFY Is Written. Is That Enough Testing? TESTS.md"
-        data-vi="Đã viết VERIFY, như vậy kiểm thử đủ chưa? TESTS.md">VERIFY 寫好了，這樣就測夠了嗎？TESTS.md</span></h2>
+        data-zh-hans="VERIFY 就够了吗？TESTS.md"
+        data-en="Is VERIFY Enough? TESTS.md"
+        data-vi="VERIFY đã đủ chưa? TESTS.md">VERIFY 就夠了嗎？TESTS.md</span></h2>
 
       <div class="film">
         <div class="player">
@@ -118,9 +118,9 @@
 
     <section class="unit" id="02-break" aria-labelledby="u02-title" data-needs="01-tests">
       <h2 class="unit-title" id="u02-title"><span class="unit-num" data-ui="video.n" data-n="02">影片 02</span><span data-i18n
-        data-zh-hans="测试全部通过，就代表测得好吗？故意弄坏一行"
-        data-en="All Tests Pass. Are the Tests Any Good? Break a Line on Purpose"
-        data-vi="Kiểm thử qua hết, vậy kiểm thử có tốt không? Cố ý làm hỏng một dòng">測試全部通過，就代表測得好嗎？故意弄壞一行</span></h2>
+        data-zh-hans="突变测试（Mutation Testing）"
+        data-en="Mutation Testing"
+        data-vi="Kiểm thử đột biến (Mutation Testing)">突變測試（Mutation Testing）</span></h2>
 
       <div class="film">
         <div class="player">
@@ -170,11 +170,11 @@
       </ol>
     </section>
 
-    <section class="unit unit-hw" id="03-playtest" aria-labelledby="u03-title" data-needs="01-tests 02-break">
+    <section class="unit" id="03-playtest" aria-labelledby="u03-title" data-needs="01-tests 02-break">
       <h2 class="unit-title" id="u03-title"><span class="unit-num" data-ui="video.n" data-n="03">影片 03</span><span data-i18n
-        data-zh-hans="测试都通过了，就可以交了吗？亲自玩一遍"
-        data-en="All Tests Pass. Ready to Hand It In? Play It Yourself"
-        data-vi="Kiểm thử đã qua hết, nộp được chưa? Tự tay chơi một lượt">測試都通過了，就可以交了嗎？親自玩一遍</span></h2>
+        data-zh-hans="通过 User Story 帮助实测"
+        data-en="Hands-On Testing with User Stories"
+        data-vi="Kiểm thử thực tế nhờ User Story">透過 User Story 幫助實測</span></h2>
 
       <div class="film">
         <div class="player">
@@ -193,108 +193,38 @@
         <li><button type="button" data-t="48"><span class="k">00:48</span><span class="t" data-i18n data-zh-hans="亲自玩，才会发现" data-en="Only playing it shows you" data-vi="Phải tự chơi mới phát hiện">親自玩，才會發現</span></button></li>
         <li><button type="button" data-t="58"><span class="k">00:58</span><span class="t" data-i18n data-zh-hans="最后一步：亲自测试" data-en="The last step: manual testing" data-vi="Bước cuối: tự tay kiểm thử">最後一步：親自測試</span></button></li>
         <li><button type="button" data-t="74"><span class="k">01:14</span><span class="t" data-i18n data-zh-hans="什么是用户故事" data-en="What is a user story" data-vi="User story là gì">什麼是使用者故事</span></button></li>
-        <li><button type="button" data-t="85"><span class="k">01:25</span><span class="t" data-i18n data-zh-hans="三张故事卡" data-en="Three story cards" data-vi="Ba thẻ câu chuyện">三張故事卡</span></button></li>
-        <li><button type="button" data-t="108"><span class="k">01:48</span><span class="t" data-i18n data-zh-hans="把故事画成路线" data-en="Turn the stories into routes" data-vi="Biến câu chuyện thành lộ trình">把故事畫成路</span></button></li>
-        <li><button type="button" data-t="117"><span class="k">01:57</span><span class="t" data-i18n data-zh-hans="第一次玩：不知道要按什么" data-en="First-time player: no idea what to press" data-vi="Người chơi lần đầu: không biết bấm gì">第一次玩：不知道要按什麼</span></button></li>
-        <li><button type="button" data-t="124"><span class="k">02:04</span><span class="t" data-i18n data-zh-hans="盖房子：重新整理网页也还在" data-en="Builder: still there after a reload" data-vi="Người xây nhà: tải lại trang vẫn còn">蓋房子：重新整理網頁也還在</span></button></li>
-        <li><button type="button" data-t="140"><span class="k">02:20</span><span class="t" data-i18n data-zh-hans="记在 playtest.md" data-en="Write it in playtest.md" data-vi="Ghi vào playtest.md">記在 playtest.md</span></button></li>
-        <li><button type="button" data-t="157"><span class="k">02:37</span><span class="t" data-i18n data-zh-hans="发现了，接回流程" data-en="Found something? Feed it back in" data-vi="Phát hiện rồi thì đưa lại vào quy trình">發現了，接回流程</span></button></li>
-        <li><button type="button" data-t="186"><span class="k">03:06</span><span class="t" data-i18n data-zh-hans="先小、再大" data-en="Start small, then go big" data-vi="Bắt đầu nhỏ, rồi mở rộng">先小、再大</span></button></li>
-        <li><button type="button" data-t="204"><span class="k">03:24</span><span class="t" data-i18n data-zh-hans="这周作业" data-en="This week’s homework" data-vi="Bài tập tuần này">這週作業</span></button></li>
-        <li><button type="button" data-t="222"><span class="k">03:42</span><span class="t" data-i18n data-zh-hans="结尾" data-en="Wrap-up" data-vi="Kết">結尾</span></button></li>
+        <li><button type="button" data-t="85"><span class="k">01:25</span><span class="t" data-i18n data-zh-hans="和 BRIEF.md、USER_STORIES.md 的关系" data-en="Where stories live: BRIEF.md or USER_STORIES.md" data-vi="Câu chuyện nằm ở đâu: BRIEF.md hay USER_STORIES.md">和 BRIEF.md、USER_STORIES.md 的關係</span></button></li>
+        <li><button type="button" data-t="94"><span class="k">01:34</span><span class="t" data-i18n data-zh-hans="三张故事卡" data-en="Three story cards" data-vi="Ba thẻ câu chuyện">三張故事卡</span></button></li>
+        <li><button type="button" data-t="117"><span class="k">01:57</span><span class="t" data-i18n data-zh-hans="把故事画成路线" data-en="Turn the stories into routes" data-vi="Biến câu chuyện thành lộ trình">把故事畫成路</span></button></li>
+        <li><button type="button" data-t="126"><span class="k">02:06</span><span class="t" data-i18n data-zh-hans="第一次玩：不知道要按什么" data-en="First-time player: no idea what to press" data-vi="Người chơi lần đầu: không biết bấm gì">第一次玩：不知道要按什麼</span></button></li>
+        <li><button type="button" data-t="133"><span class="k">02:13</span><span class="t" data-i18n data-zh-hans="盖房子：重新整理网页也还在" data-en="Builder: still there after a reload" data-vi="Người xây nhà: tải lại trang vẫn còn">蓋房子：重新整理網頁也還在</span></button></li>
+        <li><button type="button" data-t="149"><span class="k">02:29</span><span class="t" data-i18n data-zh-hans="记在 playtest.md" data-en="Write it in playtest.md" data-vi="Ghi vào playtest.md">記在 playtest.md</span></button></li>
+        <li><button type="button" data-t="166"><span class="k">02:46</span><span class="t" data-i18n data-zh-hans="发现了，接回流程" data-en="Found something? Feed it back in" data-vi="Phát hiện rồi thì đưa lại vào quy trình">發現了，接回流程</span></button></li>
+        <li><button type="button" data-t="195"><span class="k">03:15</span><span class="t" data-i18n data-zh-hans="先小、再大" data-en="Start small, then go big" data-vi="Bắt đầu nhỏ, rồi mở rộng">先小、再大</span></button></li>
+        <li><button type="button" data-t="213"><span class="k">03:33</span><span class="t" data-i18n data-zh-hans="结尾" data-en="Wrap-up" data-vi="Kết">結尾</span></button></li>
       </ol>
-
-      <p class="hw-lead" data-i18n
-        data-zh-hans="这周的作业：&lt;strong&gt;亲自测试你的空中之岛&lt;/strong&gt;。上周你照 &lt;code&gt;VERIFY.md&lt;/code&gt; 和 &lt;code&gt;PLANS.md&lt;/code&gt; 一步一步做出来，测试也都通过了；这周换你当玩家，照着&lt;strong&gt;用户故事&lt;/strong&gt;亲自玩一遍，把你和 AI 都没想到的问题找出来，再接回 VERIFY → TESTS → 修好的流程。"
-        data-en="This week’s homework: &lt;strong&gt;test your own Sky Island by hand&lt;/strong&gt;. Last week you built it step by step from &lt;code&gt;VERIFY.md&lt;/code&gt; and &lt;code&gt;PLANS.md&lt;/code&gt;, and the tests pass; this week you are the player. Play it once along each &lt;strong&gt;user story&lt;/strong&gt;, find the problems neither you nor the AI thought of, and feed them back through VERIFY → TESTS → fix."
-        data-vi="Bài tập tuần này: &lt;strong&gt;tự tay kiểm thử Đảo trên trời của bạn&lt;/strong&gt;. Tuần trước bạn đã làm từng bước theo &lt;code&gt;VERIFY.md&lt;/code&gt; và &lt;code&gt;PLANS.md&lt;/code&gt;, các kiểm thử đều đã qua; tuần này bạn đóng vai người chơi. Chơi một lượt theo từng &lt;strong&gt;user story&lt;/strong&gt;, tìm ra những vấn đề mà cả bạn lẫn AI đều không nghĩ tới, rồi đưa chúng trở lại quy trình VERIFY → TESTS → sửa.">這週的作業：<strong>親自測試你的空中之島</strong>。上週你照 <code>VERIFY.md</code> 和 <code>PLANS.md</code> 一步一步做出來，測試也都通過了；這週換你當玩家，照著<strong>使用者故事</strong>親自玩一遍，把你和 AI 都沒想到的問題找出來，再接回 VERIFY → TESTS → 修好的流程。</p>
-
-      <p class="hw-lead" data-i18n
-        data-zh-hans="&lt;strong&gt;用户故事（User Story）&lt;/strong&gt;：身为＿＿（谁），我想要＿＿（做什么），这样＿＿（为什么）。从玩家的角度，写下他想完成的一件事；一张故事，就是一条要亲自走一遍的路。先挑最重要的 3 条走通，都没问题再扩展。"
-        data-en="&lt;strong&gt;User story&lt;/strong&gt;: as a ___ (who), I want ___ (what), so that ___ (why). It records one thing a player wants to do, from the player’s point of view; each story is a route you walk through yourself. Get the 3 most important ones working first, then expand."
-        data-vi="&lt;strong&gt;User story (câu chuyện người dùng)&lt;/strong&gt;: là một ＿＿ (ai), tôi muốn ＿＿ (làm gì), để ＿＿ (vì sao). Viết ra một việc người chơi muốn làm, từ góc nhìn của người chơi; mỗi câu chuyện là một lộ trình bạn tự đi một lượt. Trước tiên đi thông 3 câu chuyện quan trọng nhất, ổn rồi mới mở rộng."><strong>使用者故事（User Story）</strong>：身為＿＿（誰），我想要＿＿（做什麼），這樣＿＿（為什麼）。從玩家的角度，寫下他想完成的一件事；一張故事，就是一條要親自走一遍的路。先挑最重要的 3 條走通，都沒問題再擴展。</p>
 
       <ol class="points">
         <li><p data-i18n
-          data-zh-hans="&lt;strong&gt;写 3 条用户故事，放进 &lt;code&gt;BRIEF.md&lt;/code&gt;。&lt;/strong&gt;不同的人会走不同的路，例如第一次玩的同学、喜欢盖房子的玩家、爱探险的玩家。用自己的话写，这一份不要请 AI 写。"
-          data-en="&lt;strong&gt;Write 3 user stories into &lt;code&gt;BRIEF.md&lt;/code&gt;.&lt;/strong&gt; Different people take different routes: for example a classmate playing for the first time, a player who likes building, a player who loves exploring. Write them in your own words; do not ask the AI to write this part."
-          data-vi="&lt;strong&gt;Viết 3 user story vào &lt;code&gt;BRIEF.md&lt;/code&gt;.&lt;/strong&gt; Mỗi người đi một lộ trình khác nhau, ví dụ bạn học chơi lần đầu, người chơi thích xây nhà, người chơi thích khám phá. Viết bằng lời của bạn; phần này đừng nhờ AI viết."><strong>寫 3 條使用者故事，放進 <code>BRIEF.md</code>。</strong>不同的人會走不同的路，例如第一次玩的同學、喜歡蓋房子的玩家、愛探險的玩家。用自己的話寫，這一份不要請 AI 寫。</p></li>
-        <li><div class="hw-li"><p data-i18n
-          data-zh-hans="&lt;strong&gt;照着每一条故事，亲自玩一遍，记在 &lt;code&gt;playtest.md&lt;/code&gt;。&lt;/strong&gt;小写文件名：你自己取的。记下哪一条故事、怎么走、✓ 还是 ✗、发生了什么；不好玩的地方（太慢、看不懂要按什么）也算。找不到问题，也照实记下来。"
-          data-en="&lt;strong&gt;Play along each story yourself and record it in &lt;code&gt;playtest.md&lt;/code&gt;.&lt;/strong&gt; A lower-case file name: one you made up. Note which story, how you went, ✓ or ✗, and what happened; parts that are no fun (too slow, unclear what to press) count too. If you find nothing, record that honestly."
-          data-vi="&lt;strong&gt;Tự chơi một lượt theo từng câu chuyện, ghi vào &lt;code&gt;playtest.md&lt;/code&gt;.&lt;/strong&gt; Tên tệp viết thường: do bạn tự đặt. Ghi lại câu chuyện nào, đi thế nào, ✓ hay ✗, đã xảy ra gì; chỗ chơi không vui (quá chậm, không biết bấm gì) cũng tính. Không tìm ra vấn đề thì cũng ghi đúng như vậy."><strong>照著每一條故事，親自玩一遍，記在 <code>playtest.md</code>。</strong>小寫檔名：你自己取的。記下哪一條故事、怎麼走、✓ 還是 ✗、發生了什麼；不好玩的地方（太慢、看不懂要按什麼）也算。找不到問題，也照實記下來。</p>
-          <figure class="hw-verify">
-            <figcaption><span data-i18n data-zh-hans="&lt;code&gt;playtest.md&lt;/code&gt;：照这个格式记" data-en="Use this format for &lt;code&gt;playtest.md&lt;/code&gt;" data-vi="Ghi &lt;code&gt;playtest.md&lt;/code&gt; theo mẫu này"><code>playtest.md</code>：照這個格式記</span><button type="button" class="hw-copy" data-ui="hw.copy">複製</button></figcaption>
-            <pre data-i18n data-zh-hans="# playtest.md（亲自测试记录）
-
-## 故事 1：＿＿＿
-身为 ＿＿＿，我想要 ＿＿＿，这样 ＿＿＿
-- 怎么走：
-- 结果：✓ ／ ✗
-- 发生什么：
-
-## 故事 2：＿＿＿
-（同上）
-
-## 故事 3：＿＿＿
-（同上）
-
-## 修好以后，再走一次
-- 故事 ＿：✓ ／ ✗" data-en="# playtest.md (manual test log)
-
-## Story 1: ___
-As a ___, I want ___, so that ___
-- Route:
-- Result: ✓ / ✗
-- What happened:
-
-## Story 2: ___
-(same as above)
-
-## Story 3: ___
-(same as above)
-
-## After the fix, walk it again
-- Story _: ✓ / ✗" data-vi="# playtest.md (nhật ký tự kiểm thử)
-
-## Câu chuyện 1: ___
-Là một ___, tôi muốn ___, để ___
-- Lộ trình:
-- Kết quả: ✓ / ✗
-- Đã xảy ra gì:
-
-## Câu chuyện 2: ___
-(như trên)
-
-## Câu chuyện 3: ___
-(như trên)
-
-## Sau khi sửa, đi lại một lần
-- Câu chuyện _: ✓ / ✗"># playtest.md（親自測試紀錄）
-
-## 故事 1：＿＿＿
-身為 ＿＿＿，我想要 ＿＿＿，這樣 ＿＿＿
-- 怎麼走：
-- 結果：✓ ／ ✗
-- 發生什麼：
-
-## 故事 2：＿＿＿
-（同上）
-
-## 故事 3：＿＿＿
-（同上）
-
-## 修好以後，再走一次
-- 故事 ＿：✓ ／ ✗</pre>
-          </figure></div></li>
+          data-zh-hans="&lt;strong&gt;大家都有盲点。&lt;/strong&gt;测试全部通过，亲自玩却发现：走到岛的边边掉下去，就一直掉、回不来。测试只会检查“想得到的”；你没想到，AI 也没想到。"
+          data-en="&lt;strong&gt;Everyone has blind spots.&lt;/strong&gt; Every test passes, yet when you play it yourself you walk off the edge of the island and keep falling, never to return. Tests only check what someone thought of; you did not think of this, and neither did the AI."
+          data-vi="&lt;strong&gt;Ai cũng có điểm mù.&lt;/strong&gt; Kiểm thử qua hết, nhưng tự chơi thì phát hiện: bước ra mép đảo là rơi mãi, không quay lại được. Kiểm thử chỉ kiểm tra những gì “nghĩ tới được”; bạn không nghĩ tới, AI cũng không."><strong>大家都有盲點。</strong>測試全部通過，親自玩卻發現：走到島的邊邊掉下去，就一直掉、回不來。測試只會檢查「想得到的」；你沒想到，AI 也沒想到。</p></li>
         <li><p data-i18n
-          data-zh-hans="&lt;strong&gt;发现的问题，接回流程。&lt;/strong&gt;你先把它写进 &lt;code&gt;VERIFY.md&lt;/code&gt;（那是你的）；请 Codex 展开进 &lt;code&gt;TESTS.md&lt;/code&gt;（还没有的话，照视频 01 先请它从 VERIFY 展开一份），先写测试、确认失败，再修好；再故意弄坏一行（视频 02），确认新测试抓得到；最后亲自再走一次那条路，记在 &lt;code&gt;playtest.md&lt;/code&gt;。"
-          data-en="&lt;strong&gt;Feed what you find back into the process.&lt;/strong&gt; First write it into &lt;code&gt;VERIFY.md&lt;/code&gt; (it is yours); have Codex expand it into &lt;code&gt;TESTS.md&lt;/code&gt; (if you have none yet, ask it to expand one from VERIFY as in video 01), write the test, see it fail, then fix it; break a line on purpose (video 02) to confirm the new test catches it; finally walk that route again yourself and record it in &lt;code&gt;playtest.md&lt;/code&gt;."
-          data-vi="&lt;strong&gt;Đưa vấn đề tìm được trở lại quy trình.&lt;/strong&gt; Bạn ghi nó vào &lt;code&gt;VERIFY.md&lt;/code&gt; trước (đó là của bạn); nhờ Codex mở rộng vào &lt;code&gt;TESTS.md&lt;/code&gt; (nếu chưa có thì nhờ nó mở rộng một bản từ VERIFY như video 01), viết kiểm thử, xác nhận thất bại rồi mới sửa; cố ý làm hỏng một dòng (video 02) để xác nhận kiểm thử mới bắt được; cuối cùng tự đi lại lộ trình đó một lần và ghi vào &lt;code&gt;playtest.md&lt;/code&gt;."><strong>發現的問題，接回流程。</strong>你先把它寫進 <code>VERIFY.md</code>（那是你的）；請 Codex 展開進 <code>TESTS.md</code>（還沒有的話，照影片 01 先請它從 VERIFY 展開一份），先寫測試、確認失敗，再修好；再故意弄壞一行（影片 02），確認新測試抓得到；最後親自再走一次那條路，記在 <code>playtest.md</code>。</p></li>
+          data-zh-hans="&lt;strong&gt;亲自玩，才会发现。&lt;/strong&gt;会发现两种问题：坏掉的（bug），和不好玩的（太慢、看不懂要按什么）。测试判断不了好不好玩，所以交出去之前的最后一步，是人亲自测试（Manual Testing）。"
+          data-en="&lt;strong&gt;Only playing it shows you.&lt;/strong&gt; You find two kinds of problems: things that are broken (bugs) and things that are no fun (too slow, unclear what to press). Tests cannot judge fun, so the last step before handing it in is a person testing it by hand (manual testing)."
+          data-vi="&lt;strong&gt;Phải tự chơi mới phát hiện.&lt;/strong&gt; Sẽ thấy hai loại vấn đề: thứ bị hỏng (bug) và thứ chơi không vui (quá chậm, không biết bấm gì). Kiểm thử không phân biệt được vui hay không, nên bước cuối trước khi nộp là con người tự tay kiểm thử (Manual Testing)."><strong>親自玩，才會發現。</strong>會發現兩種問題：壞掉的（bug），和不好玩的（太慢、看不懂要按什麼）。測試判斷不了好不好玩，所以交出去之前的最後一步，是人親自測試（Manual Testing）。</p></li>
         <li><p data-i18n
-          data-zh-hans="&lt;strong&gt;交作业。&lt;/strong&gt;把你的 GitHub repo 链接交给老师，里面要有 &lt;code&gt;BRIEF.md&lt;/code&gt;（含 3 条用户故事）、&lt;code&gt;playtest.md&lt;/code&gt;（修之前、修之后的记录）、&lt;code&gt;VERIFY.md&lt;/code&gt;、&lt;code&gt;TESTS.md&lt;/code&gt;，而且 git 看得出：发现的问题先写进 VERIFY、先有失败的测试，再修好。评分最看重你自己想的部分：故事写得具体、亲自玩得仔细、找到的问题写得清楚。"
-          data-en="&lt;strong&gt;Hand it in.&lt;/strong&gt; Give the teacher the link to your GitHub repo, which must contain &lt;code&gt;BRIEF.md&lt;/code&gt; (with the 3 user stories), &lt;code&gt;playtest.md&lt;/code&gt; (records from before and after the fix), &lt;code&gt;VERIFY.md&lt;/code&gt; and &lt;code&gt;TESTS.md&lt;/code&gt;, and git must show that each problem you found went into VERIFY first and had a failing test before it was fixed. Grading values what you thought of yourself most: specific stories, careful play, and clearly written findings."
-          data-vi="&lt;strong&gt;Nộp bài.&lt;/strong&gt; Gửi giáo viên đường dẫn GitHub repo của bạn, trong đó phải có &lt;code&gt;BRIEF.md&lt;/code&gt; (gồm 3 user story), &lt;code&gt;playtest.md&lt;/code&gt; (ghi chép trước và sau khi sửa), &lt;code&gt;VERIFY.md&lt;/code&gt;, &lt;code&gt;TESTS.md&lt;/code&gt;, và git phải cho thấy: vấn đề tìm được được ghi vào VERIFY trước, có kiểm thử thất bại trước rồi mới sửa. Điểm chú trọng nhất phần do bạn tự nghĩ: câu chuyện cụ thể, chơi kỹ, vấn đề tìm được ghi rõ ràng."><strong>交作業。</strong>把你的 GitHub repo 連結交給老師，裡面要有 <code>BRIEF.md</code>（含 3 條使用者故事）、<code>playtest.md</code>（修之前、修之後的紀錄）、<code>VERIFY.md</code>、<code>TESTS.md</code>，而且 git 看得出：發現的問題先寫進 VERIFY、先有失敗的測試，再修好。評分最看重你自己想的部分：故事寫得具體、親自玩得仔細、找到的問題寫得清楚。</p></li>
+          data-zh-hans="&lt;strong&gt;用户故事（User Story）：身为＿＿，我想要＿＿，这样＿＿。&lt;/strong&gt;从玩家的角度，写下他想完成的一件事。它通常在前期讨论需求时写，所以常和 &lt;code&gt;BRIEF.md&lt;/code&gt; 放在一起；也有开发者直接开一份 &lt;code&gt;USER_STORIES.md&lt;/code&gt;。"
+          data-en="&lt;strong&gt;User story: as a ___, I want ___, so that ___.&lt;/strong&gt; It records one thing a player wants to do, from the player’s point of view. Stories are usually written early, while the requirements are discussed, so they often sit in &lt;code&gt;BRIEF.md&lt;/code&gt;; some developers keep a separate &lt;code&gt;USER_STORIES.md&lt;/code&gt;."
+          data-vi="&lt;strong&gt;User story: là một ＿＿, tôi muốn ＿＿, để ＿＿.&lt;/strong&gt; Viết ra một việc người chơi muốn làm, từ góc nhìn của người chơi. Câu chuyện thường được viết từ giai đoạn đầu khi bàn về yêu cầu, nên hay nằm cùng &lt;code&gt;BRIEF.md&lt;/code&gt;; cũng có lập trình viên mở riêng một tệp &lt;code&gt;USER_STORIES.md&lt;/code&gt;."><strong>使用者故事（User Story）：身為＿＿，我想要＿＿，這樣＿＿。</strong>從玩家的角度，寫下他想完成的一件事。它通常在前期討論需求時寫，所以常和 <code>BRIEF.md</code> 放在一起；也有開發者直接開一份 <code>USER_STORIES.md</code>。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;照着故事的路径玩，记在 &lt;code&gt;playtest.md&lt;/code&gt;。&lt;/strong&gt;一张故事就是一条要亲自走一遍的路：记下怎么走、✓ 还是 ✗、发生了什么。发现的问题接回流程：你先写进 VERIFY → AI 展开进 TESTS → 先红、再绿修好 → 弄坏一行确认抓得到 → 再亲自走一次那条路。"
+          data-en="&lt;strong&gt;Play along each story’s route and record it in &lt;code&gt;playtest.md&lt;/code&gt;.&lt;/strong&gt; Each story is a route you walk yourself: note how you went, ✓ or ✗, and what happened. Feed what you find back in: you write it into VERIFY → the AI expands it into TESTS → red, then green → break a line to confirm it is caught → walk the route again yourself."
+          data-vi="&lt;strong&gt;Chơi theo lộ trình của từng câu chuyện, ghi vào &lt;code&gt;playtest.md&lt;/code&gt;.&lt;/strong&gt; Mỗi câu chuyện là một lộ trình bạn tự đi: ghi lại đi thế nào, ✓ hay ✗, đã xảy ra gì. Vấn đề tìm được thì đưa lại vào quy trình: bạn ghi vào VERIFY → AI mở rộng vào TESTS → đỏ rồi xanh → làm hỏng một dòng để xác nhận bắt được → tự đi lại lộ trình đó."><strong>照著故事的路徑玩，記在 <code>playtest.md</code>。</strong>一張故事就是一條要親自走一遍的路：記下怎麼走、✓ 還是 ✗、發生了什麼。發現的問題接回流程：你先寫進 VERIFY → AI 展開進 TESTS → 先紅、再綠修好 → 弄壞一行確認抓得到 → 再親自走一次那條路。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;先小、再大。&lt;/strong&gt;先挑 3～5 条最重要的故事，亲自走一遍；都没问题，再扩展到更多故事、更多自动测试；最后找别人来玩，他们会走你没想到的路。"
+          data-en="&lt;strong&gt;Start small, then go big.&lt;/strong&gt; First walk the 3 to 5 most important stories yourself; when they all work, expand to more stories and more automated tests; finally have other people play, because they take routes you never thought of."
+          data-vi="&lt;strong&gt;Bắt đầu nhỏ, rồi mở rộng.&lt;/strong&gt; Trước tiên tự đi 3–5 câu chuyện quan trọng nhất; ổn hết rồi mới mở rộng sang nhiều câu chuyện hơn, nhiều kiểm thử tự động hơn; cuối cùng nhờ người khác chơi, họ sẽ đi những lộ trình bạn chưa nghĩ tới."><strong>先小、再大。</strong>先挑 3～5 條最重要的故事，親自走一遍；都沒問題，再擴展到更多故事、更多自動測試；最後找別人來玩，他們會走你沒想到的路。</p></li>
       </ol>
     </section>
 
