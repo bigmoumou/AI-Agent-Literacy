@@ -80,7 +80,7 @@ An open course on working with AI coding agents<br>
 | Week 8 | [01 Is VERIFY Enough? TESTS.md](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=en#01-tests) | 3:54 |
 | | [02 Mutation Testing](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=en#02-break) | 2:58 |
 | | [03 Hands-On Testing with User Stories](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=en#03-playtest) | 3:43 |
-| | [Extra 1 Branches and Pull Requests: Three People, One Project](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=en#s1-branch-pr) ・ [Extra 2 Writing Up a Bug Clearly: GitHub Issues](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=en#s2-bug-issue) | 3:12 ・ 2:48 |
+| | [Extra 1 Branches and Pull Requests: Three People, One Project](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=en#s1-branch-pr) ・ [Extra 2 Writing Up a Bug Clearly: GitHub Issues](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=en#s2-bug-issue) | 3:09 ・ 2:48 |
 
 **Topics covered**: AI coding agents (OpenAI Codex, Claude Code), working folders and the terminal, `AGENTS.md` and the context window, the built-in browser, GitHub and Mermaid, verification checklists (`VERIFY.md`), switching models mid-task (GPT-6 Luna → GPT-6.1 Sol), the Codex agent loop and automatic compaction, test-driven development, `PLANS.md` and `TESTS.md`, mutation testing, user stories, branches and pull requests, and GitHub issues.
 
@@ -199,7 +199,7 @@ Thanks to the students taking the course.
 | Week 8 | [01 VERIFY 就夠了嗎？TESTS.md](https://ai-agent-literacy.pages.dev/weeks/week08/#01-tests) | 3:54 |
 | | [02 突變測試（Mutation Testing）](https://ai-agent-literacy.pages.dev/weeks/week08/#02-break) | 2:58 |
 | | [03 透過 User Story 幫助實測](https://ai-agent-literacy.pages.dev/weeks/week08/#03-playtest) | 3:43 |
-| | [補充 1 分支與 Pull Request：三個人一起改同一個專案](https://ai-agent-literacy.pages.dev/weeks/week08/#s1-branch-pr)・[補充 2 把 bug 寫清楚：GitHub Issue](https://ai-agent-literacy.pages.dev/weeks/week08/#s2-bug-issue) | 3:12・2:48 |
+| | [補充 1 分支與 Pull Request：三個人一起改同一個專案](https://ai-agent-literacy.pages.dev/weeks/week08/#s1-branch-pr)・[補充 2 把 bug 寫清楚：GitHub Issue](https://ai-agent-literacy.pages.dev/weeks/week08/#s2-bug-issue) | 3:09・2:48 |
 
 **涵蓋主題**：AI 程式助理（OpenAI Codex、Claude Code）、工作資料夾與終端機、`AGENTS.md` 與 context window、內建瀏覽器、GitHub 與 Mermaid、驗證清單（`VERIFY.md`）、做到一半換模型（GPT-6 Luna → GPT-6.1 Sol）、Codex 的 agent loop 與自動壓縮、測試驅動開發、`PLANS.md` 與 `TESTS.md`、突變測試（mutation testing）、user story、分支與 pull request、GitHub issue。
 
@@ -306,7 +306,7 @@ python -m http.server 8000
 | Week 8 | [01 VERIFY 就够了吗？TESTS.md](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=zh-Hans#01-tests) | 3:54 |
 | | [02 突变测试（Mutation Testing）](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=zh-Hans#02-break) | 2:58 |
 | | [03 通过 User Story 帮助实测](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=zh-Hans#03-playtest) | 3:43 |
-| | [补充 1 分支与 Pull Request：三个人一起改同一个项目](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=zh-Hans#s1-branch-pr)・[补充 2 把 bug 写清楚：GitHub Issue](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=zh-Hans#s2-bug-issue) | 3:12・2:48 |
+| | [补充 1 分支与 Pull Request：三个人一起改同一个项目](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=zh-Hans#s1-branch-pr)・[补充 2 把 bug 写清楚：GitHub Issue](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=zh-Hans#s2-bug-issue) | 3:09・2:48 |
 
 **涵盖主题**：AI 编程助手（OpenAI Codex、Claude Code）、工作文件夹与终端、`AGENTS.md` 与上下文窗口、内置浏览器、GitHub 与 Mermaid、验证清单（`VERIFY.md`）、做到一半换模型（GPT-6 Luna → GPT-6.1 Sol）、Codex 的 agent loop 与自动压缩、测试驱动开发、`PLANS.md` 与 `TESTS.md`、突变测试（mutation testing）、user story、分支与 pull request、GitHub issue。
 
@@ -413,7 +413,7 @@ python -m http.server 8000
 | Week 8 | [01 VERIFY だけで十分？TESTS.md](https://ai-agent-literacy.pages.dev/weeks/week08/#01-tests) | 3:54 |
 | | [02 ミューテーションテスト（Mutation Testing）](https://ai-agent-literacy.pages.dev/weeks/week08/#02-break) | 2:58 |
 | | [03 User Story で実際に試す](https://ai-agent-literacy.pages.dev/weeks/week08/#03-playtest) | 3:43 |
-| | [補足 1 ブランチと Pull Request：3 人で同じプロジェクトを直す](https://ai-agent-literacy.pages.dev/weeks/week08/#s1-branch-pr)・[補足 2 バグをはっきり書く：GitHub Issue](https://ai-agent-literacy.pages.dev/weeks/week08/#s2-bug-issue) | 3:12・2:48 |
+| | [補足 1 ブランチと Pull Request：3 人で同じプロジェクトを直す](https://ai-agent-literacy.pages.dev/weeks/week08/#s1-branch-pr)・[補足 2 バグをはっきり書く：GitHub Issue](https://ai-agent-literacy.pages.dev/weeks/week08/#s2-bug-issue) | 3:09・2:48 |
 
 **扱うテーマ**：AI コーディングエージェント（OpenAI Codex、Claude Code）、作業フォルダとターミナル、`AGENTS.md` とコンテキストウィンドウ、内蔵ブラウザ、GitHub と Mermaid、検証チェックリスト（`VERIFY.md`）、作業途中のモデル切り替え（GPT-6 Luna → GPT-6.1 Sol）、Codex のエージェントループと自動圧縮、テスト駆動開発、`PLANS.md` と `TESTS.md`、ミューテーションテスト、user story、ブランチと pull request、GitHub issue。
 
