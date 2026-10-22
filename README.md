@@ -57,7 +57,7 @@ An open course on working with AI coding agents<br>
 |---|---|---|
 | Week 1 | [01 AI Can Do the Work Itself Now. What Should We Learn? AI Agent Literacy](https://ai-agent-literacy.pages.dev/weeks/week01/?lang=en#01-agent-literacy) | 2:08 |
 | | [02 How Do You Learn Best in This Course? Tools, Hands-on Work, Self-learning](https://ai-agent-literacy.pages.dev/weeks/week01/?lang=en#02-course-guide) | 1:51 |
-| | [03 After One Instruction, What Does the AI Agent Do? From One Sentence to a Finished Page](https://ai-agent-literacy.pages.dev/weeks/week01/?lang=en#03-first-run) | 1:36 |
+| | [03 A First Run with an AI Agent: From One Sentence to a Finished Page](https://ai-agent-literacy.pages.dev/weeks/week01/?lang=en#03-first-run) | 1:52 |
 | Week 3 | [01 The Journey of report.md](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=en#01-report-journey) | 1:33 |
 | | [02 AGENTS.md and Context Management](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=en#02-agents-md-context) | 3:40 |
 | | [03 Homework: Collecting Florence Museum Data](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=en#03-homework-firenze) | 2:55 |
@@ -174,7 +174,7 @@ Thanks to the students taking the course.
 |---|---|---|
 | Week 1 | [01 AI 會自己動手做事了，我們要學什麼？AI Agent Literacy](https://ai-agent-literacy.pages.dev/weeks/week01/#01-agent-literacy) | 2:08 |
 | | [02 這門課要怎麼上，才學得最好？工具、實作、自學](https://ai-agent-literacy.pages.dev/weeks/week01/#02-course-guide) | 1:51 |
-| | [03 交代一句話之後，AI Agent 做了什麼？從一句話到成品](https://ai-agent-literacy.pages.dev/weeks/week01/#03-first-run) | 1:36 |
+| | [03 AI Agent 初次體驗：從一句話到成品](https://ai-agent-literacy.pages.dev/weeks/week01/#03-first-run) | 1:52 |
 | Week 3 | [01 report.md 的旅程](https://ai-agent-literacy.pages.dev/weeks/week03/#01-report-journey) | 1:33 |
 | | [02 AGENTS.md 與上下文管理](https://ai-agent-literacy.pages.dev/weeks/week03/#02-agents-md-context) | 3:40 |
 | | [03 作業：佛羅倫斯美術館資料收集](https://ai-agent-literacy.pages.dev/weeks/week03/#03-homework-firenze) | 2:55 |
@@ -279,7 +279,7 @@ python -m http.server 8000
 |---|---|---|
 | Week 1 | [01 AI 会自己动手做事了，我们要学什么？AI Agent Literacy](https://ai-agent-literacy.pages.dev/weeks/week01/?lang=zh-Hans#01-agent-literacy) | 2:08 |
 | | [02 这门课要怎么上，才学得最好？工具、动手做、自学](https://ai-agent-literacy.pages.dev/weeks/week01/?lang=zh-Hans#02-course-guide) | 1:51 |
-| | [03 交代一句话之后，AI Agent 做了什么？从一句话到成品](https://ai-agent-literacy.pages.dev/weeks/week01/?lang=zh-Hans#03-first-run) | 1:36 |
+| | [03 AI Agent 初次体验：从一句话到成品](https://ai-agent-literacy.pages.dev/weeks/week01/?lang=zh-Hans#03-first-run) | 1:52 |
 | Week 3 | [01 report.md 的旅程](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=zh-Hans#01-report-journey) | 1:33 |
 | | [02 AGENTS.md 与上下文管理](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=zh-Hans#02-agents-md-context) | 3:40 |
 | | [03 作业：佛罗伦萨美术馆数据收集](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=zh-Hans#03-homework-firenze) | 2:55 |
@@ -384,7 +384,7 @@ python -m http.server 8000
 |---|---|---|
 | Week 1 | [01 AI が自分で作業する時代、何を学ぶべきか？AI Agent Literacy](https://ai-agent-literacy.pages.dev/weeks/week01/#01-agent-literacy) | 2:08 |
 | | [02 この授業はどう受ければいちばん身につく？ツール・実践・自学](https://ai-agent-literacy.pages.dev/weeks/week01/#02-course-guide) | 1:51 |
-| | [03 一言指示したら、AI エージェントは何をする？一言から完成まで](https://ai-agent-literacy.pages.dev/weeks/week01/#03-first-run) | 1:36 |
+| | [03 AI エージェント初体験：一言から完成まで](https://ai-agent-literacy.pages.dev/weeks/week01/#03-first-run) | 1:52 |
 | Week 3 | [01 report.md の旅](https://ai-agent-literacy.pages.dev/weeks/week03/#01-report-journey) | 1:33 |
 | | [02 AGENTS.md とコンテキスト管理](https://ai-agent-literacy.pages.dev/weeks/week03/#02-agents-md-context) | 3:40 |
 | | [03 課題：フィレンツェの美術館データ収集](https://ai-agent-literacy.pages.dev/weeks/week03/#03-homework-firenze) | 2:55 |
