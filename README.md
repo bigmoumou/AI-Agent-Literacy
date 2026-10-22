@@ -25,7 +25,7 @@ An open course on working with AI coding agents<br>
 <table>
 <tr><td><b>Pilot site</b></td><td>National Taiwan Normal University (NTNU), 2026, in the course <i>Learning Analytics Tools Implementation Applications</i></td></tr>
 <tr><td><b>Format</b></td><td>Weekly microlearning videos (1–5 min) with chapters and key points; a browser-based practice computer; a scenario-based exam</td></tr>
-<tr><td><b>Published</b></td><td>Weeks 1 and 3–8: 27 videos, about 85 minutes (October 2026), updated weekly</td></tr>
+<tr><td><b>Published</b></td><td>Weeks 1 and 3–8: 29 videos, about 91 minutes (October 2026), updated weekly</td></tr>
 <tr><td><b>Languages</b></td><td>Site in English, Traditional Chinese, Simplified Chinese and Vietnamese, chosen from the browser's language. Weeks 3–7 are fully in English too: every video, the practice computers and the Week 6 exam. Other videos show Traditional Chinese on screen</td></tr>
 <tr><td><b>Licenses</b></td><td>Code <a href="LICENSE">MIT</a>; videos and course content <a href="LICENSE-CONTENT.md">CC BY-NC-SA 4.0</a></td></tr>
 </table>
@@ -79,8 +79,9 @@ An open course on working with AI coding agents<br>
 | Week 8 | [01 Is VERIFY Enough? TESTS.md](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=en#01-tests) | 3:54 |
 | | [02 Mutation Testing](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=en#02-break) | 2:58 |
 | | [03 Hands-On Testing with User Stories](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=en#03-playtest) | 3:43 |
+| | [Extra 1 Branches and Pull Requests: Three People, One Project](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=en#s1-branch-pr) ・ [Extra 2 Writing Up a Bug Clearly: GitHub Issues](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=en#s2-bug-issue) | 3:12 ・ 2:48 |
 
-**Topics covered**: AI coding agents (OpenAI Codex, Claude Code), working folders and the terminal, `AGENTS.md` and the context window, the built-in browser, GitHub and Mermaid, verification checklists (`VERIFY.md`), switching models mid-task (GPT-6 Luna → GPT-6.1 Sol), the Codex agent loop and automatic compaction, test-driven development, `PLANS.md` and `TESTS.md`, mutation testing and user stories.
+**Topics covered**: AI coding agents (OpenAI Codex, Claude Code), working folders and the terminal, `AGENTS.md` and the context window, the built-in browser, GitHub and Mermaid, verification checklists (`VERIFY.md`), switching models mid-task (GPT-6 Luna → GPT-6.1 Sol), the Codex agent loop and automatic compaction, test-driven development, `PLANS.md` and `TESTS.md`, mutation testing, user stories, branches and pull requests, and GitHub issues.
 
 ## How it's made
 
@@ -153,7 +154,7 @@ Thanks to the students taking the course.
 <table>
 <tr><td><b>首個示範場域</b></td><td>國立臺灣師範大學（2026），課程「學習分析工具」（Learning Analytics Tools Implementation Applications）</td></tr>
 <tr><td><b>形式</b></td><td>每週微學習影片（1–5 分鐘），附章節和重點；瀏覽器裡的練習電腦；情境式考試</td></tr>
-<tr><td><b>已公開</b></td><td>Week 1、3–8：27 支影片，約 85 分鐘（2026 年 10 月），每週更新</td></tr>
+<tr><td><b>已公開</b></td><td>Week 1、3–8：29 支影片，約 91 分鐘（2026 年 10 月），每週更新</td></tr>
 <tr><td><b>語言</b></td><td>網站有英文、繁體中文、簡體中文、越南文，依瀏覽器語言自動選。Week 3–7 另有完整英文版：每支影片、練習電腦、Week 6 考試；其他影片畫面是繁體中文</td></tr>
 <tr><td><b>授權</b></td><td>程式 <a href="LICENSE">MIT</a>；影片與教材 <a href="LICENSE-CONTENT.md">CC BY-NC-SA 4.0</a></td></tr>
 </table>
@@ -196,8 +197,9 @@ Thanks to the students taking the course.
 | Week 8 | [01 VERIFY 就夠了嗎？TESTS.md](https://ai-agent-literacy.pages.dev/weeks/week08/#01-tests) | 3:54 |
 | | [02 突變測試（Mutation Testing）](https://ai-agent-literacy.pages.dev/weeks/week08/#02-break) | 2:58 |
 | | [03 透過 User Story 幫助實測](https://ai-agent-literacy.pages.dev/weeks/week08/#03-playtest) | 3:43 |
+| | [補充 1 分支與 Pull Request：三個人一起改同一個專案](https://ai-agent-literacy.pages.dev/weeks/week08/#s1-branch-pr)・[補充 2 把 bug 寫清楚：GitHub Issue](https://ai-agent-literacy.pages.dev/weeks/week08/#s2-bug-issue) | 3:12・2:48 |
 
-**涵蓋主題**：AI 程式助理（OpenAI Codex、Claude Code）、工作資料夾與終端機、`AGENTS.md` 與 context window、內建瀏覽器、GitHub 與 Mermaid、驗證清單（`VERIFY.md`）、做到一半換模型（GPT-6 Luna → GPT-6.1 Sol）、Codex 的 agent loop 與自動壓縮、測試驅動開發、`PLANS.md` 與 `TESTS.md`、突變測試（mutation testing）與 user story。
+**涵蓋主題**：AI 程式助理（OpenAI Codex、Claude Code）、工作資料夾與終端機、`AGENTS.md` 與 context window、內建瀏覽器、GitHub 與 Mermaid、驗證清單（`VERIFY.md`）、做到一半換模型（GPT-6 Luna → GPT-6.1 Sol）、Codex 的 agent loop 與自動壓縮、測試驅動開發、`PLANS.md` 與 `TESTS.md`、突變測試（mutation testing）、user story、分支與 pull request、GitHub issue。
 
 ### 怎麼做的
 
@@ -258,7 +260,7 @@ python -m http.server 8000
 <table>
 <tr><td><b>首个示范场域</b></td><td>台湾师范大学（2026），课程“学习分析工具”（Learning Analytics Tools Implementation Applications）</td></tr>
 <tr><td><b>形式</b></td><td>每周微学习视频（1–5 分钟），附章节和要点；浏览器里的练习电脑；情境式考试</td></tr>
-<tr><td><b>已公开</b></td><td>Week 1、3–8：27 个视频，约 85 分钟（2026 年 10 月），每周更新</td></tr>
+<tr><td><b>已公开</b></td><td>Week 1、3–8：29 个视频，约 91 分钟（2026 年 10 月），每周更新</td></tr>
 <tr><td><b>语言</b></td><td>网站有英文、繁体中文、简体中文、越南文，按浏览器语言自动选择。Week 3–7 另有完整英文版：每个视频、练习电脑、Week 6 考试；其他视频画面是繁体中文</td></tr>
 <tr><td><b>许可</b></td><td>代码 <a href="LICENSE">MIT</a>；视频与教材 <a href="LICENSE-CONTENT.md">CC BY-NC-SA 4.0</a></td></tr>
 </table>
@@ -301,8 +303,9 @@ python -m http.server 8000
 | Week 8 | [01 VERIFY 就够了吗？TESTS.md](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=zh-Hans#01-tests) | 3:54 |
 | | [02 突变测试（Mutation Testing）](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=zh-Hans#02-break) | 2:58 |
 | | [03 通过 User Story 帮助实测](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=zh-Hans#03-playtest) | 3:43 |
+| | [补充 1 分支与 Pull Request：三个人一起改同一个项目](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=zh-Hans#s1-branch-pr)・[补充 2 把 bug 写清楚：GitHub Issue](https://ai-agent-literacy.pages.dev/weeks/week08/?lang=zh-Hans#s2-bug-issue) | 3:12・2:48 |
 
-**涵盖主题**：AI 编程助手（OpenAI Codex、Claude Code）、工作文件夹与终端、`AGENTS.md` 与上下文窗口、内置浏览器、GitHub 与 Mermaid、验证清单（`VERIFY.md`）、做到一半换模型（GPT-6 Luna → GPT-6.1 Sol）、Codex 的 agent loop 与自动压缩、测试驱动开发、`PLANS.md` 与 `TESTS.md`、突变测试（mutation testing）与 user story。
+**涵盖主题**：AI 编程助手（OpenAI Codex、Claude Code）、工作文件夹与终端、`AGENTS.md` 与上下文窗口、内置浏览器、GitHub 与 Mermaid、验证清单（`VERIFY.md`）、做到一半换模型（GPT-6 Luna → GPT-6.1 Sol）、Codex 的 agent loop 与自动压缩、测试驱动开发、`PLANS.md` 与 `TESTS.md`、突变测试（mutation testing）、user story、分支与 pull request、GitHub issue。
 
 ### 怎么做的
 
@@ -363,7 +366,7 @@ python -m http.server 8000
 <table>
 <tr><td><b>最初の実践の場</b></td><td>国立台湾師範大学（2026 年）、授業「学習分析ツール」（Learning Analytics Tools Implementation Applications）</td></tr>
 <tr><td><b>形式</b></td><td>毎週のマイクロラーニング動画（1〜5 分、チャプターと要点つき）、ブラウザ上の練習用コンピューター、シナリオ型の試験</td></tr>
-<tr><td><b>公開済み</b></td><td>Week 1・3〜8：動画 27 本、約 85 分（2026 年 10 月時点）、毎週更新</td></tr>
+<tr><td><b>公開済み</b></td><td>Week 1・3〜8：動画 29 本、約 91 分（2026 年 10 月時点）、毎週更新</td></tr>
 <tr><td><b>言語</b></td><td>サイトは英語・繁体字中国語・簡体字中国語・ベトナム語（日本語は未対応）で、ブラウザの言語で自動選択。Week 3〜7 は動画・練習用コンピュータ・Week 6 の試験まで完全な英語版あり。その他の動画内の文字は繁体字中国語</td></tr>
 <tr><td><b>ライセンス</b></td><td>コード <a href="LICENSE">MIT</a>、動画と教材 <a href="LICENSE-CONTENT.md">CC BY-NC-SA 4.0</a></td></tr>
 </table>
@@ -406,8 +409,9 @@ python -m http.server 8000
 | Week 8 | [01 VERIFY だけで十分？TESTS.md](https://ai-agent-literacy.pages.dev/weeks/week08/#01-tests) | 3:54 |
 | | [02 ミューテーションテスト（Mutation Testing）](https://ai-agent-literacy.pages.dev/weeks/week08/#02-break) | 2:58 |
 | | [03 User Story で実際に試す](https://ai-agent-literacy.pages.dev/weeks/week08/#03-playtest) | 3:43 |
+| | [補足 1 ブランチと Pull Request：3 人で同じプロジェクトを直す](https://ai-agent-literacy.pages.dev/weeks/week08/#s1-branch-pr)・[補足 2 バグをはっきり書く：GitHub Issue](https://ai-agent-literacy.pages.dev/weeks/week08/#s2-bug-issue) | 3:12・2:48 |
 
-**扱うテーマ**：AI コーディングエージェント（OpenAI Codex、Claude Code）、作業フォルダとターミナル、`AGENTS.md` とコンテキストウィンドウ、内蔵ブラウザ、GitHub と Mermaid、検証チェックリスト（`VERIFY.md`）、作業途中のモデル切り替え（GPT-6 Luna → GPT-6.1 Sol）、Codex のエージェントループと自動圧縮、テスト駆動開発、`PLANS.md` と `TESTS.md`、ミューテーションテストと user story。
+**扱うテーマ**：AI コーディングエージェント（OpenAI Codex、Claude Code）、作業フォルダとターミナル、`AGENTS.md` とコンテキストウィンドウ、内蔵ブラウザ、GitHub と Mermaid、検証チェックリスト（`VERIFY.md`）、作業途中のモデル切り替え（GPT-6 Luna → GPT-6.1 Sol）、Codex のエージェントループと自動圧縮、テスト駆動開発、`PLANS.md` と `TESTS.md`、ミューテーションテスト、user story、ブランチと pull request、GitHub issue。
 
 ### 作り方
 
