@@ -67,7 +67,7 @@
 
       <div class="film">
         <div class="player">
-          <video controls preload="metadata" playsinline data-hls="video/01-agent-literacy/hls/index.m3u8" data-poster="video/01-agent-literacy/poster.jpg" width="1920" height="1080">
+          <video controls preload="metadata" playsinline data-hls="video/01-agent-literacy/hls/index.m3u8" data-poster="video/01-agent-literacy/poster.jpg" data-hls-en="video/01-agent-literacy/en/hls/index.m3u8" data-poster-en="video/01-agent-literacy/poster-en.jpg" width="1920" height="1080" data-ui="video.unsupported">
             你的瀏覽器無法播放這支影片。
           </video>
         </div>
@@ -117,7 +117,7 @@
 
       <div class="film">
         <div class="player">
-          <video controls preload="metadata" playsinline data-hls="video/02-course-guide/hls/index.m3u8" data-poster="video/02-course-guide/poster.jpg" width="1920" height="1080">
+          <video controls preload="metadata" playsinline data-hls="video/02-course-guide/hls/index.m3u8" data-poster="video/02-course-guide/poster.jpg" data-hls-en="video/02-course-guide/en/hls/index.m3u8" data-poster-en="video/02-course-guide/poster-en.jpg" width="1920" height="1080" data-ui="video.unsupported">
             你的瀏覽器無法播放這支影片。
           </video>
         </div>
@@ -173,7 +173,7 @@
 
       <div class="film">
         <div class="player">
-          <video controls preload="metadata" playsinline data-hls="video/03-first-run/hls/index.m3u8" data-poster="video/03-first-run/poster.jpg" width="1920" height="1080">
+          <video controls preload="metadata" playsinline data-hls="video/03-first-run/hls/index.m3u8" data-poster="video/03-first-run/poster.jpg" data-hls-en="video/03-first-run/en/hls/index.m3u8" data-poster-en="video/03-first-run/poster-en.jpg" width="1920" height="1080" data-ui="video.unsupported">
             你的瀏覽器無法播放這支影片。
           </video>
         </div>
@@ -198,8 +198,8 @@
       <ol class="points">
         <li><p data-i18n
           data-zh-hans="&lt;strong&gt;交代：用母语说清楚三件事。&lt;/strong&gt;小安在 Codex 打一段话：做一页自我介绍网页（名字、三个兴趣、这学期想学的）；风格简单、手机也好读；只用这个文件夹，不要上传到网络。做什么、做到什么程度、界线，都说清楚。"
-          data-en="&lt;strong&gt;Instruct: say three things clearly in your own language.&lt;/strong&gt; 小安 types into Codex: make a one-page self-introduction (name, three interests, what I want to learn this term); keep the style simple and easy to read on a phone; use only this folder and do not upload anything. What to do, how far to take it and the limits are all stated."
-          data-vi="&lt;strong&gt;Dặn việc: nói rõ ba điều bằng tiếng mẹ đẻ.&lt;/strong&gt; 小安 gõ vào Codex: làm một trang web tự giới thiệu (tên, ba sở thích, điều muốn học kỳ này); phong cách đơn giản, đọc tốt trên điện thoại; chỉ dùng thư mục này, không tải lên mạng. Làm gì, làm tới mức nào và giới hạn đều nói rõ."><strong>交代：用母語說清楚三件事。</strong>小安在 Codex 打一段話：做一頁自我介紹網頁（名字、三個興趣、這學期想學的）；風格簡單、手機也好讀；只用這個資料夾，不要上傳到網路。做什麼、做到什麼程度、界線，都說清楚。</p></li>
+          data-en="&lt;strong&gt;Instruct: say three things clearly in your own language.&lt;/strong&gt; Xiao An types into Codex: make a one-page self-introduction (name, three interests, what I want to learn this term); keep the style simple and easy to read on a phone; use only this folder and do not upload anything. What to do, how far to take it and the limits are all stated."
+          data-vi="&lt;strong&gt;Dặn việc: nói rõ ba điều bằng tiếng mẹ đẻ.&lt;/strong&gt; Tiểu An gõ vào Codex: làm một trang web tự giới thiệu (tên, ba sở thích, điều muốn học kỳ này); phong cách đơn giản, đọc tốt trên điện thoại; chỉ dùng thư mục này, không tải lên mạng. Làm gì, làm tới mức nào và giới hạn đều nói rõ."><strong>交代：用母語說清楚三件事。</strong>小安在 Codex 打一段話：做一頁自我介紹網頁（名字、三個興趣、這學期想學的）；風格簡單、手機也好讀；只用這個資料夾，不要上傳到網路。做什麼、做到什麼程度、界線，都說清楚。</p></li>
         <li><p data-i18n
           data-zh-hans="&lt;strong&gt;看它做，它也会自己检查。&lt;/strong&gt;它自己读文件夹、建立 &lt;code&gt;index.html&lt;/code&gt; 和 &lt;code&gt;style.css&lt;/code&gt;，做完还会自己打开内置浏览器看一次；最后列出改了哪些文件，每个文件旁边的 + 是新增的行数，− 是删除的。"
           data-en="&lt;strong&gt;Watch it work; it checks too.&lt;/strong&gt; It reads the folder, creates &lt;code&gt;index.html&lt;/code&gt; and &lt;code&gt;style.css&lt;/code&gt;, then opens the built-in browser to look at the page itself; finally it lists the files it changed, with + for lines added and − for lines removed next to each file."
@@ -210,11 +210,11 @@
           data-vi="&lt;strong&gt;Nghiệm thu: xem từng mục theo danh sách của bạn.&lt;/strong&gt; AI đã xem rồi, bạn vẫn phải tự nghiệm thu: đối chiếu danh sách, tên đúng, có ghi điều muốn học, nhưng thiếu sở thích “chụp ảnh”. AI tự kiểm tra cũng có thể sót, nên nhất định phải nghiệm thu."><strong>驗收：拿自己的清單一條一條看。</strong>AI 看過了，你還是要自己驗收：對照自己的驗收清單，名字對、想學的有寫，但興趣少了「拍照」。AI 自己檢查也會漏，所以一定要驗收。</p></li>
         <li><p data-i18n
           data-zh-hans="&lt;strong&gt;不对，就请它修，再验收一次。&lt;/strong&gt;一句话：“兴趣少了拍照，帮我补上。”这次只改了 &lt;code&gt;index.html&lt;/code&gt; 一行（+1）；再看一次，三条都过了。交代 → 看它做 → 验收 → 请它修，这一圈就是 AI 驾驶员的工作。补充 1 教你把 Codex 和 VS Code 装起来，自己开一次。"
-          data-en="&lt;strong&gt;If it is wrong, ask it to fix it, then check again.&lt;/strong&gt; One sentence: “Photography is missing from my interests, please add it.” This time it changes one line of &lt;code&gt;index.html&lt;/code&gt; (+1); check again and all three pass. Instruct → watch it work → check → ask for fixes: this loop is the AI driver’s job. Supplement 1 shows how to install Codex and VS Code so you can run it yourself."
+          data-en="&lt;strong&gt;If it is wrong, ask it to fix it, then check again.&lt;/strong&gt; One sentence: “Photography is missing from my interests, please add it.” This time it changes one line of &lt;code&gt;index.html&lt;/code&gt; (+1); check again and all three pass. Instruct → watch it work → check → ask for fixes: this loop is the AI driver’s job. Extra 1 shows how to install Codex and VS Code so you can run it yourself."
           data-vi="&lt;strong&gt;Sai thì nhờ nó sửa, rồi nghiệm thu lại.&lt;/strong&gt; Một câu: “Sở thích thiếu chụp ảnh, thêm vào giúp mình.” Lần này chỉ sửa một dòng &lt;code&gt;index.html&lt;/code&gt; (+1); xem lại, cả ba đều đạt. Dặn việc → xem nó làm → nghiệm thu → nhờ sửa: vòng này chính là việc của người lái AI. Phần bổ sung 1 hướng dẫn cài Codex và VS Code để bạn tự chạy một lần."><strong>不對，就請它修，再驗收一次。</strong>一句話：「興趣少了拍照，幫我補上。」這次只改了 <code>index.html</code> 一行（+1）；再看一次，三條都過了。交代 → 看它做 → 驗收 → 請它修，這一圈就是 AI 駕駛員的工作。補充 1 教你把 Codex 和 VS Code 裝起來，自己開一次。</p></li>
         <li><p data-i18n
           data-zh-hans="&lt;strong&gt;成品，就在你的电脑里。&lt;/strong&gt;做完的 &lt;code&gt;index.html&lt;/code&gt;、&lt;code&gt;style.css&lt;/code&gt; 都在你电脑的文件夹里（桌面 › 小安的网站），打开 Finder 就看得到。直接在你的文件夹建文件、改文件，做完再自己打开网页检查做得对不对，这些都是网页版 AI 聊天做不到的。"
-          data-en="&lt;strong&gt;The result is right on your computer.&lt;/strong&gt; The finished &lt;code&gt;index.html&lt;/code&gt; and &lt;code&gt;style.css&lt;/code&gt; sit in a folder on your computer (Desktop › 小安的網站), where Finder shows them. Creating and changing files directly in your folder, then opening the page itself to check the work, are things a web AI chat cannot do."
+          data-en="&lt;strong&gt;The result is right on your computer.&lt;/strong&gt; The finished &lt;code&gt;index.html&lt;/code&gt; and &lt;code&gt;style.css&lt;/code&gt; sit in a folder on your computer (Desktop › xiao-an-site), where Finder shows them. Creating and changing files directly in your folder, then opening the page itself to check the work, are things a web AI chat cannot do."
           data-vi="&lt;strong&gt;Thành phẩm nằm ngay trong máy bạn.&lt;/strong&gt; &lt;code&gt;index.html&lt;/code&gt; và &lt;code&gt;style.css&lt;/code&gt; đã làm xong nằm trong thư mục trên máy bạn (Desktop › 小安的網站), mở Finder là thấy. Tạo tệp, sửa tệp ngay trong thư mục của bạn, làm xong còn tự mở trang để kiểm tra đúng chưa: đó là những việc AI chat trên web không làm được."><strong>成品，就在你的電腦裡。</strong>做完的 <code>index.html</code>、<code>style.css</code> 都在你電腦的資料夾裡（桌面 › 小安的網站），打開 Finder 就看得到。直接在你的資料夾建檔案、改檔案，做完再自己打開網頁檢查做得對不對，這些都是網頁版 AI 聊天做不到的。</p></li>
       </ol>
     </section>
@@ -227,7 +227,7 @@
 
       <div class="film">
         <div class="player">
-          <video controls preload="metadata" playsinline data-hls="video/s1-install/hls/index.m3u8" data-poster="video/s1-install/poster.jpg" width="1920" height="1080">
+          <video controls preload="metadata" playsinline data-hls="video/s1-install/hls/index.m3u8" data-poster="video/s1-install/poster.jpg" data-hls-en="video/s1-install/en/hls/index.m3u8" data-poster-en="video/s1-install/poster-en.jpg" width="1920" height="1080" data-ui="video.unsupported">
             你的瀏覽器無法播放這支影片。
           </video>
         </div>
@@ -255,7 +255,7 @@
           data-vi="&lt;strong&gt;Cài đặt.&lt;/strong&gt; Mac: mở tệp &lt;code&gt;.dmg&lt;/code&gt; vừa tải, kéo ChatGPT vào Applications, lần đầu mở thì bấm Open. Windows: trình cài đặt sẽ mở Microsoft Store, bấm Get, cài xong bấm Open, sau đó mở từ menu Start."><strong>安裝。</strong>Mac：打開下載的 <code>.dmg</code>，把 ChatGPT 拖進「應用程式」，第一次打開時按「打開」。Windows：下載的安裝程式會打開 Microsoft Store，按「取得」，裝好後按「開啟」，之後從「開始」功能表打開。</p></li>
         <li><p data-i18n
           data-zh-hans="&lt;strong&gt;登录、切到 Codex、开一个文件夹。&lt;/strong&gt;用 ChatGPT 账号登录（免费版也可以用 Codex，用量比较少）；左上角切到 Codex；新增项目时打开一个文件夹（先在桌面建好“我的第一个专案”），试着问一句“这个文件夹里有什么？”。"
-          data-en="&lt;strong&gt;Sign in, switch to Codex, open a folder.&lt;/strong&gt; Sign in with your ChatGPT account (the free plan can use Codex too, with less usage); switch to Codex in the top-left corner; add a project by opening a folder (first make 「我的第一個專案」 on the Desktop) and try asking “What is in this folder?”."
+          data-en="&lt;strong&gt;Sign in, switch to Codex, open a folder.&lt;/strong&gt; Sign in with your ChatGPT account (the free plan can use Codex too, with less usage); switch to Codex in the top-left corner; add a project by opening a folder (first make a folder called my-first-project on the Desktop) and try asking “What is in this folder?”."
           data-vi="&lt;strong&gt;Đăng nhập, chuyển sang Codex, mở một thư mục.&lt;/strong&gt; Đăng nhập bằng tài khoản ChatGPT (gói miễn phí cũng dùng được Codex, lượng dùng ít hơn); ở góc trên bên trái chuyển sang Codex; thêm dự án bằng cách mở một thư mục (tạo sẵn 「我的第一個專案」 trên Desktop) rồi thử hỏi “Trong thư mục này có gì?”."><strong>登入、切到 Codex、開一個資料夾。</strong>用 ChatGPT 帳號登入（免費版也可以用 Codex，用量比較少）；左上角切到 Codex；新增專案時打開一個資料夾（先在桌面建好「我的第一個專案」），試著問一句「這個資料夾裡有什麼？」。</p></li>
         <li><p data-i18n
           data-zh-hans="&lt;strong&gt;VS Code。&lt;/strong&gt;到 &lt;a href=&#x27;https://code.visualstudio.com/download&#x27;&gt;code.visualstudio.com&lt;/a&gt; 下载。Mac：一样拖进“应用程序”。Windows：安装时建议多勾两个“以 Code 打开”，之后在文件夹按右键就能用 VS Code 打开；其他照默认。"
@@ -263,7 +263,7 @@
           data-vi="&lt;strong&gt;VS Code.&lt;/strong&gt; Tải ở &lt;a href=&#x27;https://code.visualstudio.com/download&#x27;&gt;code.visualstudio.com&lt;/a&gt;. Mac: cũng kéo vào Applications. Windows: khi cài nên tick thêm hai mục “Open with Code”, sau này bấm chuột phải vào thư mục là mở được bằng VS Code; các mục khác để mặc định."><strong>VS Code。</strong>到 <a href='https://code.visualstudio.com/download'>code.visualstudio.com</a> 下載。Mac：一樣拖進「應用程式」。Windows：安裝時建議多勾兩個「以 Code 開啟」，之後在資料夾按右鍵就能用 VS Code 打開；其他照預設。</p></li>
         <li><p data-i18n
           data-zh-hans="&lt;strong&gt;同一个文件夹。&lt;/strong&gt;把“我的第一个专案”拖进 VS Code（问你信不信任作者时，自己的文件夹选“Yes”）；请 Codex 建一个 &lt;code&gt;hello.md&lt;/code&gt;，VS Code 马上看得到：两个工具看的是同一个文件夹。"
-          data-en="&lt;strong&gt;The same folder.&lt;/strong&gt; Drag 「我的第一個專案」 into VS Code (when it asks whether you trust the authors, choose yes for your own folder); ask Codex to create &lt;code&gt;hello.md&lt;/code&gt; and VS Code shows it at once: both tools look at the same folder."
+          data-en="&lt;strong&gt;The same folder.&lt;/strong&gt; Drag my-first-project into VS Code (when it asks whether you trust the authors, choose yes for your own folder); ask Codex to create &lt;code&gt;hello.md&lt;/code&gt; and VS Code shows it at once: both tools look at the same folder."
           data-vi="&lt;strong&gt;Cùng một thư mục.&lt;/strong&gt; Kéo 「我的第一個專案」 vào VS Code (khi hỏi có tin tác giả không, thư mục của chính bạn thì chọn có); nhờ Codex tạo &lt;code&gt;hello.md&lt;/code&gt;, VS Code thấy ngay: hai công cụ cùng nhìn một thư mục."><strong>同一個資料夾。</strong>把「我的第一個專案」拖進 VS Code（問你信不信任作者時，自己的資料夾選「Yes」）；請 Codex 建一個 <code>hello.md</code>，VS Code 馬上看得到：兩個工具看的是同一個資料夾。</p></li>
       </ol>
     </section>
@@ -276,7 +276,7 @@
 
       <div class="film">
         <div class="player">
-          <video controls preload="metadata" playsinline data-hls="video/s2-files/hls/index.m3u8" data-poster="video/s2-files/poster.jpg" width="1920" height="1080">
+          <video controls preload="metadata" playsinline data-hls="video/s2-files/hls/index.m3u8" data-poster="video/s2-files/poster.jpg" data-hls-en="video/s2-files/en/hls/index.m3u8" data-poster-en="video/s2-files/poster-en.jpg" width="1920" height="1080" data-ui="video.unsupported">
             你的瀏覽器無法播放這支影片。
           </video>
         </div>

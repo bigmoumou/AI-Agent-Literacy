@@ -31,6 +31,8 @@
       href: "weeks/week01/",
       thumb: "weeks/week01/video/01-agent-literacy/thumb.jpg",
       still: "weeks/week01/video/01-agent-literacy/poster.jpg",
+      thumbEn: "weeks/week01/video/01-agent-literacy/thumb-en.jpg",
+      stillEn: "weeks/week01/video/01-agent-literacy/poster-en.jpg",
       meta: "3 支影片＋2 支補充・共 9 分 49 秒",
       i18n: {
         "zh-Hans": {
