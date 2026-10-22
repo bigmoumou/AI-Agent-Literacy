@@ -587,7 +587,14 @@
       items[k].addEventListener("pointerenter", () => hot(true));
       items[k].addEventListener("pointerleave", () => hot(false));
     });
-    needSets.push({ ks, svg, lab, links, draw });
+    needSets.push({ ks, i, svg, lab, links, draw });
+  });
+  // 一組被另一組整個包住時（Week 8：02 要先看 01，03 要先看 01＋02），清單上只畫大的那組，和 Week 7 一樣只有一條線、一個「先看」；
+  // 影片標題下那一行照舊（老師 2026-10-22：Week 4、7、8 的箭頭要統一成 Week 7 的樣子）
+  needSets.forEach((a) => {
+    const mine = a.ks.concat(a.i);
+    const covered = needSets.some((b) => b !== a && mine.every((k) => b.ks.includes(k) || b.i === k));
+    if (covered) { a.svg.remove(); a.lab.remove(); a.draw = () => {}; }
   });
   if (needSets.length) {
     const redraw = () => needSets.forEach((n) => n.draw());
