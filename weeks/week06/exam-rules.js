@@ -2,7 +2,8 @@
    沒有 AI，所以用「要素」判斷，不比對固定句子：
      名字規則（第 2 關）：說到名字／姓名／個資，而且是禁止出現（不要寫、不能顯示、禁止列出……）、
        或要拿掉（遮掉、刪除、匿名、只用學號、用學號代替……）；「不要忘記寫名字」「名字不要寫錯」這種其實是要寫名字的不算。
-     第 3 關（照 Week 5 成績作業的評分說明）：補交造成同一個人有兩筆，以登錄時間較晚的那筆為準；
+     第 3 關（照 Week 5 成績作業的評分說明）：補交造成同一個人有兩筆，以登錄時間較晚的那筆為準
+       （直接說「用補交的分數」「原成績不算」也算）；
        「缺考」（沒請假）算 0 分；請假那次不算（不列入平均）。
    規則可以寫在 AGENTS.md，也可以寫在別的 .md（例如 VERIFY.md），只要 AGENTS.md 叫 Codex 去讀、照著做、拿它檢查。
    測試：製作/week06/design/levels/test-rules.mjs（每種寫法都列出來，該過的、不該過的都有）。 */
@@ -85,7 +86,30 @@
   const MULTI = "(?:appears? (?:twice|more than once|multiple times)|two rows|多次出現|重複上傳|兩列|出現兩次|出現兩列|多列|重交|重新交|重新繳交|重複交|重複繳交|補交|再交|交了?兩次|交了?多次|交了?好幾次|交過兩次|多次繳交|多次提交|重複提交|重新提交|重複的|重複|同一個人|同一位|同一人|同個人|同一個學號|同一學號|相同學號|學號相同|學號重複|一樣的學號|多筆|兩筆|好幾筆|duplicate|resubmi|submitted (?:twice|more than once|multiple)|same (?:student|id))";
   const LATEST = "(?:後來|之後交|之後上傳|後上傳|後面交|最後|較晚|比較晚|晚的那|時間晚|較新|比較新|新的那|最新|最後一次|最後那次|最後一筆|最後交的|最晚|最近一次|最近的|最新一次|最新那筆|最後的|後面那筆|後交的|時間最晚|時間最新|latest|most recent|last (?:one|submission|attempt)|newest)";
   const EARLIEST = "(?:第一次|最早|第一筆|最先|first (?:one|submission|attempt)|earliest)";
+  /* 直接說「用補交的那筆」或「原本的成績不算」也是對的（2026-10-23 學生回報卡關：
+     「備註補交的同學，以補交的分數來計算，原成績不列入計算」沒有寫到「最新、較晚」，原本被當成沒寫）。
+     回傳 true（用補交的）、false（反過來：補交的不算、以原成績為準）、null（沒說到，交給下面的判斷） */
+  const RESUB = "(?:補交|重交|重新交|重新繳交|重新提交|重新上傳|再交|再次繳交|再次提交|後交|後來交)";
+  const ORIG = "(?:原本|原來|原始|原先|原|舊|先前|之前|前一次|上一次|第一次|最早|第一筆)";
+  const REC = "(?:成績|分數|紀錄|那筆|那一筆|那次|那一次|資料|版本)";
+  const TAKE = "(?:以|用(?!來)|採用|採計|只算|只取|只採計|只看|只用|保留|改用|改以|使用|取(?!代|消)|算|依照|按照|根據|照)";
+  const DROPV = "(?:不列入|不納入|不計入|不算|不計|不採計|不採用|不予計算|作廢|無效|捨棄|丟掉|刪除|刪掉|移除|拿掉|去掉|排除|剔除|取消|不要|不用|忽略|略過|被取代|被覆蓋)";
+  const KEEPNEG = "(?:不要|不能|不可以|不可|別|勿|不用|不必|不需要)\\S{0,2}(?:刪除|刪掉|移除|拿掉|去掉|排除|剔除|捨棄|丟掉|取消|忽略)";   // 原成績不要刪除：不是丟掉原成績
+  function resubClause(c) {
+    if (!re(RESUB).test(c) && !re(ORIG + "\\S{0,4}" + REC).test(c)) return null;
+    const dropsOrig = re(ORIG + "\\S{0,4}" + REC + "\\S{0,6}" + DROPV).test(c) && !re(ORIG + "\\S{0,4}" + REC + "\\S{0,6}" + KEEPNEG).test(c);
+    if (re(RESUB + "\\S{0,4}" + DROPV).test(c) && !re(RESUB + "\\S{0,4}" + KEEPNEG).test(c)) return false;   // 補交的不算、補交無效
+    if (re(NEG + "\\S{0,3}(?:接受|採用|採計|算|計入|列入|以|用)\\S{0,2}" + RESUB).test(c)) return false;     // 不接受補交、不算補交的
+    if (re(ORIG + "\\S{0,3}" + REC + "\\S{0,3}為準").test(c)) return false;                                   // 以原成績為準
+    if (re(TAKE + "\\S{0,3}" + ORIG + "\\S{0,3}" + REC).test(c) && !dropsOrig) return false;                    // 用原本的成績
+    if (re(TAKE + "\\S{0,4}" + RESUB + "\\S{0,6}(?:" + REC + "|為準|計算|來算|的)").test(c)) return true;      // 以補交的分數來計算、用補交的、算重交那筆
+    if (re(RESUB + "\\S{0,6}(?:為準|取代|代替|替代|覆蓋|蓋過|換掉|蓋掉)").test(c)) return true;                 // 補交的成績為準、補交的取代原本的
+    if (dropsOrig && (re(RESUB).test(c) || re(MULTI).test(c))) return true;                                   // 原成績不列入（有說到補交、重複）
+    return null;
+  }
   function dedupeClause(c) {
+    const rs = resubClause(c);
+    if (rs !== null) return rs;
     if (re(EARLIEST).test(c) && !re(LATEST).test(c)) return false;
     const multi = re(MULTI).test(c), latest = re(LATEST).test(c);
     if (multi && latest) return true;

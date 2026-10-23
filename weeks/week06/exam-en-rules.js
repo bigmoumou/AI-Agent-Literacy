@@ -269,6 +269,12 @@
       const late = lateWords(c) && !negatedLate(c);
       const early = keepsEarly(c);
       if (early && !(late && /\b(?:not|instead of|rather than|never)\b/.test(c))) return false;
+      // "use the resubmitted score", "count the resubmission"; "the original score does not count" (2026-10-23: a student was stuck on the
+      // Chinese version of this; these say the same thing without "latest")
+      const RESUB_W = "(?:re-?submitted|resubmissions?|re-?submits?|re-?done|redone|re-?taken|retakes?|make-?up)";
+      if (reg("\\b(?:use|take|keep|count|choose|pick|go with|calculate with|compute with|grade|score)\\b[^.]{0,15}\\b" + RESUB_W + "\\b").test(c) &&
+          !/\b(?:don't|do not|never|not|no|ignore|ignoring|without)\b[^.]{0,10}\b(?:use|take|keep|count|choose|pick)\b/.test(c)) return true;
+      if (multi && reg("\\b" + EARLY + "\\b[^.]{0,30}\\b(?:does not|doesn't|do not|don't|won't|will not|shouldn't|should not|must not|mustn't|no longer)\\s+count").test(c)) return true;
       if (multi && (late || discardsEarly(c))) return true;
       if (late && reg("\\b" + KEEPERS + "\\w*\\b").test(c) && NOUN.test(c)) return true;
       if (late && WINVERB.test(c) && (NOUN.test(c) || multi)) return true;
