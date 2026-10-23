@@ -11,6 +11,10 @@
      exam.js 的 tunnelHome 叫 out()：整片亮白、隧道很快淡掉，露出概念圖的黑洞，直接回首頁（老師 2026-10-18）。
    聲音只用虛空（低鳴 drone）和閃電（劈啪 crackle、滋 zap），不用咻聲；低鳴、電流嘶嘶跟著強度變大。
    減少動態效果：不動，只換亮度，沒有閃電、沒有晃動。
+   2026-10-23 學生回報最後 10 題的背景會暈：會暈的是「周邊視野裡整片在流動」，尤其是突然加速、流動方向反轉、閃光。
+     效果保留（一樣往前衝、第 8–10 題一樣劇烈），但：往前的速度再降三成；畫面四周的光束淡一點、短一點（中間附近照舊）；
+     答對的加速溫和一點；答錯不再倒退（改成被拉住、慢到幾乎停下再走），被扯回的感覺交給往中間收的紅色波紋；
+     時間波紋擴得慢、淡一點；中間的光脈動慢一點；閃電至少隔 1.2 秒、整片閃光弱一點。第 8–10 題的劇烈交給光束數量、紅邊、閃電和聲音。
    ExamWarp.create({ sound }) → { start(), step(n, kind), out(), stop() }
      kind："intro"（問答窗的開場）、"ask"（第 n 題出現）、"right"、"wrong"、"end"（回到原本的時空） */
 (function () {
@@ -114,7 +118,7 @@
       const t = clock, m = Math.min(W, H), cx = W / 2, cy = H / 2, F = m * 0.5, maxR = Math.hypot(W, H) * 0.55;
       I += (target - I) * (1 - Math.exp(-dt * 1.4));
       fade += (fadeTo - fade) * (1 - Math.exp(-dt * (fadeTo > fade ? 1.1 : arriving >= 0 ? 7 : 2.2)));
-      boost *= Math.exp(-dt * 2.6); recoil *= Math.exp(-dt * 3.2);
+      boost *= Math.exp(-dt * 1.8); recoil *= Math.exp(-dt * 2.4);   // 回到原速慢一點，不會一下子衝出去
       flash *= Math.exp(-dt * 5); red *= Math.exp(-dt * 3); bloom *= Math.exp(-dt * (arriving >= 0 ? 2.8 : 1.6));
       let aI = I;
       // 衝出隧道（out）：衝一下 → 0.12 秒時整片亮白、隧道很快淡掉，露出後面的概念圖（exam.js 的 tunnelHome）
@@ -126,7 +130,7 @@
       }
       const frozen = t < freezeUntil;
       // 速度（老師 2026-10-18：7–10 題太快會暈）：劇烈的感覺交給光束的數量、閃電、紅邊，往前的速度只加到原本的一半左右
-      const speed = frozen ? 0 : (0.28 + 1.2 * aI * aI) * (1 + 0.8 * boost) - 1.2 * recoil;
+      const speed = frozen ? 0 : (0.2 + 0.82 * aI * aI) * (1 + 0.35 * boost) * (1 - 0.88 * Math.min(1, recoil));   // 不會變成負的：答錯是被拉住，不是倒退
 
       g.setTransform(dpr, 0, 0, dpr, 0, 0);
       g.globalCompositeOperation = "source-over";
@@ -142,19 +146,19 @@
 
       // 時間波紋：一圈圈往外擴（越劇烈越密、越快）
       ringClock -= dt * (frozen ? 0 : 1);
-      if (!reduce && ringClock <= 0) { rings.push({ age: 0 }); ringClock = 1.6 - 0.75 * aI; }
+      if (!reduce && ringClock <= 0) { rings.push({ age: 0 }); ringClock = 2.2 - 0.8 * aI; }
       for (let k = rings.length - 1; k >= 0; k--) {
         const r = rings[k];
-        if (!frozen) r.age += dt * (0.5 + 0.6 * aI) * (1 + 0.6 * boost) * (recoil > 0.3 ? -0.4 : 1);
+        if (!frozen) r.age += dt * (0.36 + 0.34 * aI) * (1 + 0.3 * boost) * (1 - 0.7 * Math.min(1, recoil));
         const rad = m * 0.05 * Math.exp(r.age * 2.1);
         if (rad > maxR * 1.2 || r.age < -0.5) { rings.splice(k, 1); continue; }
-        const al = fade * 0.32 * seg(r.age, 0, 0.25) * (1 - seg(rad, maxR * 0.5, maxR * 1.2));
+        const al = fade * 0.22 * seg(r.age, 0, 0.25) * (1 - seg(rad, maxR * 0.4, maxR * 1.05));
         g.strokeStyle = `rgba(185,178,255,${al})`; g.lineWidth = 1 + rad / m * 1.5;
         g.beginPath(); g.ellipse(cx, cy, rad, rad * 0.92, 0, 0, Math.PI * 2); g.stroke();
       }
 
       // 中間的光（脈動）
-      const pul = 1 + 0.06 * Math.sin(t * (2 + 3 * aI));
+      const pul = 1 + 0.04 * Math.sin(t * (1.2 + 1.2 * aI));
       const gr = m * (0.16 + 0.2 * aI) * pul, gl = g.createRadialGradient(cx, cy, 0, cx, cy, gr);
       gl.addColorStop(0, `rgba(255,255,255,${fade * (0.32 + 0.4 * aI)})`);
       gl.addColorStop(0.35, `rgba(170,150,255,${fade * (0.2 + 0.25 * aI)})`);
@@ -162,7 +166,7 @@
       g.fillStyle = gl; g.fillRect(cx - gr, cy - gr, gr * 2, gr * 2);
 
       // 星光拉成光束
-      const n = Math.round(340 + 480 * clamp(aI, 0, 1.2) / 1.2);
+      const n = Math.round(360 + 460 * clamp(aI, 0, 1.2) / 1.2);
       const tail = 0.05 + 0.12 * aI + 0.06 * boost;            // 速度放慢了，光束拉長一點（看起來一樣在衝，但移動得比較慢）
       for (let k = 0; k < n; k++) {
         const s = stars[k];
@@ -172,13 +176,16 @@
         const r1 = (s.d / s.z) * F;
         if (r1 > maxR) { spawn(s, false); continue; }
         const z0 = Math.min(4.2, s.z + (reduce ? 0.02 : Math.max(0.004, Math.abs(speed) * tail)) * Math.sign(speed || 1));
-        const r0 = (s.d / z0) * F;
+        let r0 = (s.d / z0) * F;
         const near = 1 - s.z / 4.2;
-        const al = fade * Math.min(1, near * 1.6) * (0.45 + 0.5 * Math.min(1, aI));
+        // 周邊視野：離中心越遠越淡、越細、越短（整片在流動的周邊是最會暈的地方；中間附近照舊）
+        const edge = smooth(seg(r1, maxR * 0.38, maxR * 0.95));
+        const al = fade * Math.min(1, near * 1.6) * (0.45 + 0.5 * Math.min(1, aI)) * (1 - 0.55 * edge);
         if (al < 0.02) continue;
+        r0 = r1 - (r1 - r0) * (1 - 0.5 * edge);
         const ca = Math.cos(s.a), sa = Math.sin(s.a);
         g.strokeStyle = `rgba(${s.c},${al})`;
-        g.lineWidth = 0.5 + 2.2 * near * near * (0.6 + 0.5 * aI);
+        g.lineWidth = (0.5 + 2.2 * near * near * (0.6 + 0.5 * aI)) * (1 - 0.4 * edge);
         g.beginPath(); g.moveTo(cx + ca * r0, cy + sa * r0); g.lineTo(cx + ca * r1, cy + sa * r1); g.stroke();
       }
 
@@ -236,7 +243,7 @@
         boltClock -= dt;
         if (boltClock <= 0) {
           makeBolt();
-          boltClock = (2.6 - 1.9 * hot) * rnd(0.6, 1.4);
+          boltClock = Math.max(1.2, (2.8 - 1.6 * hot) * rnd(0.7, 1.3));   // 至少隔 1.2 秒（太密的閃光會不舒服）
           if (sound) { if (Math.random() < 0.5) sound.zap(0.3 + 0.35 * hot, 0.2, 0, rnd(0.85, 1.1)); else sound.crackle(0.35 + 0.35 * hot, 0.22); }
         }
       }
@@ -252,7 +259,7 @@
 
       g.globalCompositeOperation = "source-over";
       // 邊緣泛紅：越劇烈越紅（輕輕起伏）；答錯時紅光一閃
-      const edge = hot * 0.3 * (0.75 + 0.25 * Math.sin(t * 3.1)) + red * 0.55;
+      const edge = hot * 0.36 * (0.8 + 0.2 * Math.sin(t * 1.6)) + red * 0.55;
       if (edge > 0.01) {
         const vg = g.createRadialGradient(cx, cy, m * 0.42, cx, cy, maxR);
         vg.addColorStop(0, "rgba(160,30,80,0)");
@@ -260,7 +267,7 @@
         g.fillStyle = vg; g.fillRect(0, 0, W, H);
       }
       // 閃一下（答對、題目換到第 8 題、抵達）
-      if (flash > 0.01) { g.fillStyle = `rgba(${flashCol},${flash * 0.22})`; g.fillRect(0, 0, W, H); }
+      if (flash > 0.01) { g.fillStyle = `rgba(${flashCol},${flash * 0.14})`; g.fillRect(0, 0, W, H); }
       if (bloom > 0.01) {
         const bl = g.createRadialGradient(cx, cy, 0, cx, cy, maxR);
         bl.addColorStop(0, `rgba(255,255,255,${bloom * 0.95})`); bl.addColorStop(1, `rgba(220,215,255,${bloom * 0.55})`);
@@ -294,13 +301,13 @@
       else if (kind === "ask") {
         target = LEVEL(n); levels();
         if (n === 7) {                                     // 第 8 題：轉移加速（突然變劇烈）
-          I = Math.max(I, 0.62); boost = 1; flash = 0.9; flashCol = "235,225,255"; boltClock = 0.25;
+          I = Math.max(I, 0.62); boost = 0.7; flash = 0.7; flashCol = "235,225,255"; boltClock = 0.4;
           waves.push({ t0: clock, life: 0.9, col: "200,185,255", w: 3, a: 0.8, glow: true });
           if (sound) { sound.zap(0.85, 0.36, 0, 0.9); sound.crackle(0.75, 0.5, 0.08); }
-        } else if (n > 7) { boost = 0.6; flash = 0.5; flashCol = "235,225,255"; if (sound) sound.zap(0.6, 0.28, 0, 0.95); }
+        } else if (n > 7) { boost = 0.45; flash = 0.4; flashCol = "235,225,255"; if (sound) sound.zap(0.6, 0.28, 0, 0.95); }
       } else if (kind === "right") {
         freezeUntil = clock + 0.07;
-        boost = big ? 1.2 : 0.8; flash = big ? 0.75 : 0.5; flashCol = "200,255,230";
+        boost = big ? 0.9 : 0.6; flash = big ? 0.6 : 0.4; flashCol = "200,255,230";
         waves.push({ t0: clock + 0.07, life: big ? 0.9 : 0.75, col: "126,240,192", w: big ? 3.2 : 2.4, a: 0.95, glow: true });
         waves.push({ t0: clock + 0.17, life: big ? 1.0 : 0.85, col: "235,255,245", w: 1.2, a: 0.7 });
         setTimeout(() => burstSparks(big ? 54 : 34, "190,255,225"), 70);
