@@ -25,7 +25,7 @@ An open course on working with AI coding agents<br>
 <table>
 <tr><td><b>Pilot site</b></td><td>National Taiwan Normal University (NTNU), 2026, in the course <i>Learning Analytics Tools Implementation Applications</i></td></tr>
 <tr><td><b>Format</b></td><td>Weekly microlearning videos (1–5 min) with chapters and key points; a browser-based practice computer; a scenario-based exam</td></tr>
-<tr><td><b>Published</b></td><td>Weeks 1–8: 35 videos, about 103 minutes (October 2026), updated weekly</td></tr>
+<tr><td><b>Published</b></td><td>Weeks 1–8: 36 videos, about 105 minutes (October 2026), updated weekly</td></tr>
 <tr><td><b>Languages</b></td><td>Site in English, Traditional Chinese, Simplified Chinese and Vietnamese, chosen from the browser's language. Weeks 1 and 3–7 are fully in English too: every video, the practice computers and the Week 6 exam. Other videos show Traditional Chinese on screen</td></tr>
 <tr><td><b>Licenses</b></td><td>Code <a href="LICENSE">MIT</a>; videos and course content <a href="LICENSE-CONTENT.md">CC BY-NC-SA 4.0</a></td></tr>
 </table>
@@ -62,6 +62,7 @@ An open course on working with AI coding agents<br>
 | Week 2 | [01 One Task: How Do You Instruct an AI Agent Precisely?](https://ai-agent-literacy.pages.dev/weeks/week02/?lang=en#01-clear-ask) | 2:03 |
 | | [02 It Can Act on Your Computer, So Who Decides? Approvals and Permissions](https://ai-agent-literacy.pages.dev/weeks/week02/?lang=en#02-approval) | 1:54 |
 | | [Extra 1 VS Code and Markdown](https://ai-agent-literacy.pages.dev/weeks/week02/?lang=en#s1-vscode-md) ・ [Extra 2 Why AI Gets Things Wrong: Models, Tokens, Usage](https://ai-agent-literacy.pages.dev/weeks/week02/?lang=en#s2-why-wrong) | 1:35 ・ 2:12 |
+| | [Extra 3 When Words Are Not Enough, Show It: Screenshots, Files, Paths](https://ai-agent-literacy.pages.dev/weeks/week02/?lang=en#s3-show-it) | 1:40 |
 | Week 3 | [01 The Journey of report.md](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=en#01-report-journey) | 1:33 |
 | | [02 AGENTS.md and Context Management](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=en#02-agents-md-context) | 3:40 |
 | | [03 Homework: Collecting Florence Museum Data](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=en#03-homework-firenze) | 2:55 |
@@ -158,7 +159,7 @@ Thanks to the students taking the course.
 <table>
 <tr><td><b>首個示範場域</b></td><td>國立臺灣師範大學（2026），課程「學習分析工具」（Learning Analytics Tools Implementation Applications）</td></tr>
 <tr><td><b>形式</b></td><td>每週微學習影片（1–5 分鐘），附章節和重點；瀏覽器裡的練習電腦；情境式考試</td></tr>
-<tr><td><b>已公開</b></td><td>Week 1–8：35 支影片，約 103 分鐘（2026 年 10 月），每週更新</td></tr>
+<tr><td><b>已公開</b></td><td>Week 1–8：36 支影片，約 105 分鐘（2026 年 10 月），每週更新</td></tr>
 <tr><td><b>語言</b></td><td>網站有英文、繁體中文、簡體中文、越南文，依瀏覽器語言自動選。Week 1、3–7 另有完整英文版：每支影片、練習電腦、Week 6 考試；其他影片畫面是繁體中文</td></tr>
 <tr><td><b>授權</b></td><td>程式 <a href="LICENSE">MIT</a>；影片與教材 <a href="LICENSE-CONTENT.md">CC BY-NC-SA 4.0</a></td></tr>
 </table>
@@ -184,6 +185,7 @@ Thanks to the students taking the course.
 | Week 2 | [01 同一件事，如何精準的交代給 AI Agent？](https://ai-agent-literacy.pages.dev/weeks/week02/#01-clear-ask) | 2:03 |
 | | [02 它能動你的電腦，那誰說了算？核准與權限](https://ai-agent-literacy.pages.dev/weeks/week02/#02-approval) | 1:54 |
 | | [補充 1 VS Code 和 Markdown](https://ai-agent-literacy.pages.dev/weeks/week02/#s1-vscode-md)・[補充 2 AI 為什麼會說錯：模型、token、用量](https://ai-agent-literacy.pages.dev/weeks/week02/#s2-why-wrong) | 1:35・2:12 |
+| | [補充 3 說不清楚，就給它看：截圖、檔案、路徑](https://ai-agent-literacy.pages.dev/weeks/week02/#s3-show-it) | 1:40 |
 | Week 3 | [01 report.md 的旅程](https://ai-agent-literacy.pages.dev/weeks/week03/#01-report-journey) | 1:33 |
 | | [02 AGENTS.md 與上下文管理](https://ai-agent-literacy.pages.dev/weeks/week03/#02-agents-md-context) | 3:40 |
 | | [03 作業：佛羅倫斯美術館資料收集](https://ai-agent-literacy.pages.dev/weeks/week03/#03-homework-firenze) | 2:55 |
@@ -268,7 +270,7 @@ python -m http.server 8000
 <table>
 <tr><td><b>首个示范场域</b></td><td>台湾师范大学（2026），课程“学习分析工具”（Learning Analytics Tools Implementation Applications）</td></tr>
 <tr><td><b>形式</b></td><td>每周微学习视频（1–5 分钟），附章节和要点；浏览器里的练习电脑；情境式考试</td></tr>
-<tr><td><b>已公开</b></td><td>Week 1–8：35 个视频，约 103 分钟（2026 年 10 月），每周更新</td></tr>
+<tr><td><b>已公开</b></td><td>Week 1–8：36 个视频，约 105 分钟（2026 年 10 月），每周更新</td></tr>
 <tr><td><b>语言</b></td><td>网站有英文、繁体中文、简体中文、越南文，按浏览器语言自动选择。Week 1、3–7 另有完整英文版：每个视频、练习电脑、Week 6 考试；其他视频画面是繁体中文</td></tr>
 <tr><td><b>许可</b></td><td>代码 <a href="LICENSE">MIT</a>；视频与教材 <a href="LICENSE-CONTENT.md">CC BY-NC-SA 4.0</a></td></tr>
 </table>
@@ -294,6 +296,7 @@ python -m http.server 8000
 | Week 2 | [01 同一件事，如何精准地交代给 AI Agent？](https://ai-agent-literacy.pages.dev/weeks/week02/?lang=zh-Hans#01-clear-ask) | 2:03 |
 | | [02 它能动你的电脑，那谁说了算？批准与权限](https://ai-agent-literacy.pages.dev/weeks/week02/?lang=zh-Hans#02-approval) | 1:54 |
 | | [补充 1 VS Code 和 Markdown](https://ai-agent-literacy.pages.dev/weeks/week02/?lang=zh-Hans#s1-vscode-md)・[补充 2 AI 为什么会说错：模型、token、用量](https://ai-agent-literacy.pages.dev/weeks/week02/?lang=zh-Hans#s2-why-wrong) | 1:35・2:12 |
+| | [补充 3 说不清楚，就给它看：截图、文件、路径](https://ai-agent-literacy.pages.dev/weeks/week02/?lang=zh-Hans#s3-show-it) | 1:40 |
 | Week 3 | [01 report.md 的旅程](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=zh-Hans#01-report-journey) | 1:33 |
 | | [02 AGENTS.md 与上下文管理](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=zh-Hans#02-agents-md-context) | 3:40 |
 | | [03 作业：佛罗伦萨美术馆数据收集](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=zh-Hans#03-homework-firenze) | 2:55 |
@@ -378,7 +381,7 @@ python -m http.server 8000
 <table>
 <tr><td><b>最初の実践の場</b></td><td>国立台湾師範大学（2026 年）、授業「学習分析ツール」（Learning Analytics Tools Implementation Applications）</td></tr>
 <tr><td><b>形式</b></td><td>毎週のマイクロラーニング動画（1〜5 分、チャプターと要点つき）、ブラウザ上の練習用コンピューター、シナリオ型の試験</td></tr>
-<tr><td><b>公開済み</b></td><td>Week 1〜8：動画 35 本、約 103 分（2026 年 10 月時点）、毎週更新</td></tr>
+<tr><td><b>公開済み</b></td><td>Week 1〜8：動画 36 本、約 105 分（2026 年 10 月時点）、毎週更新</td></tr>
 <tr><td><b>言語</b></td><td>サイトは英語・繁体字中国語・簡体字中国語・ベトナム語（日本語は未対応）で、ブラウザの言語で自動選択。Week 1・3〜7 は動画・練習用コンピュータ・Week 6 の試験まで完全な英語版あり。その他の動画内の文字は繁体字中国語</td></tr>
 <tr><td><b>ライセンス</b></td><td>コード <a href="LICENSE">MIT</a>、動画と教材 <a href="LICENSE-CONTENT.md">CC BY-NC-SA 4.0</a></td></tr>
 </table>
@@ -404,6 +407,7 @@ python -m http.server 8000
 | Week 2 | [01 同じ作業、AI エージェントにどう的確に伝える？](https://ai-agent-literacy.pages.dev/weeks/week02/#01-clear-ask) | 2:03 |
 | | [02 パソコンを操作できる AI、決めるのは誰？承認と権限](https://ai-agent-literacy.pages.dev/weeks/week02/#02-approval) | 1:54 |
 | | [補足 1 VS Code と Markdown](https://ai-agent-literacy.pages.dev/weeks/week02/#s1-vscode-md)・[補足 2 AI はなぜ間違えるのか：モデル、トークン、使用量](https://ai-agent-literacy.pages.dev/weeks/week02/#s2-why-wrong) | 1:35・2:12 |
+| | [補足 3 言葉で伝えきれないなら見せる：スクリーンショット、ファイル、パス](https://ai-agent-literacy.pages.dev/weeks/week02/#s3-show-it) | 1:40 |
 | Week 3 | [01 report.md の旅](https://ai-agent-literacy.pages.dev/weeks/week03/#01-report-journey) | 1:33 |
 | | [02 AGENTS.md とコンテキスト管理](https://ai-agent-literacy.pages.dev/weeks/week03/#02-agents-md-context) | 3:40 |
 | | [03 課題：フィレンツェの美術館データ収集](https://ai-agent-literacy.pages.dev/weeks/week03/#03-homework-firenze) | 2:55 |
