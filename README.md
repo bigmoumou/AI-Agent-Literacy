@@ -61,7 +61,7 @@ An open course on working with AI coding agents<br>
 | | [Extra 1 Installing Codex and VS Code](https://ai-agent-literacy.pages.dev/weeks/week01/?lang=en#s1-install) ・ [Extra 2 Files and File Extensions](https://ai-agent-literacy.pages.dev/weeks/week01/?lang=en#s2-files) | 2:05 ・ 1:53 |
 | Week 2 | [01 One Task: How Do You Instruct an AI Agent Precisely?](https://ai-agent-literacy.pages.dev/weeks/week02/?lang=en#01-clear-ask) | 2:03 |
 | | [02 It Can Act on Your Computer, So Who Decides? Approvals and Permissions](https://ai-agent-literacy.pages.dev/weeks/week02/?lang=en#02-approval) | 1:54 |
-| | [Extra 1 VS Code and Markdown](https://ai-agent-literacy.pages.dev/weeks/week02/?lang=en#s1-vscode-md) ・ [Extra 2 Why AI Gets Things Wrong: Models, Tokens, Usage](https://ai-agent-literacy.pages.dev/weeks/week02/?lang=en#s2-why-wrong) | 1:35 ・ 1:43 |
+| | [Extra 1 VS Code and Markdown](https://ai-agent-literacy.pages.dev/weeks/week02/?lang=en#s1-vscode-md) ・ [Extra 2 Why AI Gets Things Wrong: Models, Tokens, Usage](https://ai-agent-literacy.pages.dev/weeks/week02/?lang=en#s2-why-wrong) | 1:35 ・ 2:13 |
 | Week 3 | [01 The Journey of report.md](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=en#01-report-journey) | 1:33 |
 | | [02 AGENTS.md and Context Management](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=en#02-agents-md-context) | 3:40 |
 | | [03 Homework: Collecting Florence Museum Data](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=en#03-homework-firenze) | 2:55 |
@@ -183,7 +183,7 @@ Thanks to the students taking the course.
 | | [補充 1 裝好 Codex 和 VS Code](https://ai-agent-literacy.pages.dev/weeks/week01/#s1-install)・[補充 2 檔案與副檔名](https://ai-agent-literacy.pages.dev/weeks/week01/#s2-files) | 2:05・1:53 |
 | Week 2 | [01 同一件事，如何精準的交代給 AI Agent？](https://ai-agent-literacy.pages.dev/weeks/week02/#01-clear-ask) | 2:03 |
 | | [02 它能動你的電腦，那誰說了算？核准與權限](https://ai-agent-literacy.pages.dev/weeks/week02/#02-approval) | 1:54 |
-| | [補充 1 VS Code 和 Markdown](https://ai-agent-literacy.pages.dev/weeks/week02/#s1-vscode-md)・[補充 2 AI 為什麼會說錯：模型、token、用量](https://ai-agent-literacy.pages.dev/weeks/week02/#s2-why-wrong) | 1:35・1:43 |
+| | [補充 1 VS Code 和 Markdown](https://ai-agent-literacy.pages.dev/weeks/week02/#s1-vscode-md)・[補充 2 AI 為什麼會說錯：模型、token、用量](https://ai-agent-literacy.pages.dev/weeks/week02/#s2-why-wrong) | 1:35・2:13 |
 | Week 3 | [01 report.md 的旅程](https://ai-agent-literacy.pages.dev/weeks/week03/#01-report-journey) | 1:33 |
 | | [02 AGENTS.md 與上下文管理](https://ai-agent-literacy.pages.dev/weeks/week03/#02-agents-md-context) | 3:40 |
 | | [03 作業：佛羅倫斯美術館資料收集](https://ai-agent-literacy.pages.dev/weeks/week03/#03-homework-firenze) | 2:55 |
@@ -293,7 +293,7 @@ python -m http.server 8000
 | | [补充 1 装好 Codex 和 VS Code](https://ai-agent-literacy.pages.dev/weeks/week01/?lang=zh-Hans#s1-install)・[补充 2 文件与扩展名](https://ai-agent-literacy.pages.dev/weeks/week01/?lang=zh-Hans#s2-files) | 2:05・1:53 |
 | Week 2 | [01 同一件事，如何精准地交代给 AI Agent？](https://ai-agent-literacy.pages.dev/weeks/week02/?lang=zh-Hans#01-clear-ask) | 2:03 |
 | | [02 它能动你的电脑，那谁说了算？批准与权限](https://ai-agent-literacy.pages.dev/weeks/week02/?lang=zh-Hans#02-approval) | 1:54 |
-| | [补充 1 VS Code 和 Markdown](https://ai-agent-literacy.pages.dev/weeks/week02/?lang=zh-Hans#s1-vscode-md)・[补充 2 AI 为什么会说错：模型、token、用量](https://ai-agent-literacy.pages.dev/weeks/week02/?lang=zh-Hans#s2-why-wrong) | 1:35・1:43 |
+| | [补充 1 VS Code 和 Markdown](https://ai-agent-literacy.pages.dev/weeks/week02/?lang=zh-Hans#s1-vscode-md)・[补充 2 AI 为什么会说错：模型、token、用量](https://ai-agent-literacy.pages.dev/weeks/week02/?lang=zh-Hans#s2-why-wrong) | 1:35・2:13 |
 | Week 3 | [01 report.md 的旅程](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=zh-Hans#01-report-journey) | 1:33 |
 | | [02 AGENTS.md 与上下文管理](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=zh-Hans#02-agents-md-context) | 3:40 |
 | | [03 作业：佛罗伦萨美术馆数据收集](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=zh-Hans#03-homework-firenze) | 2:55 |
@@ -403,7 +403,7 @@ python -m http.server 8000
 | | [補足 1 Codex と VS Code を入れる](https://ai-agent-literacy.pages.dev/weeks/week01/#s1-install)・[補足 2 ファイルと拡張子](https://ai-agent-literacy.pages.dev/weeks/week01/#s2-files) | 2:05・1:53 |
 | Week 2 | [01 同じ作業、AI エージェントにどう的確に伝える？](https://ai-agent-literacy.pages.dev/weeks/week02/#01-clear-ask) | 2:03 |
 | | [02 パソコンを操作できる AI、決めるのは誰？承認と権限](https://ai-agent-literacy.pages.dev/weeks/week02/#02-approval) | 1:54 |
-| | [補足 1 VS Code と Markdown](https://ai-agent-literacy.pages.dev/weeks/week02/#s1-vscode-md)・[補足 2 AI はなぜ間違えるのか：モデル、トークン、使用量](https://ai-agent-literacy.pages.dev/weeks/week02/#s2-why-wrong) | 1:35・1:43 |
+| | [補足 1 VS Code と Markdown](https://ai-agent-literacy.pages.dev/weeks/week02/#s1-vscode-md)・[補足 2 AI はなぜ間違えるのか：モデル、トークン、使用量](https://ai-agent-literacy.pages.dev/weeks/week02/#s2-why-wrong) | 1:35・2:13 |
 | Week 3 | [01 report.md の旅](https://ai-agent-literacy.pages.dev/weeks/week03/#01-report-journey) | 1:33 |
 | | [02 AGENTS.md とコンテキスト管理](https://ai-agent-literacy.pages.dev/weeks/week03/#02-agents-md-context) | 3:40 |
 | | [03 課題：フィレンツェの美術館データ収集](https://ai-agent-literacy.pages.dev/weeks/week03/#03-homework-firenze) | 2:55 |
