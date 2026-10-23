@@ -482,7 +482,9 @@ body.is-tunneling :is(#guide .g-hud, #scar, #exam-vign, .warn, .warn-vig, .sound
 }
 #exitCap .bar { display: block; width: 240px; height: 1px; margin: 12px auto 0; background: rgba(255, 255, 255, .2); }
 #exitCap .bar i { display: block; width: 0; height: 100%; background: #d6ceff; }
-#exitCap.is-back { font-size: 15px; }
+/* WELCOME BACK 放大（學生 2026-10-23：成功返回的字太小）：桌機約 56px、手機 26px 起；text-indent 補上最後一個字後面的字距，才會置中 */
+#exitCap.is-back { bottom: 13vh; font-size: clamp(26px, 3.9vw, 60px); font-weight: 600; letter-spacing: .26em; text-indent: .26em; line-height: 1.1; text-shadow: 0 2px 18px rgba(4, 3, 10, .85), 0 1px 3px rgba(4, 3, 10, .6); }
 #exitCap.is-back .bar { display: none; }
 #exitCap .s { display: none; margin-top: 10px; font-size: 11px; font-weight: 400; letter-spacing: .46em; color: #cfc8f2; }
+#exitCap.is-back .s { margin-top: .9em; font-size: clamp(11px, .3em, 17px); font-weight: 500; letter-spacing: .46em; text-indent: .46em; color: #e6e1ff; }
 #exitCap.is-back .s:not(:empty) { display: block; }
