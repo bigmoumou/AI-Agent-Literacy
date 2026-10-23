@@ -227,6 +227,8 @@
       href: "weeks/week08/",
       thumb: "weeks/week08/video/01-tests/thumb.jpg",
       still: "weeks/week08/video/01-tests/poster.jpg",
+      thumbEn: "weeks/week08/video/01-tests/thumb-en.jpg",
+      stillEn: "weeks/week08/video/01-tests/poster-en.jpg",
       meta: "3 支影片＋2 支補充・共 16 分 57 秒",
       i18n: {
         "zh-Hans": {
