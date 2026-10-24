@@ -27,7 +27,7 @@ An open course on working with AI coding agents, hands-on every week<br>
 <tr><td><b>Pilot site</b></td><td>National Taiwan Normal University (NTNU), 2026, in the course <i>Learning Analytics Tools Implementation Applications</i></td></tr>
 <tr><td><b>Format</b></td><td>Weekly microlearning videos (1–5 min, one idea each) with chapters, numbered key points and time links; a practice computer in the browser; project-based homework; a scenario-based exam</td></tr>
 <tr><td><b>Published</b></td><td>Weeks 1–8: 36 videos, about 105 minutes (October 2026), updated weekly</td></tr>
-<tr><td><b>Languages</b></td><td>Site in English, Traditional Chinese, Simplified Chinese and Vietnamese, chosen from the browser's language. Weeks 1 and 3–8 are fully in English too: every video, the practice computers and the Week 6 exam. Other videos show Traditional Chinese on screen</td></tr>
+<tr><td><b>Languages</b></td><td>Site in English, Traditional Chinese, Simplified Chinese and Vietnamese, chosen from the browser's language. Weeks 1–8 are fully in English too: every video, the practice computers and the Week 6 exam</td></tr>
 <tr><td><b>Access</b></td><td>Mac and Windows supported alike; light and dark themes, screen-reader labels, reduced motion. No login, no cookies and no tracking of individuals; watch progress stays in the student's own browser</td></tr>
 <tr><td><b>Licenses</b></td><td>Code <a href="LICENSE">MIT</a>; videos and course content <a href="LICENSE-CONTENT.md">CC BY-NC-SA 4.0</a></td></tr>
 </table>
@@ -126,8 +126,8 @@ The video streams live on a separate Cloudflare project, so a fork plays them fr
 ## Roadmap
 
 - [ ] Weeks 9–16, published as the course goes on, including the escape-room midterm and the final project
-- [x] Full English versions of Weeks 1 and 3–8 (October 2026): every video with English on-screen text, the practice computers and the Week 6 exam; English browsers get them automatically
-- [ ] English versions of the other weeks
+- [x] Full English versions of Weeks 1–8 (October 2026): every video with English on-screen text, the practice computers and the Week 6 exam; English browsers get them automatically
+- [ ] English versions of Weeks 9–16 as they come out
 - [ ] Claude versions of the videos: the same lessons, demonstrated with Claude (Claude Code) instead of Codex
 - [ ] Open-source the teaching-video skill (based mainly on opus-video, with our own changes), with the production prompts and the lessons learned
 
@@ -174,7 +174,7 @@ Thanks to the students taking the course.
 <tr><td><b>首個示範場域</b></td><td>國立臺灣師範大學（2026），課程「學習分析工具」（Learning Analytics Tools Implementation Applications）</td></tr>
 <tr><td><b>形式</b></td><td>每週微學習影片（1–5 分鐘，一支一個概念），附章節、編號重點和時間連結；瀏覽器裡的練習電腦；專題作業；情境式考試</td></tr>
 <tr><td><b>已公開</b></td><td>Week 1–8：36 支影片，約 105 分鐘（2026 年 10 月），每週更新</td></tr>
-<tr><td><b>語言</b></td><td>網站有英文、繁體中文、簡體中文、越南文，依瀏覽器語言自動選。Week 1、3–8 另有完整英文版：每支影片、練習電腦、Week 6 考試；其他影片畫面是繁體中文</td></tr>
+<tr><td><b>語言</b></td><td>網站有英文、繁體中文、簡體中文、越南文，依瀏覽器語言自動選。Week 1–8 另有完整英文版：每支影片、練習電腦、Week 6 考試</td></tr>
 <tr><td><b>無障礙與隱私</b></td><td>Mac 與 Windows 同樣支援；深淺色主題、螢幕閱讀器標示、減少動態效果。不用登入、不用 cookie、不追蹤個人，觀看進度只存在學生自己的瀏覽器</td></tr>
 <tr><td><b>授權</b></td><td>程式 <a href="LICENSE">MIT</a>；影片與教材 <a href="LICENSE-CONTENT.md">CC BY-NC-SA 4.0</a></td></tr>
 </table>
@@ -262,8 +262,8 @@ python -m http.server 8000
 ### 接下來
 
 - [ ] Week 9–16 依課程進度上線，包括期中密室逃脫和期末專題
-- [x] Week 1、3–8 全英文版（2026 年 10 月）：每支影片的畫面和字卡、練習電腦、Week 6 考試；英文瀏覽器自動切換
-- [ ] 其他週次的英文版
+- [x] Week 1–8 全英文版（2026 年 10 月）：每支影片的畫面和字卡、練習電腦、Week 6 考試；英文瀏覽器自動切換
+- [ ] Week 9–16 上線後的英文版
 - [ ] Claude 版影片：同樣的內容，改用 Claude（Claude Code）示範（目前示範的工具是 Codex）
 - [ ] 開源這套教學影片 skill（主要參考 opus-video，再做個人化修改），以及製作用的 prompt 和製作經驗
 
@@ -298,7 +298,7 @@ python -m http.server 8000
 <tr><td><b>首个示范场域</b></td><td>台湾师范大学（2026），课程“学习分析工具”（Learning Analytics Tools Implementation Applications）</td></tr>
 <tr><td><b>形式</b></td><td>每周微学习视频（1–5 分钟，一个视频一个概念），附章节、编号要点和时间链接；浏览器里的练习电脑；项目式作业；情境式考试</td></tr>
 <tr><td><b>已公开</b></td><td>Week 1–8：36 个视频，约 105 分钟（2026 年 10 月），每周更新</td></tr>
-<tr><td><b>语言</b></td><td>网站有英文、繁体中文、简体中文、越南文，按浏览器语言自动选择。Week 1、3–8 另有完整英文版：每个视频、练习电脑、Week 6 考试；其他视频画面是繁体中文</td></tr>
+<tr><td><b>语言</b></td><td>网站有英文、繁体中文、简体中文、越南文，按浏览器语言自动选择。Week 1–8 另有完整英文版：每个视频、练习电脑、Week 6 考试</td></tr>
 <tr><td><b>无障碍与隐私</b></td><td>Mac 与 Windows 同样支持；深浅色主题、屏幕阅读器标签、减少动态效果。无需登录、不用 cookie、不追踪个人，观看进度只保存在学生自己的浏览器</td></tr>
 <tr><td><b>许可</b></td><td>代码 <a href="LICENSE">MIT</a>；视频与教材 <a href="LICENSE-CONTENT.md">CC BY-NC-SA 4.0</a></td></tr>
 </table>
@@ -386,8 +386,8 @@ python -m http.server 8000
 ### 接下来
 
 - [ ] Week 9–16 按课程进度上线，包括期中密室逃脱和期末项目
-- [x] Week 1、3–8 全英文版（2026 年 10 月）：每个视频的画面和字卡、练习电脑、Week 6 考试；英文浏览器自动切换
-- [ ] 其他周次的英文版
+- [x] Week 1–8 全英文版（2026 年 10 月）：每个视频的画面和字卡、练习电脑、Week 6 考试；英文浏览器自动切换
+- [ ] Week 9–16 上线后的英文版
 - [ ] Claude 版视频：同样的内容，改用 Claude（Claude Code）演示（目前演示的工具是 Codex）
 - [ ] 开源这套教学视频 skill（主要参考 opus-video，再做个性化修改），以及制作用的 prompt 和制作经验
 
@@ -422,7 +422,7 @@ python -m http.server 8000
 <tr><td><b>最初の実践の場</b></td><td>国立台湾師範大学（2026 年）、授業「学習分析ツール」（Learning Analytics Tools Implementation Applications）</td></tr>
 <tr><td><b>形式</b></td><td>毎週のマイクロラーニング動画（1〜5 分、1 本にひとつの概念、チャプター・番号つき要点・タイムリンクつき）、ブラウザ上の練習用コンピューター、プロジェクト型の課題、シナリオ型の試験</td></tr>
 <tr><td><b>公開済み</b></td><td>Week 1〜8：動画 36 本、約 105 分（2026 年 10 月時点）、毎週更新</td></tr>
-<tr><td><b>言語</b></td><td>サイトは英語・繁体字中国語・簡体字中国語・ベトナム語（日本語は未対応）で、ブラウザの言語で自動選択。Week 1・3〜8 は動画・練習用コンピュータ・Week 6 の試験まで完全な英語版あり。その他の動画内の文字は繁体字中国語</td></tr>
+<tr><td><b>言語</b></td><td>サイトは英語・繁体字中国語・簡体字中国語・ベトナム語（日本語は未対応）で、ブラウザの言語で自動選択。Week 1〜8 は動画・練習用コンピュータ・Week 6 の試験まで完全な英語版あり</td></tr>
 <tr><td><b>アクセシビリティとプライバシー</b></td><td>Mac と Windows の両方に同じように対応。ライト／ダークテーマ、スクリーンリーダー用ラベル、動きを減らす設定。ログイン不要、Cookie なし、個人の追跡なし。視聴の進み具合は学生自身のブラウザにだけ保存</td></tr>
 <tr><td><b>ライセンス</b></td><td>コード <a href="LICENSE">MIT</a>、動画と教材 <a href="LICENSE-CONTENT.md">CC BY-NC-SA 4.0</a></td></tr>
 </table>
@@ -510,8 +510,8 @@ python -m http.server 8000
 ### 今後の予定
 
 - [ ] Week 9〜16 を授業の進行に合わせて公開（脱出ゲーム型の中間課題と期末プロジェクトを含む）
-- [x] Week 1・3〜8 の完全英語版（2026 年 10 月）：全動画の画面とテロップ、練習用コンピュータ、Week 6 の試験。英語のブラウザでは自動で切り替え
-- [ ] ほかの週の英語版
+- [x] Week 1〜8 の完全英語版（2026 年 10 月）：全動画の画面とテロップ、練習用コンピュータ、Week 6 の試験。英語のブラウザでは自動で切り替え
+- [ ] Week 9〜16 の英語版（公開に合わせて）
 - [ ] 動画の Claude 版：同じ内容を Codex ではなく Claude（Claude Code）で実演
 - [ ] この教育動画用 skill（主に opus-video を参考に独自に改良したもの）をオープンソース化し、制作に使ったプロンプトと制作の知見もあわせて公開
 
