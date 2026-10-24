@@ -501,4 +501,9 @@
     ],
     outro: '發現的問題接回流程：你先寫進 VERIFY → AI 展開進 TESTS → 先紅、再綠修好 → 弄壞一行確認抓得到 → 親自再走一次那條路。作業就照這個迴圈：先挑 3 條最重要的故事走通，再擴展。' + practised(['bug 先寫進 VERIFY.md', '請 Codex 展開、寫成測試、修好', 'npm test', 'git log --oneline', '弄壞一行確認抓得到', '再走一次、記在 playtest.md', 'git commit -am', 'git push'])
   });
+
+  /* the same kit for the team missions of 補充 1、2 (team-missions.js) */
+  W8.kit = { same: same, dock: dock, liveWins: liveWins, seeable: seeable, inWins: inWins, trusted: trusted, chain: chain, codeFlow: codeFlow,
+    T_TERM: T_TERM, T_COMPOSER: T_COMPOSER, T_PLAY: T_PLAY, replyIs: replyIs, start: start, notInSiTrap: notInSiTrap, cwdTrap: cwdTrap,
+    traps: traps, commitFailed: commitFailed, register: register, ran: ran, practised: practised, os: os };
 })(window.LAB);
