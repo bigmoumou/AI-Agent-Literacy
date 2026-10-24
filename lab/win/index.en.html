@@ -51,14 +51,17 @@
   if (/[?&]week=7(&|$)/.test(location.search) || /[?&]mission=w7-/.test(location.search)) {
     ['w4-code', 'w4-github', 'w4-cxbrowser', 'w5-codex', 'w7'].forEach(function (n) { document.write('<link rel="stylesheet" href=\x27css/' + n + '.css\x27>'); });
   }
+  // Week 8（?week=8）：和 Week 7 一樣的樣式（同一個空中之島視窗）（製作/lab-week8/SPEC-w8.md）
+  if (/[?&]week=8(&|$)/.test(location.search) || /[?&]mission=w8-/.test(location.search)) {
+    ['w4-code', 'w4-github', 'w4-cxbrowser', 'w5-codex', 'w7'].forEach(function (n) { document.write('<link rel="stylesheet" href=\x27css/' + n + '.css\x27>'); });
+  }
 </script>
 <!-- 多語系要比其他程式先載入（不要 defer）；練習版只有繁體中文，boot.js 會把 <html lang> 鎖回 zh-Hant -->
 <script src="../../assets/i18n-strings.js"></script>
 <script src="../../assets/i18n.js"></script>
-
 <script>
   // English build (tools/lab-en): which scripts have an English copy in js/en/ (the others are shared with the Chinese page)
-  var LABEN_HAS = ["about","apps","boot","code","codex","connect","desktop","finder","lab","menu","missions","missions-week3","remote","seed","sysapps","terminal","terminal-cmds","textedit","ui","vfs","w4/cxbrowser","w4/github-pages","w4/gitremote","w4/intents4","w4/mermaid","w4/missions-browser","w4/missions-github","w4/missions-hw","w4/missions-mermaid","w4/museum","w4/seed4","w5/codex5","w5/intents5","w5/missions-context","w5/missions-hw","w5/missions-verify","w5/opendata","w5/seed5","w7/game7","w7/intents7","w7/missions7","w7/seed7","win","wm"];
+  var LABEN_HAS = ["about","apps","boot","code","codex","connect","desktop","finder","lab","menu","missions","missions-week3","remote","seed","sysapps","terminal","terminal-cmds","textedit","ui","vfs","w4/cxbrowser","w4/github-pages","w4/gitremote","w4/intents4","w4/mermaid","w4/missions-browser","w4/missions-github","w4/missions-hw","w4/missions-mermaid","w4/museum","w4/seed4","w5/codex5","w5/intents5","w5/missions-context","w5/missions-hw","w5/missions-verify","w5/opendata","w5/seed5","w7/game7","w7/intents7","w7/missions7","w7/seed7","w8/intents8","w8/missions8","w8/seed8","win","wm"];
   function LABEN(p) { return "js/" + (LABEN_HAS.indexOf(p) >= 0 ? "en/" : "") + p + ".js"; }
 </script>
 <link rel="stylesheet" href="css/en/en.css">
@@ -145,6 +148,15 @@
     ['seed7', 'game7', 'intents7', 'missions7'].forEach(function (n) {
       document.write('<script src=\x27' + LABEN('w7/' + n) + '\x27><\/script>');
     });
+  }
+  // Week 8：和 Week 7 一樣的平台模組和 Codex，Week 7 的專案、git 歷史、遊戲視窗和 npm test（seed7、game7），再接 Week 8 自己的：起點、Codex 的回覆、四個任務（不載入 Week 7 的回覆和任務）
+  if (window.LAB && LAB.week === 8) {
+    ['markdown', 'mermaid', 'web', 'github', 'github-pages', 'gitremote', 'cxbrowser'].forEach(function (n) {
+      document.write('<script src=\x27' + LABEN('w4/' + n) + '\x27><\/script>');
+    });
+    document.write('<script src=\x27' + LABEN('w5/codex5') + '\x27><\/script>');
+    ['seed7', 'game7'].forEach(function (n) { document.write('<script src=\x27' + LABEN('w7/' + n) + '\x27><\/script>'); });
+    ['seed8', 'intents8', 'missions8'].forEach(function (n) { document.write('<script src=\x27' + LABEN('w8/' + n) + '\x27><\/script>'); });
   }
 </script>
 <script src="js/en/extra/en-intents3.js"></script>

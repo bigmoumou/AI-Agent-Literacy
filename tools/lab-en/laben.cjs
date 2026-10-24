@@ -374,8 +374,8 @@ function buildHtml(osName, hasEn, cfg) {
   // the week loaders (inline scripts): document.write('<script src=\x27js/w4/' + n + '.js\x27>...')
   const BS = String.fromCharCode(92);          // a backslash: the page source has the two characters \x27 inside its strings
   const Q = BS + 'x27';
-  h = h.replace(/src=\\x27js\/(w[457])\/' \+ n \+ '\.js\\x27/g, (m, w) => 'src=' + Q + "' + LABEN('" + w + "/' + n) + '" + Q);
-  h = h.replace(/src=\\x27js\/(w[457])\/([A-Za-z0-9_-]+)\.js\\x27/g, (m, w, n) => 'src=' + Q + "' + LABEN('" + w + '/' + n + "') + '" + Q);
+  h = h.replace(/src=\\x27js\/(w[4578])\/' \+ n \+ '\.js\\x27/g, (m, w) => 'src=' + Q + "' + LABEN('" + w + "/' + n) + '" + Q);
+  h = h.replace(/src=\\x27js\/(w[4578])\/([A-Za-z0-9_-]+)\.js\\x27/g, (m, w, n) => 'src=' + Q + "' + LABEN('" + w + '/' + n + "') + '" + Q);
   // LABEN() + the English stylesheet, at the end of <head>
   const hasList = Array.from(hasEn).sort();
   const loader = '<script>' + NL + '  // English build (tools/lab-en): which scripts have an English copy in js/en/ (the others are shared with the Chinese page)' + NL +

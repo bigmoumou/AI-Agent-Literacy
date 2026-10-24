@@ -324,6 +324,62 @@
       </ol>
     </section>
 
+    <!-- 課堂練習：不是影片，是在瀏覽器裡執行的模擬電腦（lab/mac/、lab/win/，前端而已），?week=8 載入 Week 8 的任務（製作/lab-week8/SPEC-w8.md）。
+         2026-10-24：照 Week 7 的原則（老師 2026-10-21：練流程不是程式碼、可以複製貼上、肌肉記憶）；遊戲視窗裡是網站上真的空中之島（island-7k2q/?lab=4，修好以前 &bug=fall）。
+         class 是 unit-lab：video.js 在清單上寫「練習 1」，縮圖用 data-thumb。截圖由 製作/lab-week8/make_screens_w8.py 產生。 -->
+    <section class="unit unit-lab" id="lab-mac" aria-labelledby="ulab-title" data-thumb="lab/thumb.jpg">
+      <h2 class="unit-title" id="ulab-title"><span class="unit-num" data-ui="video.lab" data-n="1">練習 1</span><span data-i18n
+        data-zh-hans="进入远程电脑"
+        data-en="Enter the Remote Computer"
+        data-vi="Vào máy tính từ xa">進入遠端電腦</span></h2>
+
+      <div class="film">
+        <div class="player lab-duo">
+          <a class="lab-side" data-os="mac" href="../../lab/mac/?week=8" aria-label="進入遠端電腦（Mac）" data-i18n-attr="aria-label"
+            data-zh-hans="进入远程电脑（Mac）" data-en="Enter the remote computer (Mac)" data-vi="Vào máy tính từ xa (Mac)">
+            <span class="lp lp-mac" aria-hidden="true">
+              <span class="lp-lid"><span class="lp-screen"><img src="lab/screen-mac.jpg" alt="" width="1440" height="900" loading="lazy" decoding="async"><span class="lp-glint"></span></span><span class="lp-notch"></span></span>
+              <span class="lp-base"></span>
+            </span>
+            <span class="lab-cap" aria-hidden="true"><span class="lab-os">Mac</span><span class="lab-cta"><span data-ui="lab.go">進入遠端電腦</span><span class="arrow">→</span></span></span>
+          </a>
+          <a class="lab-side" data-os="win" href="../../lab/win/?week=8" aria-label="進入遠端電腦（Windows）" data-i18n-attr="aria-label"
+            data-zh-hans="进入远程电脑（Windows）" data-en="Enter the remote computer (Windows)" data-vi="Vào máy tính từ xa (Windows)">
+            <span class="lp lp-win" aria-hidden="true">
+              <span class="lp-lid"><span class="lp-screen"><img src="lab/screen-win.jpg" alt="" width="1440" height="900" loading="lazy" decoding="async"><span class="lp-glint"></span></span><span class="lp-cam"></span></span>
+              <span class="lp-base"></span>
+            </span>
+            <span class="lab-cap" aria-hidden="true"><span class="lab-os">Windows</span><span class="lab-cta"><span data-ui="lab.go">進入遠端電腦</span><span class="arrow">→</span></span></span>
+          </a>
+        </div>
+      </div>
+
+      <p class="lab-intro" data-i18n
+        data-zh-hans="这不是视频，而是一台在浏览器里打开的“远程电脑”，和前几周是同一台，换成这周的任务，有 Mac 和 Windows 两种，选你平常用的那一种。这周练的是把测试做扎实：请 AI 从 &lt;code&gt;VERIFY.md&lt;/code&gt; 展开 &lt;code&gt;TESTS.md&lt;/code&gt;，你用三个问题审；故意弄坏一行，看测试抓不抓得到；照着用户故事亲自玩，记在 &lt;code&gt;playtest.md&lt;/code&gt;，发现的问题再接回流程。要写的字都可以复制粘贴，目的是把流程练到手很熟；上周练过的动作标“自己来”，不再指位置。项目接着上周你自己的“空中之岛”。连线后先选一个任务，照着任务卡做；要离开时，点画面上方中间的“中断连接”。每次进入都是一台全新的电脑；刷新页面或离开后，这次的进度不会留下。"
+        data-en="This is not a video. It is the same “remote computer” as in earlier weeks, with this week’s missions, and it opens in your browser, in two kinds, Mac and Windows: pick the one you normally use. This week you practise making the tests solid: have the AI expand &lt;code&gt;VERIFY.md&lt;/code&gt; into &lt;code&gt;TESTS.md&lt;/code&gt; and review it with three questions; break one line on purpose and see whether the tests catch it; play along user stories yourself, record it in &lt;code&gt;playtest.md&lt;/code&gt;, and feed what you find back into the process. Everything you need to write can be copied and pasted; the aim is to get the flow into your hands. Actions you practised last week are marked “On your own” and are no longer pointed at. The project is your own “Sky Island” from last week. After it connects, pick a mission and follow the task card; to leave, click “Disconnect” at the top centre. Every visit starts a brand-new computer; if you refresh the page or leave, this visit’s progress is not kept."
+        data-vi="Đây không phải video mà là chiếc “máy tính từ xa” giống các tuần trước, đổi sang nhiệm vụ của tuần này, mở ngay trong trình duyệt, có hai loại Mac và Windows: hãy chọn loại bạn hay dùng. Tuần này bạn luyện cách làm kiểm thử thật chắc: nhờ AI mở rộng &lt;code&gt;VERIFY.md&lt;/code&gt; thành &lt;code&gt;TESTS.md&lt;/code&gt; và duyệt bằng ba câu hỏi; cố ý làm hỏng một dòng xem kiểm thử có bắt được không; tự chơi theo user story, ghi vào &lt;code&gt;playtest.md&lt;/code&gt;, rồi đưa vấn đề tìm được trở lại quy trình. Mọi thứ cần viết đều có thể sao chép và dán; mục đích là luyện quy trình đến mức thuần thục. Các thao tác đã luyện tuần trước được ghi “自己來” (tự làm) và không còn được chỉ vị trí. Dự án là “Đảo trên trời” của chính bạn từ tuần trước. Sau khi kết nối, hãy chọn một nhiệm vụ và làm theo thẻ nhiệm vụ; muốn rời đi, bấm “中斷連線” (Ngắt kết nối) ở giữa phía trên. Mỗi lần vào là một chiếc máy hoàn toàn mới; nếu tải lại trang hoặc rời đi, tiến độ lần này sẽ không được giữ lại.">這不是影片，而是一台在瀏覽器裡開啟的「遠端電腦」，和前幾週是同一台，換成這週的任務，有 Mac 和 Windows 兩種，選你平常用的那一種。這週練的是把測試做紮實：請 AI 從 <code>VERIFY.md</code> 展開 <code>TESTS.md</code>，你用三個問題審；故意弄壞一行，看測試抓不抓得到；照使用者故事親自玩，記在 <code>playtest.md</code>，發現的問題再接回流程。要寫的字都可以複製貼上，目的是把流程練到手很熟；上週練過的動作標「自己來」，不再指位置。專案接著上週你自己的「空中之島」。連線後先選一個任務，照著任務卡做；要離開時，按畫面上方中間的「中斷連線」。每次進入都是一台全新的電腦；重新整理或離開後，這次的進度不會留下。</p>
+      <p class="lab-note" data-i18n
+        data-zh-hans="练习环境的画面是繁体中文；需要用鼠标和键盘操作，建议用电脑的浏览器打开，手机的屏幕太小。"
+        data-en="The practice computer is in English. It needs a mouse and keyboard, so open it in a browser on a computer; a phone screen is too small."
+        data-vi="Giao diện của môi trường luyện tập là tiếng Trung phồn thể. Cần dùng chuột và bàn phím nên hãy mở bằng trình duyệt trên máy tính; màn hình điện thoại quá nhỏ.">練習環境的畫面是繁體中文；需要用滑鼠和鍵盤操作，建議用電腦的瀏覽器開啟，手機的螢幕太小。</p>
+
+      <ol class="points">
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;把测试做扎实。&lt;/strong&gt;把规则写进 &lt;code&gt;AGENTS.md&lt;/code&gt;，请 Codex 从 &lt;code&gt;VERIFY.md&lt;/code&gt; 展开 &lt;code&gt;TESTS.md&lt;/code&gt;，每条标出来源；你用三个问题审：每一条 VERIFY 都展开了吗？有没有边界？测的是规则，不是画面？不对就请它改，你审过才请它写成自动测试。"
+          data-en="&lt;strong&gt;Make the tests solid.&lt;/strong&gt; Write the rules into &lt;code&gt;AGENTS.md&lt;/code&gt;, have Codex expand &lt;code&gt;VERIFY.md&lt;/code&gt; into &lt;code&gt;TESTS.md&lt;/code&gt; with the source of every line, and review it with three questions: is every VERIFY item expanded? Are there boundary cases? Does it test rules, not looks? If not, ask it to fix them; only after your review does it turn them into automated tests."
+          data-vi="&lt;strong&gt;Làm kiểm thử thật chắc.&lt;/strong&gt; Ghi quy tắc vào &lt;code&gt;AGENTS.md&lt;/code&gt;, nhờ Codex mở rộng &lt;code&gt;VERIFY.md&lt;/code&gt; thành &lt;code&gt;TESTS.md&lt;/code&gt;, mỗi dòng ghi rõ nguồn; bạn duyệt bằng ba câu hỏi: mọi mục VERIFY đều được mở rộng chưa? Có trường hợp biên không? Có kiểm tra quy tắc chứ không phải giao diện không? Chưa đúng thì nhờ nó sửa; bạn duyệt xong mới nhờ nó viết thành kiểm thử tự động."><strong>把測試做紮實。</strong>把規則寫進 <code>AGENTS.md</code>，請 Codex 從 <code>VERIFY.md</code> 展開 <code>TESTS.md</code>，每條標出來源；你用三個問題審：每一條 VERIFY 都展開了嗎？有沒有邊界？測的是規則，不是畫面？不對就請它改，你審過才請它寫成自動測試。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;故意弄坏一行。&lt;/strong&gt;先 &lt;code&gt;git status&lt;/code&gt; 确定都 commit 了，再请 Codex 做突变测试：一次只改坏一行、跑全部测试、改回来。“放方块时不扣数量”那一次没被抓到：少的是一条测试，不是程序。请它补上，再弄坏一次确认抓得到，自己跑 &lt;code&gt;npm test&lt;/code&gt; 再 commit。"
+          data-en="&lt;strong&gt;Break one line on purpose.&lt;/strong&gt; Check with &lt;code&gt;git status&lt;/code&gt; that everything is committed, then have Codex do mutation testing: break one line at a time, run every test, put it back. The time “placing a block does not take one away” is not caught: a test is missing, not code. Have it add one and break the line again to confirm it is caught; run &lt;code&gt;npm test&lt;/code&gt; yourself, then commit."
+          data-vi="&lt;strong&gt;Cố ý làm hỏng một dòng.&lt;/strong&gt; Dùng &lt;code&gt;git status&lt;/code&gt; kiểm tra đã commit hết, rồi nhờ Codex làm kiểm thử đột biến: mỗi lần chỉ làm hỏng một dòng, chạy toàn bộ kiểm thử rồi sửa lại. Lần “đặt khối mà không trừ số lượng” không bị bắt: thiếu một kiểm thử chứ không phải lỗi chương trình. Nhờ nó bổ sung, làm hỏng lại một lần để xác nhận bắt được; tự chạy &lt;code&gt;npm test&lt;/code&gt; rồi commit."><strong>故意弄壞一行。</strong>先 <code>git status</code> 確定都 commit 了，再請 Codex 做突變測試：一次只改壞一行、跑全部測試、改回來。「放方塊時不扣數量」那一次沒被抓到：少的是一條測試，不是程式。請它補上，再弄壞一次確認抓得到，自己跑 <code>npm test</code> 再 commit。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;照着用户故事亲自玩，问题接回流程。&lt;/strong&gt;把三条用户故事粘贴进 &lt;code&gt;BRIEF.md&lt;/code&gt;，用 &lt;code&gt;touch&lt;/code&gt;（Windows 是 &lt;code&gt;New-Item&lt;/code&gt;）建 &lt;code&gt;playtest.md&lt;/code&gt;，照着故事玩、记下 ✓ 或 ✗。走到岛的边边掉下去就回不来：先写进 &lt;code&gt;VERIFY.md&lt;/code&gt;，再请 Codex 展开进 TESTS、写成测试、修好；弄坏一行确认抓得到，亲自再走一次，最后 &lt;code&gt;git push&lt;/code&gt;。练习里的 Codex 不会真的写程序，真正的作业请在你自己的电脑上做。卡住时点任务卡上的“提示”。"
+          data-en="&lt;strong&gt;Play along user stories, feed problems back.&lt;/strong&gt; Paste three user stories into &lt;code&gt;BRIEF.md&lt;/code&gt;, create &lt;code&gt;playtest.md&lt;/code&gt; with &lt;code&gt;touch&lt;/code&gt; (on Windows &lt;code&gt;New-Item&lt;/code&gt;), play along each story and note ✓ or ✗. Walk off the edge of the island and you never come back: write it into &lt;code&gt;VERIFY.md&lt;/code&gt; first, then have Codex expand it into TESTS, write the test and fix it; break the line once to confirm it is caught, walk the route again yourself, and finish with &lt;code&gt;git push&lt;/code&gt;. The Codex in the practice does not really write code; do the real homework on your own computer. If you get stuck, click “Hint” on the task card."
+          data-vi="&lt;strong&gt;Tự chơi theo user story, đưa vấn đề trở lại quy trình.&lt;/strong&gt; Dán ba user story vào &lt;code&gt;BRIEF.md&lt;/code&gt;, tạo &lt;code&gt;playtest.md&lt;/code&gt; bằng &lt;code&gt;touch&lt;/code&gt; (Windows là &lt;code&gt;New-Item&lt;/code&gt;), chơi theo từng câu chuyện và ghi ✓ hoặc ✗. Đi ra mép đảo rồi rơi xuống thì không quay lại được: ghi vào &lt;code&gt;VERIFY.md&lt;/code&gt; trước, rồi nhờ Codex mở rộng vào TESTS, viết kiểm thử và sửa; làm hỏng một dòng để xác nhận bắt được, tự đi lại một lần, cuối cùng &lt;code&gt;git push&lt;/code&gt;. Codex trong phần luyện tập không thật sự viết code; bài tập thật hãy làm trên máy của bạn. Bị kẹt thì bấm “提示” (Gợi ý) trên thẻ nhiệm vụ."><strong>照使用者故事親自玩，問題接回流程。</strong>把三條使用者故事貼進 <code>BRIEF.md</code>，用 <code>touch</code>（Windows 是 <code>New-Item</code>）建 <code>playtest.md</code>，照著故事玩、記下 ✓ 或 ✗。走到島的邊邊掉下去就回不來：先寫進 <code>VERIFY.md</code>，再請 Codex 展開進 TESTS、寫成測試、修好；弄壞一行確認抓得到，親自再走一次，最後 <code>git push</code>。練習裡的 Codex 不會真的寫程式，真正的作業請在你自己的電腦上做。卡住時按任務卡上的「提示」。</p></li>
+      </ol>
+    </section>
+
+
     <nav class="pager" id="pager" data-week="8" aria-label="其他週次" data-ui-attr="aria-label:pager.label"></nav>
   </main>
 

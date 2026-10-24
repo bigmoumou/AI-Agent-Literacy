@@ -1,5 +1,5 @@
 {
- "index.html": "8768677dc6ce6528db83d5cec7ff77e0e7cccb017ee8d41aedb8bc8069fe154f",
+ "index.html": "a03895533bdfb49ba2badeba139a1d9fd4ed3a7ad8489cccbb2ac7a0e2c5ee9b",
  "js/about.js": "9990f70579c058d62454199ad592ea7b35585df49184f1e3a856c32e234915f5",
  "js/apps.js": "332dae6c3eb7c7f35086dff41db52fc405e23c3d3e4ce8ce833b8c6d6ba11d1c",
  "js/boot.js": "12a5b06ac463ac5eebe543f7cdf7145c11a5e31b6c7da6f5805006e502818fed",
@@ -10,7 +10,7 @@
  "js/dnd.js": "cca55f75eacf553fbc35225feb2c64e7ca6e0723c3db3739002d7f77f837e673",
  "js/finder.js": "13a30c90a203dd673dfd1682a72785b5e0746853634824a793841ad330521f7e",
  "js/icons.js": "6bee754388e2d14791e4f9f78183a4ad08cc53b98ac90de21a5206ab59bb274a",
- "js/lab.js": "082da56f19c8f04fea51365f9e7fe377fd927ce3bd7ed52c87c57ed612f7c7d4",
+ "js/lab.js": "6739aa814e9346c2a216a88d232f0c81b754b2210740ff555aa79ecd9387aa9a",
  "js/menu.js": "0e812ac77dfbfb418fe8298634f0ea2534d9437120bc633fb45e46b060d9e549",
  "js/missions-week3.js": "45edfbe0661dc4f0217745ef7c0f5d6c0a4c64c7fd90194129b039847d3f9c7c",
  "js/missions.js": "8e80b2b8adac2bd1a1692a61434f8641bc4ba7102b7a43ac06ce05400bfc8a1a",
@@ -44,10 +44,13 @@
  "js/w5/missions-verify.js": "27585b097ec87d8c2ee48d49fb9e84711920b28678f3770eb30a0e11013d5fd2",
  "js/w5/opendata.js": "893a1abce66fb8cc56cfc89bc73887fc809548d6783a3dfee35f2f985dac96bc",
  "js/w5/seed5.js": "a0e647b0926c066ac5a0e98b7dd823e7fcb7e7e7dcd14567c5aaa4262c17b0c6",
- "js/w7/game7.js": "27a1e538050d430312873a69ea864e1f93da1d62ec55c87831b6606a20ca1f23",
+ "js/w7/game7.js": "b56acef7ab203fdac770bdee9793ef54c8a0b97a36d281a0b58baa740ec1d923",
  "js/w7/intents7.js": "0733d1251b58a7f5514db9f5d1be4093fb422e15518d7aa05804acbb4e428e02",
  "js/w7/missions7.js": "00d900c2da01f56322d1c63b91d20d1fae339060bccc8de6e15e1c3f489da841",
  "js/w7/seed7.js": "15ccb3a8cf99f9e5bd13e33d144bb372dde59dc78565f94f056bd9b61e7fb3da",
+ "js/w8/intents8.js": "65e91aada5f7c3d18026b253096261aac49b22dbf4212a719cf0c5d4156ee9be",
+ "js/w8/missions8.js": "3f0c8ebf6a0aaad96cc1dec6d30eb47e7c88cec31c90e08b2e938e5d74b26f6f",
+ "js/w8/seed8.js": "fae56af78de911131ef3ea00781f9ef52f0df88f67ba9eabf04759253f00ae9a",
  "js/win.js": "c629cc1a5afbeba72f2a894462e097e935e8ce9d5037ccbbd4a689ee4c93905a",
  "js/wm.js": "2ac93b337574c44eb9e003df283751850953480ee63c2b9de8c2e49152faf2c8"
 }

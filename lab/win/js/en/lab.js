@@ -12,7 +12,8 @@ window.LAB = window.LAB || {};
     3: { week: 3, label: 'Week 3', url: '../../weeks/week03/', back: '../../weeks/week03/#lab-mac' },
     4: { week: 4, label: 'Week 4', url: '../../weeks/week04/', back: '../../weeks/week04/#lab-mac' },
     5: { week: 5, label: 'Week 5', url: '../../weeks/week05/', back: '../../weeks/week05/#lab-mac' },
-    7: { week: 7, label: 'Week 7', url: '../../weeks/week07/', back: '../../weeks/week07/#lab-mac' }
+    7: { week: 7, label: 'Week 7', url: '../../weeks/week07/', back: '../../weeks/week07/#lab-mac' },
+    8: { week: 8, label: 'Week 8', url: '../../weeks/week08/', back: '../../weeks/week08/#lab-mac' }
   };
   function pickWeek() {
     var q = '';
@@ -22,6 +23,7 @@ window.LAB = window.LAB || {};
     if (/[?&]mission=w4-/.test(q)) return 4;
     if (/[?&]mission=w5-/.test(q)) return 5;
     if (/[?&]mission=w7-/.test(q)) return 7;
+    if (/[?&]mission=w8-/.test(q)) return 8;
     return 3;
   }
   LAB.week = pickWeek();
