@@ -3074,8 +3074,8 @@
         if (others.length) deco = deco ? deco.slice(0, -1) + ', ' + others.join(', ') + ')' : ' (' + others.join(', ') + ')';
         var remoteRefs = S.gitExt ? S.gitExt.refsAt(repo, c.id) : [];
         if (remoteRefs.length) { var rr = remoteRefs.map(function (r) { return C('1;31', r); }).join(', '); deco = deco ? deco.slice(0, -1) + ', ' + rr + ')' : ' (' + rr + ')'; }
-        if (one) lines.push(C('33', shortHash(c.id)) + deco + ' ' + c.msg);
-        else lines.push(C('33', 'commit ' + c.id) + deco + '\nAuthor: ' + c.author + '\nDate:   ' + gitDate(c.time) + '\n\n    ' + c.msg + '\n');
+        if (one) lines.push(C('33', shortHash(c.id)) + deco + ' ' + c.msg.split('\n')[0]);   // a merge commit's message has more lines (Week 8)
+        else lines.push(C('33', 'commit ' + c.id) + deco + (c.parent2 ? '\nMerge: ' + shortHash(c.parent) + ' ' + shortHash(c.parent2) : '') + '\nAuthor: ' + c.author + '\nDate:   ' + gitDate(c.time) + '\n\n    ' + c.msg.replace(/\n/g, '\n    ') + '\n');
       });
       ctx.out(lines.join('\n') + '\n');
       return 0;

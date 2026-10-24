@@ -152,9 +152,27 @@
     return { tree: out, conflicts: conflicts, text: text };
   }
 
+  /* is `ancestor` in the history of `id`? Through both parents: after a pull request is merged, the student's own commits are behind
+     the merge commit's second parent, and `git pull` must fast-forward (2026-10-24 bug check A1; Week 4's version follows .parent only) */
+  G.isAncestor = function (commits, ancestor, id) {
+    if (!ancestor || !id) return false;
+    var stack = [id], seen = Object.create(null), guard = 0;
+    while (stack.length && guard++ < 20000) {
+      var x = stack.pop(); if (!x || seen[x]) continue; seen[x] = true;
+      if (x === ancestor) return true;
+      var c = commits[x]; if (!c) continue;
+      if (c.parent) stack.push(c.parent);
+      if (c.parent2) stack.push(c.parent2);
+    }
+    return false;
+  };
+
   /* ------------------------------------------------------------------ pushes: remember when each branch was pushed (the yellow bar) */
   var push0 = G.push;
   G.push = function (key, branch, commits, newHead) {
+    var r0 = repo(key);
+    // main is protected in the team missions (team-seed.js sets r.protected): changes reach it only through a merged pull request
+    if (r0 && r0.protected && branch === r0.defaultBranch) return { ok: false, reason: 'protected' };
     var res = push0.apply(G, arguments);
     var r = repo(key);
     if (res && res.ok && r) {

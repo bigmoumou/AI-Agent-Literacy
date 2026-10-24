@@ -199,8 +199,7 @@
         var id = stack.pop(); if (!id || seen[id]) continue; seen[id] = 1;
         if (!L.commits[id] && cloud.commits[id]) addCommit(L, cloud.commits[id]);
         var c = cloud.commits[id]; if (!c) continue;
-        if (c.parent && !L.commits[c.parent]) stack.push(c.parent); else if (c.parent) seen[c.parent] = 1;
-        if (c.parent2 && !L.commits[c.parent2]) stack.push(c.parent2);
+        if (c.parent && !L.commits[c.parent]) stack.push(c.parent);   // first parents only, like `git pull` here (gitremote.js)
       }
       if (head) L.tracking['origin/' + branch] = head;
       save(root, L);
@@ -232,7 +231,44 @@
       return res;
     },
     /* is the work tree the same as the last commit? */
-    clean: function (root) { return W7.git.clean(root); }
+    clean: function (root) { return W7.git.clean(root); },
+    /* the merged branches deleted (`git branch -d`) and only main's first-parent history kept: what a mission starts from after the
+       earlier missions (2026-10-24 bug check A5: Windows keeps every commit's whole project in .git/lab-state.json, 200 KB at most) */
+    prune: function (root) {
+      var L = load(root); if (!L) return;
+      var keep = {}, id = L.branches.main, g = 0;
+      while (id && L.commits[id] && g++ < 5000) { keep[id] = 1; id = L.commits[id].parent; }
+      var gone = Object.keys(L.branches).filter(function (b) { return b !== 'main'; });
+      gone.forEach(function (b) { delete L.branches[b]; delete L.upstream[b]; delete L.tracking['origin/' + b]; });
+      var commits = WIN ? L.st.commits : L.repo.commits;
+      Object.keys(commits).forEach(function (k) { if (!keep[k]) delete commits[k]; });
+      save(root, L);
+      gone.forEach(function (b) { try { vfs.remove(vfs.join(root, '.git/refs/heads/' + b), { by: 'system', force: true }); } catch (e) { /* none */ } });
+    }
+  };
+  /* can the repository take n more commits? (Windows: .git/lab-state.json may hold LAB.vfs.limits.maxFile bytes; the Mac has no such file) */
+  T8.roomFor = function (n) {
+    if (!WIN) return true;
+    var st = disk(vfs.join(SI, '.git/lab-state.json')); if (st === null) return true;
+    var count = 0; try { count = Object.keys(JSON.parse(st).commits).length; } catch (e) { count = 1; }
+    var bytes = utf8len(st), per = bytes / Math.max(1, count) * 1.15, max = (vfs.limits && vfs.limits.maxFile) || 200 * 1024;
+    return bytes + per * n < max;
+  };
+  /* the files that differ from the last commit (what `git add .` would put in the next commit) */
+  T8.dirtyFiles = function () {
+    var head = T8.git.tree(SI), out = [], seen = {};
+    (function walk(dir, rel) {
+      vfs.list(dir).forEach(function (st) {
+        if (st.name === '.git') return;
+        var r = rel ? rel + '/' + st.name : st.name;
+        if (st.type === 'dir') { walk(st.path, r); return; }
+        seen[r] = 1;
+        var t = null; try { t = vfs.readFile(st.path, { by: 'system' }); } catch (e) { t = null; }
+        if (!Object.prototype.hasOwnProperty.call(head, r) || head[r] !== t) out.push(r);
+      });
+    })(SI, '');
+    Object.keys(head).forEach(function (r) { if (!seen[r]) out.push(r); });
+    return out;
   };
   /* the student's latest pull request from a branch (null: none yet) */
   T8.prFor = function (head) { var l = G.items(T8.KEY, 'pr').filter(function (it) { return it.head === head && it.by === G.user; }); return l.length ? l[l.length - 1] : null; };
@@ -374,6 +410,8 @@
       G.review(T8.KEY, p1.n, 'teammate-b', sim.approveText(p1, G.prFiles(T8.KEY, p1.n)), 'approved', true);
       G.mergePR(T8.KEY, p1.n, G.user, { silent: true });
       T8.git.switchTo(SI, 'main'); T8.git.pull(SI);
+      delete G.get(T8.KEY).branches['add-rain'];   // Delete branch after the merge (on GitHub), `git branch -d add-rain` (here)
+      T8.git.prune(SI);
       // teammate-c's PR #2: the same sky line (rain a little darker), approved by teammate-b, not merged yet
       G.teamCommit(T8.KEY, 'darker-rain', { 'game.js': T8.setSky(G.treeAt(T8.KEY, 'main')['game.js'], T8.SKY_C) }, '下雨的時候天空再暗一點', 'teammate-c', { from: 'main', ageMs: 5 * 60000 });
       var p2 = G.openPR(T8.KEY, { head: 'darker-rain', title: T8.PR_C.title, body: T8.PR_C.body, by: 'teammate-c', reviewers: ['teammate-b'], silent: true }).item;
@@ -390,7 +428,10 @@
       G.review(T8.KEY, p3.n, 'teammate-b', '衝突解好了：天空的顏色兩個都留。我先請 Codex 看過（測試全綠、不會再和 main 衝突），自己也看了 Files changed，沒問題。', 'approved', true);
       G.mergePR(T8.KEY, p3.n, G.user, { silent: true });
       T8.git.switchTo(SI, 'main'); T8.git.pull(SI);
+      ['add-flowers', 'darker-rain'].forEach(function (b) { delete G.get(T8.KEY).branches[b]; });
+      T8.git.prune(SI);
     }
+    G.get(T8.KEY).protected = true;   // from now on main changes only through a merged pull request (github8.js G.push)
     W8.state.reset();
     sim.clear(); sim.on = true;
   };

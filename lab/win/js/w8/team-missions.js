@@ -19,7 +19,7 @@
   var APP = WIN ? 'edge' : 'safari';
   function inB(lab, attr, val) {
     return trusted(function () {
-      var l = K.liveWins(APP), i, list, j, first = null;
+      var l = K.liveWins('codex').concat(K.liveWins(APP)), i, list, j, first = null;
       for (i = l.length - 1; i >= 0; i--) {
         list = l[i].el.querySelectorAll('[data-lab="' + lab + '"]');
         for (j = 0; j < list.length; j++) {
@@ -36,7 +36,7 @@
   function T_WEB() { return chain.apply(null, [].slice.call(arguments).concat([address]).concat(OPEN)); }
   /* what the browser shows: the github:view data of the page in front (view, n, …), or null */
   function shown() {
-    var l = K.liveWins(APP), i, p;
+    var l = K.liveWins('codex').concat(K.liveWins(APP)), i, p;
     for (i = l.length - 1; i >= 0; i--) { p = l[i].el.querySelector('[data-lab=gh-page]'); if (p && K.seeable(p)) return p.getAttribute('data-view'); }
     return null;
   }
@@ -57,7 +57,13 @@
   /* the merge box of a pull request: the green button, then Confirm merge */
   function T_MERGE(head) {
     return T_WEB(inB('gh-merge-confirm'), function () { var b = inB('gh-merge')(); return b && !b.disabled ? b : null; },
-      function () { var it = pr(head); return it && shown() && /^pull-/.test(shown()) ? inB('gh-pr-tab', 'tab', 'conversation')() : null; },
+      function () {
+        var v = shown();
+        if (v === 'pull') return inB('gh-merge-box')();          // waiting for the approval: the box says why
+        if (v === 'pull-files' || v === 'pull-commits') return inB('gh-pr-tab', 'tab', 'conversation')();
+        if (v === 'pull-conflicts') return inB('gh-back-pr')();
+        return null;
+      },
       function () { var it = pr(head); return it ? inB('gh-pr-row', 'n', it.n)() : null; }, inB('gh-tab-pulls'));
   }
   function synced() { return T8.synced(); }
@@ -70,11 +76,14 @@
     return null;
   }
   var NOT_MAIN = '要合併完、拿最新的 main：先 `git switch main`，再 `git pull`。';
+  function fullReply(ev) { return ev && ev.name === 'codex:reply' && ev.data && ev.data.full ? '練習電腦的存檔空間滿了（存檔點太多）。按任務卡下面的「重來這個任務」，從頭再做一次。' : null; }
+  /* every step: Codex's 「存檔空間快滿了」 first (missions8.js register adds the Terminal's ENOSPC and the Windows words) */
+  function reg(m) { m.steps.forEach(function (st) { var tr = st.trap; st.trap = function (ev, api) { return fullReply(ev) || (tr ? tr(ev, api) : null); }; }); K.register(m); }
   function replyTeam(key, val) { return function (d) { return !!d && d.team && d.team[key] === val; }; }
 
   /* ================================================================== 5 · 分支與 Pull Request */
   var RAIN_ASK = '開一條 branch 叫 add-rain，在上面做 PLANS.md 的第 5 步（下雨）：照 VERIFY.md 的 STEP 5 展開進 TESTS.md、寫成測試、做出來，跑測試，commit，推上 GitHub。做完告訴我你做了哪些事。';
-  K.register({
+  reg({
     id: 'w8-05-pr', week: 8, order: 5, group: GROUP, tag: 'Week 8 補充 1',
     title: '分支與 Pull Request：請組員看過，再接回 main',
     minutes: 10, resetsFiles: true, needs: [SI],
@@ -100,7 +109,7 @@
         hint: '`git branch` 列出所有的 branch，前面有 `*` 的是你現在在的那一條。看到 `* add-rain`，就是 Codex 開好、也切過去了。終端機不在 sky-island 裡，先 `cd ~/Desktop/sky-island`。',
         answer: '打開終端機，打 `cd ~/Desktop/sky-island`（已經在裡面就不用），再打 `git branch` 按 Return。',
         target: K.T_TERM,
-        check: function (ev, api) { return !!api.termSeen(function (c) { return c.name === 'git' && c.args[0] === 'branch' && c.status === 0 && same(api, c.cwd, SI); }, { since: 'mission' }) && T8.git.branch(SI) === 'add-rain'; },
+        check: function (ev, api) { return !!api.termSeen(function (c) { return c.name === 'git' && c.args[0] === 'branch' && c.status === 0 && same(api, c.cwd, SI) && /\*\s*add-rain/.test(c.out || ''); }, { since: 'mission' }); },
         trap: K.cwdTrap
       },
       {
@@ -160,13 +169,13 @@
         trap: K.traps(K.cwdTrap, syncTrap)
       }
     ],
-    outro: '分支是自己的繩子，main 永遠能玩；PR 請組員看過（Files changed → Approve）才接回 main（Merge）。合併完，大家 `git switch main`、`git pull` 拿最新的。' + K.practised(['請 Codex 開 branch、推上去', 'git branch', '合併前自己玩過', 'Compare & pull request', 'Reviewers', 'Files changed', 'Merge', 'git switch main、git pull'])
+    outro: '分支是自己的繩子，main 永遠能玩；PR 請組員看過（Files changed → Approve）才接回 main（Merge）。一起開發的五個習慣：main 永遠要能玩，不要直接在 main 上改；一個功能一條 branch，名字說清楚；發 PR，先請 Codex 看一遍，組員再看過才合併；合併前測試全綠、自己玩過；合併完先拿最新的 main（`git switch main`、`git pull`），再開下一條。' + K.practised(['請 Codex 開 branch、推上去', 'git branch', '合併前自己玩過', 'Compare & pull request', 'Reviewers', 'Files changed', 'Merge', 'git switch main、git pull'])
   });
 
   /* ================================================================== 6 · 衝突：兩個人改到同一行 */
   var FLOWERS_ASK = '開一條 branch 叫 add-flowers，照 VERIFY.md 的 STEP 6 做開花：PLANS.md 加上第 6 步，展開進 TESTS.md、寫成測試、做出來，跑測試，commit，推上 GitHub。做完告訴我你做了哪些事。';
   var RESOLVE_ASK = '我的 PR 和 main 衝突了，在 game.js「天空的顏色」那一行。兩個都要留：晴天用開花的藍，下雨用組員 C 改的再暗一點。請在我的 branch 上解好、跑測試，告訴我改了什麼，再推上 GitHub。';
-  K.register({
+  reg({
     id: 'w8-06-conflict', week: 8, order: 6, group: GROUP, tag: 'Week 8 補充 1',
     title: '衝突：兩個人改到同一行',
     minutes: 9, resetsFiles: true, needs: [SI],
@@ -215,7 +224,10 @@
         answer: '在 PR 頁的合併框，按「Resolve conflicts」。',
         replay: 'mission',
         target: T_WEB(function () { return shown() === 'pull-conflicts' ? null : inB('gh-resolve-conflicts')(); }, function () { var it = pr('add-flowers'); return it ? inB('gh-pr-row', 'n', it.n)() : null; }),
-        check: function (ev, api) { var it = pr('add-flowers'); return !!(it && viewSeen(api, 'pull-conflicts', function (d) { return d.n === it.n && d.merge === 'conflict'; })); }
+        check: function (ev, api) {
+          var it = pr('add-flowers'); if (!it) return false;
+          return viewSeen(api, 'pull-conflicts', function (d) { return d.n === it.n && d.merge === 'conflict'; }) || viewSeen(api, 'pull', function (d) { return d.n === it.n && d.merge === 'conflict'; });
+        }
       },
       {
         id: 's5',
@@ -271,7 +283,13 @@
     };
   }
   function n() { var it = goodIssue() || myIssue(); return it ? it.n : 4; }
-  K.register({
+  /* the fix was merged without 「Fixes #N」: the issue stays open; close it by hand, and next time write it (bug check B6) */
+  function mergedNoFixes(ev) {
+    if (!ev || ev.name !== 'github:pr-merge' || !ev.data || ev.data.head !== 'fix-rain-pickup') return null;
+    var it = pr('fix-rain-pickup'), k = n();
+    return it && G.linked(it.body).indexOf(k) < 0 ? 'PR 合併了，但說明裡沒有「Fixes #' + k + '」，所以 Issue #' + k + ' 不會自動關掉：打開 Issue #' + k + '，按「Close issue」。下次發 PR 先寫 Fixes #編號。' : null;
+  }
+  reg({
     id: 'w8-07-issue', week: 8, order: 7, group: GROUP, tag: 'Week 8 補充 2',
     title: '把 bug 寫清楚：GitHub Issue',
     minutes: 10, resetsFiles: true, needs: [SI],
@@ -332,8 +350,9 @@
         answer: '打開 ' + URL + '，按「Compare & pull request」，說明第一行寫 Fixes #' + '{N}' + '，Reviewers 選 teammate-b，按「Create pull request」。PR 已經開了才發現忘了寫：在 PR 頁說明右上角的「…」→ Edit 補上。',
         target: T_WEB(prForm(null, function (v) { return G.linked(v).length > 0; }), inB('gh-reviewer-option', 'login', 'teammate-b'), inB('gh-reviewers-gear'),
           function () { var it = pr('fix-rain-pickup'); return it && !G.linked(it.body).length ? inB('gh-body-update')() || inB('gh-pr-edit')() || inB('gh-pr-kebab')() : null; }, inB('gh-compare-pr')),
-        check: function () { var it = pr('fix-rain-pickup'), k = n(); return !!(it && G.linked(it.body).indexOf(k) >= 0 && it.reviewers.length > 0); },
+        check: function () { var it = pr('fix-rain-pickup'), k = n(); return !!(it && ((G.linked(it.body).indexOf(k) >= 0 && it.reviewers.length > 0) || it.state === 'merged')); },
         trap: function (ev) {
+          var m = mergedNoFixes(ev); if (m) return m;
           if (ev && ev.name === 'github:pr-open' && ev.data && ev.data.head === 'fix-rain-pickup') {
             if (!G.linked(ev.data.body || '').length) return 'PR 的說明沒有「Fixes #' + n() + '」，合併以後 Issue 不會自動關掉：在 PR 頁說明右上角的「…」→ Edit，補上一行 Fixes #' + n() + '，按 Update comment。';
             if (!(ev.data.reviewers || []).length) return 'PR 開好了，但還沒請人看：在 PR 頁右邊 Reviewers 按齒輪，選 teammate-b。';
@@ -347,7 +366,8 @@
         hint: '右邊 Development 寫著「Successfully merging this pull request may close these issues」：合併以後，那個 Issue 會自動關掉。',
         answer: '在 PR 的「Conversation」，等 teammate-b approved，按「Merge pull request」→「Confirm merge」。',
         target: T_MERGE('fix-rain-pickup'),
-        check: function () { var it = pr('fix-rain-pickup'); return !!(it && it.state === 'merged'); }
+        check: function () { var it = pr('fix-rain-pickup'); return !!(it && it.state === 'merged'); },
+        trap: mergedNoFixes
       },
       {
         id: 's7',
@@ -360,7 +380,12 @@
           for (i = l.length - 1; i >= 0; i--) { a = l[i].el.querySelector('.gh8-devrow a'); if (a && K.seeable(a)) return a; }
           return null;
         }), inB('gh-list-closed'), inB('gh-tab-issues')),
-        check: function (ev, api) { var k = n(); return viewSeen(api, 'issue', function (d) { return d.n === k && d.state === 'closed'; }); }
+        check: function (ev, api) { var k = n(); return viewSeen(api, 'issue', function (d) { return d.n === k && d.state === 'closed'; }); },
+        trap: function (ev) {   // merged without 「Fixes #N」 (bug check B6): the issue is still open
+          var k = n();
+          if (!ev || ev.name !== 'github:view' || !ev.data || ev.data.view !== 'issue' || ev.data.n !== k || ev.data.state !== 'open') return null;
+          return '這個 Issue 還開著：PR 的說明沒有「Fixes #' + k + '」，合併時不會自動關。按下面的「Close issue」關掉它；下次發 PR 先寫 Fixes #編號。';
+        }
       },
       {
         id: 's8', solo: true,

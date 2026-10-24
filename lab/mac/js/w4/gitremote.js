@@ -501,6 +501,11 @@
     while (id && guard++ < 5000 && !(cloudRepo.commits[id])) { send.unshift(repo.commits[id]); id = repo.commits[id].parent; }
     var os = objectStats(send, repo.commits);
     var res = G.push(cloud.key, dstName, send, local);
+    if (!res.ok && res.reason === 'protected') {   // Week 8 (github8.js): main is protected in the team missions
+      ctx.err('remote: error: GH006: Protected branch update failed for refs/heads/' + dstName + '.\nremote: error: Changes must be made through a pull request.\nTo ' + urlText + '\n ! [remote rejected] ' + srcName + ' -> ' + dstName + " (protected branch hook declined)\nerror: failed to push some refs to '" + urlText + "'\n" +
+        '（練習版：main 有保護，不能直接推上去。開一條 branch，發 PR 請組員看過，再在 GitHub 上合併。）\n');
+      return 1;
+    }
     if (!res.ok) { ctx.err("error: failed to push some refs to '" + urlText + "'\n"); return 1; }
     repo.tracking[ref] = local;
     var out = 'Enumerating objects: ' + (os.total + (os.withParent ? 2 : 0)) + ', done.\nCounting objects: 100% (' + (os.total + (os.withParent ? 2 : 0)) + '/' + (os.total + (os.withParent ? 2 : 0)) + '), done.\n';

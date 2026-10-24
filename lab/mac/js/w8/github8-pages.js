@@ -94,33 +94,54 @@
   /* a page that draws itself again when the model changes (not while the student is typing in it) */
   var WATCH = ['github:pr-open', 'github:pr-review', 'github:pr-comment', 'github:pr-merge', 'github:pr-update', 'github:issue-open', 'github:issue-close',
     'github:issue-reopen', 'github:item-edit', 'github:branch-delete', 'github:push'];
-  function livePage(ctx, view, repo, draw, viewInfo) {
-    var holder = null, pops = null, wasOn = false, offs = [], stale = false;
-    function emitView() { K.emitView(repo, view, viewInfo ? viewInfo() : {}); }
+  /* hold(): the page's own "not now" (editing the description, confirming a merge). A change from outside (a teammate approves, a PR is
+     merged) waits while the student types, has a menu open, is pressing a button or holds; then the page redraws (2026-10-24 bug check
+     A4: a redraw between mousedown and mouseup swallowed the click on Update comment and put the old text back; B7: menus closed). */
+  function livePage(ctx, view, repo, draw, viewInfo, hold) {
+    var holder = null, pops = null, wasOn = false, offs = [], stale = false, timer = null, downAt = 0;
+    function emitView() { try { K.emitView(repo, view, viewInfo ? viewInfo() : {}); } catch (e) { /* the item is gone: a mission started again */ } }
     function fill() {
       stale = false;
       holder.textContent = '';
-      holder.appendChild(draw(pops, refresh));
+      holder.appendChild(draw(pops, function () { refresh(true); }));
     }
-    function typing() { var a = document.activeElement; return a && holder && holder.contains(a) && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName); }
-    function refresh() {
-      if (typing()) { if (!stale) { stale = true; holder.addEventListener('focusout', function later() { holder.removeEventListener('focusout', later); setTimeout(function () { if (stale && !typing()) { fill(); emitView(); } }, 0); }); } return; }
+    function busy() {
+      var a = document.activeElement;
+      if (a && holder.contains(a) && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return true;
+      if (downAt && Date.now() - downAt < 1500) return true;
+      if (holder.querySelector('.gh-pop:not([hidden])')) return true;
+      return !!(hold && hold());
+    }
+    function later() {
+      if (timer) return;
+      timer = setInterval(function () {
+        if (!root.isConnected) { clearInterval(timer); timer = null; return; }
+        if (!stale || busy()) return;
+        clearInterval(timer); timer = null;
+        fill(); emitView();
+      }, 300);
+    }
+    function refresh(now) {
+      if (!now && busy()) { stale = true; later(); return; }
       fill(); emitView();
     }
     var root = K.shell(ctx, view, repo, function (p) { pops = p; holder = h('div', { class: 'gh8-live' }); fill(); return holder; });
+    root.addEventListener('pointerdown', function () { downAt = Date.now(); }, true);
+    root.addEventListener('pointerup', function () { setTimeout(function () { downAt = 0; }, 120); }, true);
     function off() { offs.forEach(function (f) { f(); }); offs = []; }
     WATCH.forEach(function (n) {
       offs.push(LAB.bus.on(n, function (d) {
         if (root.isConnected) wasOn = true;
         else { if (wasOn) off(); return; }
         if (!d || (d.repo && d.repo !== repo.key)) return;
-        refresh();
+        refresh(false);
       }));
     });
     setTimeout(function () { if (!root.isConnected && !wasOn) off(); }, 8000);
     emitView();
     return root;
   }
+  function gone() { return h('div', { class: 'gh-wrap gh-404' }, h('h1', null, '404'), h('p', { class: 'gh-lead' }, 'This is not the web page you are looking for.')); }
   function sideBlock(title, gear, body) {
     return h('div', { class: 'gh8-sideblock' }, h('div', { class: 'gh8-sidehead' }, h('span', null, title), gear || null), body);
   }
@@ -192,7 +213,7 @@
         h('p', { class: 'gh-muted' }, kind === 'pr' ? 'Pull requests help you collaborate on code with other people.' : 'Issues are used to track todos, bugs, feature requests, and more.')));
       var newBtn = kind === 'pr' ? A(ctx, base(repo) + '/compare', 'New pull request', { class: 'gh-btn gh-btn-green', dataset: { lab: 'gh-new-pr' } })
         : A(ctx, base(repo) + '/issues/new', 'New issue', { class: 'gh-btn gh-btn-green', dataset: { lab: 'gh-new-issue' } });
-      var search = h('div', { class: 'gh8-search' }, ic('search', 14), h('span', null, kind === 'pr' ? 'is:pr is:open' : 'is:issue state:open'));
+      var search = h('div', { class: 'gh8-search' }, ic('search', 14), h('span', null, kind === 'pr' ? 'is:pr ' + (stateShown === 'open' ? 'is:open' : 'is:closed') : 'is:issue state:' + (stateShown === 'open' ? 'open' : 'closed')));
       wrap.appendChild(h('div', { class: 'gh-wrap gh8-listwrap' },
         h('div', { class: 'gh8-listtop' }, search, h('button', { type: 'button', class: 'gh-btn', on: { click: function () { K.inert(); } } }, ic('tag', 16), 'Labels'),
           h('button', { type: 'button', class: 'gh-btn', on: { click: function () { K.inert(); } } }, 'Milestones'), newBtn),
@@ -304,10 +325,11 @@
   function pullPage(ctx, repo, n, tab) {
     var it = G.item(repo.key, n);
     if (!it || it.kind !== 'pr') return it && it.kind === 'issue' ? issuePage(ctx, repo, n) : K.notFound(ctx, 'There is no pull request #' + n + ' in ' + repo.key + '.', repo.key + '/pull/' + n);
-    var confirming = false, editing = false, reviewOpen = false;
+    var confirming = false, editing = false, editText = null;
     var view = tab === 'files' ? 'pull-files' : tab === 'commits' ? 'pull-commits' : 'pull';
     return livePage(ctx, view, repo, function (pops, refresh) {
       it = G.item(repo.key, n);
+      if (!it) return gone();
       var st = G.mergeState(repo.key, n), files = G.prFiles(repo.key, n), commits = G.prCommits(repo.key, n), b = base(repo);
       var wrap = h('div', null, K.repoHead(ctx, repo, 'pulls'));
       var verb = it.state === 'merged' ? [h('strong', null, it.mergedBy), ' merged ' + plural(commits.length, 'commit', 'commits') + ' into ', h('code', { class: 'gh8-ref' }, it.base), ' from ', h('code', { class: 'gh8-ref' }, it.head), ' ' + ago(it.mergedAt)]
@@ -341,10 +363,11 @@
       var bodyNode = null;
       if (editing) {
         var ta = field(h('textarea', { class: 'gh-input gh8-body', 'aria-label': 'Edit comment', dataset: { lab: 'gh-body-edit-text' } }), true);
-        ta.value = it.body;
+        ta.value = editText === null ? it.body : editText;
+        ta.addEventListener('input', function () { editText = ta.value; });
         bodyNode = h('div', null, ta, h('div', { class: 'gh8-formfoot' }, h('span', { class: 'gh-grow' }),
-          h('button', { type: 'button', class: 'gh-btn', on: { click: function () { editing = false; refresh(); } } }, 'Cancel'),
-          h('button', { type: 'button', class: 'gh-btn gh-btn-green', dataset: { lab: 'gh-body-update' }, on: { click: function () { editing = false; G.editBody(repo.key, n, ta.value); } } }, 'Update comment')));
+          h('button', { type: 'button', class: 'gh-btn', on: { click: function () { editing = false; editText = null; refresh(); } } }, 'Cancel'),
+          h('button', { type: 'button', class: 'gh-btn gh-btn-green', dataset: { lab: 'gh-body-update' }, on: { click: function () { var v = ta.value; editing = false; editText = null; G.editBody(repo.key, n, v); } } }, 'Update comment')));
         setTimeout(function () { try { ta.focus(); } catch (e) { /* gone */ } }, 0);
       }
       main.appendChild(commentBox(ctx, repo, it.by, it.time, it.body, { menu: menu, role: 'Author', bodyNode: bodyNode, lab: 'gh-pr-body-box' }));
@@ -385,9 +408,10 @@
       page.appendChild(h('div', { class: 'gh8-cols' }, main, side));
       return wrap;
     }, function () {
+      if (!it || !G.item(repo.key, n)) return { n: n, state: 'gone' };
       var st = G.mergeState(repo.key, n);
       return { n: n, head: it.head, state: it.state, merge: st.state, conflicts: st.conflicts || [], approved: !!st.approved, body: it.body, reviewers: it.reviewers.slice() };
-    });
+    }, function () { return editing || confirming; });
   }
   function mergeBox(ctx, repo, it, st, pops, refresh, o) {
     var b = base(repo);
@@ -412,7 +436,8 @@
         h('p', { class: 'gh8-conflist' }, 'Conflicting files', h('br'), st.conflicts.map(function (p) { return h('code', null, p); }))),
         h('span', { class: 'gh-grow' }), A(ctx, b + '/pull/' + it.n + '/conflicts', 'Resolve conflicts', { class: 'gh-btn', dataset: { lab: 'gh-resolve-conflicts' } })));
     } else rows.push(h('div', { class: 'gh8-mrow' }, h('span', { class: 'gh8-mic is-ok' }, ic('check', 20)), h('div', null, h('strong', null, 'This branch has no conflicts with the base branch'), h('p', { class: 'gh-muted' }, 'Merging can be performed automatically.'))));
-    var can = st.state === 'clean';
+    var reserved = it.by !== USER && repo.pendingMerge === it.n;
+    var can = st.state === 'clean' && !reserved;
     var btnRow;
     if (o.confirming && can) {
       var msgIn = field(h('input', { type: 'text', class: 'gh-input', value: 'Merge pull request #' + it.n + ' from ' + it.by + '/' + it.head, 'aria-label': 'Commit message' }));
@@ -422,7 +447,7 @@
         h('button', { type: 'button', class: 'gh-btn gh-btn-green', dataset: { lab: 'gh-merge-confirm' }, on: { click: function () { var r = G.mergePR(repo.key, it.n, USER); if (!r.ok) LAB.ui.toast('現在不能合併'); } } }, 'Confirm merge')));
     } else {
       var mbtn = h('button', { type: 'button', class: 'gh-btn' + (can ? ' gh-btn-green' : ''), disabled: !can, dataset: { lab: 'gh-merge' }, on: { click: function () { if (can) o.setConfirm(true); } } }, 'Merge pull request');
-      btnRow = h('div', { class: 'gh8-mrow gh8-mbtnrow' }, mbtn, can ? null : h('span', { class: 'gh-muted gh-small' }, st.state === 'conflict' ? 'Merging is blocked: resolve the conflicts first.' : 'Merging is blocked: waiting for an approving review.'));
+      btnRow = h('div', { class: 'gh8-mrow gh8-mbtnrow' }, mbtn, can ? null : h('span', { class: 'gh-muted gh-small' }, reserved ? 'teammate-b will merge this pull request.（練習版：這個 PR 由組員 B 合併）' : st.state === 'conflict' ? 'Merging is blocked: resolve the conflicts first.' : 'Merging is blocked: waiting for an approving review.'));
     }
     return h('div', { class: 'gh-box gh8-mergebox is-' + st.state, dataset: { lab: 'gh-merge-box', state: st.state } }, rows, btnRow);
   }
@@ -463,14 +488,15 @@
     var pick = null;
     return livePage(ctx, 'pull-conflicts', repo, function (pops, refresh) {
       it = G.item(repo.key, n);
+      if (!it) return gone();
       var st = G.mergeState(repo.key, n), b = base(repo);
       var wrap = h('div', null, K.repoHead(ctx, repo, 'pulls'));
       var page = h('div', { class: 'gh-wrap gh8-conf' },
-        h('div', { class: 'gh8-prhead' }, h('h1', { class: 'gh8-prtitle' }, 'Resolve conflicts'), h('span', { class: 'gh-grow' }), A(ctx, b + '/pull/' + n, 'Back to the pull request', { class: 'gh-btn gh-btn-sm' })),
+        h('div', { class: 'gh8-prhead' }, h('h1', { class: 'gh8-prtitle' }, 'Resolve conflicts'), h('span', { class: 'gh-grow' }), A(ctx, b + '/pull/' + n, 'Back to the pull request', { class: 'gh-btn gh-btn-sm', dataset: { lab: 'gh-back-pr' } })),
         h('p', null, A(ctx, b + '/pull/' + n, it.title + ' #' + n), h('span', { class: 'gh-muted' }, ' · ' + it.head + ' → ' + it.base)));
       wrap.appendChild(page);
       if (st.state !== 'conflict') {
-        page.appendChild(h('div', { class: 'gh-box gh8-empty', dataset: { lab: 'gh-no-conflicts' } }, ic('check', 24, 'gh8-green'), h('h3', null, 'This branch has no conflicts with the base branch'), h('p', { class: 'gh-muted' }, 'Go back to the pull request to merge it.'), A(ctx, b + '/pull/' + n, 'Back to the pull request', { class: 'gh-btn' })));
+        page.appendChild(h('div', { class: 'gh-box gh8-empty', dataset: { lab: 'gh-no-conflicts' } }, ic('check', 24, 'gh8-green'), h('h3', null, 'This branch has no conflicts with the base branch'), h('p', { class: 'gh-muted' }, 'Go back to the pull request to merge it.'), A(ctx, b + '/pull/' + n, 'Back to the pull request', { class: 'gh-btn', dataset: { lab: 'gh-back-pr' } })));
         return wrap;
       }
       var path = pick && st.conflicts.indexOf(pick) >= 0 ? pick : st.conflicts[0], text = st.text[path] || '';
@@ -495,7 +521,7 @@
           h('br'), '練習版的網頁編輯器不能改：請 Codex 在你的 branch 上解好（說清楚兩邊都要什麼）、跑測試、推上 GitHub，這一頁就會變成沒有衝突。'));
       page.appendChild(h('div', { class: 'gh8-confcols' }, listBox, editor));
       return wrap;
-    }, function () { var st = G.mergeState(repo.key, n); return { n: n, head: it.head, merge: st.state, conflicts: st.conflicts || [] }; });
+    }, function () { if (!G.item(repo.key, n)) return { n: n, state: 'gone' }; var st = G.mergeState(repo.key, n); return { n: n, head: it.head, merge: st.state, conflicts: st.conflicts || [] }; });
   }
 
   /* ------------------------------------------------------------------ /issues/new */
@@ -546,6 +572,7 @@
     if (it.kind === 'pr') return pullPage(ctx, repo, n, null);
     return livePage(ctx, 'issue', repo, function (pops) {
       it = G.item(repo.key, n);
+      if (!it) return gone();
       var b = base(repo), wrap = h('div', null, K.repoHead(ctx, repo, 'issues'));
       var prs = G.items(repo.key, 'pr').filter(function (p) { return G.linked(p.body).indexOf(it.n) >= 0; });
       var main = h('div', { class: 'gh8-timeline' });
@@ -576,7 +603,7 @@
         h('div', { class: 'gh8-prmeta' }, badge(it.state, 'issue'), h('span', null, h('strong', null, it.by), ' opened this issue ' + ago(it.time) + ' · ' + plural(it.comments.length, 'comment', 'comments'))),
         h('div', { class: 'gh8-cols' }, main, side)));
       return wrap;
-    }, function () { return { n: n, state: it.state, labels: it.labels.slice(), title: it.title, body: it.body, closedBy: it.closedBy || 0 }; });
+    }, function () { if (!G.item(repo.key, n)) return { n: n, state: 'gone' }; return { n: n, state: it.state, labels: it.labels.slice(), title: it.title, body: it.body, closedBy: it.closedBy || 0 }; });
   }
 
   /* ------------------------------------------------------------------ routes and titles */
