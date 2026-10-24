@@ -19,7 +19,7 @@ An open course on working with AI coding agents, hands-on every week<br>
 <b>English</b> · <a href="#zh-tw">繁體中文</a> · <a href="#zh-cn">简体中文</a> · <a href="#ja">日本語</a>
 </p>
 
-[![Course highlights on a film strip: a practice computer with Codex inside; the agent drafts PLANS.md and students check it; homework from Florence museums and a Tokyo ginkgo map to Sky Island; teamwork with pull requests; the Week 6 exam that plays like a game](docs/images/highlights.webp)](https://ai-agent-literacy.pages.dev/)
+[![Course highlights on a film strip: a practice computer with Codex inside; the agent drafts PLANS.md and students check it; homework from Florence museums and a Tokyo ginkgo map to Sky Island; teamwork with pull requests; the Week 6 exam that plays like a game](docs/images/highlights-v4.webp)](https://ai-agent-literacy.pages.dev/)
 
 **Students learn to work with AI agents by doing it, every week.** AI Agent Literacy teaches students to direct an AI coding agent such as OpenAI Codex, then check and correct its work rather than take it on trust. The teacher writes every script and reviews each video through 7–10 rounds; the videos, the site and the practice computers are built with AI agents (Codex and Claude), so the course itself is a worked example of human-led work with AI. Everything is published under open licenses.
 
