@@ -19,7 +19,7 @@ An open course on working with AI coding agents, hands-on every week<br>
 <b>English</b> · <a href="#zh-tw">繁體中文</a> · <a href="#zh-cn">简体中文</a> · <a href="#ja">日本語</a>
 </p>
 
-[![The course homepage: the film strip glides from Week 3 to the latest week](docs/images/home.webp)](https://ai-agent-literacy.pages.dev/)
+[![Course highlights on a film strip: a practice computer with Codex inside; the agent drafts PLANS.md and students check it; homework from Florence museums and a Tokyo ginkgo map to Sky Island; teamwork with pull requests; the Week 6 exam that plays like a game](docs/images/highlights-v4.webp)](https://ai-agent-literacy.pages.dev/)
 
 **Students learn to work with AI agents by doing it, every week.** AI Agent Literacy teaches students to direct an AI coding agent such as OpenAI Codex, then check and correct its work rather than take it on trust. The teacher writes every script and reviews each video through 7–10 rounds; the videos, the site and the practice computers are built with AI agents (Codex and Claude), so the course itself is a worked example of human-led work with AI. Everything is published under open licenses.
 
@@ -45,7 +45,7 @@ An open course on working with AI coding agents, hands-on every week<br>
 </tr>
 </table>
 
-- **A practice computer that feels real.** Each week ends on a simulated Mac or Windows computer in the browser, checked against screenshots of real machines: a terminal with about 100 commands, a file manager, VS Code, system settings and Codex itself. Students type every step themselves until it becomes muscle memory, as in learning to program; mission cards check each step, and nothing is saved, so mistakes cost nothing.<br><sub>Simulation-based learning · deliberate practice · immediate feedback</sub>
+- **A practice computer that feels real.** Each week ends on a simulated Mac or Windows computer in the browser, checked against screenshots of real machines: a terminal with about 100 commands, a file manager, VS Code, system settings and a simulated Codex. Students hand Codex a task and check what it made, again and again, until working with an AI agent becomes second nature; mission cards check each step, and nothing is saved, so mistakes cost nothing.<br><sub>Simulation-based learning · deliberate practice · immediate feedback</sub>
 - **Teacher-written videos, reviewed until they are right.** The teacher writes every script, and each video goes through 7–10 rounds of review before release. Every frame is rendered from code rather than generated, so interfaces and steps are exact. Homework videos act out a common mistake before the better way, and one character, Xiao An the book fox, carries the story from week to week.<br><sub>Microlearning · worked examples · learning from errors</sub>
 - **Projects with a story, ending in a real product.** Homework moves from Florence museum data and a Tokyo ginkgo walking map to a grade report and a 3D block-world island, then on to team projects. Each one ends in something that works, pushed to GitHub ([Projects](#projects)).<br><sub>Authentic assessment · project-based learning</sub>
 - **Teamwork the way software teams work.** In groups of three, students change one project through branches and pull requests; the AI agent runs git and reviews each pull request first, and bugs go into GitHub issues. In the Week 9 escape-room midterm each member takes a role: story and puzzles, mechanics and web, or testing and integration.<br><sub>Collaborative learning · authentic workflows</sub>
@@ -181,7 +181,7 @@ Thanks to the students taking the course.
 
 ### 課程特色
 
-- **像真的一樣的練習電腦。** 每週最後都在瀏覽器裡的模擬 Mac 或 Windows 上練習，外觀對照真實電腦的截圖校正：終端機約有 100 個指令，還有檔案管理、VS Code、系統設定和 Codex。每一步都由學生親手輸入，像以前學寫程式一樣練成肌肉記憶；任務卡逐步檢查，什麼都不會存下來，錯了就重來。<br><sub>模擬式學習・刻意練習・即時回饋</sub>
+- **像真的一樣的練習電腦。** 每週最後都在瀏覽器裡的模擬 Mac 或 Windows 上練習，外觀對照真實電腦的截圖校正：終端機約有 100 個指令，還有檔案管理、VS Code、系統設定和模擬的 Codex。學生把任務交給 Codex，再檢查它做出來的東西，反覆練到和 AI 代理合作變成習慣；任務卡逐步檢查，什麼都不會存下來，錯了就重來。<br><sub>模擬式學習・刻意練習・即時回饋</sub>
 - **教師親寫劇本、反覆審查的影片。** 每支影片的劇本都由教師撰寫，審查 7–10 輪才上線。畫面由程式逐格繪製，不用生成式影片，介面和步驟都精準。作業影片先演出常見錯誤，再示範比較好的做法；抱書的狐狸「小安」串起每一週的故事。<br><sub>微學習・範例學習・從錯誤中學習</sub>
 - **有故事、有成品的作業。** 從佛羅倫斯美術館資料、東京銀杏散步地圖、成績分析報告，到方塊世界風格的 3D 空中之島，再到分組專題；每份作業都是一件能運作的成品，推上 GitHub（見下方作業表）。<br><sub>真實性評量・專題導向學習</sub>
 - **像軟體團隊一樣分組協作。** 三人一組改同一個專案：開分支、發 pull request，由 AI 代理處理 git 並先審每個 PR，bug 寫成 GitHub Issue。Week 9 的期中密室逃脫，每人負責一個角色：劇情與謎題、機關與網頁、測試與整合。<br><sub>合作學習・真實工作流程</sub>
@@ -305,7 +305,7 @@ python -m http.server 8000
 
 ### 课程特色
 
-- **像真的一样的练习电脑。** 每周最后都在浏览器里的模拟 Mac 或 Windows 上练习，外观对照真实电脑的截图校正：终端约有 100 个命令，还有文件管理、VS Code、系统设置和 Codex。每一步都由学生亲手输入，像以前学编程一样练成肌肉记忆；任务卡逐步检查，什么都不会保存，错了就重来。<br><sub>基于模拟的学习・刻意练习・即时反馈</sub>
+- **像真的一样的练习电脑。** 每周最后都在浏览器里的模拟 Mac 或 Windows 上练习，外观对照真实电脑的截图校正：终端约有 100 个命令，还有文件管理、VS Code、系统设置和模拟的 Codex。学生把任务交给 Codex，再检查它做出来的东西，反复练到与 AI 智能体合作成为习惯；任务卡逐步检查，什么都不会保存，错了就重来。<br><sub>基于模拟的学习・刻意练习・即时反馈</sub>
 - **教师亲写脚本、反复审查的视频。** 每个视频的脚本都由教师撰写，审查 7–10 轮才上线。画面由代码逐帧绘制，不用生成式视频，界面和步骤都很精确。作业视频先演出常见错误，再示范更好的做法；抱书的狐狸“小安”串起每一周的故事。<br><sub>微学习・样例学习・从错误中学习</sub>
 - **有故事、有成品的作业。** 从佛罗伦萨美术馆数据、东京银杏散步地图、成绩分析报告，到方块世界风格的 3D 空中之岛，再到分组项目；每份作业都是一件能运行的成品，推送到 GitHub（见下方作业表）。<br><sub>真实性评价・项目式学习</sub>
 - **像软件团队一样分组协作。** 三人一组改同一个项目：开分支、提 pull request，由 AI 智能体处理 git 并先审每个 PR，bug 写成 GitHub Issue。Week 9 的期中密室逃脱，每人负责一个角色：剧情与谜题、机关与网页、测试与整合。<br><sub>合作学习・真实工作流程</sub>
@@ -429,7 +429,7 @@ python -m http.server 8000
 
 ### 特長
 
-- **本物そっくりの練習用コンピューター**：毎週の最後に、ブラウザ上の Mac または Windows のシミュレーターで練習します。外観は実機のスクリーンショットと照らし合わせて調整し、約 100 のコマンドが使えるターミナル、ファイル管理、VS Code、システム設定、Codex まで備えています。プログラミングを学ぶときと同じく、すべての操作を自分の手で入力して体で覚えます。課題カードが一歩ずつ確認し、何も保存されないので、失敗してもやり直せます。<br><sub>シミュレーション型学習・意図的練習・即時フィードバック</sub>
+- **本物そっくりの練習用コンピューター**：毎週の最後に、ブラウザ上の Mac または Windows のシミュレーターで練習します。外観は実機のスクリーンショットと照らし合わせて調整し、約 100 のコマンドが使えるターミナル、ファイル管理、VS Code、システム設定、シミュレーションの Codex まで備えています。学生は Codex に作業を任せ、できあがったものを自分で確かめることをくり返し、AI エージェントとの協働を身につけます。課題カードが一歩ずつ確認し、何も保存されないので、失敗してもやり直せます。<br><sub>シミュレーション型学習・意図的練習・即時フィードバック</sub>
 - **教員が脚本を書き、納得いくまでレビューする動画**：すべての動画の脚本を教員が書き、7〜10 回のレビューを経て公開します。画面は生成 AI ではなくコードで 1 フレームずつ描くため、操作画面と手順は正確です。課題の動画ではまずよくある間違いを演じてから、よりよい進め方を示します。本を抱えたキツネの「小安（シャオアン）」が毎週の物語をつなぎます。<br><sub>マイクロラーニング・例題学習・誤りから学ぶ</sub>
 - **ストーリーがあり、完成品で終わる課題**：フィレンツェの美術館データ、東京のイチョウ散歩マップ、成績レポート、ブロックの世界風の 3D の空中の島へと進み、そのあとはチームのプロジェクトに移ります。どの課題も動く成果物として GitHub に push して終わります（下の課題一覧を参照）。<br><sub>真正の評価・プロジェクト型学習</sub>
 - **ソフトウェアチームと同じ協働**：3 人 1 組で、ひとつのプロジェクトをブランチと pull request で進めます。git の操作と各 PR の最初のレビューは AI エージェントが担い、バグは GitHub Issue に書きます。Week 9 の脱出ゲーム型の中間課題では、ストーリーと謎、仕掛けと Web、テストと統合の役割を分担します。<br><sub>協働学習・実務のワークフロー</sub>
