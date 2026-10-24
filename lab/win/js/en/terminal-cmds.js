@@ -2615,8 +2615,8 @@
         Object.keys(st.branches).forEach(function (b) { if (st.branches[b] === cid && !(cnt === 0 && b === st.head)) refs.push(b); });
         if (gx) gx.refsAt(st, cid).forEach(function (r) { refs.push(r); });
         var rtxt = refs.length ? ' (' + refs.join(', ') + ')' : '';
-        if (one) logs.push(cid.slice(0, 7) + rtxt + ' ' + cm.msg);
-        else { var dd = new Date(cm.ts); logs.push('commit ' + cid + rtxt + '\nAuthor: ' + cm.name + ' <' + cm.email + '>\nDate:   ' + DAY_EN[dd.getDay()].slice(0, 3) + ' ' + ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][dd.getMonth()] + ' ' + dd.getDate() + ' ' + two(dd.getHours()) + ':' + two(dd.getMinutes()) + ':' + two(dd.getSeconds()) + ' ' + dd.getFullYear() + ' +0800\n\n    ' + cm.msg + '\n'); }
+        if (one) logs.push(cid.slice(0, 7) + rtxt + ' ' + cm.msg.split('\n')[0]);   // a merge commit's message has more lines (Week 8)
+        else { var dd = new Date(cm.ts); logs.push('commit ' + cid + rtxt + (cm.parent2 ? '\nMerge: ' + String(cm.parent).slice(0, 7) + ' ' + String(cm.parent2).slice(0, 7) : '') + '\nAuthor: ' + cm.name + ' <' + cm.email + '>\nDate:   ' + DAY_EN[dd.getDay()].slice(0, 3) + ' ' + ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][dd.getMonth()] + ' ' + dd.getDate() + ' ' + two(dd.getHours()) + ':' + two(dd.getMinutes()) + ':' + two(dd.getSeconds()) + ' ' + dd.getFullYear() + ' +0800\n\n    ' + cm.msg.replace(/\n/g, '\n    ') + '\n'); }
         cid = cm.parent; cnt++;
       }
       ctx.out(logs.join(one ? '\n' : '\n') + '\n');

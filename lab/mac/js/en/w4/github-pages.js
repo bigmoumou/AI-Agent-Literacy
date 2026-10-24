@@ -74,6 +74,10 @@
   function dec(seg) { try { return decodeURIComponent(seg); } catch (e) { return seg; } }
   function A(ctx, path, kids, attrs) { return W.link(ctx, HOST + path, kids, attrs); }
   function inert(text) { LAB.ui.toast(text || 'This feature is not available (practice version)'); }
+  /* extension points (Week 8, github8-pages.js: pull requests and issues); Week 4 leaves them empty, so its pages look the same.
+     routes: fn(ctx, repo, segs after owner/repo, info) → Element|null · titles: fn(repo, segs) → text|'' · tabs(repo) → {issues|pulls:
+     {path, count}} · banner(ctx, repo) → Element|null (the yellow "had recent pushes" bar) · branchMenu: true lists the branches */
+  var ext = { routes: [], titles: [], tabs: null, banner: null, branchMenu: false };
   function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
   function splitLines(text) {
     if (text === '' || text === null || text === undefined) return [];
@@ -249,6 +253,15 @@
       return h('button', { type: 'button', class: attrs.class, on: { click: function () { inert('Only the Code page is available (practice version)'); } } }, kids);
     };
     var cnt = function (icon, label, n) { return h('button', { type: 'button', class: 'gh-btn gh-btn-sm', on: { click: function () { inert(); } } }, ic(icon, 16), h('span', null, label), h('span', { class: 'gh-count' }, String(n))); };
+    var more = ext.tabs ? ext.tabs(repo) : null;   // Week 8: Issues and Pull requests have pages, with their counts
+    var extTab = function (key, name, icon) {
+      var t = more && more[key];
+      if (!t) return tab(name, icon, false);
+      var el = tab(name, icon, active === key, t.path);
+      if (t.count) el.appendChild(h('span', { class: 'gh-count' }, String(t.count)));
+      el.setAttribute('data-lab', 'gh-tab-' + key);
+      return el;
+    };
     return h('div', { class: 'gh-repohead' },
       h('div', { class: 'gh-wrap gh-reponame' },
         ic('repo', 16, 'gh-muted'),
@@ -259,7 +272,7 @@
         cnt('eye', 'Watch', 1), cnt('fork', 'Fork', 0), cnt('star', 'Star', 0)),
       h('nav', { class: 'gh-wrap gh-tabs', 'aria-label': 'Repository' },
         tab('Code', 'code', active === 'code', '/' + USER + '/' + repo.name),
-        tab('Issues', 'issue', false), tab('Pull requests', 'pr', false), tab('Actions', 'play', false)));
+        extTab('issues', 'Issues', 'issue'), extTab('pulls', 'Pull requests', 'pr'), tab('Actions', 'play', false)));
   }
 
   /* ------------------------------------------------------------------ the green Code button and its panel */
@@ -317,7 +330,7 @@
     var c = commit || chain[0];
     return h('div', { class: 'gh-cbar' },
       avatar(authorName(c), 20), h('strong', { class: 'gh-cauthor' }, authorName(c)),
-      A(ctx, '/' + USER + '/' + repo.name + '/commit/' + c.id, c.msg, { class: 'gh-cmsg', title: c.msg }),
+      A(ctx, '/' + USER + '/' + repo.name + '/commit/' + c.id, c.msg.split('\n')[0], { class: 'gh-cmsg', title: c.msg }),
       h('span', { class: 'gh-grow' }),
       A(ctx, '/' + USER + '/' + repo.name + '/commit/' + c.id, c.id.slice(0, 7), { class: 'gh-hash' }),
       h('span', { class: 'gh-muted' }, '·'), h('span', { class: 'gh-muted' }, G.ago(c.time)),
@@ -340,8 +353,8 @@
         cmd(['git remote add origin ' + url, 'git branch -M main', 'git push -u origin main'])));
   }
 
-  function repoPage(ctx, repo, dir, view) {
-    var branch = repo.defaultBranch, chain = G.chain(repo.key, branch);
+  function repoPage(ctx, repo, dir, view, br) {
+    var branch = br || repo.defaultBranch, chain = G.chain(repo.key, branch);
     var tree = chain.length ? chain[0].tree : {};
     var mermaidState = null;
     var root = shell(ctx, view, repo, function (pops) {
@@ -354,10 +367,20 @@
       }
       var base = '/' + USER + '/' + repo.name;
       // the bar above the table: branch, counts, Go to file, Add file, Code
-      var branchBtn = h('button', { type: 'button', class: 'gh-btn gh-btn-sm', on: { click: function () { inert('Only the main branch is available (practice version)'); } } }, ic('branch', 16), h('strong', null, branch), ic('caret', 12));
+      var names = Object.keys(repo.branches).filter(function (b) { return repo.branches[b]; });
+      var many = ext.branchMenu && names.length > 1, branchBtn;
+      if (many) {   // Week 8: the branch menu lists every branch on GitHub
+        var bpanel = h('div', { class: 'gh-pop gh-menu gh-branchpop', role: 'menu', dataset: { lab: 'gh-branch-menu' } }, h('div', { class: 'gh-menu-who' }, 'Switch branches'));
+        names.sort(function (a, b) { return a === repo.defaultBranch ? -1 : b === repo.defaultBranch ? 1 : a < b ? -1 : 1; }).forEach(function (b) {
+          bpanel.appendChild(A(ctx, b === repo.defaultBranch ? base : base + '/tree/' + enc(b), [b === branch ? ic('check', 16) : h('span', { class: 'gh-ic-space' }), h('span', null, b), b === repo.defaultBranch ? h('span', { class: 'gh-label' }, 'default') : null], { class: 'gh-menu-item', role: 'menuitem', dataset: { lab: 'gh-branch-item', branch: b } }));
+        });
+        var bbtn = h('button', { type: 'button', class: 'gh-btn gh-btn-sm', dataset: { lab: 'gh-branch-button' } }, ic('branch', 16), h('strong', null, branch), ic('caret', 12));
+        pops.bind(bbtn, bpanel);
+        branchBtn = h('span', { class: 'gh-hpos' }, bbtn, bpanel);
+      } else branchBtn = h('button', { type: 'button', class: 'gh-btn gh-btn-sm', on: { click: function () { inert('Only the main branch is available (practice version)'); } } }, ic('branch', 16), h('strong', null, branch), ic('caret', 12));
       var top = h('div', { class: 'gh-actions' },
         branchBtn,
-        h('button', { type: 'button', class: 'gh-linkbtn', on: { click: function () { inert('Only the main branch is available (practice version)'); } } }, ic('branch', 16), h('strong', null, '1'), ' Branch'),
+        h('button', { type: 'button', class: 'gh-linkbtn', on: { click: function () { inert(many ? 'Branch list page is not available (practice version): use the branch button on the left to switch' : 'Only the main branch is available (practice version)'); } } }, ic('branch', 16), h('strong', null, String(Math.max(1, names.length))), names.length > 1 ? ' Branches' : ' Branch'),
         h('button', { type: 'button', class: 'gh-linkbtn', on: { click: function () { inert(); } } }, ic('tag', 16), h('strong', null, '0'), ' Tags'),
         h('span', { class: 'gh-grow' }),
         h('button', { type: 'button', class: 'gh-btn gh-btn-sm', on: { click: function () { inert(); } } }, ic('search', 14), h('span', null, 'Go to file')),
@@ -377,18 +400,18 @@
         table.appendChild(h('div', { class: 'gh-row', role: 'row', dataset: { lab: 'gh-file-row', path: e.path, type: e.type } },
           h('span', { class: 'gh-ricon ' + (e.type === 'dir' ? 'is-dir' : 'is-file') }, ic(e.type === 'dir' ? 'folder' : 'file', 16)),
           A(ctx, href, e.name, { class: 'gh-rname' }),
-          A(ctx, base + '/commit/' + c.id, c.msg, { class: 'gh-rmsg gh-muted', title: c.msg }),
+          A(ctx, base + '/commit/' + c.id, c.msg.split('\n')[0], { class: 'gh-rmsg gh-muted', title: c.msg }),
           h('span', { class: 'gh-rtime gh-muted' }, G.ago(c.time))));
       });
       // README of this folder
       var readme = entries.filter(function (e) { return e.type === 'file' && /^readme(\.md|\.markdown|\.txt)?$/i.test(e.name); })[0];
-      var main = h('div', { class: 'gh-main' }, top, table);
+      var main = h('div', { class: 'gh-main' }, ext.banner && !br ? ext.banner(ctx, repo) : null, top, table);
       if (readme) {
         var md = /\.md$|\.markdown$/i.test(readme.name) ? markdownNode(tree[readme.path], readme.path, ctx, repo) : { node: h('pre', { class: 'gh-pre' }, tree[readme.path]), mermaid: null };
         mermaidState = md.mermaid;
         main.appendChild(h('section', { class: 'gh-box gh-readme', dataset: { lab: 'gh-readme' } },
           h('div', { class: 'gh-boxhead' }, ic('book', 16), h('strong', null, 'README'), h('span', { class: 'gh-grow' }),
-            A(ctx, base + '/edit/' + branch + '/' + enc(readme.path), ic('pencil', 16), { class: 'gh-iconbtn', title: 'Edit file', 'aria-label': 'Edit file', dataset: { lab: 'gh-readme-edit' } })),
+            br ? null : A(ctx, base + '/edit/' + branch + '/' + enc(readme.path), ic('pencil', 16), { class: 'gh-iconbtn', title: 'Edit file', 'aria-label': 'Edit file', dataset: { lab: 'gh-readme-edit' } })),
           h('div', { class: 'gh-boxbody' }, md.node)));
       }
       var side = h('aside', { class: 'gh-side' },
@@ -404,8 +427,8 @@
   }
 
   /* ------------------------------------------------------------------ a file */
-  function filePage(ctx, repo, path) {
-    var branch = repo.defaultBranch, chain = G.chain(repo.key, branch), tree = chain.length ? chain[0].tree : {};
+  function filePage(ctx, repo, path, br) {
+    var branch = br || repo.defaultBranch, chain = G.chain(repo.key, branch), tree = chain.length ? chain[0].tree : {};
     var base = '/' + USER + '/' + repo.name;
     if (!chain.length || !Object.prototype.hasOwnProperty.call(tree, path)) return notFound(ctx, 'This file does not exist: ' + path, repo.key + '/' + path);
     var text = tree[path], isMd = /\.(md|markdown)$/i.test(path), mode = isMd ? 'preview' : 'code';
@@ -440,7 +463,7 @@
       }
       draw();
       var copyText = h('button', { type: 'button', class: 'gh-iconbtn', title: 'Copy file', 'aria-label': 'Copy file', on: { click: function () { LAB.clipboard.setText(text); LAB.ui.toast('File contents copied'); } } }, ic('copy', 16));
-      var pencil = A(ctx, base + '/edit/' + branch + '/' + enc(path), ic('pencil', 16), { class: 'gh-iconbtn', title: 'Edit this file', 'aria-label': 'Edit this file', dataset: { lab: 'gh-edit' } });
+      var pencil = br ? null : A(ctx, base + '/edit/' + branch + '/' + enc(path), ic('pencil', 16), { class: 'gh-iconbtn', title: 'Edit this file', 'aria-label': 'Edit this file', dataset: { lab: 'gh-edit' } });
       var box = h('div', { class: 'gh-box gh-filebox' },
         commitBar(ctx, repo, chain, touch, false),
         h('div', { class: 'gh-boxhead gh-filehead' }, isMd ? seg : null, h('span', { class: 'gh-muted gh-fileinfo' }, lines.length + ' lines (' + lines.length + ' loc) · ' + sizeLabel(utf8len(text))), h('span', { class: 'gh-grow' }), copyText, pencil),
@@ -723,11 +746,14 @@
     if (!repo) return notFound(ctx, 'The repository ' + USER + '/' + segs[1] + ' does not exist.', USER + '/' + segs[1]);
     if (segs.length === 2) return repoPage(ctx, repo, '', 'repo');
     var kind = segs[2], rest = segs.slice(4).join('/');
-    if (kind === 'tree') return rest ? repoPage(ctx, repo, rest, 'tree') : repoPage(ctx, repo, '', 'repo');
-    if (kind === 'blob' && rest) return filePage(ctx, repo, rest);
+    // Week 8: /tree/<branch> and /blob/<branch>/… show another branch (Week 4 has only main, so br is always null there)
+    var br = segs[3] && segs[3] !== repo.defaultBranch && Object.prototype.hasOwnProperty.call(repo.branches, segs[3]) && repo.branches[segs[3]] ? segs[3] : null;
+    if (kind === 'tree') return rest ? repoPage(ctx, repo, rest, 'tree', br) : repoPage(ctx, repo, '', br ? 'tree' : 'repo', br);
+    if (kind === 'blob' && rest) return filePage(ctx, repo, rest, br);
     if (kind === 'edit' && rest) return editPage(ctx, repo, rest);
     if (kind === 'commits') return commitsPage(ctx, repo);
     if (kind === 'commit' && segs[3]) return commitPage(ctx, repo, segs[3]);
+    for (var i = 0; i < ext.routes.length; i++) { var el = ext.routes[i](ctx, repo, segs.slice(2), info); if (el) return el; }
     return notFound(ctx, 'There is nothing at this address.', repo.key + '/' + segs.slice(2).join('/'));
   }
 
@@ -746,10 +772,17 @@
     if (kind === 'tree') return repo.name + (rest ? '/' + rest : '') + ' at ' + repo.defaultBranch + ' · ' + full;
     if (kind === 'commits') return 'Commits · ' + full;
     if (kind === 'commit') return 'Commit · ' + full;
+    for (var i = 0; i < ext.titles.length; i++) { var t = ext.titles[i](repo, segs.slice(2)); if (t) return t; }
     return 'Page not found · GitHub';
   }
 
   W.register({ host: 'github.com', title: titleOf, build: route });
 
-  LAB.githubPages = { route: route, titleOf: titleOf };
+  LAB.githubPages = {
+    route: route, titleOf: titleOf, ext: ext,
+    // the pieces the Week 8 pages (github8-pages.js) are drawn with, so they look the same
+    kit: { h: h, ic: ic, ICONS: ICONS, A: A, shell: shell, repoHead: repoHead, avatar: avatar, authorName: authorName, markdownNode: markdownNode,
+      diffRows: diffRows, notFound: notFound, emitView: emitView, inert: inert, enc: enc, dec: dec, splitLines: splitLines, cap: cap, unique: unique,
+      commitBar: commitBar, HOST: HOST, USER: USER }
+  };
 })(window.LAB);

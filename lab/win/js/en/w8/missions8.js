@@ -502,4 +502,9 @@
     ],
     outro: ('A problem you found goes back into the flow: you write it into VERIFY first → the AI expands it into TESTS → red first, then green after the fix → break one line to confirm it is caught → walk that route yourself again. The homework follows this loop: first get the 3 most important stories working, then expand.' + (practised(['writing the bug into VERIFY.md first', 'asking Codex to expand, write the test and fix it', 'npm test', 'git log --oneline', 'breaking one line to confirm it is caught', 'walking it again and recording it in playtest.md', 'git commit -am', 'git push'])))
   });
+
+  /* the same kit for the team missions of 補充 1、2 (team-missions.js) */
+  W8.kit = { same: same, dock: dock, liveWins: liveWins, seeable: seeable, inWins: inWins, trusted: trusted, chain: chain, codeFlow: codeFlow,
+    T_TERM: T_TERM, T_COMPOSER: T_COMPOSER, T_PLAY: T_PLAY, replyIs: replyIs, start: start, notInSiTrap: notInSiTrap, cwdTrap: cwdTrap,
+    traps: traps, commitFailed: commitFailed, register: register, ran: ran, practised: practised, os: os };
 })(window.LAB);

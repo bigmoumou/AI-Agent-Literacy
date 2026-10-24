@@ -67,8 +67,9 @@
   /* ------------------------------------------------------------------ the game window */
   LAB.icons.add('app-skyisland', '<svg viewBox="0 0 64 64"><rect x="4" y="4" width="56" height="56" rx="13" fill="#bfe0f4"/><path d="M32 16 50 25 32 34 14 25z" fill="#68a84c"/><path d="M14 25 32 34v16L14 41z" fill="#8c6442"/><path d="M50 25 32 34v16l18-9z" fill="#735236"/></svg>');
   var current = null;   // { win, frame, lv, bug }
-  // Week 8 (seed8.js) sets W7.bugParam to 'fall' (falling off the edge never comes back); Week 7's bug is 'multi'
-  function src(lv, bug) { return GAME_URL + '?lab=' + Math.max(0, lv) + (bug ? '&bug=' + (W7.bugParam ? W7.bugParam() : 'multi') : '') + '&v=' + Date.now(); }
+  // Week 8 (seed8.js) sets W7.bugParam to 'fall' (falling off the edge never comes back); Week 7's bug is 'multi'. Week 8's team missions
+  // (team-seed.js) add W7.extraParams: &rain=1 once STEP 5 is built, &sky=/&rainsky= from game.js's sky line; their bug is 'rainpick'
+  function src(lv, bug) { return GAME_URL + '?lab=' + Math.max(0, lv) + (bug ? '&bug=' + (W7.bugParam ? W7.bugParam() : 'multi') : '') + (W7.extraParams ? W7.extraParams() : '') + '&v=' + Date.now(); }
   function openGame() {
     var lv = W7.level(), bug = W7.bugOn();
     if (current && !current.win.closed) {
@@ -116,6 +117,6 @@
     if (!d || d.src !== 'sky-island' || typeof d.ev !== 'string') return;
     if (!current || !current.frame || e.source !== current.frame.contentWindow) return;
     var inv = Array.isArray(d.inv) ? d.inv.reduce(function (a, b) { return a + (Number(b) || 0); }, 0) : 0;
-    LAB.bus.emit('island:' + d.ev, { lv: d.lv, inv: inv, block: d.block || '', bug: current.bug, back: !!d.back });
+    LAB.bus.emit('island:' + d.ev, { lv: d.lv, inv: inv, block: d.block || '', bug: current.bug, back: !!d.back, on: !!d.on });
   });
 })(window.LAB);
