@@ -1,7 +1,7 @@
 <h1 align="center">AI Agent Literacy</h1>
 
 <p align="center">
-An open course on working with AI coding agents<br>
+An open course on working with AI coding agents, hands-on every week<br>
 <sub>First piloted at National Taiwan Normal University, 2026</sub>
 </p>
 
@@ -10,7 +10,8 @@ An open course on working with AI coding agents<br>
 </p>
 
 <p align="center">
-<a href="#educational-design">Educational design</a> ·
+<a href="#highlights">Highlights</a> ·
+<a href="#projects">Projects</a> ·
 <a href="#videos">Videos</a> ·
 <a href="#how-its-made">How it's made</a> ·
 <a href="#license-and-citation">Cite</a>
@@ -20,15 +21,18 @@ An open course on working with AI coding agents<br>
 
 [![The course homepage: the film strip glides from Week 3 to the latest week](docs/images/home.webp)](https://ai-agent-literacy.pages.dev/)
 
-**An example of AI demonstration teaching.** AI Agent Literacy teaches students to work with AI coding agents such as OpenAI Codex, and its own materials are made the same way. The teaching videos, the course site and the practice environment were developed with AI agents (Codex and Claude); the teacher designed the curriculum, supplied the content and reviewed every video. Students see what to do with AI and, in the materials themselves, how a complete piece of work gets made with it. Everything is published as an open course under open licenses.
+**Students learn to work with AI agents by doing it, every week.** AI Agent Literacy teaches students to direct an AI coding agent such as OpenAI Codex, then check and correct its work rather than take it on trust. The teacher writes every script and reviews each video through 7–10 rounds; the videos, the site and the practice computers are built with AI agents (Codex and Claude), so the course itself is a worked example of human-led work with AI. Everything is published under open licenses.
 
 <table>
 <tr><td><b>Pilot site</b></td><td>National Taiwan Normal University (NTNU), 2026, in the course <i>Learning Analytics Tools Implementation Applications</i></td></tr>
-<tr><td><b>Format</b></td><td>Weekly microlearning videos (1–5 min) with chapters and key points; a browser-based practice computer; a scenario-based exam</td></tr>
+<tr><td><b>Format</b></td><td>Weekly microlearning videos (1–5 min, one idea each) with chapters, numbered key points and time links; a practice computer in the browser; project-based homework; a scenario-based exam</td></tr>
 <tr><td><b>Published</b></td><td>Weeks 1–8: 36 videos, about 105 minutes (October 2026), updated weekly</td></tr>
 <tr><td><b>Languages</b></td><td>Site in English, Traditional Chinese, Simplified Chinese and Vietnamese, chosen from the browser's language. Weeks 1 and 3–8 are fully in English too: every video, the practice computers and the Week 6 exam. Other videos show Traditional Chinese on screen</td></tr>
+<tr><td><b>Access</b></td><td>Mac and Windows supported alike; light and dark themes, screen-reader labels, reduced motion. No login, no cookies and no tracking of individuals; watch progress stays in the student's own browser</td></tr>
 <tr><td><b>Licenses</b></td><td>Code <a href="LICENSE">MIT</a>; videos and course content <a href="LICENSE-CONTENT.md">CC BY-NC-SA 4.0</a></td></tr>
 </table>
+
+## Highlights
 
 <table>
 <tr>
@@ -36,20 +40,30 @@ An open course on working with AI coding agents<br>
 <td width="50%"><img src="docs/images/exam.webp" alt="The Week 6 test entrance: from the homepage into the test, the screen tears into a black hole, Mac is picked, and WARNING appears on the remote desktop"></td>
 </tr>
 <tr>
-<td align="center"><b>Virtual Remote Practice</b></td>
-<td align="center"><b>Scenario-Based Exam Practice</b></td>
+<td align="center"><b>A practice computer that feels real</b></td>
+<td align="center"><b>An exam that plays like a game</b></td>
 </tr>
 </table>
 
-## Educational design
+- **A practice computer that feels real.** Each week ends on a simulated Mac or Windows computer in the browser, checked against screenshots of real machines: a terminal with about 100 commands, a file manager, VS Code, system settings and Codex itself. Students type every step themselves until it becomes muscle memory, as in learning to program; mission cards check each step, and nothing is saved, so mistakes cost nothing.<br><sub>Simulation-based learning · deliberate practice · immediate feedback</sub>
+- **Teacher-written videos, reviewed until they are right.** The teacher writes every script, and each video goes through 7–10 rounds of review before release. Every frame is rendered from code rather than generated, so interfaces and steps are exact. Homework videos act out a common mistake before the better way, and one character, Xiao An the book fox, carries the story from week to week.<br><sub>Microlearning · worked examples · learning from errors</sub>
+- **Projects with a story, ending in a real product.** Homework moves from Florence museum data and a Tokyo ginkgo walking map to a grade report and a 3D block-world island, then on to team projects. Each one ends in something that works, pushed to GitHub ([Projects](#projects)).<br><sub>Authentic assessment · project-based learning</sub>
+- **Teamwork the way software teams work.** In groups of three, students change one project through branches and pull requests; the AI agent runs git and reviews each pull request first, and bugs go into GitHub issues. In the Week 9 escape-room midterm each member takes a role: story and puzzles, mechanics and web, or testing and integration.<br><sub>Collaborative learning · authentic workflows</sub>
+- **An exam that plays like a game.** In Week 6, Xiao An calls for help from a torn timeline, and the only way back is a remote computer: levels without hints, built on the earlier weeks' work, then ten questions inside a time tunnel. Sound and visuals are designed for immersion, without dizzying motion.<br><sub>Scenario-based assessment · game-based learning</sub>
+- **Engineering habits for the AI era.** The student writes `VERIFY.md`, what counts as done; the agent writes `PLANS.md`, how to get there; `TESTS.md`, mutation testing and user stories then check the result. Students learn to direct, check and correct an AI agent rather than accept its output.<br><sub>Human-in-the-loop AI literacy · test-driven development</sub>
 
-- **Microlearning for self-paced review.** Each video covers one idea in 1–5 minutes and is segmented into chapters with numbered key points. A time link (`#t=30`) takes students to the exact moment a teacher wants them to revisit.
-- **Worked examples and common errors.** Homework videos first show a typical mistake, such as pasting the whole assignment into the AI or trusting a confident but wrong average, and then walk through a better process.
-- **Simulation-based practice.** A simulated Mac or Windows computer runs in the browser as a virtual lab. Guided missions give immediate feedback on every step, and nothing is saved, so students can make mistakes safely and start again.
-- **Scenario-based assessment.** The Week 6 exam places students in a story on a remote computer. With no hints, they complete levels that mirror the work of the earlier weeks: moving around folders in the terminal, writing `AGENTS.md` and `VERIFY.md` for an AI agent, and a closing quiz.
-- **Authentic, project-based homework.** Each assignment ends in a real deliverable pushed to GitHub: a museum data collection, a walking-map website, a grade report, a small game.
-- **Human-in-the-loop habits for AI-assisted work.** Verification checklists, test-driven development, planning documents (`PLANS.md`, `TESTS.md`) and version control teach students to direct, check and correct an AI agent rather than accept its output. This is the AI literacy the course aims for.
-- **Access and privacy by default.** Four interface languages, light and dark themes, screen-reader labels and reduced-motion support. No login, no cookies and no tracking of individuals; watch progress stays in the student's own browser.
+## Projects
+
+| Week | Project | What students make | What it trains |
+|---|---|---|---|
+| 3 | [Florence museums](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=en#03-homework-firenze) | Opening hours and ticket prices of Florence's museums, collected through Codex alone | Clear instructions, `AGENTS.md`, checking saved files |
+| 4 | [Tokyo ginkgo walk](https://ai-agent-literacy.pages.dev/weeks/week04/?lang=en#03-homework-ginkgo) | A walking-map website built from official sources, published on GitHub | Judging sources, the built-in browser, GitHub |
+| 5 | [Grade report](https://ai-agent-literacy.pages.dev/weeks/week05/?lang=en#03-homework-grades) | A short report on two classes' grades, with three hidden traps | `VERIFY.md`, data checks, student privacy |
+| 7 | [Sky Island](https://ai-agent-literacy.pages.dev/weeks/week07/?lang=en#03-homework-island) | A 3D block-world floating island, planned before it is built | `PLANS.md`, TDD, Git |
+| 9 | Escape-room midterm *(coming)* | A team-built escape-room web game | Roles, testing, integration |
+| Final | Own project *(coming)* | A project of each student's own choosing | All of the above |
+
+All 29 walking-map sites from the first class are in the [student gallery](https://ai-agent-literacy.pages.dev/works/?lang=en).
 
 ## Videos
 
@@ -90,9 +104,9 @@ An open course on working with AI coding agents<br>
 
 ## How it's made
 
-- **Roles.** The teacher supplies the material, sets the direction and reviews every round. The site and the videos are developed by Codex and Claude together.
+- **Roles.** The teacher writes the scripts, supplies the material and approves every round; Codex and Claude build the site and the videos together.
 - **Video from code.** Every frame is an HTML, CSS and JavaScript page rendered to video (HTML-to-video) with HyperFrames, GSAP, Playwright and FFmpeg; music and sound effects are synthesized in code. No video-generation model is used. The workflow mainly draws on the opus-video skill, with our own changes for this course.
-- **Quality review.** Each draft is checked on contact sheets, including at phone width, and scored on seven criteria (opening, readability on a phone, natural motion, visual variety, composition, sound and picture in sync, faithfulness to the source). Codex and Claude then review each other's videos, and the teacher gives the final approval. Problems the teacher finds become rules for every later video.
+- **Quality review.** Each draft is checked on contact sheets, including at phone width, and scored on seven criteria (opening, readability on a phone, natural motion, visual variety, composition, sound and picture in sync, faithfulness to the source). Codex and Claude then review each other's videos, and the teacher gives the final approval. Problems the teacher finds become rules for every later video, and student reports are fixed quickly, often the same day.
 - **Delivery.** A static site on Cloudflare Pages; the videos stream as HLS (hls.js) from a separate Cloudflare media site.
 
 The full workflow and the lessons learned are in [docs/about.md](docs/about.md) (Traditional Chinese and English).
@@ -111,7 +125,7 @@ The video streams live on a separate Cloudflare project, so a fork plays them fr
 
 ## Roadmap
 
-- [ ] Weeks 9–16, published as the course goes on
+- [ ] Weeks 9–16, published as the course goes on, including the escape-room midterm and the final project
 - [x] Full English versions of Weeks 1 and 3–8 (October 2026): every video with English on-screen text, the practice computers and the Week 6 exam; English browsers get them automatically
 - [ ] English versions of the other weeks
 - [ ] Claude versions of the videos: the same lessons, demonstrated with Claude (Claude Code) instead of Codex
@@ -154,25 +168,38 @@ Thanks to the students taking the course.
 
 **課程網站**：[ai-agent-literacy.pages.dev](https://ai-agent-literacy.pages.dev/)
 
-**AI 示範教學的實例。** AI Agent Literacy（AI 代理素養）是一門開放式課程，教學生和 AI 程式助理（例如 OpenAI 的 Codex）一起工作，而課程本身的教材也是這樣做出來的：教學影片、課程網站和練習環境由 AI 代理（Codex 與 Claude）開發，授課教師設計課程、提供教材，並審核每一支影片。學生除了學到怎麼用 AI，也能從教材本身看到一件完整的作品如何和 AI 合作完成。所有內容都以開放授權公開，是一門開放式課程。
+**每週真的動手，和 AI 代理一起做出作品。** AI Agent Literacy（AI 代理素養）教學生指揮 AI 程式助理（例如 OpenAI 的 Codex）完成實際的工作，並檢查、修正它的成果，而不是照單全收。每支影片的劇本都由授課教師撰寫，經過 7–10 輪審查才上線；影片、網站和練習電腦由 AI 代理（Codex 與 Claude）製作，所以課程本身也示範了「由人主導、和 AI 合作」的完整過程。所有內容以開放授權公開。
 
 <table>
 <tr><td><b>首個示範場域</b></td><td>國立臺灣師範大學（2026），課程「學習分析工具」（Learning Analytics Tools Implementation Applications）</td></tr>
-<tr><td><b>形式</b></td><td>每週微學習影片（1–5 分鐘），附章節和重點；瀏覽器裡的練習電腦；情境式考試</td></tr>
+<tr><td><b>形式</b></td><td>每週微學習影片（1–5 分鐘，一支一個概念），附章節、編號重點和時間連結；瀏覽器裡的練習電腦；專題作業；情境式考試</td></tr>
 <tr><td><b>已公開</b></td><td>Week 1–8：36 支影片，約 105 分鐘（2026 年 10 月），每週更新</td></tr>
 <tr><td><b>語言</b></td><td>網站有英文、繁體中文、簡體中文、越南文，依瀏覽器語言自動選。Week 1、3–8 另有完整英文版：每支影片、練習電腦、Week 6 考試；其他影片畫面是繁體中文</td></tr>
+<tr><td><b>無障礙與隱私</b></td><td>Mac 與 Windows 同樣支援；深淺色主題、螢幕閱讀器標示、減少動態效果。不用登入、不用 cookie、不追蹤個人，觀看進度只存在學生自己的瀏覽器</td></tr>
 <tr><td><b>授權</b></td><td>程式 <a href="LICENSE">MIT</a>；影片與教材 <a href="LICENSE-CONTENT.md">CC BY-NC-SA 4.0</a></td></tr>
 </table>
 
-### 教學設計
+### 課程特色
 
-- **微學習與自主複習**：一支影片只講一個概念，1–5 分鐘，切成章節並附編號重點。教師可以用時間連結（`#t=30`）把學生帶到要複習的那一刻。
-- **範例學習與常見錯誤**：作業影片先示範常見的錯誤，例如把整份題目貼給 AI、相信 AI 很有自信算出的錯誤平均，再一步步走過比較好的做法。
-- **模擬式練習**：在瀏覽器裡執行的模擬 Mac／Windows，是一個虛擬實驗室。任務卡逐步引導，每一步都立即回饋；什麼都不會存下來，學生可以放心犯錯、隨時重來。
-- **情境式評量**：Week 6 的考試把學生放進一段故事，連到一台遠端電腦。沒有提示，學生要一關一關完成任務，內容對應前幾週的實作：用終端機在資料夾間移動、替 AI 代理寫 `AGENTS.md` 和 `VERIFY.md`，最後是一段問答。
-- **真實性評量與專題導向作業**：每份作業都是一件實際的成品，推上 GitHub：美術館資料收集、散步地圖網站、成績報告、一個小遊戲。
-- **人機協作（human-in-the-loop）的習慣**：驗證清單、測試驅動開發、規劃文件（`PLANS.md`、`TESTS.md`）和版本管理，讓學生學會指揮、檢查並修正 AI，而不是照單全收。這就是課程想培養的 AI 素養。
-- **預設就顧及無障礙與隱私**：四種介面語言、深淺色主題、螢幕閱讀器標示、減少動態效果。不用登入、不用 cookie，也不追蹤個人；觀看進度只存在學生自己的瀏覽器。
+- **像真的一樣的練習電腦。** 每週最後都在瀏覽器裡的模擬 Mac 或 Windows 上練習，外觀對照真實電腦的截圖校正：終端機約有 100 個指令，還有檔案管理、VS Code、系統設定和 Codex。每一步都由學生親手輸入，像以前學寫程式一樣練成肌肉記憶；任務卡逐步檢查，什麼都不會存下來，錯了就重來。<br><sub>模擬式學習・刻意練習・即時回饋</sub>
+- **教師親寫劇本、反覆審查的影片。** 每支影片的劇本都由教師撰寫，審查 7–10 輪才上線。畫面由程式逐格繪製，不用生成式影片，介面和步驟都精準。作業影片先演出常見錯誤，再示範比較好的做法；抱書的狐狸「小安」串起每一週的故事。<br><sub>微學習・範例學習・從錯誤中學習</sub>
+- **有故事、有成品的作業。** 從佛羅倫斯美術館資料、東京銀杏散步地圖、成績分析報告，到方塊世界風格的 3D 空中之島，再到分組專題；每份作業都是一件能運作的成品，推上 GitHub（見下方作業表）。<br><sub>真實性評量・專題導向學習</sub>
+- **像軟體團隊一樣分組協作。** 三人一組改同一個專案：開分支、發 pull request，由 AI 代理處理 git 並先審每個 PR，bug 寫成 GitHub Issue。Week 9 的期中密室逃脫，每人負責一個角色：劇情與謎題、機關與網頁、測試與整合。<br><sub>合作學習・真實工作流程</sub>
+- **像遊戲一樣的考試。** Week 6 小安從破裂的時空發出求救，回去的路只有一台遠端電腦：沒有提示的關卡，內容對應前幾週的實作，最後在時空隧道裡回答 10 題。聲音和畫面都為沉浸感設計，同時避免讓人頭暈的動態。<br><sub>情境式評量・遊戲式學習</sub>
+- **AI 時代的工程習慣。** 學生寫 `VERIFY.md`，定義怎樣才算完成；AI 代理寫 `PLANS.md`，規劃怎麼做到；再用 `TESTS.md`、突變測試和 user story 檢查成果。學生學會指揮、檢查並修正 AI，而不是照單全收。<br><sub>人機協作（human-in-the-loop）・測試驅動開發</sub>
+
+### 作業
+
+| 週 | 作業 | 學生做出什麼 | 練到什麼 |
+|---|---|---|---|
+| Week 3 | [佛羅倫斯美術館](https://ai-agent-literacy.pages.dev/weeks/week03/#03-homework-firenze) | 只用 Codex 收集佛羅倫斯各美術館的開放時間與票價 | 把事情交代清楚、`AGENTS.md`、檢查存下來的檔案 |
+| Week 4 | [東京銀杏散步地圖](https://ai-agent-literacy.pages.dev/weeks/week04/#03-homework-ginkgo) | 從官方資料整理出的銀杏散步地圖網站，發布在 GitHub | 判斷資料來源、內建瀏覽器、GitHub |
+| Week 5 | [成績分析小報告](https://ai-agent-literacy.pages.dev/weeks/week05/#03-homework-grades) | 兩個班的成績分析報告，藏了三個陷阱 | `VERIFY.md`、資料檢查、學生隱私 |
+| Week 7 | [空中之島](https://ai-agent-literacy.pages.dev/weeks/week07/#03-homework-island) | 先規劃、再動手做的方塊世界風格 3D 浮空島 | `PLANS.md`、TDD、Git |
+| Week 9 | 期中：時空密室（即將推出） | 分組完成的密室逃脫網頁遊戲 | 分工、測試、整合 |
+| 期末 | 自己的專案（即將推出） | 自己選題的專案 | 綜合以上 |
+
+第一屆的 29 份銀杏地圖網站都收在[作品集](https://ai-agent-literacy.pages.dev/works/)。
 
 ### 影片
 
@@ -213,9 +240,9 @@ Thanks to the students taking the course.
 
 ### 怎麼做的
 
-- **分工**：教師提供教材、決定方向，每一輪都審核。網站和影片的開發由 Codex 與 Claude 協力完成。
+- **分工**：教師撰寫劇本、提供教材，每一輪都審核並決定是否上線；網站和影片由 Codex 與 Claude 協力開發。
 - **用程式做影片**：每一格畫面都是 HTML、CSS、JavaScript 寫成的網頁，用 HyperFrames、GSAP、Playwright、FFmpeg 逐格渲染成影片；配樂和音效也用程式合成。沒有用影片生成模型。製作流程主要參考 opus-video skill，再依課程需求做了個人化修改。
-- **品質審查**：每一版都看縮圖總表（包括手機寬度），依開場、手機可讀、動作自然、畫面變化、構圖、音畫同步、貼合原始教材七項評分。接著由 Codex 與 Claude 互相審查，教師最後確認才上線。教師指出的問題，會寫成之後每支影片都要遵守的規則。
+- **品質審查**：每一版都看縮圖總表（包括手機寬度），依開場、手機可讀、動作自然、畫面變化、構圖、音畫同步、貼合原始教材七項評分。接著由 Codex 與 Claude 互相審查，教師最後確認才上線。教師指出的問題，會寫成之後每支影片都要遵守的規則；學生回報的問題會盡快修正，常常當天就上線。
 - **網站**：純靜態網站，放在 Cloudflare Pages；影片用 HLS（hls.js）從另一個 Cloudflare 影片站播放。
 
 詳細流程和學到的經驗在 [docs/about.md](docs/about.md)。
@@ -234,7 +261,7 @@ python -m http.server 8000
 
 ### 接下來
 
-- [ ] Week 9–16 依課程進度上線
+- [ ] Week 9–16 依課程進度上線，包括期中密室逃脫和期末專題
 - [x] Week 1、3–8 全英文版（2026 年 10 月）：每支影片的畫面和字卡、練習電腦、Week 6 考試；英文瀏覽器自動切換
 - [ ] 其他週次的英文版
 - [ ] Claude 版影片：同樣的內容，改用 Claude（Claude Code）示範（目前示範的工具是 Codex）
@@ -265,25 +292,38 @@ python -m http.server 8000
 
 **课程网站**：[ai-agent-literacy.pages.dev](https://ai-agent-literacy.pages.dev/?lang=zh-Hans)
 
-**AI 示范教学的实例。** AI Agent Literacy（AI 智能体素养）是一门开放课程，教学生和 AI 编程助手（例如 OpenAI 的 Codex）一起工作，而课程本身的教材也是这样做出来的：教学视频、课程网站和练习环境由 AI 智能体（Codex 与 Claude）开发，授课教师设计课程、提供教材，并审核每一个视频。学生除了学到怎么用 AI，也能从教材本身看到一件完整的作品如何与 AI 合作完成。所有内容都以开放许可公开，是一门开放课程。
+**每周真正动手，和 AI 智能体一起做出作品。** AI Agent Literacy（AI 智能体素养）教学生指挥 AI 编程助手（例如 OpenAI 的 Codex）完成实际的工作，并检查、修正它的成果，而不是照单全收。每个视频的脚本都由授课教师撰写，经过 7–10 轮审查才上线；视频、网站和练习电脑由 AI 智能体（Codex 与 Claude）制作，所以课程本身也示范了“由人主导、与 AI 合作”的完整过程。所有内容以开放许可公开。
 
 <table>
 <tr><td><b>首个示范场域</b></td><td>台湾师范大学（2026），课程“学习分析工具”（Learning Analytics Tools Implementation Applications）</td></tr>
-<tr><td><b>形式</b></td><td>每周微学习视频（1–5 分钟），附章节和要点；浏览器里的练习电脑；情境式考试</td></tr>
+<tr><td><b>形式</b></td><td>每周微学习视频（1–5 分钟，一个视频一个概念），附章节、编号要点和时间链接；浏览器里的练习电脑；项目式作业；情境式考试</td></tr>
 <tr><td><b>已公开</b></td><td>Week 1–8：36 个视频，约 105 分钟（2026 年 10 月），每周更新</td></tr>
 <tr><td><b>语言</b></td><td>网站有英文、繁体中文、简体中文、越南文，按浏览器语言自动选择。Week 1、3–8 另有完整英文版：每个视频、练习电脑、Week 6 考试；其他视频画面是繁体中文</td></tr>
+<tr><td><b>无障碍与隐私</b></td><td>Mac 与 Windows 同样支持；深浅色主题、屏幕阅读器标签、减少动态效果。无需登录、不用 cookie、不追踪个人，观看进度只保存在学生自己的浏览器</td></tr>
 <tr><td><b>许可</b></td><td>代码 <a href="LICENSE">MIT</a>；视频与教材 <a href="LICENSE-CONTENT.md">CC BY-NC-SA 4.0</a></td></tr>
 </table>
 
-### 教学设计
+### 课程特色
 
-- **微学习与自主复习**：一个视频只讲一个概念，1–5 分钟，分成章节并附编号要点。教师可以用时间链接（`#t=30`）把学生带到要复习的那一刻。
-- **样例学习与常见错误**：作业视频先演示常见的错误，例如把整份题目贴给 AI、相信 AI 很有把握算出的错误平均值，再一步步走过更好的做法。
-- **基于模拟的练习**：在浏览器里运行的模拟 Mac／Windows，是一个虚拟实验室。任务卡逐步引导，每一步都即时反馈；什么都不会保存，学生可以放心犯错、随时重来。
-- **情境式评价**：Week 6 的考试把学生放进一段故事，连接到一台远程电脑。没有提示，学生要一关一关完成任务，内容对应前几周的实践：用终端在文件夹之间移动、为 AI 智能体写 `AGENTS.md` 和 `VERIFY.md`，最后是一段问答。
-- **真实性评价与项目式作业**：每份作业都是一件真实的成品，推送到 GitHub：美术馆数据收集、散步地图网站、成绩报告、一个小游戏。
-- **人在回路（human-in-the-loop）的习惯**：验证清单、测试驱动开发、规划文档（`PLANS.md`、`TESTS.md`）和版本管理，让学生学会指挥、检查并修正 AI，而不是全盘接受。这就是课程想培养的 AI 素养。
-- **默认兼顾无障碍与隐私**：四种界面语言、深浅色主题、屏幕阅读器标注、减少动态效果。不用登录、不用 cookie，也不追踪个人；观看进度只保存在学生自己的浏览器。
+- **像真的一样的练习电脑。** 每周最后都在浏览器里的模拟 Mac 或 Windows 上练习，外观对照真实电脑的截图校正：终端约有 100 个命令，还有文件管理、VS Code、系统设置和 Codex。每一步都由学生亲手输入，像以前学编程一样练成肌肉记忆；任务卡逐步检查，什么都不会保存，错了就重来。<br><sub>基于模拟的学习・刻意练习・即时反馈</sub>
+- **教师亲写脚本、反复审查的视频。** 每个视频的脚本都由教师撰写，审查 7–10 轮才上线。画面由代码逐帧绘制，不用生成式视频，界面和步骤都很精确。作业视频先演出常见错误，再示范更好的做法；抱书的狐狸“小安”串起每一周的故事。<br><sub>微学习・样例学习・从错误中学习</sub>
+- **有故事、有成品的作业。** 从佛罗伦萨美术馆数据、东京银杏散步地图、成绩分析报告，到方块世界风格的 3D 空中之岛，再到分组项目；每份作业都是一件能运行的成品，推送到 GitHub（见下方作业表）。<br><sub>真实性评价・项目式学习</sub>
+- **像软件团队一样分组协作。** 三人一组改同一个项目：开分支、提 pull request，由 AI 智能体处理 git 并先审每个 PR，bug 写成 GitHub Issue。Week 9 的期中密室逃脱，每人负责一个角色：剧情与谜题、机关与网页、测试与整合。<br><sub>合作学习・真实工作流程</sub>
+- **像游戏一样的考试。** Week 6 小安从破裂的时空发出求救，回去的路只有一台远程电脑：没有提示的关卡，内容对应前几周的实践，最后在时空隧道里回答 10 道题。声音和画面都为沉浸感设计，同时避免让人头晕的动态。<br><sub>情境式评价・游戏化学习</sub>
+- **AI 时代的工程习惯。** 学生写 `VERIFY.md`，定义怎样才算完成；AI 智能体写 `PLANS.md`，规划怎么做到；再用 `TESTS.md`、突变测试和 user story 检查成果。学生学会指挥、检查并修正 AI，而不是照单全收。<br><sub>人机协同（human-in-the-loop）・测试驱动开发</sub>
+
+### 作业
+
+| 周 | 作业 | 学生做出什么 | 练到什么 |
+|---|---|---|---|
+| Week 3 | [佛罗伦萨美术馆](https://ai-agent-literacy.pages.dev/weeks/week03/?lang=zh-Hans#03-homework-firenze) | 只用 Codex 收集佛罗伦萨各美术馆的开放时间与票价 | 把事情交代清楚、`AGENTS.md`、检查保存下来的文件 |
+| Week 4 | [东京银杏散步地图](https://ai-agent-literacy.pages.dev/weeks/week04/?lang=zh-Hans#03-homework-ginkgo) | 根据官方资料整理的银杏散步地图网站，发布在 GitHub | 判断资料来源、内置浏览器、GitHub |
+| Week 5 | [成绩分析小报告](https://ai-agent-literacy.pages.dev/weeks/week05/?lang=zh-Hans#03-homework-grades) | 两个班的成绩分析报告，藏了三个陷阱 | `VERIFY.md`、数据检查、学生隐私 |
+| Week 7 | [空中之岛](https://ai-agent-literacy.pages.dev/weeks/week07/?lang=zh-Hans#03-homework-island) | 先规划、再动手做的方块世界风格 3D 浮空岛 | `PLANS.md`、TDD、Git |
+| Week 9 | 期中：时空密室（即将推出） | 分组完成的密室逃脱网页游戏 | 分工、测试、整合 |
+| 期末 | 自己的项目（即将推出） | 自己选题的项目 | 综合以上 |
+
+第一届的 29 个银杏地图网站都收录在[作品集](https://ai-agent-literacy.pages.dev/works/?lang=zh-Hans)。
 
 ### 视频
 
@@ -324,9 +364,9 @@ python -m http.server 8000
 
 ### 怎么做的
 
-- **分工**：教师提供教材、决定方向，每一轮都审核。网站和视频的开发由 Codex 与 Claude 协作完成。
+- **分工**：教师撰写脚本、提供教材，每一轮都审核并决定是否上线；网站和视频由 Codex 与 Claude 协作开发。
 - **用代码做视频**：每一帧画面都是 HTML、CSS、JavaScript 写成的网页，用 HyperFrames、GSAP、Playwright、FFmpeg 逐帧渲染成视频；配乐和音效也用代码合成。没有使用视频生成模型。制作流程主要参考 opus-video skill，再根据课程需求做了个性化修改。
-- **质量审查**：每一版都看缩略图总表（包括手机宽度），按开场、手机可读、动作自然、画面变化、构图、音画同步、贴合原始教材七项评分。然后由 Codex 与 Claude 互相审查，教师最后确认才上线。教师指出的问题，会写成之后每个视频都要遵守的规则。
+- **质量审查**：每一版都看缩略图总表（包括手机宽度），按开场、手机可读、动作自然、画面变化、构图、音画同步、贴合原始教材七项评分。然后由 Codex 与 Claude 互相审查，教师最后确认才上线。教师指出的问题，会写成之后每个视频都要遵守的规则；学生反馈的问题会尽快修正，常常当天就上线。
 - **网站**：纯静态网站，部署在 Cloudflare Pages；视频以 HLS（hls.js）从另一个 Cloudflare 视频站播放。
 
 完整说明见 [docs/about.md](docs/about.md)（繁体中文、英文）。
@@ -345,7 +385,7 @@ python -m http.server 8000
 
 ### 接下来
 
-- [ ] Week 9–16 按课程进度上线
+- [ ] Week 9–16 按课程进度上线，包括期中密室逃脱和期末项目
 - [x] Week 1、3–8 全英文版（2026 年 10 月）：每个视频的画面和字卡、练习电脑、Week 6 考试；英文浏览器自动切换
 - [ ] 其他周次的英文版
 - [ ] Claude 版视频：同样的内容，改用 Claude（Claude Code）演示（目前演示的工具是 Codex）
@@ -376,25 +416,38 @@ python -m http.server 8000
 
 **コースサイト**：[ai-agent-literacy.pages.dev](https://ai-agent-literacy.pages.dev/)
 
-**AI デモンストレーション教育の実践例。** AI Agent Literacy（AI エージェント・リテラシー）は、OpenAI の Codex などの AI コーディングエージェントと協働する方法を教えるオープンコースです。授業の教材そのものも同じ方法で作られています。教育動画・コースサイト・練習環境は AI エージェント（Codex と Claude）が開発し、担当教員がカリキュラムを設計して教材を用意し、すべての動画をレビューしました。学生は AI の使い方を学ぶと同時に、教材そのものを通して、AI と協働してひとつの作品を完成させる過程を見ることができます。すべてオープンライセンスで公開しているオープンコースです。
+**毎週、実際に手を動かして AI エージェントと作品を作る授業です。** AI Agent Literacy（AI エージェント・リテラシー）は、OpenAI の Codex などの AI コーディングエージェントに指示を出し、その成果をうのみにせず確かめて直す力を育てるオープンコースです。動画の脚本はすべて担当教員が書き、各動画は 7〜10 回のレビューを経て公開しています。動画・コースサイト・練習用コンピューターは AI エージェント（Codex と Claude）が制作しているため、授業そのものが「人が主導して AI と協働する」実例になっています。すべてオープンライセンスで公開しています。
 
 <table>
 <tr><td><b>最初の実践の場</b></td><td>国立台湾師範大学（2026 年）、授業「学習分析ツール」（Learning Analytics Tools Implementation Applications）</td></tr>
-<tr><td><b>形式</b></td><td>毎週のマイクロラーニング動画（1〜5 分、チャプターと要点つき）、ブラウザ上の練習用コンピューター、シナリオ型の試験</td></tr>
+<tr><td><b>形式</b></td><td>毎週のマイクロラーニング動画（1〜5 分、1 本にひとつの概念、チャプター・番号つき要点・タイムリンクつき）、ブラウザ上の練習用コンピューター、プロジェクト型の課題、シナリオ型の試験</td></tr>
 <tr><td><b>公開済み</b></td><td>Week 1〜8：動画 36 本、約 105 分（2026 年 10 月時点）、毎週更新</td></tr>
 <tr><td><b>言語</b></td><td>サイトは英語・繁体字中国語・簡体字中国語・ベトナム語（日本語は未対応）で、ブラウザの言語で自動選択。Week 1・3〜8 は動画・練習用コンピュータ・Week 6 の試験まで完全な英語版あり。その他の動画内の文字は繁体字中国語</td></tr>
+<tr><td><b>アクセシビリティとプライバシー</b></td><td>Mac と Windows の両方に同じように対応。ライト／ダークテーマ、スクリーンリーダー用ラベル、動きを減らす設定。ログイン不要、Cookie なし、個人の追跡なし。視聴の進み具合は学生自身のブラウザにだけ保存</td></tr>
 <tr><td><b>ライセンス</b></td><td>コード <a href="LICENSE">MIT</a>、動画と教材 <a href="LICENSE-CONTENT.md">CC BY-NC-SA 4.0</a></td></tr>
 </table>
 
-### 教育デザイン
+### 特長
 
-- **マイクロラーニングと自己ペースの復習**：1 本の動画で扱うのはひとつの概念だけ。1〜5 分で、チャプターと番号つきの要点に分けています。教員はタイムリンク（`#t=30`）で、学生に見直してほしい場面へ直接案内できます。
-- **例題学習とよくある間違い**：課題の動画では、まず課題文をまるごと AI に貼りつける、AI が自信ありげに出した誤った平均値を信じる、といったよくある間違いを見せてから、よりよい進め方を順を追って示します。
-- **シミュレーション型の練習**：ブラウザ上で動く Mac／Windows のシミュレーターがバーチャルラボになっています。課題カードが一歩ずつ案内し、各ステップにすぐフィードバックが返ります。何も保存されないので、安心して失敗し、いつでもやり直せます。
-- **シナリオ型評価**：Week 6 の試験では、学生はストーリーの中でリモートのコンピューターに接続します。ヒントなしで、それまでの週の実践に対応したレベルをひとつずつクリアします（ターミナルでのフォルダ移動、AI エージェントのための `AGENTS.md` と `VERIFY.md` の作成、最後のクイズ）。
-- **真正の評価とプロジェクト型の課題**：どの課題も、GitHub に push する実際の成果物で終わります（美術館のデータ収集、散歩マップのサイト、成績レポート、小さなゲーム）。
-- **ヒューマン・イン・ザ・ループの習慣**：検証チェックリスト、テスト駆動開発、計画文書（`PLANS.md`、`TESTS.md`）、バージョン管理を通して、AI の出力をそのまま受け入れるのではなく、指示し、確認し、修正する力を育てます。これがこの授業の目指す AI リテラシーです。
-- **アクセシビリティとプライバシーを標準で**：4 つの表示言語、ライト／ダークテーマ、スクリーンリーダー向けのラベル、動きを減らす設定への対応。ログインも cookie も不要で、個人の追跡もしません。視聴の進み具合は学生自身のブラウザにだけ保存されます。
+- **本物そっくりの練習用コンピューター**：毎週の最後に、ブラウザ上の Mac または Windows のシミュレーターで練習します。外観は実機のスクリーンショットと照らし合わせて調整し、約 100 のコマンドが使えるターミナル、ファイル管理、VS Code、システム設定、Codex まで備えています。プログラミングを学ぶときと同じく、すべての操作を自分の手で入力して体で覚えます。課題カードが一歩ずつ確認し、何も保存されないので、失敗してもやり直せます。<br><sub>シミュレーション型学習・意図的練習・即時フィードバック</sub>
+- **教員が脚本を書き、納得いくまでレビューする動画**：すべての動画の脚本を教員が書き、7〜10 回のレビューを経て公開します。画面は生成 AI ではなくコードで 1 フレームずつ描くため、操作画面と手順は正確です。課題の動画ではまずよくある間違いを演じてから、よりよい進め方を示します。本を抱えたキツネの「小安（シャオアン）」が毎週の物語をつなぎます。<br><sub>マイクロラーニング・例題学習・誤りから学ぶ</sub>
+- **ストーリーがあり、完成品で終わる課題**：フィレンツェの美術館データ、東京のイチョウ散歩マップ、成績レポート、ブロックの世界風の 3D の空中の島へと進み、そのあとはチームのプロジェクトに移ります。どの課題も動く成果物として GitHub に push して終わります（下の課題一覧を参照）。<br><sub>真正の評価・プロジェクト型学習</sub>
+- **ソフトウェアチームと同じ協働**：3 人 1 組で、ひとつのプロジェクトをブランチと pull request で進めます。git の操作と各 PR の最初のレビューは AI エージェントが担い、バグは GitHub Issue に書きます。Week 9 の脱出ゲーム型の中間課題では、ストーリーと謎、仕掛けと Web、テストと統合の役割を分担します。<br><sub>協働学習・実務のワークフロー</sub>
+- **ゲームのように進む試験**：Week 6 では、裂けた時空から小安が助けを求めてきます。戻る道はリモートのコンピューターだけ。それまでの週の実践にもとづくヒントなしのレベルを進み、最後に時空トンネルの中で 10 問に答えます。音と映像は没入感を重視して設計し、めまいを起こすような動きは避けています。<br><sub>シナリオ型評価・ゲーム型学習</sub>
+- **AI 時代のエンジニアリング習慣**：学生が `VERIFY.md` で「何をもって完成とするか」を決め、エージェントが `PLANS.md` で進め方を計画し、`TESTS.md`・ミューテーションテスト・user story で結果を確かめます。AI の出力をそのまま受け入れず、指示し、確認し、修正する力を育てます。<br><sub>ヒューマン・イン・ザ・ループ・テスト駆動開発</sub>
+
+### 課題
+
+| 週 | 課題 | 学生が作るもの | 身につくこと |
+|---|---|---|---|
+| Week 3 | [フィレンツェの美術館](https://ai-agent-literacy.pages.dev/weeks/week03/#03-homework-firenze) | Codex だけを使って集めた、フィレンツェの美術館の開館時間と料金 | 明確な指示、`AGENTS.md`、保存したファイルの確認 |
+| Week 4 | [東京のイチョウ散歩](https://ai-agent-literacy.pages.dev/weeks/week04/#03-homework-ginkgo) | 公式の情報源から作るイチョウ散歩マップのサイト（GitHub で公開） | 情報源の見極め、内蔵ブラウザ、GitHub |
+| Week 5 | [成績レポート](https://ai-agent-literacy.pages.dev/weeks/week05/#03-homework-grades) | 2 クラスの成績を分析した短いレポート（3 つの落とし穴入り） | `VERIFY.md`、データの確認、学生のプライバシー |
+| Week 7 | [空中の島](https://ai-agent-literacy.pages.dev/weeks/week07/#03-homework-island) | 計画してから作る、ブロックの世界風の 3D の浮遊島 | `PLANS.md`、TDD、Git |
+| Week 9 | 中間：時空の脱出ゲーム（準備中） | チームで作る脱出ゲームの Web サイト | 役割分担、テスト、統合 |
+| 期末 | 自分のプロジェクト（準備中） | 自分で選んだテーマのプロジェクト | ここまでのすべて |
+
+最初の受講生による散歩マップのサイト 29 件は[作品集](https://ai-agent-literacy.pages.dev/works/)で見られます。
 
 ### 動画
 
@@ -435,9 +488,9 @@ python -m http.server 8000
 
 ### 作り方
 
-- **役割分担**：教員が教材を用意して方向を決め、毎回レビューします。サイトと動画の開発は Codex と Claude が協力して行います。
+- **役割分担**：教員が脚本を書いて教材を用意し、毎回レビューして公開を判断します。サイトと動画の開発は Codex と Claude が協力して行います。
 - **コードで作る動画**：すべてのフレームは HTML・CSS・JavaScript で書いた Web ページで、HyperFrames・GSAP・Playwright・FFmpeg で 1 フレームずつレンダリングしています。BGM と効果音もコードで合成しており、動画生成モデルは使っていません。制作フローは主に opus-video skill を参考にし、授業に合わせて独自に手を加えています。
-- **品質レビュー**：各版をサムネイル一覧（スマートフォン幅を含む）で確認し、冒頭のつかみ、スマートフォンでの読みやすさ、動きの自然さ、画面の変化、構図、音と映像の同期、元の教材への忠実さの 7 項目で採点します。そのうえで Codex と Claude が互いにレビューし、最後に教員が確認してから公開します。教員が指摘した問題は、以降すべての動画で守るルールにしています。
+- **品質レビュー**：各版をサムネイル一覧（スマートフォン幅を含む）で確認し、冒頭のつかみ、スマートフォンでの読みやすさ、動きの自然さ、画面の変化、構図、音と映像の同期、元の教材への忠実さの 7 項目で採点します。そのうえで Codex と Claude が互いにレビューし、最後に教員が確認してから公開します。教員が指摘した問題は、以降すべての動画で守るルールにしています。学生からの報告にはすばやく対応し、その日のうちに直すことも少なくありません。
 - **配信**：Cloudflare Pages 上の静的サイトで、動画は別の Cloudflare メディアサイトから HLS（hls.js）で配信しています。
 
 詳しい制作フローは [docs/about.md](docs/about.md)（繁体字中国語・英語）にあります。
@@ -456,7 +509,7 @@ python -m http.server 8000
 
 ### 今後の予定
 
-- [ ] Week 9〜16 を授業の進行に合わせて公開
+- [ ] Week 9〜16 を授業の進行に合わせて公開（脱出ゲーム型の中間課題と期末プロジェクトを含む）
 - [x] Week 1・3〜8 の完全英語版（2026 年 10 月）：全動画の画面とテロップ、練習用コンピュータ、Week 6 の試験。英語のブラウザでは自動で切り替え
 - [ ] ほかの週の英語版
 - [ ] 動画の Claude 版：同じ内容を Codex ではなく Claude（Claude Code）で実演
