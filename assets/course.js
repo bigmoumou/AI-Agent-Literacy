@@ -60,6 +60,8 @@
       href: "weeks/week02/",
       thumb: "weeks/week02/video/01-clear-ask/thumb.jpg",
       still: "weeks/week02/video/01-clear-ask/poster.jpg",
+      thumbEn: "weeks/week02/video/01-clear-ask/thumb-en.jpg",
+      stillEn: "weeks/week02/video/01-clear-ask/poster-en.jpg",
       meta: "2 支影片＋3 支補充・共 9 分 24 秒",
       i18n: {
         "zh-Hans": {

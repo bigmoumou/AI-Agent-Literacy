@@ -67,7 +67,7 @@
 
       <div class="film">
         <div class="player">
-          <video controls preload="metadata" playsinline data-hls="video/01-clear-ask/hls/index.m3u8" data-poster="video/01-clear-ask/poster.jpg" width="1920" height="1080" data-ui="video.unsupported">
+          <video controls preload="metadata" playsinline data-hls="video/01-clear-ask/hls/index.m3u8" data-poster="video/01-clear-ask/poster.jpg" data-hls-en="video/01-clear-ask/en/hls/index.m3u8" data-poster-en="video/01-clear-ask/poster-en.jpg" width="1920" height="1080" data-ui="video.unsupported">
             你的瀏覽器無法播放這支影片。
           </video>
         </div>
@@ -91,7 +91,7 @@
       <ol class="points">
         <li><p data-i18n
           data-zh-hans="&lt;strong&gt;一句话，它只能用猜的。&lt;/strong&gt;小安要准备考试，跟 Codex 说“帮我整理笔记”。“整理”是什么意思，它不知道，只能自己猜：把文件搬进 &lt;code&gt;整理/&lt;/code&gt;、改了标题和格式，连期末报告草稿都一起改了。它读的文件里还有期末报告草稿：我们甚至不能肯定，资料整理的来源是否正确。小安要的，其实是一份考前复习重点。"
-          data-en="&lt;strong&gt;With one sentence, it can only guess.&lt;/strong&gt; Preparing for an exam, Xiao An tells Codex “Organise my notes.” What does “organise” mean? It does not know, so it guesses: it moves the files into &lt;code&gt;整理/&lt;/code&gt;, rewrites their headings and format, and even changes the final report draft. It also read the final report draft, so we cannot even be sure the sources behind its notes are right. What Xiao An actually wanted was one set of revision notes for the exam."
+          data-en="&lt;strong&gt;With one sentence, it can only guess.&lt;/strong&gt; Preparing for an exam, Xiao An tells Codex “Organize my notes.” What does “organize” mean? It does not know, so it guesses: it moves the files into &lt;code&gt;organized/&lt;/code&gt;, rewrites their headings and format, and even changes the final report draft. It also read the final report draft, so we cannot even be sure the sources behind its notes are right. What Xiao An actually wanted was one set of revision notes for the exam."
           data-vi="&lt;strong&gt;Chỉ một câu, nó đành phải đoán.&lt;/strong&gt; Tiểu An chuẩn bị thi, nói với Codex “Sắp xếp ghi chú giúp mình”. “Sắp xếp” nghĩa là gì, nó không biết, nên tự đoán: chuyển các tệp vào &lt;code&gt;整理/&lt;/code&gt;, sửa tiêu đề và định dạng, sửa luôn cả bản nháp báo cáo cuối kỳ. Nó còn đọc cả bản nháp báo cáo cuối kỳ, nên ta thậm chí không chắc nguồn dữ liệu nó dùng để tổng hợp có đúng không. Thứ Tiểu An thật sự cần là một bản tóm tắt ôn thi."><strong>一句話，它只能用猜的。</strong>小安要準備考試，跟 Codex 說「幫我整理筆記」。「整理」是什麼意思，它不知道，只能自己猜：把檔案搬進 <code>整理/</code>、改了標題和格式，連期末報告草稿都一起改了。它讀的檔案裡還有期末報告草稿：我們甚至不能肯定，資料整理的來源是否正確。小安要的，其實是一份考前複習重點。</p></li>
         <li><p data-i18n
           data-zh-hans="&lt;strong&gt;交代清楚四件事。&lt;/strong&gt;目标（要做出什么）、资料来源（用哪些资料、在哪里）、界线（什么不能碰）、怎样算做好（你等一下怎么验收）。就像请朋友帮你买午餐：一个排骨便当、去校门口那家买、不要辣、12:10 前放我桌上。交代 Codex 也是同样的四件事。"
@@ -99,7 +99,7 @@
           data-vi="&lt;strong&gt;Nói rõ bốn điều.&lt;/strong&gt; Mục tiêu (làm ra cái gì), nguồn dữ liệu (dùng dữ liệu nào, ở đâu), giới hạn (cái gì không được đụng) và thế nào là xong (lát nữa bạn nghiệm thu thế nào). Giống như nhờ bạn mua cơm trưa: một hộp cơm sườn, mua ở quán cổng trường, đừng cay, đặt lên bàn mình trước 12:10. Dặn Codex cũng là bốn điều đó."><strong>交代清楚四件事。</strong>目標（要做出什麼）、資料來源（用哪些資料、在哪裡）、界線（什麼不能碰）、怎樣算做好（你等一下怎麼驗收）。就像請朋友幫你買午餐：一個排骨便當、去校門口那家買、不要辣、12:10 前放我桌上。交代 Codex 也是同樣的四件事。</p></li>
         <li><p data-i18n
           data-zh-hans="&lt;strong&gt;一段话，它照你的意思做。&lt;/strong&gt;四件事一件一行：“帮我做一份考前复习重点，存成 複習重點.md。只用 week1.md 和 week2.md。不要改、不要搬原本的文件。每周 5 点以内、每点一行，最后列出我可能还不懂的地方。”这次它不用猜：只多了一个文件（&lt;code&gt;複習重點.md&lt;/code&gt; +19），原本的都没动。"
-          data-en="&lt;strong&gt;With one paragraph, it does what you meant.&lt;/strong&gt; One line per thing: “Make me a set of revision notes for the exam and save it as 複習重點.md. Use only week1.md and week2.md. Do not change or move the original files. At most 5 points per week, one line each, and finish with a list of what I may still not understand.” This time it does not have to guess: there is only one new file (&lt;code&gt;複習重點.md&lt;/code&gt; +19) and the originals are untouched."
+          data-en="&lt;strong&gt;With one paragraph, it does what you meant.&lt;/strong&gt; One line per thing: “Make me a set of review notes for the exam and save it as review-notes.md. Use only week1.md and week2.md. Do not change or move the original files. At most 5 points per week, one line each, and finish with a list of what I may still not understand.” This time it does not have to guess: there is only one new file (&lt;code&gt;review-notes.md&lt;/code&gt; +19) and the originals are untouched."
           data-vi="&lt;strong&gt;Một đoạn, nó làm đúng ý bạn.&lt;/strong&gt; Mỗi điều một dòng: “Làm giúp mình bản tóm tắt ôn thi, lưu thành 複習重點.md. Chỉ dùng week1.md và week2.md. Đừng sửa, đừng chuyển các tệp gốc. Mỗi tuần tối đa 5 ý, mỗi ý một dòng, cuối cùng liệt kê những chỗ mình có thể chưa hiểu.” Lần này nó không phải đoán: chỉ thêm một tệp (&lt;code&gt;複習重點.md&lt;/code&gt; +19), các tệp gốc không bị đụng tới."><strong>一段話，它照你的意思做。</strong>四件事一件一行：「幫我做一份考前複習重點，存成 複習重點.md。只用 week1.md 和 week2.md。不要改、不要搬原本的檔案。每週 5 點以內、每點一行，最後列出我可能還不懂的地方。」這次它不用猜：只多了一個檔案（<code>複習重點.md</code> +19），原本的都沒動。</p></li>
         <li><p data-i18n
           data-zh-hans="&lt;strong&gt;怎样算做好，由你决定。&lt;/strong&gt;界线和怎样算做好，就是你的验收清单：看改了哪些文件（原本的没动）、数一数每周几点、找到“我可能还不懂的”那一段。说清楚了，验收就有标准。"
@@ -120,7 +120,7 @@
 
       <div class="film">
         <div class="player">
-          <video controls preload="metadata" playsinline data-hls="video/02-approval/hls/index.m3u8" data-poster="video/02-approval/poster.jpg" width="1920" height="1080" data-ui="video.unsupported">
+          <video controls preload="metadata" playsinline data-hls="video/02-approval/hls/index.m3u8" data-poster="video/02-approval/poster.jpg" data-hls-en="video/02-approval/en/hls/index.m3u8" data-poster-en="video/02-approval/poster-en.jpg" width="1920" height="1080" data-ui="video.unsupported">
             你的瀏覽器無法播放這支影片。
           </video>
         </div>
@@ -169,7 +169,7 @@
 
       <div class="film">
         <div class="player">
-          <video controls preload="metadata" playsinline data-hls="video/s1-vscode-md/hls/index.m3u8" data-poster="video/s1-vscode-md/poster.jpg" width="1920" height="1080" data-ui="video.unsupported">
+          <video controls preload="metadata" playsinline data-hls="video/s1-vscode-md/hls/index.m3u8" data-poster="video/s1-vscode-md/poster.jpg" data-hls-en="video/s1-vscode-md/en/hls/index.m3u8" data-poster-en="video/s1-vscode-md/poster-en.jpg" width="1920" height="1080" data-ui="video.unsupported">
             你的瀏覽器無法播放這支影片。
           </video>
         </div>
@@ -192,7 +192,7 @@
       <ol class="points">
         <li><p data-i18n
           data-zh-hans="&lt;strong&gt;VS Code 是看文件、改文件的地方。&lt;/strong&gt;不是写程序才用。左边 EXPLORER 是文件夹里的文件，点一下就打开；Codex 和 VS Code 看的是同一个文件夹，视频 01 Codex 写的 &lt;code&gt;複習重點.md&lt;/code&gt; 在这里就看得到。"
-          data-en="&lt;strong&gt;VS Code is where you read and edit files.&lt;/strong&gt; It is not only for writing code. The EXPLORER on the left lists the files in the folder, and one click opens a file; Codex and VS Code look at the same folder, so the &lt;code&gt;複習重點.md&lt;/code&gt; that Codex wrote in video 01 shows up here."
+          data-en="&lt;strong&gt;VS Code is where you read and edit files.&lt;/strong&gt; It is not only for writing code. The EXPLORER on the left lists the files in the folder, and one click opens a file; Codex and VS Code look at the same folder, so the &lt;code&gt;review-notes.md&lt;/code&gt; that Codex wrote in video 01 shows up here."
           data-vi="&lt;strong&gt;VS Code là nơi xem và sửa tệp.&lt;/strong&gt; Không phải chỉ dùng để viết code. EXPLORER bên trái là các tệp trong thư mục, bấm một lần là mở; Codex và VS Code cùng nhìn một thư mục, nên &lt;code&gt;複習重點.md&lt;/code&gt; mà Codex viết trong video 01 cũng thấy ở đây."><strong>VS Code 是看檔案、改檔案的地方。</strong>不是寫程式才用。左邊 EXPLORER 是資料夾裡的檔案，點一下就打開；Codex 和 VS Code 看的是同一個資料夾，影片 01 Codex 寫的 <code>複習重點.md</code> 在這裡就看得到。</p></li>
         <li><p data-i18n
           data-zh-hans="&lt;strong&gt;改完记得保存。&lt;/strong&gt;⌘S（Windows：Ctrl+S）。标签页上的 × 变成白点，就是还没保存；没保存的话，Codex 读到的还是旧的。"
@@ -217,7 +217,7 @@
 
       <div class="film">
         <div class="player">
-          <video controls preload="metadata" playsinline data-hls="video/s2-why-wrong/hls/index.m3u8" data-poster="video/s2-why-wrong/poster.jpg" width="1920" height="1080" data-ui="video.unsupported">
+          <video controls preload="metadata" playsinline data-hls="video/s2-why-wrong/hls/index.m3u8" data-poster="video/s2-why-wrong/poster.jpg" data-hls-en="video/s2-why-wrong/en/hls/index.m3u8" data-poster-en="video/s2-why-wrong/poster-en.jpg" width="1920" height="1080" data-ui="video.unsupported">
             你的瀏覽器無法播放這支影片。
           </video>
         </div>
@@ -245,7 +245,7 @@
           data-vi="&lt;strong&gt;Nó viết tiếp từng đoạn một.&lt;/strong&gt; Mỗi bước, mô hình AI chọn đoạn “có khả năng đi tiếp nhất” (cách nói đơn giản hóa). Nó quan tâm câu có trôi chảy không, chứ không phải đã kiểm tra đúng hay sai."><strong>它一段一段接下去寫。</strong>AI 的模型每一步都挑「最可能接在後面」的那一段（簡化版的說法）。它在乎的是通不通順，不是查過對不對。</p></li>
         <li><p data-i18n
           data-zh-hans="&lt;strong&gt;token：它读、写的单位。&lt;/strong&gt;一个 token 可能是一个字、一个英文单词，或半个单词（每个模型的切法不一样）。你打的字、它读的文件、它写的回答，都是一个一个 token。"
-          data-en="&lt;strong&gt;Tokens: the units it reads and writes.&lt;/strong&gt; A token may be one Chinese character, one English word or part of a word (each model splits text differently). What you type, the files it reads and the answers it writes are all made of tokens."
+          data-en="&lt;strong&gt;Tokens: the units it reads and writes.&lt;/strong&gt; A token may be a single character, a word or part of a word (each model splits text differently). What you type, the files it reads and the answers it writes are all made of tokens."
           data-vi="&lt;strong&gt;Token: đơn vị nó đọc và viết.&lt;/strong&gt; Một token có thể là một chữ Hán, một từ tiếng Anh, hoặc nửa từ (mỗi mô hình cắt khác nhau). Chữ bạn gõ, tệp nó đọc, câu trả lời nó viết đều là từng token một."><strong>token：它讀、寫的單位。</strong>一個 token 可能是一個字、一個英文單字，或半個單字（每個模型的切法不一樣）。你打的字、它讀的檔案、它寫的回答，都是一個一個 token。</p></li>
         <li><p data-i18n
           data-zh-hans="&lt;strong&gt;知识有截止日，也会很有把握地说错。&lt;/strong&gt;模型的知识停在训练的那一天，之后才发生的事它不一定知道（例如 2026 年 7 月起，Codex 在 ChatGPT 桌面 app 里）。不知道的时候，它也可能照样很有把握地回答。请它找论文，它可能列出一篇看起来很像真的、其实查不到的。"
@@ -274,7 +274,7 @@
 
       <div class="film">
         <div class="player">
-          <video controls preload="metadata" playsinline data-hls="video/s3-show-it/hls/index.m3u8" data-poster="video/s3-show-it/poster.jpg" width="1920" height="1080" data-ui="video.unsupported">
+          <video controls preload="metadata" playsinline data-hls="video/s3-show-it/hls/index.m3u8" data-poster="video/s3-show-it/poster.jpg" data-hls-en="video/s3-show-it/en/hls/index.m3u8" data-poster-en="video/s3-show-it/poster-en.jpg" width="1920" height="1080" data-ui="video.unsupported">
             你的瀏覽器無法播放這支影片。
           </video>
         </div>
@@ -307,7 +307,7 @@
           data-vi="&lt;strong&gt;Tệp: kéo thẳng vào ô nhập.&lt;/strong&gt; Muốn nó đọc tệp nào, kéo tệp đó từ danh sách bên trái VS Code vào ô nhập của Codex, nó sẽ biết chính xác là tệp nào. Tệp ảnh cũng kéo vào được như vậy."><strong>檔案：直接拖進輸入框。</strong>要它讀某個檔案，從 VS Code 左邊的檔案清單把它拖進 Codex 的輸入框，它就知道是哪一個檔案。圖片檔也能這樣拖進去。</p></li>
         <li><p data-i18n
           data-zh-hans="&lt;strong&gt;复制路径：Codex 和 VS Code 一起开。&lt;/strong&gt;老师的习惯是 Codex 和 VS Code 同时开着：左边 VS Code 看文件，右边 Codex 交代事情。在 VS Code 左边的文件按右键，选 &lt;code&gt;Copy Relative Path&lt;/code&gt;（从项目文件夹算起的路径，例如 &lt;code&gt;資料/介紹.md&lt;/code&gt;），贴给 Codex，不用自己打、也不会打错。两个文件都叫 &lt;code&gt;介紹.md&lt;/code&gt; 时，看路径就分得出来。"
-          data-en="&lt;strong&gt;Copy the path: keep Codex and VS Code open together.&lt;/strong&gt; The teacher&#x27;s habit is to keep both open: VS Code on the left to look at files, Codex on the right to give instructions. Right-click a file on the left of VS Code and choose &lt;code&gt;Copy Relative Path&lt;/code&gt; (the path from the project folder, for example &lt;code&gt;資料/介紹.md&lt;/code&gt;), then paste it into Codex: no typing, no typos. When two files are both called &lt;code&gt;介紹.md&lt;/code&gt;, the path tells them apart."
+          data-en="&lt;strong&gt;Copy the path: keep Codex and VS Code open together.&lt;/strong&gt; The teacher&#x27;s habit is to keep both open: VS Code on the left to look at files, Codex on the right to give instructions. Right-click a file on the left of VS Code and choose &lt;code&gt;Copy Relative Path&lt;/code&gt; (the path from the project folder, for example &lt;code&gt;data/intro.md&lt;/code&gt;), then paste it into Codex: no typing, no typos. When two files are both called &lt;code&gt;intro.md&lt;/code&gt;, the path tells them apart."
           data-vi="&lt;strong&gt;Sao chép đường dẫn: mở Codex và VS Code cùng lúc.&lt;/strong&gt; Thói quen của thầy là mở cả hai: bên trái VS Code để xem tệp, bên phải Codex để giao việc. Bấm chuột phải vào tệp bên trái VS Code, chọn &lt;code&gt;Copy Relative Path&lt;/code&gt; (đường dẫn tính từ thư mục dự án, ví dụ &lt;code&gt;資料/介紹.md&lt;/code&gt;), rồi dán vào Codex: không phải tự gõ, cũng không gõ sai. Khi hai tệp đều tên &lt;code&gt;介紹.md&lt;/code&gt;, nhìn đường dẫn là phân biệt được."><strong>複製路徑：Codex 和 VS Code 一起開。</strong>老師的習慣是 Codex 和 VS Code 同時開著：左邊 VS Code 看檔案，右邊 Codex 交代事情。在 VS Code 左邊的檔案按右鍵，選 <code>Copy Relative Path</code>（從專案資料夾算起的路徑，例如 <code>資料/介紹.md</code>），貼給 Codex，不用自己打、也不會打錯。兩個檔案都叫 <code>介紹.md</code> 時，看路徑就分得出來。</p></li>
       </ol>
     </section>
