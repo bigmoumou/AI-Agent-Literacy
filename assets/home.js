@@ -479,6 +479,22 @@
     g.textAlign = "left";
   }
 
+  // Week 9 期中「時空密室」（2026-10-28 上線；網址加 ?w9=0 關掉）：那一格是暗的舞台，時空線從裡面長出來、衝出膠捲上下邊界，
+  // 帶子本身畫在 3D 裡（assets/timeline-art.js），不在這張貼圖上
+  const TL_ON = new URLSearchParams(location.search).get("w9") !== "0" && !!window.TimelineArt && !!window.CoverScenes;
+  const tlI = TL_ON ? frames.findIndex((f) => f.n === 9) : -1;
+  // 這一格是一扇窗：深藍的底、中間稍微亮一點（膠捲在 assets/timeline-art.js 畫上去）；兩行字的內容也給 timeline-art 用，它會再畫一次壓在膠捲上面
+  const tlLabels = (f) => ({ top: `WEEK ${pad(f.n)} · MIDTERM`, bottom: f.kind === "ready" ? wf(f.w, "title") : tr("home.soon"), mono: MONO, sans: SANS });
+  function drawTimeline(g, f) {
+    const { x, y, w, h } = IMG, L = tlLabels(f);
+    g.fillStyle = "#0a0e18"; g.fillRect(x, y, w, h);
+    const lift = g.createRadialGradient(x + w * 0.5, y + h * 0.45, 0, x + w * 0.5, y + h * 0.45, w * 0.62);
+    lift.addColorStop(0, "rgba(44,60,100,.38)"); lift.addColorStop(1, "rgba(44,60,100,0)");
+    g.fillStyle = lift; g.fillRect(x, y, w, h);
+    g.fillStyle = "rgba(255,255,255,.62)"; g.font = `700 19px ${MONO}`; g.fillText(L.top, x + 32, y + 52);
+    g.fillStyle = "rgba(255,255,255,.92)"; g.font = `700 34px ${SANS}`; g.fillText(L.bottom, x + 30, y + h - 34);
+  }
+
   // 考試週（Week 6 TEST）：整格就是老師的概念圖，圖和動畫在 assets/exam-art.js（Week 6 一開始的撕裂畫面也用它）
   let examArt = null;
 
@@ -497,6 +513,7 @@
       rr(sg, IMG.x, IMG.y, IMG.w, IMG.h, 10);
       sg.clip();
       if (f.kind === "leader") drawLeader(sg);
+      else if (TL_ON && f.n === 9) drawTimeline(sg, f);
       else if (f.kind === "ready") drawReady(sg, f, withImage ? img : null);
       else drawSoon(sg, f);
       sg.restore();
@@ -646,6 +663,8 @@
       studio.colors(col.fog, col.fog[0] + col.fog[1] + col.fog[2] < 1.2);
       studio.drawBack(propAlpha);
     }
+    const tlc = tl && tlVisible() ? tlCtx() : null;
+    if (tlc) tl.draw("back", tlc);   // Week 9 的時空線：在膠捲後面的那幾段先畫，會被畫格擋住
 
     // 膠捲：只畫看得到的那幾格
     gl.useProgram(frameProg.p);
@@ -675,7 +694,9 @@
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, arc.count);
     }
     gl.bindVertexArray(null);
+    if (tlc) tl.draw("front", tlc);            // Week 9 的時空線：窗口裡的膠捲、影子、兩行字
     if (studio) studio.drawFront(propAlpha);   // 膠捲前面的道具
+    if (tlc) tl.draw("top", tlc);              // Week 9 的時空線：連出去的那幾段，最上層
   }
 
   /* ======================================================================
@@ -974,6 +995,7 @@
     }
     if (e.pointerType === "mouse" && !indexOpen && !leaving) {
       mouse = { x: e.clientX, y: e.clientY };
+      if (tl) tl.pointer(e.clientX, e.clientY);
       setHover(pick(e.clientX, e.clientY), e.clientX, e.clientY);
     }
   });
@@ -993,7 +1015,7 @@
   }
   canvas.addEventListener("pointerup", (e) => endDrag(e, false));
   canvas.addEventListener("pointercancel", (e) => endDrag(e, true));
-  canvas.addEventListener("pointerleave", (e) => { if (e.pointerType === "mouse" && !drag) { mouse = null; setHover(-1); } });
+  canvas.addEventListener("pointerleave", (e) => { if (e.pointerType === "mouse" && !drag) { mouse = null; setHover(-1); if (tl) tl.pointer(null); } });
   canvas.addEventListener("webglcontextlost", (e) => { e.preventDefault(); fallback(); });
 
   /* ======================================================================
@@ -1031,6 +1053,42 @@
     const wait = introUntil - performance.now() + 250;
     if (wait > 0) setTimeout(() => idle(fn), wait); else idle(fn);
   }
+  /* Week 9 時空線（預覽）：開場轉完才建（場景圖集要畫一下），那一格在畫面上才動，最多每秒 30 次 */
+  let tl = null, tlLast = 0;
+  function setupTimeline() {
+    if (tlI < 0) return;
+    // 畫格用老師參考圖裡的插畫加上鐘塔（製作/week09/cover/make_frames_atlas.py 做的 4×4 圖集）。
+    // 網頁一出現（第一批畫格畫好、開場還沒開始轉）就建，建一次約 0.1 秒，這時候看不出卡頓；圖集還沒到就等它到了再建。
+    // 原本等開場 2.4 秒轉完才建，再慢慢長出來，要 5 秒多才看得到（2026-10-23 老師：載入很久後才出現）。
+    // 圖集在 index.html 先預載；下載失敗就用 timeline-scenes.js 程式畫的場景
+    const img = new Image();
+    let state = 0, want = false, done = false;   // state：0 下載中、1 好了、2 失敗
+    const go = () => {
+      if (done) return; done = true;
+      const fr = state === 1 ? { img, cols: 4, rows: 4, tw: 300, th: 225, pad: 6, sharp: 13, clock: 9, crop: [18, 293, 220] } : null;   // 0～8 插畫、9～12 鐘塔、13～15 城堡（糊）
+      try { tl = window.TimelineArt.create(gl, { R, TH, H, reduceMotion, scale: small ? 0.6 : 1, labels: tlLabels(frames[tlI]), frames: fr }); } catch (e) { tl = null; }
+      wake();
+    };
+    img.onload = () => { state = 1; if (want) go(); };
+    img.onerror = () => { state = 2; if (want) go(); };
+    img.src = "assets/week9-frames.webp";
+    want = true; if (state) go();
+  }
+  function tlAngle() { const a = (tlI - pos) * TH; return Math.atan2(Math.sin(a), Math.cos(a)); }
+  function tlVisible() { return Math.abs(tlAngle()) < 1.3; }
+  // 首頁的字和按鈕在螢幕上的位置（每 0.4 秒量一次）：時空線衝出去的那段碰到就壓低
+  let tlAvoid = [], tlAvoidAt = -1e9;
+  function tlRects() {
+    const t = performance.now();
+    if (t - tlAvoidAt > 400) {
+      tlAvoidAt = t;
+      tlAvoid = [".brand", ".top-actions", "#info", ".dock"].map((sel) => document.querySelector(sel)).filter(Boolean)
+        .map((el) => el.getBoundingClientRect()).filter((r) => r.width > 0 && r.height > 0)
+        .map((r) => ({ l: r.left - 8, t: r.top - 8, r: r.right + 8, b: r.bottom + 8 }));
+    }
+    return tlAvoid;
+  }
+  function tlCtx() { return { angle: tlAngle(), bend, suck, proj, cam, vw, vh, fog: col.fog, avoid: tlRects() }; }
   function examVisible() {
     let a = (examI - pos) * TH;
     a = Math.atan2(Math.sin(a), Math.cos(a));
@@ -1155,14 +1213,19 @@
       examOn = true;
       if (now - examLast > 33) { examLast = now; examStep(now); examNew = true; }
     } else if (examHeard && sound) { sound.quiet(0.5); examHeard = false; }
+    let tlOn = false, tlNew = false;
+    if (tl && !document.hidden && tlVisible() && !reduceMotion) {
+      tlOn = true;
+      if (now - tlLast > 33) { tlLast = now; tl.step(now / 1000, tlAngle()); tlNew = true; }
+    } else if (tl && reduceMotion && tlVisible()) { tl.step(now / 1000, tlAngle()); }
     // 2026-10-21 效能（老師：首頁也要優化，看不出差別）：膠捲停著、只有考試週那一格在動時，那一格本來就每秒只更新 30 次，
     // 整個畫面也就跟著它每秒畫 30 次（原本每秒畫 60 次，一半是重畫一模一樣的畫面）；其他東西一動就回到每一格都畫
     const others = pos !== target || vel !== 0 || hoverMoving || !!leaving || !!returning || now < introUntil || (studioT0 > 0 && now - studioT0 < STUDIO_FADE) ||
       !near(col.fog[0], want.fog[0]) || !near(col.alpha, want.alpha);
-    if (others || examNew || !examOn || needDraw) { draw(); needDraw = false; }
+    if (others || examNew || tlNew || (!examOn && !tlOn) || needDraw) { draw(); needDraw = false; }
     if (mouse && !drag && !leaving && Math.abs(target - pos) > 1e-3) setHover(pick(mouse.x, mouse.y), mouse.x, mouse.y);
 
-    const moving = others || examOn;
+    const moving = others || examOn || tlOn;
 
     // 太慢就降解析度（只在連續動畫時量，睡醒的第一格不算）
     if (measured && moving) {
@@ -1248,6 +1311,7 @@
         if (returning) introUntil = performance.now() + 2400 + EXAM_RETURN;   // Week 6 那一格的動畫素材等往後拉完再準備（建的時候會卡一下）
         if (!returning) loadStudio();                       // 時空回歸時，攝影棚道具等往後拉完才載入、淡入（道具跟著版面的鏡頭位置畫）
         setupExam();
+        setupTimeline();
         if (returning) beginReturn();
       } else {
         wake();
