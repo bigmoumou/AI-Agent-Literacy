@@ -315,6 +315,9 @@ body.is-leaving .curtain { opacity: 1; pointer-events: auto; }
 /* 進考試週：不用一般的布幕，最後由一張和 Week 6 第一格一樣的全螢幕畫面接手（home.js 的 examLeave） */
 body.is-to-exam .curtain { opacity: 0; }
 body.is-to-exam :is(.hud-top, .hud-bottom) { opacity: 0; transition: opacity .25s ease; pointer-events: none; }
+/* 進 Week 9（assets/home.js 的 w9Leave）：被吸進一條膠捲，最後才蓋上深藍（和 Week 9 那一頁的底色一樣，換頁時看不出接縫） */
+body.is-to-w9 .curtain { background: #070a12; transition: opacity .3s ease .95s; }
+body.is-to-w9 :is(.hud-top, .hud-bottom) { opacity: 0; transition: opacity .25s ease; pointer-events: none; }
 .exam-handoff { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 41; pointer-events: none; opacity: 0; background: #000; }
 /* 從 Week 6 時空回歸回來（home.js 的 examReturn）：第一格先鋪上 Week 6 那張圖（和 weeks/week06/exam.css 的 body.is-loading #rift 同一種鋪法：
    貼圖座標 1024x768，畫面區 40,118,944,532 蓋滿螢幕），膠捲準備好再接手；接手之前和往後拉的時候，上下的字和攝影棚道具先藏起來 */

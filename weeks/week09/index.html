@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<script>
+  // 課程網址：舊的 github.io 和 learning-analytics-tools.pages.dev（2026-10-21 改名前）都轉到 ai-agent-literacy.pages.dev 的同一頁，保留 #t= 等片段
+  if (location.hostname.endsWith("github.io") || /(^|\.)learning-analytics-tools\.pages\.dev$/.test(location.hostname)) {
+    location.replace("https://ai-agent-literacy.pages.dev" + (location.pathname.replace(/^\/(Learning-Analytics-Tools|AI-Agent-Literacy)(?=\/|$)/, "") || "/") + location.search + location.hash);
+  }
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title data-i18n
+  data-zh-hans="Week 9｜时空密室"
+  data-en="Week 9 | Time-Rift Escape Rooms"
+  data-vi="Tuần 9 | Phòng thoát hiểm thời không">Week 9｜時空密室</title>
+<meta name="description" content="Week 9 期中：課程分成 15 條平行時空，每組三個人帶著 AI 代理，各自做出一間網頁版密室逃脫。作品準備中。" data-i18n-attr="content"
+  data-zh-hans="Week 9 期中：课程分成 15 条平行时空，每组三个人带着 AI 智能体，各自做出一间网页版密室逃脱。作品准备中。"
+  data-en="Week 9 midterm: the course splits into 15 parallel timelines; each team of three, working with an AI agent, builds its own escape room on the web. The works are coming soon."
+  data-vi="Tuần 9, giữa kỳ: khóa học tách thành 15 dòng thời gian song song; mỗi nhóm ba người cùng một AI agent làm ra một phòng thoát hiểm trên web. Các tác phẩm sắp có.">
+<meta name="author" content="JUNHAO CHEN">
+<meta name="copyright" content="© 2026 JUNHAO CHEN">
+<meta name="theme-color" content="#070a12">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+<link rel="stylesheet" href="../../assets/week.css">
+<link rel="stylesheet" href="rooms.css">
+<!-- 膠捲的畫格：和首頁 Week 9 那一格同一張圖（老師參考圖裡的插畫＋鐘塔），從首頁點進來時大多已經有了 -->
+<link rel="preload" href="../../assets/week9-frames.webp" as="image">
+<!-- 多語系要比其他程式先載入（不要 defer） -->
+<script src="../../assets/i18n-strings.js"></script>
+<script src="../../assets/i18n.js"></script>
+<script src="../../assets/course.js" defer></script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23f6efdc'/%3E%3Cpath d='M9.5 24v-5M16 24v-9M22.5 24V8' stroke='%238a5400' stroke-width='4.2'/%3E%3C/svg%3E">
+</head>
+<!-- Week 9 期中「時空密室」（2026-10-28；由 製作/week09/page/build_week9.py 產生，改這裡的文字要改那個腳本再跑一次）：
+     課程的主時間線（膠捲上是 Week 1–8 的封面）從左邊進來，在時空裡裂開，分成 15 條平行時空，每條通往一組的作品格。
+     膠捲畫在 #w9cv（rooms.js，原生 WebGL2，和首頁 Week 9 那一格同一套畫法）；文字和 15 格作品是一般的 HTML，疊在上面。
+     作品還沒交：每一格都是「準備中」（還在沖洗的底片），點了沒有反應。 -->
+<body class="w9" data-root="../../">
+<script>
+  // 開場：作品格先藏起來，等 rooms.js 的膠捲長到那一格才顯影（要在畫面出現前就加，不然會先閃一下）。
+  // 不支援 WebGL2 或「減少動態效果」就不藏；rooms.js 沒有跑起來的話，4 秒後全部直接顯示。
+  // 從首頁 Week 9 那一格被吸進來（assets/home.js 記下點的時間）：頂列和介紹先藏起來，rooms.js 從一格膠捲裡把鏡頭拉出來之後才出現。
+  if (window.WebGL2RenderingContext && !(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)) {
+    document.body.classList.add("w9-anim");
+    try { var a = +sessionStorage.getItem("w9-arrive"); if (a && Date.now() - a < 8000) document.documentElement.classList.add("w9-arrive"); } catch (e) {}
+    setTimeout(function () { if (!window.__w9) { document.querySelectorAll(".room").forEach(function (r) { r.classList.add("is-on"); }); document.documentElement.classList.remove("w9-arrive"); } }, 4000);
+  }
+</script>
+<div class="page">
+  <header class="top">
+    <a class="brand" href="../../">
+      <span class="brand-name">AI Agent Literacy</span>
+      <span class="brand-sub" data-ui="brand.sub">學習分析工具・NTNU・Week 1 – 16</span>
+    </a>
+    <a class="pill nav-works" href="../../works/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H5a.5.5 0 0 1-.5-.5V5a.5.5 0 0 1 .5-.5zm9 0h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5h-5a.5.5 0 0 1-.5-.5V5a.5.5 0 0 1 .5-.5zm-9 9h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H5a.5.5 0 0 1-.5-.5v-5a.5.5 0 0 1 .5-.5zm9 0h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5h-5a.5.5 0 0 1-.5-.5v-5a.5.5 0 0 1 .5-.5z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span data-ui="nav.works">作品集</span></a>
+    <a class="pill icon-only nav-gh" href="https://github.com/bigmoumou/AI-Agent-Literacy" aria-label="GitHub 原始碼" data-ui-attr="aria-label:home.github"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2.2a9.8 9.8 0 0 0-3.1 19.1c.5.1.7-.2.7-.5v-1.7c-2.7.6-3.3-1.3-3.3-1.3-.4-1.1-1.1-1.4-1.1-1.4-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.3-1.1.6-1.3-2.2-.2-4.5-1.1-4.5-4.9 0-1.1.4-2 1-2.7-.1-.2-.4-1.2.1-2.6 0 0 .8-.3 2.7 1a9.4 9.4 0 0 1 4.9 0c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.6.6.7 1 1.6 1 2.7 0 3.8-2.3 4.7-4.5 4.9.4.3.7.9.7 1.8v2.7c0 .3.2.6.7.5A9.8 9.8 0 0 0 12 2.2z"/></svg></a>
+    <button class="pill icon-only" id="themeBtn" type="button">深色</button>
+  </header>
+
+  <main class="w9-stage" id="stage">
+    <canvas id="w9cv" aria-hidden="true"></canvas>
+    <section class="w9-intro" aria-labelledby="w9Title">
+      <p class="w9-kicker">WEEK 09 · MIDTERM</p>
+      <h1 class="w9-title" id="w9Title" data-i18n
+      data-zh-hans="时空密室"
+      data-en="Time-Rift Escape Rooms"
+      data-vi="Phòng thoát hiểm thời không">時空密室</h1>
+      <p class="w9-lede" data-i18n
+      data-zh-hans="课程走到这里，分成 15 条平行时空。每一组三个人，带着 AI 智能体，各自做出一间网页版密室逃脱。"
+      data-en="Here the course splits into 15 parallel timelines. Each team of three, working with an AI agent, builds its own escape room on the web."
+      data-vi="Đến đây, khóa học tách thành 15 dòng thời gian song song. Mỗi nhóm ba người, cùng một AI agent, tự làm ra một phòng thoát hiểm trên web.">課程走到這裡，分成 15 條平行時空。每一組三個人，帶著 AI 代理，各自做出一間網頁版密室逃脫。</p>
+      <p class="w9-status"><span class="dot" aria-hidden="true"></span><span data-i18n
+      data-zh-hans="作品还在冲洗：期中交件后，从这里进入每一组的时空。"
+      data-en="The works are still developing: after the midterm deadline, enter each team’s timeline from here."
+      data-vi="Các tác phẩm vẫn đang được tráng phim: sau hạn nộp giữa kỳ, hãy vào dòng thời gian của từng nhóm từ đây.">作品還在沖洗：期中交件後，從這裡進入每一組的時空。</span></p>
+    </section>
+    <ol class="w9-rooms" aria-label="15 組的作品（準備中）" data-i18n-attr="aria-label"
+      data-zh-hans="15 组的作品（准备中）"
+      data-en="The 15 teams’ works (coming soon)"
+      data-vi="Tác phẩm của 15 nhóm (sắp có)">
+      <li class="room" tabindex="0" style="--tint:#f0b545;--i:0" data-n="1">
+        <div class="room-film" aria-hidden="true">
+          <span class="ec tl">TEAM 01</span><span class="ec tr">W09</span>
+          <div class="room-pic">
+            <span class="room-num">01</span>
+            <span class="room-soon" data-i18n data-zh-hans="准备中" data-en="Coming soon" data-vi="Sắp có">準備中</span>
+            <span class="room-pend">PENDING</span>
+          </div>
+          <span class="ec bl">▸ 01</span><span class="ec br">01A</span>
+        </div>
+        <span class="vh" data-i18n data-zh-hans="第 01 组：作品准备中" data-en="Team 01: work coming soon" data-vi="Nhóm 01: tác phẩm sắp có">第 01 組：作品準備中</span>
+      </li>
+      <li class="room" tabindex="0" style="--tint:#6cc9c0;--i:1" data-n="2">
+        <div class="room-film" aria-hidden="true">
+          <span class="ec tl">TEAM 02</span><span class="ec tr">W09</span>
+          <div class="room-pic">
+            <span class="room-num">02</span>
+            <span class="room-soon" data-i18n data-zh-hans="准备中" data-en="Coming soon" data-vi="Sắp có">準備中</span>
+            <span class="room-pend">PENDING</span>
+          </div>
+          <span class="ec bl">▸ 02</span><span class="ec br">02A</span>
+        </div>
+        <span class="vh" data-i18n data-zh-hans="第 02 组：作品准备中" data-en="Team 02: work coming soon" data-vi="Nhóm 02: tác phẩm sắp có">第 02 組：作品準備中</span>
+      </li>
+      <li class="room" tabindex="0" style="--tint:#a99bf0;--i:2" data-n="3">
+        <div class="room-film" aria-hidden="true">
+          <span class="ec tl">TEAM 03</span><span class="ec tr">W09</span>
+          <div class="room-pic">
+            <span class="room-num">03</span>
+            <span class="room-soon" data-i18n data-zh-hans="准备中" data-en="Coming soon" data-vi="Sắp có">準備中</span>
+            <span class="room-pend">PENDING</span>
+          </div>
+          <span class="ec bl">▸ 03</span><span class="ec br">03A</span>
+        </div>
+        <span class="vh" data-i18n data-zh-hans="第 03 组：作品准备中" data-en="Team 03: work coming soon" data-vi="Nhóm 03: tác phẩm sắp có">第 03 組：作品準備中</span>
+      </li>
+      <li class="room" tabindex="0" style="--tint:#f29aa8;--i:3" data-n="4">
+        <div class="room-film" aria-hidden="true">
+          <span class="ec tl">TEAM 04</span><span class="ec tr">W09</span>
+          <div class="room-pic">
+            <span class="room-num">04</span>
+            <span class="room-soon" data-i18n data-zh-hans="准备中" data-en="Coming soon" data-vi="Sắp có">準備中</span>
+            <span class="room-pend">PENDING</span>
+          </div>
+          <span class="ec bl">▸ 04</span><span class="ec br">04A</span>
+        </div>
+        <span class="vh" data-i18n data-zh-hans="第 04 组：作品准备中" data-en="Team 04: work coming soon" data-vi="Nhóm 04: tác phẩm sắp có">第 04 組：作品準備中</span>
+      </li>
+      <li class="room" tabindex="0" style="--tint:#9fd07c;--i:4" data-n="5">
+        <div class="room-film" aria-hidden="true">
+          <span class="ec tl">TEAM 05</span><span class="ec tr">W09</span>
+          <div class="room-pic">
+            <span class="room-num">05</span>
+            <span class="room-soon" data-i18n data-zh-hans="准备中" data-en="Coming soon" data-vi="Sắp có">準備中</span>
+            <span class="room-pend">PENDING</span>
+          </div>
+          <span class="ec bl">▸ 05</span><span class="ec br">05A</span>
+        </div>
+        <span class="vh" data-i18n data-zh-hans="第 05 组：作品准备中" data-en="Team 05: work coming soon" data-vi="Nhóm 05: tác phẩm sắp có">第 05 組：作品準備中</span>
+      </li>
+      <li class="room" tabindex="0" style="--tint:#f2c27a;--i:5" data-n="6">
+        <div class="room-film" aria-hidden="true">
+          <span class="ec tl">TEAM 06</span><span class="ec tr">W09</span>
+          <div class="room-pic">
+            <span class="room-num">06</span>
+            <span class="room-soon" data-i18n data-zh-hans="准备中" data-en="Coming soon" data-vi="Sắp có">準備中</span>
+            <span class="room-pend">PENDING</span>
+          </div>
+          <span class="ec bl">▸ 06</span><span class="ec br">06A</span>
+        </div>
+        <span class="vh" data-i18n data-zh-hans="第 06 组：作品准备中" data-en="Team 06: work coming soon" data-vi="Nhóm 06: tác phẩm sắp có">第 06 組：作品準備中</span>
+      </li>
+      <li class="room" tabindex="0" style="--tint:#7fb6f0;--i:6" data-n="7">
+        <div class="room-film" aria-hidden="true">
+          <span class="ec tl">TEAM 07</span><span class="ec tr">W09</span>
+          <div class="room-pic">
+            <span class="room-num">07</span>
+            <span class="room-soon" data-i18n data-zh-hans="准备中" data-en="Coming soon" data-vi="Sắp có">準備中</span>
+            <span class="room-pend">PENDING</span>
+          </div>
+          <span class="ec bl">▸ 07</span><span class="ec br">07A</span>
+        </div>
+        <span class="vh" data-i18n data-zh-hans="第 07 组：作品准备中" data-en="Team 07: work coming soon" data-vi="Nhóm 07: tác phẩm sắp có">第 07 組：作品準備中</span>
+      </li>
+      <li class="room" tabindex="0" style="--tint:#cfa3ec;--i:7" data-n="8">
+        <div class="room-film" aria-hidden="true">
+          <span class="ec tl">TEAM 08</span><span class="ec tr">W09</span>
+          <div class="room-pic">
+            <span class="room-num">08</span>
+            <span class="room-soon" data-i18n data-zh-hans="准备中" data-en="Coming soon" data-vi="Sắp có">準備中</span>
+            <span class="room-pend">PENDING</span>
+          </div>
+          <span class="ec bl">▸ 08</span><span class="ec br">08A</span>
+        </div>
+        <span class="vh" data-i18n data-zh-hans="第 08 组：作品准备中" data-en="Team 08: work coming soon" data-vi="Nhóm 08: tác phẩm sắp có">第 08 組：作品準備中</span>
+      </li>
+      <li class="room" tabindex="0" style="--tint:#f0ab84;--i:8" data-n="9">
+        <div class="room-film" aria-hidden="true">
+          <span class="ec tl">TEAM 09</span><span class="ec tr">W09</span>
+          <div class="room-pic">
+            <span class="room-num">09</span>
+            <span class="room-soon" data-i18n data-zh-hans="准备中" data-en="Coming soon" data-vi="Sắp có">準備中</span>
+            <span class="room-pend">PENDING</span>
+          </div>
+          <span class="ec bl">▸ 09</span><span class="ec br">09A</span>
+        </div>
+        <span class="vh" data-i18n data-zh-hans="第 09 组：作品准备中" data-en="Team 09: work coming soon" data-vi="Nhóm 09: tác phẩm sắp có">第 09 組：作品準備中</span>
+      </li>
+      <li class="room" tabindex="0" style="--tint:#86d6ae;--i:9" data-n="10">
+        <div class="room-film" aria-hidden="true">
+          <span class="ec tl">TEAM 10</span><span class="ec tr">W09</span>
+          <div class="room-pic">
+            <span class="room-num">10</span>
+            <span class="room-soon" data-i18n data-zh-hans="准备中" data-en="Coming soon" data-vi="Sắp có">準備中</span>
+            <span class="room-pend">PENDING</span>
+          </div>
+          <span class="ec bl">▸ 10</span><span class="ec br">10A</span>
+        </div>
+        <span class="vh" data-i18n data-zh-hans="第 10 组：作品准备中" data-en="Team 10: work coming soon" data-vi="Nhóm 10: tác phẩm sắp có">第 10 組：作品準備中</span>
+      </li>
+      <li class="room" tabindex="0" style="--tint:#e8cf6e;--i:10" data-n="11">
+        <div class="room-film" aria-hidden="true">
+          <span class="ec tl">TEAM 11</span><span class="ec tr">W09</span>
+          <div class="room-pic">
+            <span class="room-num">11</span>
+            <span class="room-soon" data-i18n data-zh-hans="准备中" data-en="Coming soon" data-vi="Sắp có">準備中</span>
+            <span class="room-pend">PENDING</span>
+          </div>
+          <span class="ec bl">▸ 11</span><span class="ec br">11A</span>
+        </div>
+        <span class="vh" data-i18n data-zh-hans="第 11 组：作品准备中" data-en="Team 11: work coming soon" data-vi="Nhóm 11: tác phẩm sắp có">第 11 組：作品準備中</span>
+      </li>
+      <li class="room" tabindex="0" style="--tint:#93aef2;--i:11" data-n="12">
+        <div class="room-film" aria-hidden="true">
+          <span class="ec tl">TEAM 12</span><span class="ec tr">W09</span>
+          <div class="room-pic">
+            <span class="room-num">12</span>
+            <span class="room-soon" data-i18n data-zh-hans="准备中" data-en="Coming soon" data-vi="Sắp có">準備中</span>
+            <span class="room-pend">PENDING</span>
+          </div>
+          <span class="ec bl">▸ 12</span><span class="ec br">12A</span>
+        </div>
+        <span class="vh" data-i18n data-zh-hans="第 12 组：作品准备中" data-en="Team 12: work coming soon" data-vi="Nhóm 12: tác phẩm sắp có">第 12 組：作品準備中</span>
+      </li>
+      <li class="room" tabindex="0" style="--tint:#e2a6d8;--i:12" data-n="13">
+        <div class="room-film" aria-hidden="true">
+          <span class="ec tl">TEAM 13</span><span class="ec tr">W09</span>
+          <div class="room-pic">
+            <span class="room-num">13</span>
+            <span class="room-soon" data-i18n data-zh-hans="准备中" data-en="Coming soon" data-vi="Sắp có">準備中</span>
+            <span class="room-pend">PENDING</span>
+          </div>
+          <span class="ec bl">▸ 13</span><span class="ec br">13A</span>
+        </div>
+        <span class="vh" data-i18n data-zh-hans="第 13 组：作品准备中" data-en="Team 13: work coming soon" data-vi="Nhóm 13: tác phẩm sắp có">第 13 組：作品準備中</span>
+      </li>
+      <li class="room" tabindex="0" style="--tint:#f5bb92;--i:13" data-n="14">
+        <div class="room-film" aria-hidden="true">
+          <span class="ec tl">TEAM 14</span><span class="ec tr">W09</span>
+          <div class="room-pic">
+            <span class="room-num">14</span>
+            <span class="room-soon" data-i18n data-zh-hans="准备中" data-en="Coming soon" data-vi="Sắp có">準備中</span>
+            <span class="room-pend">PENDING</span>
+          </div>
+          <span class="ec bl">▸ 14</span><span class="ec br">14A</span>
+        </div>
+        <span class="vh" data-i18n data-zh-hans="第 14 组：作品准备中" data-en="Team 14: work coming soon" data-vi="Nhóm 14: tác phẩm sắp có">第 14 組：作品準備中</span>
+      </li>
+      <li class="room" tabindex="0" style="--tint:#a6dba0;--i:14" data-n="15">
+        <div class="room-film" aria-hidden="true">
+          <span class="ec tl">TEAM 15</span><span class="ec tr">W09</span>
+          <div class="room-pic">
+            <span class="room-num">15</span>
+            <span class="room-soon" data-i18n data-zh-hans="准备中" data-en="Coming soon" data-vi="Sắp có">準備中</span>
+            <span class="room-pend">PENDING</span>
+          </div>
+          <span class="ec bl">▸ 15</span><span class="ec br">15A</span>
+        </div>
+        <span class="vh" data-i18n data-zh-hans="第 15 组：作品准备中" data-en="Team 15: work coming soon" data-vi="Nhóm 15: tác phẩm sắp có">第 15 組：作品準備中</span>
+      </li>
+    </ol>
+    <nav class="pager" id="pager" data-week="9" aria-label="其他週次" data-ui-attr="aria-label:pager.label"></nav>
+  </main>
+
+  <footer class="foot">
+    <span>Learning Analytics Tools Implementation Applications (NTNU)</span>
+    <span><span data-ui="footer.copyright">Copyright © 2026 JUNHAO CHEN・程式碼 MIT・內容 CC BY-NC-SA 4.0</span> <a class="foot-lic" href="https://github.com/bigmoumou/AI-Agent-Literacy#授權" data-ui="footer.license" data-ui-attr="href:footer.licenseUrl">授權說明</a></span>
+    <a href="../../" data-ui="nav.home">回到課程首頁</a>
+  </footer>
+</div>
+<script src="rooms.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,176 @@
+/* Week 9 期中「時空密室」：整頁是一個深色舞台（和首頁 Week 9 那一格同一個世界），膠捲畫在 #w9cv（rooms.js），
+   文字和 15 組的作品格是一般的 HTML，疊在上面。不管網站是淺色還是深色主題，這一頁都是深色，顏色直接寫死。 */
+body.w9 {
+  --night: #070a12;
+  --txt: #f1efe9;
+  --txt-2: #c3c8d8;
+  --txt-3: #8a90a4;
+  --amber: #f0b545;
+  background: var(--night);
+  color: var(--txt);
+}
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+
+/* 頂列、頁尾：在深色舞台上一律用淺色字；這一頁固定是深色，主題按鈕沒有作用（語言選單仍然插在它前面） */
+body.w9 .page { position: relative; }
+body.w9 .top { position: relative; z-index: 3; }
+body.w9 .brand-name { color: var(--txt); }
+body.w9 .brand-sub { color: var(--txt-3); }
+body.w9 .pill { background: rgba(255, 255, 255, .06); border-color: rgba(255, 255, 255, .16); color: var(--txt); }
+body.w9 .pill:hover { background: rgba(255, 255, 255, .12); }
+body.w9 #themeBtn { display: none; }
+body.w9 .foot { position: relative; z-index: 3; color: var(--txt-3); }
+body.w9 .foot a { color: var(--txt-2); }
+
+/* ---------- 舞台：滿版，膠捲畫在後面 ---------- */
+body.w9 .page > main.w9-stage {
+  position: relative;
+  max-width: none;
+  width: auto;
+  margin-inline: calc(-1 * var(--gutter));
+  padding: clamp(1.4rem, 4vh, 3rem) var(--gutter) clamp(1.6rem, 4vh, 3rem);
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: clamp(5.5rem, 16vw, 8rem);      /* 窄的時候：介紹和作品格之間留給時空裂縫和主時間線 */
+  align-content: start;
+  isolation: isolate;
+}
+#w9cv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; pointer-events: none; transition: opacity .35s ease; }
+/* 從首頁 Week 9 那一格被吸進來（html.w9-arrive，rooms.js 拉出來之後拿掉）：先只有深藍，畫布淡入（鏡頭正從一格膠捲裡往外拉），
+   拉出來之後頂列、介紹、換頁列、頁尾才浮出來 */
+body.w9 :is(.top, .w9-intro, .pager, .foot) { transition: opacity .9s ease; }
+html.w9-arrive body.w9 :is(.top, .w9-intro, .pager, .foot) { opacity: 0; transition: none; }
+html.w9-arrive:not(.w9-out) #w9cv { opacity: 0; }
+.w9-intro, .w9-rooms, body.w9 .pager { position: relative; z-index: 1; }
+
+/* ---------- 介紹 ---------- */
+.w9-intro { max-width: 34rem; text-shadow: 0 1px 14px rgba(7, 10, 18, .92), 0 0 2px rgba(7, 10, 18, .8); }
+.w9-kicker { margin: 0 0 1rem; font: 700 .78rem/1 var(--font-mono); letter-spacing: .24em; color: var(--amber); }
+.w9-title { margin: 0; font-size: clamp(2.6rem, 5.4vw, 4.7rem); font-weight: 900; line-height: 1.04; letter-spacing: .02em; text-wrap: balance; }
+html[lang="en"] .w9-title, html[lang="vi"] .w9-title { font-size: clamp(2.2rem, 4.2vw, 3.7rem); letter-spacing: 0; }
+.w9-lede { margin: 1.15rem 0 0; color: var(--txt-2); font-size: clamp(.98rem, 1.15vw, 1.08rem); line-height: 1.8; max-width: 27em; }
+.w9-status { margin: 1.3rem 0 0; display: flex; gap: .65rem; align-items: baseline; color: var(--txt-3); font-size: .88rem; line-height: 1.6; max-width: 30em; }
+.w9-status .dot { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--amber); transform: translateY(-1px); }
+
+/* ---------- 15 組的作品格：每一格是一小段底片 ---------- */
+.w9-rooms { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(1.2rem, 4vw, 1.8rem) clamp(.8rem, 3vw, 1.2rem); }
+@media (min-width: 560px) { .w9-rooms { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+.room { --tint: #f0b545; position: relative; }
+.w9-rooms .room { --tint: #a9d4f5 !important; }   /* 15 組統一淡藍色（和 WebGL 版一樣；蓋過 index.html 每一格各自的色調） */
+.room-film {
+  position: relative;
+  padding: 21px 7px 21px;
+  background: #121215;
+  border-radius: 4px;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, .5), 0 0 0 1px rgba(255, 255, 255, .04) inset;
+  transition: transform .5s cubic-bezier(.2, .7, .2, 1), box-shadow .5s ease;
+}
+/* 上下兩排齒孔（和首頁的膠捲一樣是圓角的淺色方孔） */
+.room-film::before, .room-film::after {
+  content: ""; position: absolute; left: 6px; right: 6px; height: 6px;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='13' height='6'><rect x='2' y='0' width='8' height='6' rx='1.6' fill='%23e8e2d6' fill-opacity='.86'/></svg>") 0 0 / 13px 6px repeat-x;
+}
+.room-film::before { top: 4px; }
+.room-film::after { bottom: 4px; }
+/* 膠捲邊上的字（像首頁畫格的 AI AGENT LITERACY、▸ 09、09A） */
+.ec { position: absolute; font: 700 7.5px/1 var(--font-mono); letter-spacing: .14em; color: rgba(240, 181, 69, .78); white-space: nowrap; }
+.ec.tl { left: 9px; top: 12px; }
+.ec.tr { right: 9px; top: 12px; color: rgba(255, 255, 255, .34); }
+.ec.bl { left: 9px; bottom: 12px; color: rgba(255, 255, 255, .34); }
+.ec.br { right: 9px; bottom: 12px; }
+
+/* 畫面：還在沖洗的底片。暗的暖棕色底、帶一點這一組的色調，中間是外框大數字（和首頁「準備中」的畫格同一種寫法） */
+.room-pic {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: 5px;
+  overflow: hidden;
+  background:
+    radial-gradient(110% 95% at 50% 42%, color-mix(in srgb, var(--tint) 13%, #2b2219) 0%, #18130e 72%);
+  transition: filter .5s ease;
+}
+.room-num {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  font: 700 clamp(1.9rem, 3.2vw, 2.9rem)/1 var(--font-mono);
+  color: transparent;
+  -webkit-text-stroke: 1.2px color-mix(in srgb, var(--tint) 82%, #fff);
+  opacity: .88;
+  padding-bottom: 24%;   /* 數字放在上半，下面留給「準備中」，小格子才不會疊在一起 */
+}
+.room-soon { position: absolute; left: 8%; bottom: 9%; font-weight: 700; font-size: clamp(.78rem, .95vw, .92rem); color: #f1efe9; letter-spacing: .04em; }
+.room-pend { position: absolute; right: 7%; top: 11%; font: 700 .52rem/1 var(--font-mono); letter-spacing: .2em; color: rgba(241, 239, 233, .46); }   /* 放右上：英文的 Coming soon 比較長，放下面會疊到 */
+/* 顯影：一道很淡、帶這一組色調的光，慢慢從左掃到右（像底片在藥水裡慢慢顯影）；每一格錯開，不會一起動 */
+.room-pic::after {
+  content: ""; position: absolute; inset: -10% -70%;
+  background: linear-gradient(100deg, transparent 42%, color-mix(in srgb, var(--tint) 20%, transparent) 50%, transparent 58%);
+  transform: translateX(-55%);
+  animation: w9-develop 11s ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * -.73s);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+@keyframes w9-develop {
+  0% { transform: translateX(-55%); opacity: 0; }
+  12% { opacity: 1; }
+  60% { transform: translateX(55%); opacity: 1; }
+  72%, 100% { transform: translateX(55%); opacity: 0; }
+}
+/* 滑鼠移上去：那一格稍微浮起來、亮一點（rooms.js 同時讓通往這一格的膠捲起一個小波）。點了沒有反應，所以游標不變 */
+.room:hover .room-film { transform: translateY(-3px); box-shadow: 0 18px 40px rgba(0, 0, 0, .55), 0 0 0 1px color-mix(in srgb, var(--tint) 35%, transparent) inset; }
+.room:hover .room-pic { filter: brightness(1.14); }
+
+/* 開場（rooms.js 有在跑時才加 .w9-anim）：作品格先是暗的，膠捲長到它那裡才「顯影」出來 */
+body.w9-anim .room { opacity: 0; transform: translateY(8px); filter: brightness(.35) saturate(.5); transition: opacity .9s ease, transform .9s cubic-bezier(.2, .7, .2, 1), filter 1.4s ease; }
+body.w9-anim .room.is-on { opacity: 1; transform: none; filter: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .room-pic::after { animation: none; opacity: 0; }
+  .room-film, .room-pic { transition: none; }
+}
+
+/* ---------- 換頁列 ---------- */
+body.w9 .pager { margin-top: 0; font-size: .85rem; }
+body.w9 .pager a { color: var(--txt-2); }
+body.w9 .pager span { color: var(--txt-3); }
+
+/* ---------- 寬的螢幕：介紹在左、作品格在右（5 × 3），主時間線從左下進來，在兩者之間裂開 ----------
+   每一排作品格上面留一條空隙（row-gap，第一排上面用 padding-top），rooms.js 讓這一排的幾條膠捲疊在裡面走，
+   走到哪一格的正上方就往下接進去（所以 row-gap 要夠高，rooms.js 會讀它） */
+@media (min-width: 980px) and (min-aspect-ratio: 5/4) {
+  body.w9 .page > main.w9-stage {
+    grid-template-columns: minmax(17rem, 25%) minmax(0, 1fr);
+    grid-template-rows: 1fr auto;
+    column-gap: clamp(7rem, 13vw, 12rem);
+    row-gap: 1.2rem;
+    align-items: center;
+    min-height: calc(100svh - 128px);
+  }
+  .w9-intro { align-self: center; margin-top: -3vh; }
+  .w9-rooms { grid-template-columns: repeat(5, minmax(0, 1fr)); column-gap: clamp(.9rem, 1.4vw, 1.5rem); row-gap: clamp(54px, 8vh, 76px); padding-top: clamp(54px, 8vh, 76px); }
+  body.w9 .pager { grid-column: 1 / -1; align-self: end; }
+}
+
+/* ---------- 有 WebGL2（rooms.js 加 .w9-gl）：整個舞台是 3D 空間，作品窗畫在裡面 ----------
+   上面那份 15 格的 HTML 只留給讀屏軟體（看不到）；介紹疊在左上（窄螢幕在上面），換頁列在最下面 */
+body.w9-gl .page > main.w9-stage { display: block; min-height: calc(100svh - 128px); }
+body.w9-gl .w9-rooms { position: absolute !important; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+body.w9-gl .w9-intro { max-width: 32rem; }
+body.w9-gl .pager { position: absolute; left: var(--gutter); right: var(--gutter); bottom: clamp(.8rem, 2.4vh, 1.4rem); text-shadow: 0 1px 10px rgba(7, 10, 18, .95), 0 0 3px rgba(7, 10, 18, .9); }
+/* 膠捲會從文字後面經過：介紹和換頁列的字後面各墊一層很柔和的暗（沒有邊，看起來只是那裡比較暗） */
+body.w9-gl .w9-intro::before {
+  content: ""; position: absolute; z-index: -1; inset: -18% -26% -22% -60%; pointer-events: none;
+  background: radial-gradient(closest-side, rgba(6, 9, 17, .9), rgba(6, 9, 17, .72) 45%, rgba(6, 9, 17, .32) 75%, rgba(6, 9, 17, 0));
+}
+body.w9-gl .pager > * { position: relative; }
+body.w9-gl .pager > *::before {
+  content: ""; position: absolute; z-index: -1; inset: -16px -34px; pointer-events: none;
+  background: radial-gradient(closest-side, rgba(6, 9, 17, .88), rgba(6, 9, 17, .55) 60%, rgba(6, 9, 17, 0));
+}
+@media (min-width: 900px) and (min-aspect-ratio: 23/20) {
+  body.w9-gl .w9-intro { max-width: min(26rem, 30vw); padding-top: clamp(1rem, 9vh, 5rem); }
+}
+@media not all and (min-width: 900px) and (min-aspect-ratio: 23/20) {
+  body.w9-gl .page > main.w9-stage { min-height: max(calc(100svh - 110px), 1040px); }   /* 窄螢幕：5 條的頭端一排一條往下排 */
+}

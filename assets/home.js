@@ -756,8 +756,14 @@
     goTo(i, false);
     try { sessionStorage.setItem("film-frame", String(i)); } catch (e) { /* 無法儲存也沒關係 */ }
     const toExam = f.w.exam && examFx && examArt && !reduceMotion;
-    leaving = { t0: performance.now(), exam: toExam, camY: cam[1], frT: fr.t, surged: false };
+    // 進 Week 9：被吸進那一格裡的一條膠捲（w9Leave）；Week 9 那一頁從一格膠捲裡把鏡頭拉出來（weeks/week09/rooms.js 看到這個時間）
+    const toW9 = !toExam && f.n === 9 && tlI >= 0 && !!tl && !reduceMotion;
+    leaving = { t0: performance.now(), exam: toExam, w9: toW9, camY: cam[1], frT: fr.t, surged: false };
     document.body.classList.add("is-leaving");
+    if (toW9) {
+      document.body.classList.add("is-to-w9");
+      try { sessionStorage.setItem("w9-arrive", String(Date.now())); } catch (e) { /* 存不了就照一般的開場 */ }
+    }
     if (toExam) {
       document.body.classList.add("is-to-exam");
       // 衝到位（0.78）的那一刻記下來：Week 6 照同一個時間接著往裡推（ExamArt.push）
@@ -765,7 +771,30 @@
       examArt.surge(performance.now() / 1000 + 0.12);   // 一點下去：裂縫先暗一下、再猛亮
       if (sound) { sound.unlock(); sound.suck(); sound.zap(0.54, 0.22, 0.12); }   // 被吸進去（整片聲音往低處塌）＋裂縫猛亮時「滋」
     }
-    setTimeout(() => { window.location.href = root() + f.w.href; }, reduceMotion ? 60 : toExam ? EXAM_LEAVE * 0.9 : 650);
+    setTimeout(() => { window.location.href = root() + f.w.href; }, reduceMotion ? 60 : toExam ? EXAM_LEAVE * 0.9 : toW9 ? W9_LEAVE : 650);
+  }
+  /* 進 Week 9：被吸進一條膠捲。先往後一縮，接著越來越快地衝向 Week 9 那一格（窗口差不多鋪滿畫面），
+     再把視角收窄（像望遠鏡一直推近），推進窗口裡主膠捲正中間的那一格，直到那一格的畫面鋪滿整個螢幕；最後蓋上一層深藍、換頁。
+     收窄視角不移動相機，所以不會穿過膠捲那一面，窗口的裁切也一直是對的。旁邊的畫格和進考試週一樣被吸往中間。 */
+  const W9_LEAVE = 1300;
+  function w9Leave(now) {
+    const L = leaving, t = clamp((now - L.t0) / W9_LEAVE, 0, 1);
+    const back = Math.sin(seg01(t, 0, 0.16) * Math.PI) * 0.2;
+    const e = Math.pow(seg01(t, 0.05, 0.62), 2), es = e * e * (3 - 2 * e);
+    const zFill = -R + (R * TH * 0.922) / (2 * lens.tanH);        // 窗口（一格的 92%）剛好鋪滿畫面寬的位置
+    cam[2] = CAM_BACK + back + (zFill - CAM_BACK) * es;
+    cam[1] = L.camY + (0 - L.camY) * es;
+    const w0 = NEAR * lens.tanH, h0 = NEAR * lens.tanV, ft = L.frT + (h0 - L.frT) * es;   // 視窗慢慢回到正中間
+    // 主膠捲正中間那一格（assets/timeline-art.js 的主膠捲：正中間在窗口裡往下 0.08 格高、膠捲後面 0.25；寬是膠捲高的 0.36）
+    const a = tlAngle(), r = R + 0.25, tx = r * Math.sin(a) - cam[0], ty = -0.0808 * H + bend * a * a - cam[1], tz = -r * Math.cos(a) - cam[2];
+    const nx = (tx / -tz) * NEAR, ny = (ty / -tz) * NEAR, ch = (0.36 * H * 0.71 * NEAR) / -tz, cw = (0.36 * H * 0.83 * NEAR) / -tz;
+    const Zend = Math.max(1.01, (2 * h0) / (ch * 0.96), (2 * w0) / (cw * 0.96));   // 那一格的畫面鋪滿整個螢幕
+    const ez = Math.pow(seg01(t, 0.3, 0.92), 2.2), Z = Math.exp(Math.log(Zend) * ez), k = (Z - 1) / (Zend - 1);
+    const cy0 = ft - h0, cx = nx * k, cy = cy0 + (ny - cy0) * k;
+    fr.l = cx - w0 / Z; fr.r = cx + w0 / Z; fr.t = cy + h0 / Z; fr.b = cy - h0 / Z;
+    buildProj();
+    const sk = seg01(t, 0, 0.6);
+    suck = sk * sk * (3 - 2 * sk);                                  // 旁邊的畫格被吸往中間
   }
   /* 進考試週：被吸進去。先往後一縮（像被拉住），接著越來越快地衝進那一格，旁邊的畫格被吸往中間、往後退，
      地板和道具淡掉；最後疊上一張和 Week 6 第一格一模一樣的全螢幕畫面（weeks/week06/exam.js 也是這樣把畫面區鋪滿），
@@ -898,7 +927,7 @@
   window.addEventListener("pageshow", (e) => {
     if (!e.persisted) return;
     leaving = null; suck = 0;
-    document.body.classList.remove("is-leaving", "is-to-exam");
+    document.body.classList.remove("is-leaving", "is-to-exam", "is-to-w9");
     if (handoff) handoff.style.opacity = "0";
     cam[2] = CAM_BACK; cam[1] = CAM_Y;
     layout();
@@ -1088,7 +1117,8 @@
     }
     return tlAvoid;
   }
-  function tlCtx() { return { angle: tlAngle(), bend, suck, proj, cam, vw, vh, fog: col.fog, avoid: tlRects() }; }
+  // 進 Week 9 時旁邊的畫格也被吸往中間，但 Week 9 這一格本身不變形：照樣畫時空線（suck 傳 0；timeline-art 看到 suck 就不畫，那是給進考試週、這一格在旁邊時用的）
+  function tlCtx() { return { angle: tlAngle(), bend, suck: leaving && leaving.w9 ? 0 : suck, proj, cam, vw, vh, fog: col.fog, avoid: tlRects() }; }
   function examVisible() {
     let a = (examI - pos) * TH;
     a = Math.atan2(Math.sin(a), Math.cos(a));
@@ -1200,6 +1230,7 @@
       if (Math.abs(goal - hover[i]) < 0.003) hover[i] = goal; else hoverMoving = true;
     }
     if (leaving && leaving.exam) examLeave(now);
+    else if (leaving && leaving.w9) w9Leave(now);
     else if (returning && returning.t0) examReturn(now);
     else if (leaving) {
       const t = clamp((now - leaving.t0) / 650, 0, 1);

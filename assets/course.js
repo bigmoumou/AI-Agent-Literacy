@@ -250,6 +250,35 @@
         },
       },
     },
+    // 2026-10-28 Week 9 期中「時空密室」：15 組的作品格（交件前都是「準備中」）；頁面由 製作/week09/page/build_week9.py 產生
+    9: {
+      status: "ready",
+      title: "期中：時空密室",
+      summary: "課程走到這裡，分成 15 條平行時空：每一組三個人帶著 AI 代理，各自做出一間網頁版密室逃脫。作品還在沖洗，期中交件後從這裡進入每一組的時空。",
+      href: "weeks/week09/",
+      thumb: "weeks/week09/thumb.jpg",
+      still: "weeks/week09/poster.jpg",
+      thumbEn: "weeks/week09/thumb-en.jpg",
+      stillEn: "weeks/week09/poster-en.jpg",
+      meta: "15 組作品・交件後開放",
+      i18n: {
+        "zh-Hans": {
+          title: "期中：时空密室",
+          summary: "课程走到这里，分成 15 条平行时空：每一组三个人带着 AI 智能体，各自做出一间网页版密室逃脱。作品还在冲洗，期中交件后从这里进入每一组的时空。",
+          meta: "15 组作品・交件后开放",
+        },
+        en: {
+          title: "Midterm: Time-Rift Escape Rooms",
+          summary: "Here the course splits into 15 parallel timelines: each team of three, working with an AI agent, builds its own escape room on the web. The works are still developing; after the midterm deadline, enter each team’s timeline from here.",
+          meta: "15 team projects · open after the deadline",
+        },
+        vi: {
+          title: "Giữa kỳ: Phòng thoát hiểm thời không",
+          summary: "Đến đây, khóa học tách thành 15 dòng thời gian song song: mỗi nhóm ba người cùng một AI agent làm ra một phòng thoát hiểm trên web. Các tác phẩm vẫn đang được tráng phim; sau hạn nộp giữa kỳ, hãy vào dòng thời gian của từng nhóm từ đây.",
+          meta: "15 tác phẩm nhóm · mở sau hạn nộp",
+        },
+      },
+    },
   };
 
   // 英文版（2026-10-22）：有 thumbEn／stillEn 的週次，英文介面的首頁膠捲、全部週次清單、換頁列用英文封面。
