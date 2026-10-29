@@ -380,7 +380,8 @@
     }
     function physics(s, dt) {   // 一維的波：鄰居拉、原位拉回、阻尼；根部固定，尾端放開。靜下來就停（不用每格都算）
       if (!s.live) return;
-      const n = s.b.n, d = s.disp, v = s.vel, c2 = 80 * 80, k0 = 34, damp = 3.6, steps = 4, h = dt / steps;
+      // 每一小步最多 0.007 秒：這組參數的穩定上限約 0.0123 秒，原本固定 4 小步，一格拖到 50 毫秒（dt 的上限）就爆開成鋸齒和長條
+      const n = s.b.n, d = s.disp, v = s.vel, c2 = 80 * 80, k0 = 34, damp = 3.6, steps = Math.max(4, Math.ceil(dt / 0.007)), h = dt / steps;
       for (let st = 0; st < steps; st++) {
         for (let i = 1; i < n - 1; i++) v[i] += (c2 * (d[i - 1] + d[i + 1] - 2 * d[i]) - k0 * d[i] - damp * v[i]) * h;
         v[n - 1] += (c2 * (d[n - 2] - d[n - 1]) - k0 * d[n - 1] - damp * v[n - 1]) * h;
@@ -388,7 +389,7 @@
         d[0] = 0; v[0] = 0;
       }
       let e = 0; for (let i = 0; i < n; i++) e = Math.max(e, Math.abs(d[i]), Math.abs(v[i]) * 0.1);
-      if (e < 1e-4) { d.fill(0); v.fill(0); s.live = false; }
+      if (e < 1e-4 || !(e < 5)) { d.fill(0); v.fill(0); s.live = false; }   // 萬一還是算壞（太大或 NaN）就放回原位
     }
 
     // 每一格：進場、走片、擺動、波（step 只算數字，draw 才畫）
