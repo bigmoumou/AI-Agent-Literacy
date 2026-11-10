@@ -117,9 +117,13 @@ html[lang="en"] .w9-title, html[lang="vi"] .w9-title { font-size: clamp(2.2rem, 
   60% { transform: translateX(55%); opacity: 1; }
   72%, 100% { transform: translateX(55%); opacity: 0; }
 }
-/* 滑鼠移上去：那一格稍微浮起來、亮一點（rooms.js 同時讓通往這一格的膠捲起一個小波）。點了沒有反應，所以游標不變 */
-.room:hover .room-film { transform: translateY(-3px); box-shadow: 0 18px 40px rgba(0, 0, 0, .55), 0 0 0 1px color-mix(in srgb, var(--tint) 35%, transparent) inset; }
-.room:hover .room-pic { filter: brightness(1.14); }
+/* 滑鼠移上去：那一格稍微浮起來、亮一點（rooms.js 同時讓通往這一格的膠捲起一個小波）。
+   有作品的組整格是連結（a.room-link，另開新分頁到作品站）；沒有組的格子點了沒有反應，游標不變 */
+.room:hover .room-film, .room-link:focus-visible .room-film { transform: translateY(-3px); box-shadow: 0 18px 40px rgba(0, 0, 0, .55), 0 0 0 1px color-mix(in srgb, var(--tint) 35%, transparent) inset; }
+.room:hover .room-pic, .room-link:focus-visible .room-pic { filter: brightness(1.14); }
+.room-link { display: block; color: inherit; text-decoration: none; border-radius: 6px; }
+.room-link:focus-visible { outline: 2px solid var(--tint); outline-offset: 4px; }
+.room.is-open .room-soon { right: 7%; font-size: clamp(.66rem, .8vw, .82rem); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }   /* 遊戲名稱比「準備中」長：一行，太長用…（讀屏軟體念的是 .vh 裡的全名） */
 
 /* 開場（rooms.js 有在跑時才加 .w9-anim）：作品格先是暗的，膠捲長到它那裡才「顯影」出來 */
 body.w9-anim .room { opacity: 0; transform: translateY(8px); filter: brightness(.35) saturate(.5); transition: opacity .9s ease, transform .9s cubic-bezier(.2, .7, .2, 1), filter 1.4s ease; }

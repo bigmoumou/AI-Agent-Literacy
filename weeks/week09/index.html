@@ -13,10 +13,10 @@
   data-zh-hans="Week 9｜时空密室"
   data-en="Week 9 | Time-Rift Escape Rooms"
   data-vi="Tuần 9 | Phòng thoát hiểm thời không">Week 9｜時空密室</title>
-<meta name="description" content="Week 9 期中：課程分成 15 條平行時空，每組三個人帶著 AI 代理，各自做出一間網頁版密室逃脫。作品準備中。" data-i18n-attr="content"
-  data-zh-hans="Week 9 期中：课程分成 15 条平行时空，每组三个人带着 AI 智能体，各自做出一间网页版密室逃脱。作品准备中。"
-  data-en="Week 9 midterm: the course splits into 15 parallel timelines; each team of three, working with an AI agent, builds its own escape room on the web. The works are coming soon."
-  data-vi="Tuần 9, giữa kỳ: khóa học tách thành 15 dòng thời gian song song; mỗi nhóm ba người cùng một AI agent làm ra một phòng thoát hiểm trên web. Các tác phẩm sắp có.">
+<meta name="description" content="Week 9 期中：課程分成 15 條平行時空，每組三個人帶著 AI 代理，各自做出一間網頁版密室逃脫。點一格作品，就能進去玩。" data-i18n-attr="content"
+  data-zh-hans="Week 9 期中：课程分成 15 条平行时空，每组三个人带着 AI 智能体，各自做出一间网页版密室逃脱。点一格作品，就能进去玩。"
+  data-en="Week 9 midterm: the course splits into 15 parallel timelines; each team of three, working with an AI agent, builds its own escape room on the web. Click a frame to play."
+  data-vi="Tuần 9, giữa kỳ: khóa học tách thành 15 dòng thời gian song song; mỗi nhóm ba người cùng một AI agent làm ra một phòng thoát hiểm trên web. Nhấp vào một khung để chơi.">
 <meta name="author" content="JUNHAO CHEN">
 <meta name="copyright" content="© 2026 JUNHAO CHEN">
 <meta name="theme-color" content="#070a12">
@@ -36,7 +36,7 @@
 <!-- Week 9 期中「時空密室」（2026-10-28；由 製作/week09/page/build_week9.py 產生，改這裡的文字要改那個腳本再跑一次）：
      課程的主時間線（膠捲上是 Week 1–8 的封面）從左邊進來，在時空裡裂開，分成 15 條平行時空，每條通往一組的作品格。
      膠捲畫在 #w9cv（rooms.js，原生 WebGL2，和首頁 Week 9 那一格同一套畫法）；文字和 15 格作品是一般的 HTML，疊在上面。
-     作品還沒交：每一格都是「準備中」（還在沖洗的底片），點了沒有反應。 -->
+     有作品的組（01–12；13、14 整理中）點了另開新分頁，進入作品站 time-rift-rooms 上那一組的遊戲；15 留給之後交件的組，照舊是「準備中」。 -->
 <body class="w9" data-root="../../">
 <script>
   // 開場：作品格先藏起來，等 rooms.js 的膠捲長到那一格才顯影（要在畫面出現前就加，不然會先閃一下）。
@@ -72,181 +72,209 @@
       data-en="Here the course splits into 15 parallel timelines. Each team of three, working with an AI agent, builds its own escape room on the web."
       data-vi="Đến đây, khóa học tách thành 15 dòng thời gian song song. Mỗi nhóm ba người, cùng một AI agent, tự làm ra một phòng thoát hiểm trên web.">課程走到這裡，分成 15 條平行時空。每一組三個人，帶著 AI 代理，各自做出一間網頁版密室逃脫。</p>
       <p class="w9-status"><span class="dot" aria-hidden="true"></span><span data-i18n
-      data-zh-hans="作品还在冲洗：期中交件后，从这里进入每一组的时空。"
-      data-en="The works are still developing: after the midterm deadline, enter each team’s timeline from here."
-      data-vi="Các tác phẩm vẫn đang được tráng phim: sau hạn nộp giữa kỳ, hãy vào dòng thời gian của từng nhóm từ đây.">作品還在沖洗：期中交件後，從這裡進入每一組的時空。</span></p>
+      data-zh-hans="点一格作品，进入那一组的密室（另开新分页）。"
+      data-en="Click a frame to enter that team’s escape room (opens in a new tab)."
+      data-vi="Nhấp vào một khung để vào phòng thoát hiểm của nhóm đó (mở trong thẻ mới).">點一格作品，進入那一組的密室（另開新分頁）。</span></p>
     </section>
-    <ol class="w9-rooms" aria-label="15 組的作品（準備中）" data-i18n-attr="aria-label"
-      data-zh-hans="15 组的作品（准备中）"
-      data-en="The 15 teams’ works (coming soon)"
-      data-vi="Tác phẩm của 15 nhóm (sắp có)">
-      <li class="room" tabindex="0" style="--tint:#f0b545;--i:0" data-n="1">
+    <ol class="w9-rooms" aria-label="15 組的作品" data-i18n-attr="aria-label"
+      data-zh-hans="15 组的作品"
+      data-en="The 15 teams’ works"
+      data-vi="Tác phẩm của 15 nhóm">
+      <li class="room is-open" style="--tint:#f0b545;--i:0" data-n="1">
+        <a class="room-link" href="https://time-rift-rooms.o1r2g3a4n5i6z7e8.workers.dev/01/" target="_blank" rel="noopener">
         <div class="room-film" aria-hidden="true">
           <span class="ec tl">TEAM 01</span><span class="ec tr">W09</span>
           <div class="room-pic">
             <span class="room-num">01</span>
-            <span class="room-soon" data-i18n data-zh-hans="准备中" data-en="Coming soon" data-vi="Sắp có">準備中</span>
-            <span class="room-pend">PENDING</span>
+            <span class="room-soon" data-i18n data-zh-hans="夢隙：醒來之前" data-en="夢隙：醒來之前" data-vi="夢隙：醒來之前">夢隙：醒來之前</span>
+            <span class="room-pend">OPEN</span>
           </div>
           <span class="ec bl">▸ 01</span><span class="ec br">01A</span>
         </div>
-        <span class="vh" data-i18n data-zh-hans="第 01 组：作品准备中" data-en="Team 01: work coming soon" data-vi="Nhóm 01: tác phẩm sắp có">第 01 組：作品準備中</span>
+        <span class="vh" data-i18n data-zh-hans="第 01 组：夢隙：醒來之前（另开新分页）" data-en="Team 01: 夢隙：醒來之前 (opens in a new tab)" data-vi="Nhóm 01: 夢隙：醒來之前 (mở trong thẻ mới)">第 01 組：夢隙：醒來之前（另開新分頁）</span>
+        </a>
       </li>
-      <li class="room" tabindex="0" style="--tint:#6cc9c0;--i:1" data-n="2">
+      <li class="room is-open" style="--tint:#6cc9c0;--i:1" data-n="2">
+        <a class="room-link" href="https://time-rift-rooms.o1r2g3a4n5i6z7e8.workers.dev/02/" target="_blank" rel="noopener">
         <div class="room-film" aria-hidden="true">
           <span class="ec tl">TEAM 02</span><span class="ec tr">W09</span>
           <div class="room-pic">
             <span class="room-num">02</span>
-            <span class="room-soon" data-i18n data-zh-hans="准备中" data-en="Coming soon" data-vi="Sắp có">準備中</span>
-            <span class="room-pend">PENDING</span>
+            <span class="room-soon" data-i18n data-zh-hans="棉花糖工坊：閉館之後" data-en="棉花糖工坊：閉館之後" data-vi="棉花糖工坊：閉館之後">棉花糖工坊：閉館之後</span>
+            <span class="room-pend">OPEN</span>
           </div>
           <span class="ec bl">▸ 02</span><span class="ec br">02A</span>
         </div>
-        <span class="vh" data-i18n data-zh-hans="第 02 组：作品准备中" data-en="Team 02: work coming soon" data-vi="Nhóm 02: tác phẩm sắp có">第 02 組：作品準備中</span>
+        <span class="vh" data-i18n data-zh-hans="第 02 组：棉花糖工坊：閉館之後（另开新分页）" data-en="Team 02: 棉花糖工坊：閉館之後 (opens in a new tab)" data-vi="Nhóm 02: 棉花糖工坊：閉館之後 (mở trong thẻ mới)">第 02 組：棉花糖工坊：閉館之後（另開新分頁）</span>
+        </a>
       </li>
-      <li class="room" tabindex="0" style="--tint:#a99bf0;--i:2" data-n="3">
+      <li class="room is-open" style="--tint:#a99bf0;--i:2" data-n="3">
+        <a class="room-link" href="https://time-rift-rooms.o1r2g3a4n5i6z7e8.workers.dev/03/" target="_blank" rel="noopener">
         <div class="room-film" aria-hidden="true">
           <span class="ec tl">TEAM 03</span><span class="ec tr">W09</span>
           <div class="room-pic">
             <span class="room-num">03</span>
-            <span class="room-soon" data-i18n data-zh-hans="准备中" data-en="Coming soon" data-vi="Sắp có">準備中</span>
-            <span class="room-pend">PENDING</span>
+            <span class="room-soon" data-i18n data-zh-hans="逃離學院" data-en="逃離學院" data-vi="逃離學院">逃離學院</span>
+            <span class="room-pend">OPEN</span>
           </div>
           <span class="ec bl">▸ 03</span><span class="ec br">03A</span>
         </div>
-        <span class="vh" data-i18n data-zh-hans="第 03 组：作品准备中" data-en="Team 03: work coming soon" data-vi="Nhóm 03: tác phẩm sắp có">第 03 組：作品準備中</span>
+        <span class="vh" data-i18n data-zh-hans="第 03 组：逃離學院（另开新分页）" data-en="Team 03: 逃離學院 (opens in a new tab)" data-vi="Nhóm 03: 逃離學院 (mở trong thẻ mới)">第 03 組：逃離學院（另開新分頁）</span>
+        </a>
       </li>
-      <li class="room" tabindex="0" style="--tint:#f29aa8;--i:3" data-n="4">
+      <li class="room is-open" style="--tint:#f29aa8;--i:3" data-n="4">
+        <a class="room-link" href="https://time-rift-rooms.o1r2g3a4n5i6z7e8.workers.dev/04/" target="_blank" rel="noopener">
         <div class="room-film" aria-hidden="true">
           <span class="ec tl">TEAM 04</span><span class="ec tr">W09</span>
           <div class="room-pic">
             <span class="room-num">04</span>
-            <span class="room-soon" data-i18n data-zh-hans="准备中" data-en="Coming soon" data-vi="Sắp có">準備中</span>
-            <span class="room-pend">PENDING</span>
+            <span class="room-soon" data-i18n data-zh-hans="不存在的第八節課" data-en="不存在的第八節課" data-vi="不存在的第八節課">不存在的第八節課</span>
+            <span class="room-pend">OPEN</span>
           </div>
           <span class="ec bl">▸ 04</span><span class="ec br">04A</span>
         </div>
-        <span class="vh" data-i18n data-zh-hans="第 04 组：作品准备中" data-en="Team 04: work coming soon" data-vi="Nhóm 04: tác phẩm sắp có">第 04 組：作品準備中</span>
+        <span class="vh" data-i18n data-zh-hans="第 04 组：不存在的第八節課（另开新分页）" data-en="Team 04: 不存在的第八節課 (opens in a new tab)" data-vi="Nhóm 04: 不存在的第八節課 (mở trong thẻ mới)">第 04 組：不存在的第八節課（另開新分頁）</span>
+        </a>
       </li>
-      <li class="room" tabindex="0" style="--tint:#9fd07c;--i:4" data-n="5">
+      <li class="room is-open" style="--tint:#9fd07c;--i:4" data-n="5">
+        <a class="room-link" href="https://time-rift-rooms.o1r2g3a4n5i6z7e8.workers.dev/05/" target="_blank" rel="noopener">
         <div class="room-film" aria-hidden="true">
           <span class="ec tl">TEAM 05</span><span class="ec tr">W09</span>
           <div class="room-pic">
             <span class="room-num">05</span>
-            <span class="room-soon" data-i18n data-zh-hans="准备中" data-en="Coming soon" data-vi="Sắp có">準備中</span>
-            <span class="room-pend">PENDING</span>
+            <span class="room-soon" data-i18n data-zh-hans="天亮前交出去" data-en="天亮前交出去" data-vi="天亮前交出去">天亮前交出去</span>
+            <span class="room-pend">OPEN</span>
           </div>
           <span class="ec bl">▸ 05</span><span class="ec br">05A</span>
         </div>
-        <span class="vh" data-i18n data-zh-hans="第 05 组：作品准备中" data-en="Team 05: work coming soon" data-vi="Nhóm 05: tác phẩm sắp có">第 05 組：作品準備中</span>
+        <span class="vh" data-i18n data-zh-hans="第 05 组：天亮前交出去（另开新分页）" data-en="Team 05: 天亮前交出去 (opens in a new tab)" data-vi="Nhóm 05: 天亮前交出去 (mở trong thẻ mới)">第 05 組：天亮前交出去（另開新分頁）</span>
+        </a>
       </li>
-      <li class="room" tabindex="0" style="--tint:#f2c27a;--i:5" data-n="6">
+      <li class="room is-open" style="--tint:#f2c27a;--i:5" data-n="6">
+        <a class="room-link" href="https://time-rift-rooms.o1r2g3a4n5i6z7e8.workers.dev/06/" target="_blank" rel="noopener">
         <div class="room-film" aria-hidden="true">
           <span class="ec tl">TEAM 06</span><span class="ec tr">W09</span>
           <div class="room-pic">
             <span class="room-num">06</span>
-            <span class="room-soon" data-i18n data-zh-hans="准备中" data-en="Coming soon" data-vi="Sắp có">準備中</span>
-            <span class="room-pend">PENDING</span>
+            <span class="room-soon" data-i18n data-zh-hans="餘燼裡的第六人" data-en="餘燼裡的第六人" data-vi="餘燼裡的第六人">餘燼裡的第六人</span>
+            <span class="room-pend">OPEN</span>
           </div>
           <span class="ec bl">▸ 06</span><span class="ec br">06A</span>
         </div>
-        <span class="vh" data-i18n data-zh-hans="第 06 组：作品准备中" data-en="Team 06: work coming soon" data-vi="Nhóm 06: tác phẩm sắp có">第 06 組：作品準備中</span>
+        <span class="vh" data-i18n data-zh-hans="第 06 组：餘燼裡的第六人（另开新分页）" data-en="Team 06: 餘燼裡的第六人 (opens in a new tab)" data-vi="Nhóm 06: 餘燼裡的第六人 (mở trong thẻ mới)">第 06 組：餘燼裡的第六人（另開新分頁）</span>
+        </a>
       </li>
-      <li class="room" tabindex="0" style="--tint:#7fb6f0;--i:6" data-n="7">
+      <li class="room is-open" style="--tint:#7fb6f0;--i:6" data-n="7">
+        <a class="room-link" href="https://time-rift-rooms.o1r2g3a4n5i6z7e8.workers.dev/07/" target="_blank" rel="noopener">
         <div class="room-film" aria-hidden="true">
           <span class="ec tl">TEAM 07</span><span class="ec tr">W09</span>
           <div class="room-pic">
             <span class="room-num">07</span>
-            <span class="room-soon" data-i18n data-zh-hans="准备中" data-en="Coming soon" data-vi="Sắp có">準備中</span>
-            <span class="room-pend">PENDING</span>
+            <span class="room-soon" data-i18n data-zh-hans="禁忌實驗室：古堡逃脫" data-en="禁忌實驗室：古堡逃脫" data-vi="禁忌實驗室：古堡逃脫">禁忌實驗室：古堡逃脫</span>
+            <span class="room-pend">OPEN</span>
           </div>
           <span class="ec bl">▸ 07</span><span class="ec br">07A</span>
         </div>
-        <span class="vh" data-i18n data-zh-hans="第 07 组：作品准备中" data-en="Team 07: work coming soon" data-vi="Nhóm 07: tác phẩm sắp có">第 07 組：作品準備中</span>
+        <span class="vh" data-i18n data-zh-hans="第 07 组：禁忌實驗室：古堡逃脫（另开新分页）" data-en="Team 07: 禁忌實驗室：古堡逃脫 (opens in a new tab)" data-vi="Nhóm 07: 禁忌實驗室：古堡逃脫 (mở trong thẻ mới)">第 07 組：禁忌實驗室：古堡逃脫（另開新分頁）</span>
+        </a>
       </li>
-      <li class="room" tabindex="0" style="--tint:#cfa3ec;--i:7" data-n="8">
+      <li class="room is-open" style="--tint:#cfa3ec;--i:7" data-n="8">
+        <a class="room-link" href="https://time-rift-rooms.o1r2g3a4n5i6z7e8.workers.dev/08/" target="_blank" rel="noopener">
         <div class="room-film" aria-hidden="true">
           <span class="ec tl">TEAM 08</span><span class="ec tr">W09</span>
           <div class="room-pic">
             <span class="room-num">08</span>
-            <span class="room-soon" data-i18n data-zh-hans="准备中" data-en="Coming soon" data-vi="Sắp có">準備中</span>
-            <span class="room-pend">PENDING</span>
+            <span class="room-soon" data-i18n data-zh-hans="公主今晚必須死" data-en="公主今晚必須死" data-vi="公主今晚必須死">公主今晚必須死</span>
+            <span class="room-pend">OPEN</span>
           </div>
           <span class="ec bl">▸ 08</span><span class="ec br">08A</span>
         </div>
-        <span class="vh" data-i18n data-zh-hans="第 08 组：作品准备中" data-en="Team 08: work coming soon" data-vi="Nhóm 08: tác phẩm sắp có">第 08 組：作品準備中</span>
+        <span class="vh" data-i18n data-zh-hans="第 08 组：公主今晚必須死（另开新分页）" data-en="Team 08: 公主今晚必須死 (opens in a new tab)" data-vi="Nhóm 08: 公主今晚必須死 (mở trong thẻ mới)">第 08 組：公主今晚必須死（另開新分頁）</span>
+        </a>
       </li>
-      <li class="room" tabindex="0" style="--tint:#f0ab84;--i:8" data-n="9">
+      <li class="room is-open" style="--tint:#f0ab84;--i:8" data-n="9">
+        <a class="room-link" href="https://time-rift-rooms.o1r2g3a4n5i6z7e8.workers.dev/09/" target="_blank" rel="noopener">
         <div class="room-film" aria-hidden="true">
           <span class="ec tl">TEAM 09</span><span class="ec tr">W09</span>
           <div class="room-pic">
             <span class="room-num">09</span>
-            <span class="room-soon" data-i18n data-zh-hans="准备中" data-en="Coming soon" data-vi="Sắp có">準備中</span>
-            <span class="room-pend">PENDING</span>
+            <span class="room-soon" data-i18n data-zh-hans="3D 病房：消失的病歷" data-en="3D 病房：消失的病歷" data-vi="3D 病房：消失的病歷">3D 病房：消失的病歷</span>
+            <span class="room-pend">OPEN</span>
           </div>
           <span class="ec bl">▸ 09</span><span class="ec br">09A</span>
         </div>
-        <span class="vh" data-i18n data-zh-hans="第 09 组：作品准备中" data-en="Team 09: work coming soon" data-vi="Nhóm 09: tác phẩm sắp có">第 09 組：作品準備中</span>
+        <span class="vh" data-i18n data-zh-hans="第 09 组：3D 病房：消失的病歷（另开新分页）" data-en="Team 09: 3D 病房：消失的病歷 (opens in a new tab)" data-vi="Nhóm 09: 3D 病房：消失的病歷 (mở trong thẻ mới)">第 09 組：3D 病房：消失的病歷（另開新分頁）</span>
+        </a>
       </li>
-      <li class="room" tabindex="0" style="--tint:#86d6ae;--i:9" data-n="10">
+      <li class="room is-open" style="--tint:#86d6ae;--i:9" data-n="10">
+        <a class="room-link" href="https://time-rift-rooms.o1r2g3a4n5i6z7e8.workers.dev/10/" target="_blank" rel="noopener">
         <div class="room-film" aria-hidden="true">
           <span class="ec tl">TEAM 10</span><span class="ec tr">W09</span>
           <div class="room-pic">
             <span class="room-num">10</span>
-            <span class="room-soon" data-i18n data-zh-hans="准备中" data-en="Coming soon" data-vi="Sắp có">準備中</span>
-            <span class="room-pend">PENDING</span>
+            <span class="room-soon" data-i18n data-zh-hans="密室逃脫之在杰難逃" data-en="密室逃脫之在杰難逃" data-vi="密室逃脫之在杰難逃">密室逃脫之在杰難逃</span>
+            <span class="room-pend">OPEN</span>
           </div>
           <span class="ec bl">▸ 10</span><span class="ec br">10A</span>
         </div>
-        <span class="vh" data-i18n data-zh-hans="第 10 组：作品准备中" data-en="Team 10: work coming soon" data-vi="Nhóm 10: tác phẩm sắp có">第 10 組：作品準備中</span>
+        <span class="vh" data-i18n data-zh-hans="第 10 组：密室逃脫之在杰難逃（另开新分页）" data-en="Team 10: 密室逃脫之在杰難逃 (opens in a new tab)" data-vi="Nhóm 10: 密室逃脫之在杰難逃 (mở trong thẻ mới)">第 10 組：密室逃脫之在杰難逃（另開新分頁）</span>
+        </a>
       </li>
-      <li class="room" tabindex="0" style="--tint:#e8cf6e;--i:10" data-n="11">
+      <li class="room is-open" style="--tint:#e8cf6e;--i:10" data-n="11">
+        <a class="room-link" href="https://time-rift-rooms.o1r2g3a4n5i6z7e8.workers.dev/11/" target="_blank" rel="noopener">
         <div class="room-film" aria-hidden="true">
           <span class="ec tl">TEAM 11</span><span class="ec tr">W09</span>
           <div class="room-pic">
             <span class="room-num">11</span>
-            <span class="room-soon" data-i18n data-zh-hans="准备中" data-en="Coming soon" data-vi="Sắp có">準備中</span>
-            <span class="room-pend">PENDING</span>
+            <span class="room-soon" data-i18n data-zh-hans="黃燈之後" data-en="黃燈之後" data-vi="黃燈之後">黃燈之後</span>
+            <span class="room-pend">OPEN</span>
           </div>
           <span class="ec bl">▸ 11</span><span class="ec br">11A</span>
         </div>
-        <span class="vh" data-i18n data-zh-hans="第 11 组：作品准备中" data-en="Team 11: work coming soon" data-vi="Nhóm 11: tác phẩm sắp có">第 11 組：作品準備中</span>
+        <span class="vh" data-i18n data-zh-hans="第 11 组：黃燈之後（另开新分页）" data-en="Team 11: 黃燈之後 (opens in a new tab)" data-vi="Nhóm 11: 黃燈之後 (mở trong thẻ mới)">第 11 組：黃燈之後（另開新分頁）</span>
+        </a>
       </li>
-      <li class="room" tabindex="0" style="--tint:#93aef2;--i:11" data-n="12">
+      <li class="room is-open" style="--tint:#93aef2;--i:11" data-n="12">
+        <a class="room-link" href="https://time-rift-rooms.o1r2g3a4n5i6z7e8.workers.dev/12/" target="_blank" rel="noopener">
         <div class="room-film" aria-hidden="true">
           <span class="ec tl">TEAM 12</span><span class="ec tr">W09</span>
           <div class="room-pic">
             <span class="room-num">12</span>
-            <span class="room-soon" data-i18n data-zh-hans="准备中" data-en="Coming soon" data-vi="Sắp có">準備中</span>
-            <span class="room-pend">PENDING</span>
+            <span class="room-soon" data-i18n data-zh-hans="夜自習：第零節" data-en="夜自習：第零節" data-vi="夜自習：第零節">夜自習：第零節</span>
+            <span class="room-pend">OPEN</span>
           </div>
           <span class="ec bl">▸ 12</span><span class="ec br">12A</span>
         </div>
-        <span class="vh" data-i18n data-zh-hans="第 12 组：作品准备中" data-en="Team 12: work coming soon" data-vi="Nhóm 12: tác phẩm sắp có">第 12 組：作品準備中</span>
+        <span class="vh" data-i18n data-zh-hans="第 12 组：夜自習：第零節（另开新分页）" data-en="Team 12: 夜自習：第零節 (opens in a new tab)" data-vi="Nhóm 12: 夜自習：第零節 (mở trong thẻ mới)">第 12 組：夜自習：第零節（另開新分頁）</span>
+        </a>
       </li>
-      <li class="room" tabindex="0" style="--tint:#e2a6d8;--i:12" data-n="13">
+      <li class="room is-wip" style="--tint:#e2a6d8;--i:12" data-n="13">
+        <a class="room-link" href="https://time-rift-rooms.o1r2g3a4n5i6z7e8.workers.dev/13/" target="_blank" rel="noopener">
         <div class="room-film" aria-hidden="true">
           <span class="ec tl">TEAM 13</span><span class="ec tr">W09</span>
           <div class="room-pic">
             <span class="room-num">13</span>
-            <span class="room-soon" data-i18n data-zh-hans="准备中" data-en="Coming soon" data-vi="Sắp có">準備中</span>
+            <span class="room-soon" data-i18n data-zh-hans="整理中" data-en="In progress" data-vi="Đang hoàn thiện">整理中</span>
             <span class="room-pend">PENDING</span>
           </div>
           <span class="ec bl">▸ 13</span><span class="ec br">13A</span>
         </div>
-        <span class="vh" data-i18n data-zh-hans="第 13 组：作品准备中" data-en="Team 13: work coming soon" data-vi="Nhóm 13: tác phẩm sắp có">第 13 組：作品準備中</span>
+        <span class="vh" data-i18n data-zh-hans="第 13 组：午夜鐘聲，南瓜學院（整理中，另开新分页）" data-en="Team 13: 午夜鐘聲，南瓜學院 (in progress, opens in a new tab)" data-vi="Nhóm 13: 午夜鐘聲，南瓜學院 (đang hoàn thiện, mở trong thẻ mới)">第 13 組：午夜鐘聲，南瓜學院（整理中，另開新分頁）</span>
+        </a>
       </li>
-      <li class="room" tabindex="0" style="--tint:#f5bb92;--i:13" data-n="14">
+      <li class="room is-wip" style="--tint:#f5bb92;--i:13" data-n="14">
+        <a class="room-link" href="https://time-rift-rooms.o1r2g3a4n5i6z7e8.workers.dev/14/" target="_blank" rel="noopener">
         <div class="room-film" aria-hidden="true">
           <span class="ec tl">TEAM 14</span><span class="ec tr">W09</span>
           <div class="room-pic">
             <span class="room-num">14</span>
-            <span class="room-soon" data-i18n data-zh-hans="准备中" data-en="Coming soon" data-vi="Sắp có">準備中</span>
+            <span class="room-soon" data-i18n data-zh-hans="整理中" data-en="In progress" data-vi="Đang hoàn thiện">整理中</span>
             <span class="room-pend">PENDING</span>
           </div>
           <span class="ec bl">▸ 14</span><span class="ec br">14A</span>
         </div>
-        <span class="vh" data-i18n data-zh-hans="第 14 组：作品准备中" data-en="Team 14: work coming soon" data-vi="Nhóm 14: tác phẩm sắp có">第 14 組：作品準備中</span>
+        <span class="vh" data-i18n data-zh-hans="第 14 组：回生病院：第44號病患（整理中，另开新分页）" data-en="Team 14: 回生病院：第44號病患 (in progress, opens in a new tab)" data-vi="Nhóm 14: 回生病院：第44號病患 (đang hoàn thiện, mở trong thẻ mới)">第 14 組：回生病院：第44號病患（整理中，另開新分頁）</span>
+        </a>
       </li>
       <li class="room" tabindex="0" style="--tint:#a6dba0;--i:14" data-n="15">
         <div class="room-film" aria-hidden="true">

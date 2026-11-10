@@ -6,7 +6,8 @@
      另外一條有鐘塔的膠捲也從裂縫轉出來，往右邊飛出畫面。
    - 膠捲照物理規律彎：真的底片只能往正面、背面彎，不能在自己的平面裡往旁邊彎；所以寬的方向一定垂直於彎曲的方向，
      直的地方慢慢轉向鏡頭，扭轉沿著膠捲平均分散（不會突然翻過去）。滑鼠碰到時起的波也是往正反面晃。
-   - 作品還沒交：作品格是還在沖洗的底片（這一組的色調、外框大數字、TEAM nn、PENDING、準備中），點了沒有反應。
+   - 作品格（大數字、TEAM nn、OPEN／PENDING、遊戲名稱或整理中／準備中）：交了作品的組點一下（手機點一下、鍵盤 Enter），
+     另開新分頁進入作品站 time-rift-rooms 上那一組的遊戲（網址在 index.html 每一格的 a.room-link）；沒有組的格子（15）點了沒有反應。
    - 開場：裂縫亮起來，主時間線流進去，5 條從裂縫往外長，長過哪一組的作品格，那一格才顯影。
    - 滑鼠：鏡頭跟著平移（近的動得多、遠的動得少）；移到作品格上，那一格往鏡頭浮起、變亮，那條膠捲起一個小波，其他組稍微暗下來。
    - 滑鼠移到作品格上（手機上點一下、鍵盤用 Tab 選到）：那一格浮起來，缺掉的方塊一塊一塊補回來（資料暫時恢復），移開後又慢慢缺回去。
@@ -88,7 +89,7 @@
   })();
 
   /* ---------- 作品格的畫面（膠捲上那一長格裡面的圖）：15 組統一淡藍色，有「資訊缺失」的像素感 ----------
-     貼圖的三個顏色通道各放一層：R＝大數字（實心，著色器把它變成一格一格的方塊、有些方塊缺掉）、G＝小字（TEAM nn、PENDING、準備中，保持清楚）、
+     貼圖的三個顏色通道各放一層：R＝大數字（實心，著色器把它變成一格一格的方塊、有些方塊缺掉）、G＝小字（TEAM nn、OPEN／PENDING、遊戲名稱，保持清楚）、
      B＝底的明暗（中間亮、四周暗）。真正的顏色在著色器裡上。 */
   const PW = 512, PH = 256, PI = 6, portalCv = document.createElement("canvas");   // 一組一格 512×256，四周留 6 像素（縮小時不會滲到隔壁）
   portalCv.width = 4 * PW; portalCv.height = 4 * PH;
@@ -123,7 +124,8 @@
       [...n].forEach((dg, q) => DIGITS[+dg].forEach((row, ry) => [...row].forEach((bit, rx) => { if (bit === "1") g.fillRect(x + (c0 + q * 6 + rx) * cw, y + (r0 + ry) * ch, cw, ch); })));
       g.fillStyle = "rgb(0,255,0)"; g.textBaseline = "alphabetic";   // G：小字
       g.textAlign = "left"; g.font = `700 20px ${MONO}`; spaced(true); g.fillText(`TEAM ${n}`, x + 20, y + 34);
-      g.textAlign = "right"; g.font = `700 15px ${MONO}`; g.globalAlpha = 0.6; g.fillText("PENDING", x + w - 20, y + 33); g.globalAlpha = 1; spaced(false);
+      const pend = li.querySelector(".room-pend");   // OPEN（有作品）或 PENDING
+      g.textAlign = "right"; g.font = `700 15px ${MONO}`; g.globalAlpha = 0.6; g.fillText(pend ? pend.textContent : "PENDING", x + w - 20, y + 33); g.globalAlpha = 1; spaced(false);
       g.textAlign = "left"; g.font = `700 30px ${SANS}`; g.fillText(soonText(li), x + 20, y + h - 20);
       g.restore();
     });
@@ -505,7 +507,7 @@
       const s = add({ kind: "spoke", phys: true, g, seed: 3 + g, tint: 3 * g + 1, w: WS, v: 0, blur: 0, sp: 0.06, dRef: d, grow: 2.2, hj: [h0, h0 + 3], P });
       for (let k = 0; k < 3 && 3 * g + k < N; k++) {
         const i = 3 * g + k, ot = oldT[i];
-        TEAM[i] = { i, k, j: k, li: roomEls[i], s, hl: ot ? ot.hl : 0, dev: ot ? ot.dev : REDUCE ? 1 : 0, on: ot ? ot.on : false, rec: ot ? ot.rec : 0, poly: null, z: 99, cx: 0, cy: 0 };
+        TEAM[i] = { i, k, j: k, li: roomEls[i], a: roomEls[i].querySelector("a.room-link"), s, hl: ot ? ot.hl : 0, dev: ot ? ot.dev : REDUCE ? 1 : 0, on: ot ? ot.on : false, rec: ot ? ot.rec : 0, poly: null, z: 99, cx: 0, cy: 0 };
       }
     });
     S.forEach((s, i) => build(s, old[i]));
@@ -708,17 +710,25 @@
     ptr = { x, y, t, touch: e.pointerType !== "mouse" }; markInput(); wake();
   });
   stage.addEventListener("pointerleave", () => { ptr = null; ptrV = 0; wake(); });
+  // 螢幕上 (x, y) 落在哪一組的作品格（已經顯影、最前面的那一格；沒有就是 -1）
+  function teamAt(x, y) { let best = 1e9, hit = -1; TEAM.forEach((tm) => { if (tm.poly && tm.on && tm.z < best && inPoly(tm.poly, x, y)) { best = tm.z; hit = tm.i; } }); return hit; }
   // 手機、平板沒有滑鼠：點一下作品格，那一格浮起來、資料恢復 2.8 秒（鏡頭不跟著手指跑，捲動頁面時才不會晃）
   stage.addEventListener("pointerdown", (e) => {
     const r = stage.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
     ptr = { x, y, t: performance.now(), touch: e.pointerType !== "mouse" }; markInput();
-    if (ptr.touch) { let best = 1e9, hit = -1; TEAM.forEach((tm) => { if (tm.poly && tm.on && tm.z < best && inPoly(tm.poly, x, y)) { best = tm.z; hit = tm.i; } }); if (hit >= 0) pin = { i: hit, until: performance.now() + 2800 }; }
+    if (ptr.touch) { const hit = teamAt(x, y); if (hit >= 0) pin = { i: hit, until: performance.now() + 2800 }; }
     wake();
   });
-  // 鍵盤：15 組的清單（給讀屏軟體，看不到）每一格都可以用 Tab 選到，選到哪一組，畫面上那一格就浮起來、資料恢復
+  // 點作品格（滑鼠、手指都是 click）：另開新分頁進入那一組的密室；點到介紹、週次列或還沒有組的格子不理
+  stage.addEventListener("click", (e) => {
+    if (!arrDone || e.target.closest("a, button, .w9-intro, .pager")) return;
+    const r = stage.getBoundingClientRect(), hit = teamAt(e.clientX - r.left, e.clientY - r.top);
+    if (hit >= 0 && TEAM[hit].a) window.open(TEAM[hit].a.href, "_blank", "noopener");
+  });
+  // 鍵盤：15 組的清單（給讀屏軟體，看不到）每一格都可以用 Tab 選到（有作品的是格子裡的連結，Enter 就進去），選到哪一組，畫面上那一格就浮起來、資料恢復
   roomEls.forEach((li, i) => {
-    li.addEventListener("focus", () => { kbd = i; markInput(); wake(); });
-    li.addEventListener("blur", () => { if (kbd === i) kbd = -1; wake(); });
+    li.addEventListener("focusin", () => { kbd = i; markInput(); wake(); });
+    li.addEventListener("focusout", () => { if (kbd === i) kbd = -1; wake(); });
   });
   ["keydown", "wheel", "scroll"].forEach((ev) => window.addEventListener(ev, markInput, { passive: true }));
   function kick(s, at, amp) { s.live = true; const sig = Math.max(3, (s.hw / s.sp) * 0.9); for (let k = Math.max(1, (at - 4 * sig) | 0); k < Math.min(s.b.n - 1, at + 4 * sig); k++) s.vel[k] += amp * Math.exp(-((k - at) * (k - at)) / (sig * sig)); }
@@ -805,7 +815,8 @@
     });
     // 滑鼠：先看作品格（最前面的），再看膠捲
     let hp = -1;
-    if (ptr && !ptr.touch && arrDone) { let best = 1e9; TEAM.forEach((tm) => { if (tm.poly && tm.on && tm.z < best && inPoly(tm.poly, ptr.x, ptr.y)) { best = tm.z; hp = tm.i; } }); }
+    if (ptr && !ptr.touch && arrDone) hp = teamAt(ptr.x, ptr.y);
+    { const cur = hp >= 0 && TEAM[hp].a ? "pointer" : ""; if (stage.style.cursor !== cur) stage.style.cursor = cur; }   // 有作品的格子：手指游標
     if (hp < 0 && pin && now < pin.until && TEAM[pin.i].on) hp = pin.i;   // 手機上點了一下
     if (hp < 0 && kbd >= 0 && TEAM[kbd] && TEAM[kbd].on) hp = kbd;           // 鍵盤選到
     if (hp !== hoverP) { if (hp >= 0 && !REDUCE) { const s = TEAM[hp].s; kick(s, Math.max(2, s.kF[0] - Math.round(0.9 / s.sp)), -0.45); } hoverP = hp; }
