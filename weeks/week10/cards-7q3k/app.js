@@ -837,8 +837,22 @@
     turn.innerHTML = '<i class="ins-slab s2"></i><i class="ins-slab s1"></i>';
     // 超過角度有阻力（像橡皮筋：越拉越緊，最多再多 30%）
     const soft = (v, m) => (Math.abs(v) <= m ? v : Math.sign(v) * (m + m * 0.3 * (1 - 1 / (1 + (Math.abs(v) - m) / (m * 0.6)))));
+    const PERSP = 1800;
     function apply() {
       turn.style.setProperty('--rx', rx.toFixed(2) + 'deg'); turn.style.setProperty('--ry', ry.toFixed(2) + 'deg');
+      // 透視補償：靠近你的那一邊投影變大、遠的那邊變小，卡片看起來會偏一邊。
+      // 照 CSS 的轉法（先 rotateY 再 rotateX，再位移）算四個角投影到畫面上的位置，把外框的中心移回正中間（算兩次就很準）
+      const w2 = stage.offsetWidth / 2, h2 = stage.offsetHeight / 2, ca = Math.cos(ry * Math.PI / 180), sa = Math.sin(ry * Math.PI / 180), cb = Math.cos(rx * Math.PI / 180), sb = Math.sin(rx * Math.PI / 180);
+      let tx = 0, ty = 0;
+      for (let it = 0; it < 2; it++) {
+        let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+        for (const x of [-w2, w2]) for (const y of [-h2, h2]) {
+          const xa = x * ca, za = -x * sa, yb = y * cb - za * sb, zb = y * sb + za * cb, k = PERSP / (PERSP - zb), X = (xa + tx) * k, Y = (yb + ty) * k;
+          x0 = Math.min(x0, X); x1 = Math.max(x1, X); y0 = Math.min(y0, Y); y1 = Math.max(y1, Y);
+        }
+        tx -= (x0 + x1) / 2; ty -= (y0 + y1) / 2;
+      }
+      turn.style.setProperty('--tx', tx.toFixed(2) + 'px'); turn.style.setProperty('--ty', ty.toFixed(2) + 'px');
       const mx = 50 + ry / MAXY * 42, my = 50 - rx / MAXX * 42, hyp = Math.min(1, Math.hypot(rx / MAXX, ry / MAXY));
       if (card) {
         const t = $('.card-tilt', card);
@@ -849,11 +863,10 @@
     }
     function frame(now) {
       raf = 0; if (!open) return;
-      const dt = Math.min(0.05, (now - (last || now)) / 1000); last = now;
+      const dt = Math.min(0.1, (now - (last || now)) / 1000); last = now;   // 照真的經過時間算（慢的手機也準時回正）；0.1 秒以內彈簧都穩
       if (!drag) {
-        let tx = target.rx, ty = target.ry;
-        if (now - idle > 1800 && !REDUCED) { const s = now / 1000; tx = 6 * Math.sin(s * 0.9); ty = 12 * Math.sin(s * 0.55 + 1); }   // 沒人動的時候自己輕輕擺
-        vx += (tx - rx) * 75 * dt; vy += (ty - ry) * 75 * dt; vx *= Math.exp(-6.5 * dt); vy *= Math.exp(-6.5 * dt);
+        const tx = target.rx, ty = target.ry;   // 沒人轉的時候就停在正面（不自己擺）
+        vx += (tx - rx) * 70 * dt; vy += (ty - ry) * 70 * dt; vx *= Math.exp(-12 * dt); vy *= Math.exp(-12 * dt);   // 阻尼大：回到正面，不甩過頭
         rx += vx * dt; ry += vy * dt;
       }
       // 轉得快：閃粉從反光的地方灑出來
@@ -885,7 +898,7 @@
       k = (i + list.length) % list.length;
       const d = list[k], old = card;
       card = build(d); turn.append(card); label(d);
-      rx = -6; ry = dir ? -28 * dir : 24; vx = vy = 0; idle = performance.now();   // 一進來就帶一點角度晃回來，光澤馬上跑起來
+      rx = 0; ry = 0; vx = vy = 0; idle = performance.now(); target = { rx: 0, ry: 0 };   // 正面出來
       if (old) {
         if (G) G.to(old, { opacity: 0, x: (dir || 1) * -80, duration: 0.3, ease: 'power2.in', onComplete: () => old.remove() }); else old.remove();
         if (G) G.fromTo(card, { opacity: 0, x: (dir || 1) * 80 }, { opacity: 1, x: 0, duration: 0.35, ease: 'power2.out' });
@@ -931,11 +944,9 @@
       if (!open) return;
       const now = performance.now(); idle = now;
       if (drag) {
+        // 像拿著卡片轉（軌跡球）：手指往右，右緣往後；手指往上，上緣往後（CSS rotateX 正值是上緣往後）
         const dt = Math.max(0.008, (now - drag.t) / 1000), nrx = soft(drag.rx - (e.clientY - drag.y) * 0.28, MAXX), nry = soft(drag.ry + (e.clientX - drag.x) * 0.32, MAXY);
         vx = (nrx - rx) / dt; vy = (nry - ry) / dt; rx = nrx; ry = nry; drag.t = now; wake();
-      } else if (e.pointerType === 'mouse') {
-        const b = stage.getBoundingClientRect();
-        target = { rx: Math.max(-1, Math.min(1, (b.top + b.height / 2 - e.clientY) / (b.height / 2))) * 9, ry: Math.max(-1, Math.min(1, (e.clientX - b.left - b.width / 2) / (b.width / 2))) * -12 };
       }
     });
     const letGo = () => { if (!drag) return; drag = null; turn.classList.remove('drag'); target = { rx: 0, ry: 0 }; idle = performance.now(); };
@@ -955,7 +966,11 @@
     return {
       open: openAt, close, isOpen: () => open,
       step(dir) { if (open) show(k + dir, dir); },
-      hand(nx, ny) { if (!open || drag) return; target = { rx: (0.5 - ny) * 2 * MAXX, ry: -(nx - 0.5) * 2 * MAXY }; idle = performance.now(); },
+      hand(nx, ny) {   // 手在中間一小塊（±0.12）算正面；超過才開始轉
+        if (!open || drag) return;
+        const dz = (v) => (Math.abs(v) < 0.12 ? 0 : (v - Math.sign(v) * 0.12) / 0.38);
+        target = { rx: Math.max(-1, Math.min(1, dz(0.5 - ny))) * MAXX, ry: -Math.max(-1, Math.min(1, dz(nx - 0.5))) * MAXY }; idle = performance.now();   // 手往上：卡面朝上
+      },
       state: () => ({ open, rx, ry, k, n: list.length, name: open ? list[k].name : null })
     };
   })();

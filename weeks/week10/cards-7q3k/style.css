@@ -240,8 +240,10 @@ body.sorting .card-tilt { pointer-events: none; }
 #inspect[data-r="s"] .ins-rays { opacity: .55; background: repeating-conic-gradient(from 0deg, rgba(255, 205, 90, 0) 0 5deg, rgba(255, 205, 90, .55) 5deg 6deg); animation: insspin 120s linear infinite; }
 #inspect[data-r="r"] .ins-rays { opacity: .7; background: radial-gradient(circle, rgba(170, 200, 255, .55), rgba(120, 160, 255, .12) 35%, transparent 60%); }
 @keyframes insspin { to { transform: translate(-50%, -50%) rotate(360deg); } }
-.ins-stage { position: relative; width: min(calc(68vh * 63 / 88), 78vw); aspect-ratio: 63 / 88; perspective: 1400px; }
-.ins-turn { position: absolute; inset: 0; transform-style: preserve-3d; transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); cursor: grab; }
+.ins-stage { position: relative; width: min(calc(68vh * 63 / 88), 78vw); aspect-ratio: 63 / 88; perspective: 1800px; perspective-origin: 50% 50%; }
+/* 繞卡片正中央轉；--tx、--ty 把透視造成的偏移補回來，投影出來的卡片中心一直在正中間 */
+.ins-turn { position: absolute; inset: 0; transform-style: preserve-3d; transform-origin: 50% 50% 0;
+  transform: translate(var(--tx, 0px), var(--ty, 0px)) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); cursor: grab; }
 .ins-turn.drag { cursor: grabbing; }
 .ins-turn .card { position: absolute; inset: 0; width: 100%; cursor: inherit; }
 .ins-turn .card .face, .ins-turn .card .back { box-shadow: none; }
