@@ -274,7 +274,7 @@
     /* 抓起來丟：按在貼紙上才接手這次的滑鼠／手指，其他時候不擋住卡片 */
     function at(e) { return { x: e.clientX, y: e.clientY }; }
     window.addEventListener('pointerdown', (e) => {
-      if (!on.matter || grab || e.target.closest('button')) return;
+      if (!on.matter || grab || e.target.closest('button') || document.body.classList.contains('inspecting')) return;   // 鑑賞模式時貼紙在後面，不接手
       const p = at(e), hit = Query.point(items, p)[0];
       if (!hit) return;
       e.preventDefault(); e.stopPropagation();
@@ -389,7 +389,7 @@
     /* ◆ ★ 卡片正面朝上時，一直有小星星從卡片上飄出來；背面朝上、在最上面的那張也會漏出一點光 */
     function ambient() {
       if (document.hidden) return;
-      const list = $$('.card[data-r="r"], .card[data-r="s"]').filter((c) => c.classList.contains('up') || c.classList.contains('top'));
+      const list = $$(document.body.classList.contains('inspecting') ? '#inspect .card' : '.card[data-r="r"], .card[data-r="s"]').filter((c) => c.dataset.r !== 'c' && (c.classList.contains('up') || c.classList.contains('top')));
       for (const c of list) {
         const r = c.getBoundingClientRect();
         if (r.width < 20 || r.bottom < 0 || r.top > H) continue;
@@ -591,7 +591,8 @@
     const end = () => {
       busy = false; c.classList.add('up');
       if (isNew) $('.art', c).append(el('span', 'new', 'NEW'));
-      have.add(d.id); saveHave();
+      const before = have.size; have.add(d.id); saveHave();
+      if (before < CARDS.length && have.size === CARDS.length) setTimeout(complete, 700);
       setHint('再點一下，收進下面的格子');
     };
     if (!G) { f.style.transform = 'rotateY(180deg)'; sound.card(d); end(); return; }
@@ -647,8 +648,8 @@
     state = 'rank';
     $('#ranktitle').textContent = '我的最愛排行'; $('#ranknote').textContent = '拖拉卡片排名次';
     $('.rankbtns').hidden = false; $('#again').hidden = false;
-    setHint('拖拉下面的卡片排名次・點一張放大看');
-    $$('.card', rank).forEach((c) => { c.onclick = () => { if (!document.body.classList.contains('sorting')) { setHero(c._d); sound.card(c._d, true); } }; });
+    setHint('點一張卡，放大轉動欣賞・拖拉排名次');
+    $$('.card', rank).forEach((c) => { c.onclick = () => { if (!document.body.classList.contains('sorting')) ins.open(c); }; });
     if (window.Sortable) {
       sortable = new Sortable(rank, {
         animation: 200, easing: 'cubic-bezier(.2,.8,.2,1)', draggable: '.card', forceFallback: true, fallbackOnBody: true, fallbackTolerance: 4,
@@ -669,7 +670,7 @@
   function setHero(d) {
     const old = hero;
     hero = makeCard(d, true); hero.classList.add('instack', 'top'); faceUp(hero);
-    hero.onclick = () => sound.card(d);
+    hero.onclick = () => { const c = $$('.card', rank).find((x) => x._d === d); if (c && state === 'rank') ins.open(c, hero); else sound.card(d); };
     spot.append(hero);
     $$('.card', rank).forEach((c) => c.classList.toggle('sel', c._d === d));
     if (G) {
@@ -747,6 +748,7 @@
     function release() { if (target) { fire(target, 'mouseleave', 0, 0); target = null; } sm = null; hist = []; }
     /* 手的位置 → 卡片傾斜：把手掌中心換成卡片上的一個點，當成滑鼠移到那裡 */
     function drive(nx, ny) {
+      if (ins.isOpen()) { ins.hand(nx, ny); return; }
       const t = focusEl();
       if (t !== target) { if (target) fire(target, 'mouseleave', 0, 0); target = t; if (t) fire(t, 'mouseenter', 0, 0); }
       if (!t) return;
@@ -757,7 +759,7 @@
     function wave(now, x) {
       hist.push({ t: now, x });
       while (hist.length && now - hist[0].t > 450) hist.shift();
-      if (hist.length < 3 || now - lastWave < 1100) return;
+      if (hist.length < 3 || now - lastWave < 1100 || ins.isOpen()) return;
       if (Math.abs(x - hist[0].x) > 0.3) { lastWave = now; hist = []; say('ml5', '看到揮手 → 下一步'); next(); }
     }
     function onHands(res) {
@@ -805,6 +807,159 @@
     return { start, stop, feed(res) { active = true; fig.hidden = false; onHands(res); }, quiet() { active = false; release(); } };
   })();
 
+  /* ------------------------------------------------------------ 收集滿 12 張 */
+  function complete() {
+    const r = $('.count').getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
+    $('.count').classList.add('full');
+    fx.burst(innerWidth / 2, innerHeight * 0.42, 's', 160); fx.ring(innerWidth / 2, innerHeight * 0.42, 's', 0, Math.min(innerWidth, innerHeight) * 0.7);
+    for (let i = 0; i < 40; i++) fx.spark(x, y, { colors: fx.GOLD, speed: 220, size: 6, life: 1.2, g: 160 });
+    softFlash('s', 0.35);
+    [0, 1, 2, 3, 4].forEach((i) => sound.note(SCALE[6 + i], i * 0.11, 0.8));
+    say('gsap', '12 張全部收集完成！');
+  }
+
+  /* ------------------------------------------------------------ 鑑賞模式：點一張卡放大，拖曳（或用手、傾斜手機）轉動欣賞卡面 */
+  const ins = (() => {
+    const root = $('#inspect'), turn = $('.ins-turn', root), stage = $('.ins-stage', root), shadow = $('.ins-shadow', root);
+    const MAXY = 38, MAXX = 26;
+    let open = false, list = [], k = 0, card = null, from = null, rx = 0, ry = 0, vx = 0, vy = 0, drag = null, raf = 0, last = 0, idle = 0, target = { rx: 0, ry: 0 }, ext = 0, g0 = null, lastSpark = 0;
+    // 閃粉材質：一張小圖（亮點＋幾顆四角星），宇宙閃粉拿它當遮罩，彩虹只從閃粉的地方透出來
+    (function () {
+      const S = 160, cv = document.createElement('canvas'); cv.width = cv.height = S; const q = cv.getContext('2d');
+      for (let i = 0; i < 430; i++) { q.fillStyle = 'rgba(255,255,255,' + (0.25 + Math.random() * 0.75).toFixed(2) + ')'; q.beginPath(); q.arc(Math.random() * S, Math.random() * S, 0.4 + Math.random() * 1.3, 0, 7); q.fill(); }
+      for (let i = 0; i < 16; i++) {
+        const x = Math.random() * S, y = Math.random() * S, r = 2 + Math.random() * 3.2; q.fillStyle = '#fff';
+        q.beginPath(); q.moveTo(x, y - r); q.lineTo(x + r * 0.2, y); q.lineTo(x, y + r); q.lineTo(x - r * 0.2, y); q.closePath(); q.fill();
+        q.beginPath(); q.moveTo(x - r, y); q.lineTo(x, y + r * 0.2); q.lineTo(x + r, y); q.lineTo(x, y - r * 0.2); q.closePath(); q.fill();
+      }
+      root.style.setProperty('--glitter', 'url(' + cv.toDataURL() + ')');
+    })();
+    turn.innerHTML = '<i class="ins-slab s2"></i><i class="ins-slab s1"></i>';
+    // 超過角度有阻力（像橡皮筋：越拉越緊，最多再多 30%）
+    const soft = (v, m) => (Math.abs(v) <= m ? v : Math.sign(v) * (m + m * 0.3 * (1 - 1 / (1 + (Math.abs(v) - m) / (m * 0.6)))));
+    function apply() {
+      turn.style.setProperty('--rx', rx.toFixed(2) + 'deg'); turn.style.setProperty('--ry', ry.toFixed(2) + 'deg');
+      const mx = 50 + ry / MAXY * 42, my = 50 - rx / MAXX * 42, hyp = Math.min(1, Math.hypot(rx / MAXX, ry / MAXY));
+      if (card) {
+        const t = $('.card-tilt', card);
+        t.style.setProperty('--mx', mx.toFixed(1) + '%'); t.style.setProperty('--my', my.toFixed(1) + '%'); t.style.setProperty('--hyp', hyp.toFixed(3));
+        t.style.setProperty('--px', mx.toFixed(1)); t.style.setProperty('--py', my.toFixed(1)); t.style.setProperty('--tilt', hyp.toFixed(2));
+      }
+      shadow.style.transform = 'translate(' + (-ry * 0.9).toFixed(1) + 'px,' + (rx * 0.5).toFixed(1) + 'px) scale(' + (1 - hyp * 0.1).toFixed(3) + ')';
+    }
+    function frame(now) {
+      raf = 0; if (!open) return;
+      const dt = Math.min(0.05, (now - (last || now)) / 1000); last = now;
+      if (!drag) {
+        let tx = target.rx, ty = target.ry;
+        if (now - idle > 1800 && !REDUCED) { const s = now / 1000; tx = 6 * Math.sin(s * 0.9); ty = 12 * Math.sin(s * 0.55 + 1); }   // 沒人動的時候自己輕輕擺
+        vx += (tx - rx) * 75 * dt; vy += (ty - ry) * 75 * dt; vx *= Math.exp(-6.5 * dt); vy *= Math.exp(-6.5 * dt);
+        rx += vx * dt; ry += vy * dt;
+      }
+      // 轉得快：閃粉從反光的地方灑出來
+      const sp = Math.hypot(vx, vy);
+      if (card && card._d.r !== 'c' && sp > 90 && now - lastSpark > 60) {
+        lastSpark = now; const b = stage.getBoundingClientRect();
+        fx.spark(b.left + b.width * (0.5 + ry / MAXY * 0.4), b.top + b.height * (0.5 - rx / MAXX * 0.4), { colors: card._d.r === 's' ? fx.RAINBOW : fx.SILVER, speed: 120, size: 6, life: 0.8, g: 40 });
+      }
+      apply(); raf = requestAnimationFrame(frame);
+    }
+    const wake = () => { if (!raf && open) { last = 0; raf = requestAnimationFrame(frame); } };
+    function build(d) {
+      const c = makeCard(d, true); tiltDrop($('.card-tilt', c)); faceUp(c);
+      $('.face', c).insertAdjacentHTML('beforeend', '<i class="ins-brush"></i><i class="ins-sparkle"></i><i class="ins-cosmos"></i><i class="ins-glare"></i>');
+      c.onclick = null; return c;
+    }
+    function label(d) {
+      root.dataset.r = d.r; $('.ins-name', root).textContent = d.name; $('.ins-rar', root).textContent = { c: '● 普通', r: '◆ 銀卡', s: '★ 閃卡' }[d.r] + '・元氣 ' + d.hp + '・♪ ' + d.note;
+    }
+    function shine(d, delay) {
+      if (d.r === 'c') return;
+      setTimeout(() => {
+        if (!open) return;
+        const b = stage.getBoundingClientRect(), x = b.left + b.width / 2, y = b.top + b.height / 2;
+        softFlash(d.r, d.r === 's' ? 0.3 : 0.2); fx.ring(x, y, d.r, 0, Math.max(b.width, b.height) * 0.9); fx.burst(x, y, d.r, d.r === 's' ? 110 : 60);
+      }, delay);
+    }
+    function show(i, dir) {
+      k = (i + list.length) % list.length;
+      const d = list[k], old = card;
+      card = build(d); turn.append(card); label(d);
+      rx = -6; ry = dir ? -28 * dir : 24; vx = vy = 0; idle = performance.now();   // 一進來就帶一點角度晃回來，光澤馬上跑起來
+      if (old) {
+        if (G) G.to(old, { opacity: 0, x: (dir || 1) * -80, duration: 0.3, ease: 'power2.in', onComplete: () => old.remove() }); else old.remove();
+        if (G) G.fromTo(card, { opacity: 0, x: (dir || 1) * 80 }, { opacity: 1, x: 0, duration: 0.35, ease: 'power2.out' });
+      }
+      sound.card(d, true); shine(d, old ? 250 : 520);
+      say('gsap', '鑑賞：' + d.name + '（拖曳轉動，放手彈回來）');
+    }
+    function openAt(c, fromEl) {
+      if (open || state !== 'rank' || busy) return;
+      list = $$('.card', rank).map((x) => x._d); from = fromEl || c;
+      open = true; root.hidden = false; document.body.classList.add('inspecting'); $('#phys').style.visibility = 'hidden';
+      g0 = null; target = { rx: 0, ry: 0 };
+      show(list.indexOf(c._d), 0);
+      if (G) {
+        const a = from.getBoundingClientRect(), b = stage.getBoundingClientRect();
+        G.fromTo(stage, { x: a.left + a.width / 2 - (b.left + b.width / 2), y: a.top + a.height / 2 - (b.top + b.height / 2), scale: a.width / b.width }, { x: 0, y: 0, scale: 1, duration: 0.6, ease: 'power3.out' });
+        G.fromTo(root, { opacity: 0 }, { opacity: 1, duration: 0.35, clearProps: 'opacity' });
+        G.fromTo([$('.ins-top', root), $('.ins-x', root), $('.ins-prev', root), $('.ins-next', root), $('.ins-hint', root)], { opacity: 0 }, { opacity: 1, duration: 0.4, delay: 0.3 });
+      }
+      wake();
+    }
+    function close() {
+      if (!open) return;
+      const d = list[k], end = () => {
+        open = false; root.hidden = true; document.body.classList.remove('inspecting'); $('#phys').style.visibility = '';
+        if (card) { card.remove(); card = null; }
+        if (G) G.set(stage, { clearProps: 'all' });
+        if (!hero || hero._d !== d) setHero(d);
+        $$('.card', rank).forEach((x) => x.classList.toggle('sel', x._d === d));
+      };
+      say('gsap', '回到排行');
+      if (G) { G.to(stage, { scale: 0.86, opacity: 0, duration: 0.25, ease: 'power2.in' }); G.to(root, { opacity: 0, duration: 0.3, onComplete() { G.set(root, { clearProps: 'opacity' }); end(); } }); }
+      else end();
+    }
+    // 拖曳轉動
+    stage.addEventListener('pointerdown', (e) => {
+      if (!open) return; e.preventDefault();
+      drag = { x: e.clientX, y: e.clientY, rx, ry, t: performance.now(), px: e.clientX, py: e.clientY }; turn.classList.add('drag');
+      try { stage.setPointerCapture(e.pointerId); } catch (err) { /* 沒關係 */ }
+      sayOnce('gsap', '拖曳轉動卡片：放手後會彈回來');
+    });
+    stage.addEventListener('pointermove', (e) => {
+      if (!open) return;
+      const now = performance.now(); idle = now;
+      if (drag) {
+        const dt = Math.max(0.008, (now - drag.t) / 1000), nrx = soft(drag.rx - (e.clientY - drag.y) * 0.28, MAXX), nry = soft(drag.ry + (e.clientX - drag.x) * 0.32, MAXY);
+        vx = (nrx - rx) / dt; vy = (nry - ry) / dt; rx = nrx; ry = nry; drag.t = now; wake();
+      } else if (e.pointerType === 'mouse') {
+        const b = stage.getBoundingClientRect();
+        target = { rx: Math.max(-1, Math.min(1, (b.top + b.height / 2 - e.clientY) / (b.height / 2))) * 9, ry: Math.max(-1, Math.min(1, (e.clientX - b.left - b.width / 2) / (b.width / 2))) * -12 };
+      }
+    });
+    const letGo = () => { if (!drag) return; drag = null; turn.classList.remove('drag'); target = { rx: 0, ry: 0 }; idle = performance.now(); };
+    stage.addEventListener('pointerup', letGo); stage.addEventListener('pointercancel', letGo);
+    stage.addEventListener('pointerleave', () => { if (!drag) target = { rx: 0, ry: 0 }; });
+    $('.ins-bg', root).addEventListener('click', close);
+    $('.ins-x', root).addEventListener('click', close);
+    $('.ins-prev', root).addEventListener('click', () => show(k - 1, -1));
+    $('.ins-next', root).addEventListener('click', () => show(k + 1, 1));
+    // 傾斜手機（陀螺儀）
+    window.addEventListener('deviceorientation', (e) => {
+      if (!open || drag || e.gamma == null || e.beta == null) return;
+      if (!g0) g0 = { g: e.gamma, b: e.beta };
+      target = { rx: Math.max(-MAXX, Math.min(MAXX, -(e.beta - g0.b) * 1.1)), ry: Math.max(-MAXY, Math.min(MAXY, (e.gamma - g0.g) * 1.3)) };
+      idle = performance.now();
+    });
+    return {
+      open: openAt, close, isOpen: () => open,
+      step(dir) { if (open) show(k + dir, dir); },
+      hand(nx, ny) { if (!open || drag) return; target = { rx: (0.5 - ny) * 2 * MAXX, ry: -(nx - 0.5) * 2 * MAXY }; idle = performance.now(); },
+      state: () => ({ open, rx, ry, k, n: list.length, name: open ? list[k].name : null })
+    };
+  })();
+
   /* ------------------------------------------------------------ 套件列：按名字開關 */
   function toggle(k) {
     if (k === 'ml5') {
@@ -833,6 +988,10 @@
   }
   window.addEventListener('pointerdown', firstTouch, { once: true });
   window.addEventListener('keydown', (e) => {
+    if (ins.isOpen()) {
+      if (e.key === 'Escape') ins.close(); else if (e.key === 'ArrowRight') ins.step(1); else if (e.key === 'ArrowLeft') ins.step(-1);
+      return;
+    }
     if ((e.key === ' ' || e.key === 'Enter' || e.key === 'ArrowRight') && !(e.target instanceof HTMLButtonElement)) { e.preventDefault(); next(); }
   });
   $('#again').addEventListener('click', again);
@@ -848,5 +1007,5 @@
   setTimeout(() => { for (let i = 0; i < 5; i++) { const d = CARDS[Math.floor(Math.random() * CARDS.length)]; phys.sticker(innerWidth * (0.12 + Math.random() * 0.76), -40 - i * 50, d, (Math.random() - 0.5) * 4, 2); } }, 500);
 
   /* 測試用：自動檢查會從這裡看狀態、模擬手勢 */
-  window.club = { next, state: () => state, busy: () => busy, on, hand, cards: CARDS, phys, play, sortByRarity, again, toggle, vanta: () => !!vanta, hero: () => (hero ? hero._d : null) };
+  window.club = { next, state: () => state, busy: () => busy, on, hand, cards: CARDS, phys, play, sortByRarity, again, toggle, ins, vanta: () => !!vanta, hero: () => (hero ? hero._d : null) };
 })();

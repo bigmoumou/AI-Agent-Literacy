@@ -68,6 +68,17 @@
     <p>影像只在這台電腦上處理，不會上傳。</p>
   </figure>
 
+  <!-- 鑑賞模式：點一張卡放大，拖曳（或用手、傾斜手機）轉動欣賞卡面 -->
+  <div id="inspect" hidden>
+    <div class="ins-bg"></div>
+    <div class="ins-rays" aria-hidden="true"></div>
+    <div class="ins-top"><b class="ins-name"></b><span class="ins-rar"></span></div>
+    <div class="ins-stage"><div class="ins-shadow" aria-hidden="true"></div><div class="ins-turn"></div></div>
+    <button class="ins-x" type="button">✕ 關閉</button>
+    <button class="ins-prev" type="button" aria-label="上一張">‹</button>
+    <button class="ins-next" type="button" aria-label="下一張">›</button>
+    <p class="ins-hint">拖曳轉動卡片・‹ › 換一張・Esc 關閉</p>
+  </div>
   <div class="copy">Copyright © 2026 JUNHAO CHEN</div>
   <canvas id="fx" aria-hidden="true"></canvas>
   <div id="flash" aria-hidden="true"></div>

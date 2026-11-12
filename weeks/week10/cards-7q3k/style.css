@@ -231,7 +231,62 @@ body.sorting .card-tilt { pointer-events: none; }
 #cam canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 #cam p { margin: 4px 0 0; font-size: 11px; line-height: 1.4; color: var(--muted); }
 
+/* ------------------------------------------------------------ 鑑賞模式 */
+#inspect { position: fixed; inset: 0; z-index: 26; display: grid; place-items: center; touch-action: none; user-select: none; -webkit-user-select: none; }
+#inspect[hidden] { display: none; }
+.ins-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 60% 55% at 50% 47%, rgba(48, 58, 96, .80), rgba(12, 14, 28, .95) 72%); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); }
+.ins-rays { position: absolute; left: 50%; top: 47%; width: min(150vh, 170vw); aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; pointer-events: none; opacity: 0;
+  -webkit-mask: radial-gradient(circle, #000 12%, transparent 62%); mask: radial-gradient(circle, #000 12%, transparent 62%); }
+#inspect[data-r="s"] .ins-rays { opacity: .55; background: repeating-conic-gradient(from 0deg, rgba(255, 205, 90, 0) 0 5deg, rgba(255, 205, 90, .55) 5deg 6deg); animation: insspin 120s linear infinite; }
+#inspect[data-r="r"] .ins-rays { opacity: .7; background: radial-gradient(circle, rgba(170, 200, 255, .55), rgba(120, 160, 255, .12) 35%, transparent 60%); }
+@keyframes insspin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+.ins-stage { position: relative; width: min(calc(68vh * 63 / 88), 78vw); aspect-ratio: 63 / 88; perspective: 1400px; }
+.ins-turn { position: absolute; inset: 0; transform-style: preserve-3d; transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); cursor: grab; }
+.ins-turn.drag { cursor: grabbing; }
+.ins-turn .card { position: absolute; inset: 0; width: 100%; cursor: inherit; }
+.ins-turn .card .face, .ins-turn .card .back { box-shadow: none; }
+/* 卡片的厚度：後面疊兩片同大小的卡紙，轉的時候從側邊看得到 */
+.ins-slab { position: absolute; inset: 0; border-radius: 5% / 3.6%; background: var(--slab, #d9cdb8); }
+.ins-slab.s1 { transform: translateZ(-2.5px); } .ins-slab.s2 { transform: translateZ(-5px); filter: brightness(.82); }
+#inspect[data-r="r"] { --slab: #c3ccd9; } #inspect[data-r="s"] { --slab: #d6a83c; }
+.ins-shadow { position: absolute; left: 10%; right: 10%; bottom: -9%; height: 9%; border-radius: 50%; background: radial-gradient(rgba(0, 0, 0, .6), transparent 70%); filter: blur(8px); pointer-events: none; }
+.ins-top { position: absolute; top: max(16px, 4vh); left: 0; right: 0; text-align: center; color: #f4efe6; pointer-events: none; z-index: 1; }
+.ins-name { display: block; font-size: clamp(18px, 2.6vh, 26px); letter-spacing: .06em; }
+.ins-rar { display: block; margin-top: 2px; font: 13px/1.4 var(--mono); color: #c9c3b8; letter-spacing: .12em; }
+#inspect[data-r="s"] .ins-name { background: linear-gradient(90deg, #c9982e, #fff1b8 45%, #e2b44a 60%, #c9982e); background-size: 220% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: nameshine 3s linear infinite; }
+#inspect[data-r="r"] .ins-name { background: linear-gradient(90deg, #9aa4b4, #ffffff 45%, #b9c3d2 60%, #9aa4b4); background-size: 220% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: nameshine 3s linear infinite; }
+.ins-x, .ins-prev, .ins-next { position: absolute; z-index: 2; border: 0; background: rgba(255, 255, 255, .1); color: #f4efe6; cursor: pointer; font: inherit; }
+.ins-x { top: max(14px, 3.4vh); right: 18px; padding: 6px 12px; border-radius: 999px; font-size: 14px; }
+.ins-prev, .ins-next { top: 50%; width: 46px; height: 64px; margin-top: -32px; border-radius: 10px; font-size: 34px; line-height: 1; }
+.ins-prev { left: max(12px, 3vw); } .ins-next { right: max(12px, 3vw); }
+.ins-x:hover, .ins-prev:hover, .ins-next:hover { background: rgba(255, 255, 255, .2); }
+.ins-hint { position: absolute; bottom: max(10px, 3vh); left: 0; right: 0; margin: 0; text-align: center; color: #b9b3a8; font-size: 13px; pointer-events: none; }
+/* 跟著角度變的卡面：反光點、閃粉、彩虹宇宙閃粉（★）、拉絲金屬（◆） */
+.ins-glare, .ins-sparkle, .ins-cosmos, .ins-brush { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; }
+.ins-glare { z-index: 6; mix-blend-mode: overlay; opacity: calc(.3 + var(--hyp, 0) * .7);
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, .95), rgba(255, 255, 255, .3) 20%, transparent 46%); }
+.ins-sparkle { z-index: 4; mix-blend-mode: color-dodge; display: none; background-image: var(--glitter); background-size: 36% auto;
+  background-position: calc(var(--mx, 50%) * .7) calc(var(--my, 50%) * .7); opacity: calc(.18 + var(--hyp, 0) * .6); }
+.ins-cosmos { z-index: 5; mix-blend-mode: color-dodge; display: none; opacity: calc(.45 + var(--hyp, 0) * .55);
+  background: linear-gradient(115deg, #ff5fa8, #ffd65c 16%, #6dffc0 32%, #5fb4ff 48%, #b47bff 64%, #ff5fa8 80%, #ffd65c); background-size: 300% 300%;
+  background-position: var(--mx, 50%) var(--my, 50%);
+  /* 兩層遮罩相乘：閃粉的形狀 × 上面強、下面說明文字那一塊淡（字才看得清楚） */
+  -webkit-mask-image: var(--glitter), linear-gradient(#000 0 58%, rgba(0, 0, 0, .22) 66%, rgba(0, 0, 0, .22) 92%, #000);
+  mask-image: var(--glitter), linear-gradient(#000 0 58%, rgba(0, 0, 0, .22) 66%, rgba(0, 0, 0, .22) 92%, #000);
+  -webkit-mask-size: 30% auto, 100% 100%; mask-size: 30% auto, 100% 100%; -webkit-mask-repeat: repeat, no-repeat; mask-repeat: repeat, no-repeat;
+  -webkit-mask-position: calc(var(--mx, 50%) * -.4) calc(var(--my, 50%) * -.4), 0 0; mask-position: calc(var(--mx, 50%) * -.4) calc(var(--my, 50%) * -.4), 0 0;
+  -webkit-mask-composite: source-in; mask-composite: intersect; }
+.ins-brush { z-index: 3; mix-blend-mode: overlay; display: none; opacity: calc(.35 + var(--hyp, 0) * .5);
+  background: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0) 0 2px, rgba(255, 255, 255, .5) 2px 3px, rgba(255, 255, 255, 0) 3px 5px),
+    linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, .7) calc(var(--mx, 50%) * .6 + 20%), transparent 75%); }
+.ins-turn .card[data-r="r"] .ins-sparkle, .ins-turn .card[data-r="s"] .ins-sparkle, .ins-turn .card[data-r="s"] .ins-cosmos, .ins-turn .card[data-r="r"] .ins-brush { display: block; }
+.ins-turn .card[data-r="s"] .ins-sparkle { opacity: calc(.3 + var(--hyp, 0) * .7); }
+.ins-turn .card .ins-sparkle { -webkit-mask-image: linear-gradient(#000 0 58%, rgba(0, 0, 0, .3) 66%, rgba(0, 0, 0, .3) 92%, #000); mask-image: linear-gradient(#000 0 58%, rgba(0, 0, 0, .3) 66%, rgba(0, 0, 0, .3) 92%, #000); }
+/* 收集滿 12 張 */
+.count.full { color: var(--gold, #c9982e); text-shadow: 0 0 10px rgba(255, 210, 100, .9); }
+
 @media (max-width: 640px) {
+  .ins-prev, .ins-next { width: 38px; height: 54px; font-size: 28px; }
   .top { padding: 10px 14px 2px; gap: 10px; }
   .brand span { display: none; }
   #kit { padding: 2px 14px 6px; gap: 2px 10px; font-size: 11px; }
