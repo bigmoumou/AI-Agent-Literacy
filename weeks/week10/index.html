@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<script>
+  // 課程網址：舊的 github.io 和 learning-analytics-tools.pages.dev（2026-10-21 改名前）都轉到 ai-agent-literacy.pages.dev 的同一頁，保留 #t= 等片段
+  if (location.hostname.endsWith("github.io") || /(^|\.)learning-analytics-tools\.pages\.dev$/.test(location.hostname)) {
+    location.replace("https://ai-agent-literacy.pages.dev" + (location.pathname.replace(/^\/(Learning-Analytics-Tools|AI-Agent-Literacy)(?=\/|$)/, "") || "/") + location.search + location.hash);
+  }
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title data-i18n
+  data-zh-hans="Week 10｜东西该放在哪里：前端、后端、数据库"
+  data-en="Week 10 | Where Things Belong: Front-end, Back-end, Database"
+  data-vi="Tuần 10 | Mọi thứ nên đặt ở đâu: front-end, back-end, cơ sở dữ liệu">Week 10｜東西該放在哪裡：前端、後端、資料庫</title>
+<meta name="description" content="Week 10：截至目前，我們做的銀杏地圖、空中之島、期中密室，全部都是前端。這週用一個登入網站看前端是什麼：被 GET 到你電腦上、在瀏覽器裡跑的那一份，所以看得到、改得了、只在這台、各跑各的。前端的登入和註冊都是假的；要保密、要判斷、要共享、要留下來，就交給後端。最後用三個前端套件做練習。" data-i18n-attr="content"
+  data-zh-hans="Week 10：到目前为止，我们做的银杏地图、空中之岛、期中密室，全部都是前端。这周用一个登录网站看前端是什么：被 GET 到你电脑上、在浏览器里跑的那一份，所以看得到、改得了、只在这台、各跑各的。前端的登录和注册都是假的；要保密、要判断、要共享、要留下来，就交给后端。最后用三个前端软件包做练习。"
+  data-en="Week 10: everything we have built so far (the ginkgo map, Sky Island, the midterm escape rooms) is front-end. This week uses a login site to show what front-end is: the copy that is fetched (GET) to your computer and runs in your browser, so it can be seen, can be changed, lives only on this machine, and runs separately for everyone. Front-end login and sign-up are fake; anything that must be kept secret, judged, shared or kept goes to the back-end. The practice uses three front-end packages."
+  data-vi="Tuần 10: mọi thứ chúng ta đã làm đến giờ (bản đồ bạch quả, Đảo trên trời, phòng thoát hiểm giữa kỳ) đều là front-end. Tuần này dùng một trang đăng nhập để xem front-end là gì: bản được GET về máy bạn và chạy trong trình duyệt, nên xem được, sửa được, chỉ nằm trên máy này và mỗi người chạy một bản riêng. Đăng nhập và đăng ký ở front-end đều là giả; cần giữ bí mật, cần phán định, cần chia sẻ, cần lưu lại thì giao cho back-end. Bài luyện tập dùng ba gói front-end.">
+<meta name="author" content="JUNHAO CHEN">
+<meta name="copyright" content="© 2026 JUNHAO CHEN">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+<link rel="stylesheet" href="../../assets/week.css">
+<!-- 多語系要比其他程式先載入（不要 defer） -->
+<script src="../../assets/i18n-strings.js"></script>
+<script src="../../assets/i18n.js"></script>
+<script src="../../assets/course.js" defer></script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23f6efdc'/%3E%3Cpath d='M9.5 24v-5M16 24v-9M22.5 24V8' stroke='%238a5400' stroke-width='4.2'/%3E%3C/svg%3E">
+</head>
+<body data-root="../../">
+<div class="page">
+  <header class="top">
+    <a class="brand" href="../../">
+      <span class="brand-name">AI Agent Literacy</span>
+      <span class="brand-sub" data-ui="brand.sub">學習分析工具・NTNU・Week 1 – 16</span>
+    </a>
+    <a class="pill nav-works" href="../../works/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H5a.5.5 0 0 1-.5-.5V5a.5.5 0 0 1 .5-.5zm9 0h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5h-5a.5.5 0 0 1-.5-.5V5a.5.5 0 0 1 .5-.5zm-9 9h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H5a.5.5 0 0 1-.5-.5v-5a.5.5 0 0 1 .5-.5zm9 0h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5h-5a.5.5 0 0 1-.5-.5v-5a.5.5 0 0 1 .5-.5z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span data-ui="nav.works">作品集</span></a>
+    <a class="pill icon-only nav-gh" href="https://github.com/bigmoumou/AI-Agent-Literacy" aria-label="GitHub 原始碼" data-ui-attr="aria-label:home.github"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2.2a9.8 9.8 0 0 0-3.1 19.1c.5.1.7-.2.7-.5v-1.7c-2.7.6-3.3-1.3-3.3-1.3-.4-1.1-1.1-1.4-1.1-1.4-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.3-1.1.6-1.3-2.2-.2-4.5-1.1-4.5-4.9 0-1.1.4-2 1-2.7-.1-.2-.4-1.2.1-2.6 0 0 .8-.3 2.7 1a9.4 9.4 0 0 1 4.9 0c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.6.6.7 1 1.6 1 2.7 0 3.8-2.3 4.7-4.5 4.9.4.3.7.9.7 1.8v2.7c0 .3.2.6.7.5A9.8 9.8 0 0 0 12 2.2z"/></svg></a>
+    <button class="pill icon-only" id="themeBtn" type="button">深色</button>
+  </header>
+
+  <main>
+    <div class="head">
+      <p class="kicker"><span class="dot" aria-hidden="true"></span>WEEK 10</p>
+      <h1 data-i18n
+        data-zh-hans="东西该放在哪里：前端、后端、数据库"
+        data-en="Where Things Belong: Front-end, Back-end, Database"
+        data-vi="Mọi thứ nên đặt ở đâu: front-end, back-end, cơ sở dữ liệu">東西該放在哪裡：前端、後端、資料庫</h1>
+      <p class="lede" data-i18n
+        data-zh-hans="到上周为止，我们做的网站全部都是前端。这周用一个登录网站“小安俱乐部”，从输入网址的那一刻讲起：浏览器怎么把文件 GET 到你的电脑上、这代表哪四件事、为什么登录和注册一定要交给后端。最后照着四句参考 prompt，请 Codex 做一个纯前端的登录网站。"
+        data-en="Up to last week, every site we built was front-end only. This week uses a login site, “Xiao An Club”, and starts from the moment you enter a URL: how the browser fetches (GET) the files to your computer, the four things that follow from it, and why login and sign-up have to be handed to a back-end. At the end, four reference prompts let you ask Codex for a front-end-only login site."
+        data-vi="Đến tuần trước, mọi trang web chúng ta làm đều chỉ có front-end. Tuần này dùng một trang đăng nhập, “Câu lạc bộ Tiểu An”, bắt đầu từ lúc bạn gõ địa chỉ: trình duyệt GET các tệp về máy bạn như thế nào, bốn điều kéo theo, và vì sao đăng nhập, đăng ký phải giao cho back-end. Cuối cùng, dựa vào bốn câu prompt tham khảo, nhờ Codex làm một trang đăng nhập chỉ có front-end.">到上週為止，我們做的網站全部都是前端。這週用一個登入網站「小安俱樂部」，從打下網址的那一刻講起：瀏覽器怎麼把檔案 GET 到你的電腦上、這代表哪四件事、為什麼登入和註冊一定要交給後端。最後照著四句參考 prompt，請 Codex 做一個純前端的登入網站。</p>
+      <p class="lang-note" data-ui="video.note"></p>
+    </div>
+
+    <!-- 2026-11-12 Week 10：影片 01「你做的都是前端」（登入網站「小安俱樂部」的例子；老師看過第二版後說上線）。原始檔在 製作/week10/01-frontend/。
+         這一頁由 製作/week10/tools/site_week10.py 產生（文字四種語言都在那裡改，可以重跑）。之後加影片 02、補充時，在那支程式的 UNITS 加一段。
+         一支影片一個 section：id 和 video/ 裡的資料夾同名；影片、片段、重點都由 assets/video.js 接起來。 -->
+
+    <section class="unit" id="01-frontend" aria-labelledby="u01-title">
+      <h2 class="unit-title" id="u01-title"><span class="unit-num" data-ui="video.n" data-n="01">影片 01</span><span data-i18n
+        data-zh-hans="你做的都是前端"
+        data-en="Everything You&#x27;ve Built Is Front-end"
+        data-vi="Những gì bạn đã làm đều là front-end">你做的都是前端</span></h2>
+
+      <div class="film">
+        <div class="player">
+          <video controls preload="metadata" playsinline data-hls="video/01-frontend/hls/index.m3u8" data-poster="video/01-frontend/poster.jpg" width="1920" height="1080" data-ui="video.unsupported">
+            你的瀏覽器無法播放這支影片。
+          </video>
+        </div>
+      </div>
+
+      <ol class="chapters" aria-label="影片片段（點了直接跳到那一段）" data-ui-attr="aria-label:video.chapters">
+        <li><button type="button" data-t="0"><span class="k">00:00</span><span class="t" data-i18n data-zh-hans="开场" data-en="Opening" data-vi="Mở đầu">開場</span></button></li>
+        <li><button type="button" data-t="6"><span class="k">00:06</span><span class="t" data-i18n data-zh-hans="先认识一个工具：开发者工具（DevTools）" data-en="First, a tool: the browser&#x27;s DevTools" data-vi="Làm quen một công cụ: DevTools của trình duyệt">先認識一個工具：開發者工具（DevTools）</span></button></li>
+        <li><button type="button" data-t="30"><span class="k">00:30</span><span class="t" data-i18n data-zh-hans="不用密码也能进去" data-en="Getting in without the password" data-vi="Vào được mà không cần mật khẩu">不用密碼也能進去</span></button></li>
+        <li><button type="button" data-t="54"><span class="k">00:54</span><span class="t" data-i18n data-zh-hans="网址输进去，发生什么？（GET）" data-en="What happens when you enter a URL? (GET)" data-vi="Gõ địa chỉ xong thì chuyện gì xảy ra? (GET)">網址打下去，發生什麼？（GET）</span></button></li>
+        <li><button type="button" data-t="90"><span class="k">01:30</span><span class="t" data-i18n data-zh-hans="亲眼看 GET" data-en="Seeing the GETs yourself" data-vi="Tận mắt xem các GET">親眼看 GET</span></button></li>
+        <li><button type="button" data-t="105"><span class="k">01:45</span><span class="t" data-i18n data-zh-hans="拿到你电脑上的四件事" data-en="Four things that follow once it is on your computer" data-vi="Bốn điều kéo theo khi tệp đã về máy bạn">拿到你電腦上的四件事</span></button></li>
+        <li><button type="button" data-t="125"><span class="k">02:05</span><span class="t" data-i18n data-zh-hans="在这台电脑注册，其实是假的" data-en="Signing up on this computer is fake" data-vi="Đăng ký trên máy này thực ra là giả">在這台電腦註冊，其實是假的</span></button></li>
+        <li><button type="button" data-t="150"><span class="k">02:30</span><span class="t" data-i18n data-zh-hans="所以要有后端" data-en="So you need a back-end" data-vi="Vì thế cần có back-end">所以要有後端</span></button></li>
+        <li><button type="button" data-t="189"><span class="k">03:09</span><span class="t" data-i18n data-zh-hans="一条原则，交代给 AI" data-en="One principle to give the AI" data-vi="Một nguyên tắc để dặn AI">一條原則，交代給 AI</span></button></li>
+        <li><button type="button" data-t="211"><span class="k">03:31</span><span class="t" data-i18n data-zh-hans="前端的强项：软件包" data-en="What the front-end is good at: packages" data-vi="Thế mạnh của front-end: các gói (package)">前端的強項：套件</span></button></li>
+        <li><button type="button" data-t="226"><span class="k">03:46</span><span class="t" data-i18n data-zh-hans="跟 Codex 说一句：canvas-confetti、AOS、Pretext" data-en="One sentence to Codex: canvas-confetti, AOS, Pretext" data-vi="Nói một câu với Codex: canvas-confetti, AOS, Pretext">跟 Codex 說一句：canvas-confetti、AOS、Pretext</span></button></li>
+        <li><button type="button" data-t="260"><span class="k">04:20</span><span class="t" data-i18n data-zh-hans="练习：做一个纯前端的登录网站" data-en="Practice: a front-end-only login site" data-vi="Luyện tập: một trang đăng nhập chỉ có front-end">練習：做一個純前端的登入網站</span></button></li>
+        <li><button type="button" data-t="280"><span class="k">04:40</span><span class="t" data-i18n data-zh-hans="结尾" data-en="Wrap-up" data-vi="Kết">結尾</span></button></li>
+      </ol>
+
+      <ol class="points">
+        <li><p data-i18n
+          data-zh-hans="到目前为止，我们做的银杏地图、空中之岛、期中密室，全部都是&lt;strong&gt;前端（Front-end）&lt;/strong&gt;：被 GET 到你电脑上、在你的浏览器里跑的那一份。"
+          data-en="Everything we have built so far (the ginkgo map, Sky Island, the midterm escape rooms) is &lt;strong&gt;front-end&lt;/strong&gt;: the copy that is fetched (GET) to your computer and runs in your browser."
+          data-vi="Mọi thứ chúng ta đã làm đến giờ (bản đồ bạch quả, Đảo trên trời, phòng thoát hiểm giữa kỳ) đều là &lt;strong&gt;front-end&lt;/strong&gt;: bản được GET về máy bạn và chạy trong trình duyệt của bạn.">截至目前，我們做的銀杏地圖、空中之島、期中密室，全部都是<strong>前端（Front-end）</strong>：被 GET 到你電腦上、在你的瀏覽器裡跑的那一份。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;浏览器内置的开发者工具（DevTools）&lt;/strong&gt;。按 F12 打开（Mac 按 ⌥⌘I）。“网络”看浏览器拿了哪些文件，“应用”看它替这个网站存了什么。放心按：动到的只是你电脑上的这一份。"
+          data-en="&lt;strong&gt;The browser&#x27;s built-in DevTools.&lt;/strong&gt; Press F12 (⌥⌘I on a Mac). The Network tab shows which files the browser fetched; the Application tab shows what it stored for this site. Click freely: you only touch the copy on your own computer."
+          data-vi="&lt;strong&gt;DevTools có sẵn trong trình duyệt.&lt;/strong&gt; Nhấn F12 (Mac: ⌥⌘I). Thẻ Network cho biết trình duyệt đã lấy những tệp nào; thẻ Application cho biết nó lưu gì cho trang này. Cứ bấm thoải mái: bạn chỉ đụng tới bản trên máy mình."><strong>瀏覽器內建的開發者工具（DevTools）</strong>。按 F12 打開（Mac 按 ⌥⌘I）。「網路」看瀏覽器拿了哪些檔案，「應用程式」看它替這個網站存了什麼。放心按：動到的只是你電腦上的這一份。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;网址输进去，发生什么。&lt;/strong&gt;网址说的是哪一台电脑上的哪一个文件。浏览器发出请求（Request）“GET /index.html”，服务器回应（Response）200，把文件交回来；找不到就回 404。浏览器读到还要 CSS、JS、图片、users.json，再一个一个 GET，最后在你的电脑上排版、执行。"
+          data-en="&lt;strong&gt;What happens when you enter a URL.&lt;/strong&gt; A URL names a file on a particular computer. The browser sends a request, “GET /index.html”; the server answers with response 200 and hands the file back, or 404 if it is not there. Reading the page, the browser finds it also needs the CSS, the JS, images and users.json, fetches each with another GET, then lays the page out and runs it on your computer."
+          data-vi="&lt;strong&gt;Gõ địa chỉ xong thì chuyện gì xảy ra.&lt;/strong&gt; Địa chỉ cho biết tệp nào trên máy tính nào. Trình duyệt gửi yêu cầu (Request) “GET /index.html”; máy chủ trả lời (Response) 200 và giao tệp lại, không tìm thấy thì trả 404. Đọc trang, trình duyệt thấy còn cần CSS, JS, hình ảnh, users.json nên GET từng cái một, rồi dàn trang và chạy trên máy bạn."><strong>網址打下去，發生什麼。</strong>網址說的是哪一台電腦上的哪一個檔案。瀏覽器送出請求（Request）「GET /index.html」，伺服器回應（Response）200，把檔案交回來；找不到就回 404。瀏覽器讀到還要 CSS、JS、圖片、users.json，再一個一個 GET，最後在你的電腦上排版、執行。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;文件到了你的电脑上，代表四件事&lt;/strong&gt;：看得到（密码就写在 users.json 里）、改得了（把 loggedIn 改成 true，连密码都不用输）、只在这台、各跑各的。这些只在自己做的网站或示范网站试，别人的网站不要乱试。"
+          data-en="&lt;strong&gt;Once the files are on your computer, four things follow&lt;/strong&gt;: they can be seen (the passwords are right there in users.json), they can be changed (set loggedIn to true and you do not even need a password), they live only on this machine, and everyone runs a separate copy. Try this only on sites you built yourself or on the demo site, never on other people&#x27;s sites."
+          data-vi="&lt;strong&gt;Khi tệp đã về máy bạn, có bốn điều kéo theo&lt;/strong&gt;: xem được (mật khẩu nằm ngay trong users.json), sửa được (đổi loggedIn thành true là khỏi cần mật khẩu), chỉ nằm trên máy này, và mỗi người chạy một bản riêng. Chỉ thử trên trang do mình làm hoặc trang mẫu, đừng thử bừa trên trang của người khác."><strong>檔案到了你的電腦上，代表四件事</strong>：看得到（密碼就寫在 users.json 裡）、改得了（把 loggedIn 改成 true，連密碼都不用打）、只在這台、各跑各的。這些只在自己做的網站或示範網站試，別人的網站不要亂試。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;前端的登录和注册，都是假的。&lt;/strong&gt;它们只是在读同一份 users.json。GET 只能拿，不能把东西写回服务器，所以在这台电脑按“注册”，新账号只暂存在浏览器里，刷新就消失；服务器上的 users.json 从头到尾没有变。"
+          data-en="&lt;strong&gt;Front-end login and sign-up are both fake.&lt;/strong&gt; They only read the same users.json. GET can only fetch; it cannot write anything back to the server. So when you click “Sign up” on this computer, the new account sits in the browser for a moment and is gone after a reload, while the users.json on the server never changed."
+          data-vi="&lt;strong&gt;Đăng nhập và đăng ký ở front-end đều là giả.&lt;/strong&gt; Chúng chỉ đọc cùng một tệp users.json. GET chỉ lấy về được, không ghi ngược lên máy chủ được. Vì thế khi bấm “Đăng ký” trên máy này, tài khoản mới chỉ tạm nằm trong trình duyệt, tải lại trang là mất; users.json trên máy chủ từ đầu đến cuối không hề đổi."><strong>前端的登入和註冊，都是假的。</strong>它們只是在讀同一份 users.json。GET 只能拿，不能把東西寫回伺服器，所以在這台電腦按「註冊」，新帳號只暫存在瀏覽器裡，重新整理就消失；伺服器上的 users.json 從頭到尾沒有變。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;所以要有后端（Back-end）&lt;/strong&gt;：服务器上一组待命的程序。你按注册，前端把数据交给它，由它把新账号写进名单；密码也由它去核对，名单不用再交给前端。后端存放数据的地方，叫数据库（Database）。一条原则：前端的检查是为了方便，后端的检查才算数。"
+          data-en="&lt;strong&gt;So you need a back-end&lt;/strong&gt;: a program standing by on the server. When you sign up, the front-end hands it the data and it writes the new account into the list; it also checks the password, so the list never has to be handed to the front-end. The place where the back-end keeps its data is called a database. One principle: front-end checks are for convenience; only back-end checks count."
+          data-vi="&lt;strong&gt;Vì thế cần có back-end&lt;/strong&gt;: một chương trình luôn chờ sẵn trên máy chủ. Khi bạn đăng ký, front-end giao dữ liệu cho nó, nó ghi tài khoản mới vào danh sách; mật khẩu cũng do nó đối chiếu, nên danh sách không cần giao cho front-end nữa. Nơi back-end cất dữ liệu gọi là cơ sở dữ liệu (Database). Một nguyên tắc: kiểm tra ở front-end là để tiện, kiểm tra ở back-end mới tính."><strong>所以要有後端（Back-end）</strong>：伺服器上一組待命的程式。你按註冊，前端把資料交給它，由它把新帳號寫進名單；密碼也由它去對，名單不用再交給前端。後端收資料的地方，叫資料庫（Database）。一條原則：前端的檢查是為了方便，後端的檢查才算數。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;软件包（Package）&lt;/strong&gt;是别人写好的前端程序。跟 Codex 说要用哪一个、做什么效果，它会帮你接好：canvas-confetti 放彩带，AOS 让东西滚到才出现，Pretext 算每一行文字该多宽。软件包也是从别人的服务器 GET 到你电脑上跑的，所以软件包也是前端。"
+          data-en="&lt;strong&gt;A package&lt;/strong&gt; is front-end code someone else has already written. Tell Codex which one to use and what effect you want, and it wires it in: canvas-confetti fires confetti, AOS reveals things as they scroll into view, and Pretext works out how wide each line of text should be. Packages are fetched (GET) from someone else&#x27;s server and run on your computer, so they are front-end too."
+          data-vi="&lt;strong&gt;Gói (package)&lt;/strong&gt; là mã front-end người khác đã viết sẵn. Nói với Codex dùng gói nào, muốn hiệu ứng gì, nó sẽ gắn vào giúp bạn: canvas-confetti bắn pháo giấy, AOS cho mọi thứ hiện ra khi cuộn tới, Pretext tính mỗi dòng chữ nên rộng bao nhiêu. Gói cũng được GET từ máy chủ của người khác về chạy trên máy bạn, nên gói cũng là front-end."><strong>套件（Package）</strong>是別人寫好的前端程式。跟 Codex 說要用哪一個、做什麼效果，它會幫你接好：canvas-confetti 噴彩帶，AOS 讓東西捲到才出現，Pretext 算每一行文字該多寬。套件也是從別人的伺服器 GET 到你電腦上跑的，所以套件也是前端。</p></li>
+        <li><p data-i18n
+          data-zh-hans="&lt;strong&gt;练习（纯前端就好，这次不用后端）。&lt;/strong&gt;新建一个文件夹，用 Codex 打开；一次只交代一件事，做完看一眼，再交代下一件。参考 prompt：&lt;br&gt;①“做一个纯前端的登录网站：有登录页和会员专区，账号密码放在 users.json，不要后端。”&lt;br&gt;②“登录成功时，用 canvas-confetti 放一次彩带。”&lt;br&gt;③“把会员专区做成往下滚动的一页：最上面一段介绍，下面 12 张卡片。用 AOS 让卡片滚到时一张一张跳出来。”&lt;br&gt;④“用 Pretext 让介绍那段文字绕着一张图排。图可以拖，拖到哪里，文字就马上让开。”&lt;br&gt;验收：登录有彩带；往下滚，卡片一张一张跳出来；拖着图，文字会让开；打开开发者工具的“网络”，找得到三个软件包，也看得到 users.json 里的密码。不一定一次就成功，哪里不对，截图给 Codex 再说一次。"
+          data-en="&lt;strong&gt;Practice (front-end only; no back-end this time).&lt;/strong&gt; Make a new folder and open it in Codex; ask for one thing at a time, look at the result, then ask for the next. Reference prompts:&lt;br&gt;1. “Build a front-end-only login site: a login page and a members&#x27; area, with the accounts and passwords in users.json and no back-end.”&lt;br&gt;2. “When login succeeds, fire confetti once with canvas-confetti.”&lt;br&gt;3. “Make the members&#x27; area one scrolling page: an intro paragraph at the top and 12 cards below. Use AOS so the cards appear one by one as they scroll into view.”&lt;br&gt;4. “Use Pretext so the intro text flows around an image. The image can be dragged, and the text moves out of its way at once.”&lt;br&gt;Check: confetti on login; cards appear one by one as you scroll; the text moves aside when you drag the image; and in the DevTools Network tab you can find the three packages and also read the passwords in users.json. It may not work the first time: show Codex a screenshot of what is wrong and ask again."
+          data-vi="&lt;strong&gt;Luyện tập (chỉ cần front-end, lần này không dùng back-end).&lt;/strong&gt; Tạo một thư mục mới, mở bằng Codex; mỗi lần chỉ dặn một việc, làm xong xem qua rồi mới dặn việc tiếp. Prompt tham khảo:&lt;br&gt;1. “Làm một trang đăng nhập chỉ có front-end: có trang đăng nhập và khu thành viên, tài khoản và mật khẩu để trong users.json, không dùng back-end.”&lt;br&gt;2. “Khi đăng nhập thành công, dùng canvas-confetti bắn pháo giấy một lần.”&lt;br&gt;3. “Làm khu thành viên thành một trang cuộn xuống: trên cùng là một đoạn giới thiệu, bên dưới là 12 thẻ. Dùng AOS để các thẻ hiện ra từng cái khi cuộn tới.”&lt;br&gt;4. “Dùng Pretext để đoạn giới thiệu chảy quanh một tấm hình. Hình kéo được, kéo tới đâu chữ né ra tới đó.”&lt;br&gt;Nghiệm thu: đăng nhập có pháo giấy; cuộn xuống, thẻ hiện ra từng cái; kéo hình thì chữ né ra; mở thẻ Network của DevTools sẽ thấy ba gói và cũng đọc được mật khẩu trong users.json. Không nhất thiết thành công ngay lần đầu: chỗ nào sai, chụp màn hình gửi Codex rồi nói lại."><strong>練習（純前端就好，這次不用後端）。</strong>開一個新資料夾，用 Codex 打開；一次只交代一件事，做完看一眼，再交代下一件。參考 prompt：<br>①「做一個純前端的登入網站：有登入頁和會員專區，帳號密碼放在 users.json，不要後端。」<br>②「登入成功時，用 canvas-confetti 放一次彩帶。」<br>③「把會員專區做成往下捲的一頁：最上面一段介紹，下面 12 張卡片。用 AOS 讓卡片捲到時一張一張跳出來。」<br>④「用 Pretext 讓介紹那段文字繞著一張圖排。圖可以拖，拖到哪裡，文字就馬上讓開。」<br>驗收：登入有彩帶；往下捲，卡片一張一張跳出來；拖著圖，文字會讓開；打開開發者工具的「網路」，找得到三個套件，也看得到 users.json 裡的密碼。不一定一次就成功，哪裡不對，截圖給 Codex 再說一次。</p></li>
+      </ol>
+    </section>
+
+    <nav class="pager" id="pager" data-week="10" aria-label="其他週次" data-ui-attr="aria-label:pager.label"></nav>
+  </main>
+
+  <footer class="foot">
+    <span>Learning Analytics Tools Implementation Applications (NTNU)</span>
+    <span><span data-ui="footer.copyright">Copyright © 2026 JUNHAO CHEN・程式碼 MIT・內容 CC BY-NC-SA 4.0</span> <a class="foot-lic" href="https://github.com/bigmoumou/AI-Agent-Literacy#授權" data-ui="footer.license" data-ui-attr="href:footer.licenseUrl">授權說明</a></span>
+    <a href="../../" data-ui="nav.home">回到課程首頁</a>
+  </footer>
+</div>
+
+<!-- 先 hls.js、再 video.js（播放、片段、#t= 連結都在 video.js） -->
+<script src="../../assets/vendor/hls.light.min.js"></script>
+<script src="../../assets/video.js"></script>
+</body>
+</html>

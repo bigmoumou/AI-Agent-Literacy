@@ -279,6 +279,33 @@
         },
       },
     },
+    // 2026-11-12 Week 10：影片 01 你做的都是前端（登入網站的例子）；由 製作/week10/tools/site_week10.py 產生
+    10: {
+      status: "ready",
+      title: "東西該放在哪裡：前端、後端、資料庫",
+      summary: "你做的都是前端：瀏覽器把檔案 GET 到你的電腦上跑，所以看得到、改得了、只在這台、各跑各的；登入和註冊要交給後端。",
+      href: "weeks/week10/",
+      thumb: "weeks/week10/video/01-frontend/thumb.jpg",
+      still: "weeks/week10/video/01-frontend/poster.jpg",
+      meta: "1 支影片・共 4 分 49 秒",
+      i18n: {
+        "zh-Hans": {
+          title: "东西该放在哪里：前端、后端、数据库",
+          summary: "你做的都是前端：浏览器把文件 GET 到你的电脑上跑，所以看得到、改得了、只在这台、各跑各的；登录和注册要交给后端。",
+          meta: "1 个视频・共 4 分 49 秒",
+        },
+        en: {
+          title: "Where Things Belong: Front-end, Back-end, Database",
+          summary: "Everything you have built is front-end: the browser GETs the files and runs them on your computer, so they can be seen, changed, stay on one machine and run separately; login and sign-up belong to the back-end.",
+          meta: "1 video · 4 min 49 s in total",
+        },
+        vi: {
+          title: "Mọi thứ nên đặt ở đâu: front-end, back-end, cơ sở dữ liệu",
+          summary: "Những gì bạn đã làm đều là front-end: trình duyệt GET tệp về và chạy trên máy bạn, nên xem được, sửa được, chỉ ở máy này, mỗi người một bản; đăng nhập và đăng ký phải giao cho back-end.",
+          meta: "1 video · tổng cộng 4 phút 49 giây",
+        },
+      },
+    },
   };
 
   // 英文版（2026-10-22）：有 thumbEn／stillEn 的週次，英文介面的首頁膠捲、全部週次清單、換頁列用英文封面。
