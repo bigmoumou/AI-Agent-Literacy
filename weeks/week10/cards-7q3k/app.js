@@ -204,8 +204,12 @@
       push(b);
     }
     function strip(rect) {
-      const b = Bodies.rectangle(rect.left + rect.width / 2, rect.top + rect.height / 2, rect.width, rect.height, { restitution: 0.2, friction: 0.6, frictionAir: 0.03, density: 0.0008 });
-      b.plugin = { kind: 'strip', w: rect.width, h: rect.height, born: performance.now() };
+      const cx = rect.cx != null ? rect.cx : rect.left + rect.width / 2, cy = rect.cy != null ? rect.cy : rect.top + rect.height / 2;
+      const b = Bodies.rectangle(cx, cy, rect.width, rect.height, { restitution: 0.2, friction: 0.6, frictionAir: 0.03, density: 0.0008 });
+      if (rect.angle) Body.setAngle(b, rect.angle);
+      const jag = []; let jy = 2;
+      for (let i = 0; i <= Math.max(8, Math.round(rect.width / 5)); i++) { jy = Math.max(0.3, Math.min(4.4, jy + (Math.random() - 0.5) * 2.6)); jag.push(jy); }
+      b.plugin = { kind: 'strip', w: rect.width, h: rect.height, born: performance.now(), jag };
       Body.setVelocity(b, { x: -2, y: -8 }); Body.setAngularVelocity(b, -0.05);
       push(b);
     }
@@ -240,10 +244,19 @@
         } else {
           const g = ctx.createLinearGradient(-p.w / 2, 0, p.w / 2, 0);
           g.addColorStop(0, '#f9b45a'); g.addColorStop(0.5, '#e8641b'); g.addColorStop(1, '#b9430e');
+          const J = p.jag, n = J.length - 1, w2 = p.w / 2, h2 = p.h / 2;
+          ctx.beginPath(); ctx.moveTo(-w2, -h2 + 4);                                    // 上緣：壓封的鋸齒
+          for (let x = 0, k = 0; x <= p.w; x += 4.5, k++) ctx.lineTo(-w2 + x, -h2 + (k % 2 ? 0 : 4));
+          for (let i = n; i >= 0; i--) ctx.lineTo(-w2 + i * p.w / n, h2 + J[i]);         // 下緣：撕開的鋸齒
+          ctx.closePath();
           ctx.shadowColor = 'rgba(40,25,10,.25)'; ctx.shadowBlur = 5; ctx.shadowOffsetY = 2;
-          ctx.fillStyle = g; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
-          ctx.shadowColor = 'transparent'; ctx.fillStyle = 'rgba(255,255,255,.28)';
-          for (let x = -p.w / 2; x < p.w / 2; x += 6) ctx.fillRect(x, -p.h / 2, 2, p.h);
+          ctx.fillStyle = g; ctx.fill();
+          ctx.shadowColor = 'transparent';
+          ctx.save(); ctx.clip(); ctx.fillStyle = 'rgba(255,255,255,.28)';
+          for (let x = -w2; x < w2; x += 6) ctx.fillRect(x, -h2, 2, p.h + 6);
+          ctx.restore();
+          ctx.beginPath(); for (let i = 0; i <= n; i++) ctx[i ? 'lineTo' : 'moveTo'](-w2 + i * p.w / n, h2 + J[i] - 0.6);
+          ctx.strokeStyle = 'rgba(255,247,234,.95)'; ctx.lineWidth = 1.4; ctx.stroke();
         }
         ctx.restore();
       }
@@ -360,6 +373,11 @@
       for (const p of parts) {
         p.life += dt; p.vy += p.g * dt; p.vx *= 1 - 1.6 * dt; p.vy *= 1 - 1.2 * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.rot += p.spin * dt;
         const k = p.life / p.max, fade = k < 0.15 ? k / 0.15 : 1 - (k - 0.15) / 0.85, tw = 0.65 + 0.35 * Math.sin(p.life * p.tw);
+        if (p.flake) {   // 紙屑：小紙片翻著掉下來，不發光
+          g.globalCompositeOperation = 'source-over'; g.globalAlpha = Math.max(0, fade); g.fillStyle = p.c;
+          g.save(); g.translate(p.x, p.y); g.rotate(p.rot); g.scale(1, Math.cos(p.life * 9 + p.rot)); g.fillRect(-p.r * 1.3, -p.r * 0.6, p.r * 2.6, p.r * 1.2); g.restore();
+          g.globalCompositeOperation = 'lighter'; continue;
+        }
         g.globalAlpha = Math.max(0, fade * tw);
         star4(p.x, p.y, p.r * (0.6 + 0.4 * tw), p.rot, p.c);
       }
@@ -395,7 +413,12 @@
       const cols = t.classList.contains('pack') || t.dataset.r === 's' ? (Math.random() < 0.5 ? RAINBOW : GOLD) : SILVER;
       spark(e.clientX + (Math.random() - 0.5) * 14, e.clientY + (Math.random() - 0.5) * 14, { colors: cols, speed: 50, lift: 20, size: 5.5, life: 0.9, g: 40 });
     }, { passive: true });
-    return { resize, burst, ring, spark, GOLD, SILVER, RAINBOW };
+    function flake(x, y, n) {
+      if (REDUCED) return;
+      for (let i = 0; i < n; i++) add({ x: x + (Math.random() - 0.5) * 6, y: y + Math.random() * 3, vx: (Math.random() - 0.35) * 90, vy: -30 - Math.random() * 70, g: 520, life: 0, max: 0.8 + Math.random() * 0.5,
+        r: 1.4 + Math.random() * 1.8, c: Math.random() < 0.6 ? '#fff7ea' : (Math.random() < 0.5 ? '#f3a35c' : '#d8d1c6'), rot: Math.random() * 6, spin: (Math.random() - 0.5) * 12, tw: 0, flake: true });
+    }
+    return { resize, burst, ring, spark, flake, GOLD, SILVER, RAINBOW };
   })();
   const flashEl = $('#flash'), glowEl = $('#glow');
   /* 柔和的一閃（最多 45%，慢慢淡掉，不是閃爍） */
@@ -456,22 +479,75 @@
     const p = el('div', 'pack',
       '<div class="pack-tilt"><div class="pack-top"></div><div class="pack-body"><i class="pack-holo"></i><i class="glit"></i><div class="pack-tear">✂ 從這裡撕開</div>' +
       '<div class="pack-ring"><img src="img/an-wave.webp" alt="" draggable="false"></div>' +
-      '<div class="pack-title"><b>小安俱樂部</b><span>貼圖卡包</span></div><div class="pack-sub">第 1 彈・5 張卡＋貼紙<br>每包至少一張 ◆</div></div><div class="pack-bottom"></div></div>');
+      '<div class="pack-title"><b>小安俱樂部</b><span>貼圖卡包</span></div><div class="pack-sub">第 1 彈・5 張卡＋貼紙<br>每包至少一張 ◆</div></div><div class="pack-bottom"></div>' +
+      '<svg class="pack-tearfx" aria-hidden="true"><defs><linearGradient id="tearIn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b2414"/><stop offset=".55" stop-color="#a39a8e"/><stop offset="1" stop-color="#f4efe6"/></linearGradient></defs><polygon class="slit" fill="url(#tearIn)" points=""/><polyline class="fib" points=""/></svg>' +
+      '<div class="pack-top pack-flap"><svg aria-hidden="true"><polyline class="fib" points=""/></svg></div></div>');
     spot.append(p);
-    const tilt = $('.pack-tilt', p), top = $('.pack-top', p);
+    const tilt = $('.pack-tilt', p), top = $('.pack-top', p), flap = $('.pack-flap', p), body = $('.pack-body', p), tfx = $('.pack-tearfx', p);
     tiltAdd(tilt, 12);
     if (G) G.fromTo(p, { y: -70, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: 'back.out(1.3)' });
     setHint('從左到右撕開卡包（點一下也可以）');
-    /* 撕開：按住往右劃，上面那一條會跟著掀起來；劃過一半以上就撕開 */
-    let down = null, prog = 0, step = 0;
-    const setProg = (v) => { prog = Math.max(0, Math.min(1, v)); if (G) G.set(top, { rotation: -20 * prog, y: -10 * prog }); const s = Math.floor(prog * 10); if (s > step) sound.tick(); step = s; };
-    p.addEventListener('pointerdown', (e) => { if (state !== 'pack' || busy) return; firstTouch(); down = { x: e.clientX, w: p.offsetWidth }; try { p.setPointerCapture(e.pointerId); } catch (err) { /* 沒關係 */ } });
+    /* 撕開：撕口照手指走。左邊撕下來的那段往上翹（鉸鏈在撕口），右邊還黏著；撕開的邊是鋸齒狀的紙纖維，
+       卡包本體也照同一條鋸齒切開，撕口露出一條包裝內側；邊撕邊掉紙屑。撕不到一半放手就停在那裡，再拉一次接著撕。 */
+    let down = null, prog = 0, step = 0, geo = null, tearing = null;
+    function measure() {
+      const W = tilt.offsetWidth, H = top.offsetHeight, n = Math.max(12, Math.round(W / 5)), J = [];
+      let y = 2;
+      for (let i = 0; i <= n; i++) { y = Math.max(0.3, Math.min(4.4, y + (Math.random() - 0.5) * 2.6)); J.push(y); }
+      geo = { W, H, n, J, dx: W / n };
+      flap.style.height = (H + 7) + 'px';
+      const fs = $('svg', flap); fs.setAttribute('width', W); fs.setAttribute('height', H + 8);
+      $('.fib', flap).setAttribute('points', J.map((j, i) => (i * geo.dx).toFixed(1) + ',' + (H + j - 0.6).toFixed(1)).join(' '));
+      tfx.setAttribute('width', W); tfx.setAttribute('height', 16); tfx.style.top = (H - 6) + 'px';
+    }
+    function setProg(v) {
+      if (!geo) measure();
+      prog = Math.max(prog, Math.max(0, Math.min(1, v)));            // 撕開的地方不會黏回去
+      if (prog <= 0) return;
+      const { W, H, n, J, dx } = geo, X = prog * W, k = Math.min(n, Math.ceil(X / dx) - 1);
+      const jy = (i) => J[Math.max(0, Math.min(n, i))];
+      const jagAt = (x) => { const f = x / dx, i = Math.floor(f), u = f - i; return jy(i) * (1 - u) + jy(i + 1) * u; };
+      const f1 = (x) => x.toFixed(1), xs = [], j0 = jagAt(X);
+      for (let i = 0; i <= k; i++) xs.push(i);
+      // 撕下來的那段（x ≤ X），下緣是鋸齒
+      let poly = `0 0, ${f1(X)}px 0, ${f1(X)}px ${f1(H + j0)}px`;
+      for (let q = xs.length - 1; q >= 0; q--) poly += `, ${f1(xs[q] * dx)}px ${f1(H + jy(xs[q]))}px`;
+      flap.style.clipPath = `polygon(${poly})`;
+      flap.style.visibility = 'visible';
+      top.style.clipPath = `polygon(${f1(X)}px 0, 100% 0, 100% 100%, ${f1(X)}px 100%)`;
+      // 卡包本體的上緣照同一條鋸齒切（那一點紙跟著撕下來的那段走了）
+      let bp = xs.map((i) => `${f1(i * dx)}px ${f1(jy(i))}px`).join(', ');
+      bp += `, ${f1(X)}px ${f1(j0)}px, ${f1(X)}px 0, 100% 0, 100% 100%, 0 100%`;
+      body.style.clipPath = `polygon(${bp})`;
+      // 撕口：一條包裝內側＋白色紙纖維
+      const top_ = xs.map((i) => `${f1(i * dx)},${f1(6 + jy(i) - 2.4 - (i % 3) * 0.5)}`).concat([`${f1(X)},${f1(6 + j0 - 2.4)}`]);
+      const bot_ = xs.map((i) => `${f1(i * dx)},${f1(6 + jy(i))}`).concat([`${f1(X)},${f1(6 + j0)}`]);
+      $('.slit', tfx).setAttribute('points', top_.concat(bot_.slice().reverse()).join(' '));
+      $('.fib', tfx).setAttribute('points', bot_.join(' '));
+      const deg = 30 * Math.pow(Math.min(1, prog * 1.6), 0.7);
+      flap.style.transformOrigin = `${f1(X)}px ${H}px`;
+      flap.style.transform = `translateY(${(-1.5 * prog).toFixed(2)}px) rotate(${deg.toFixed(2)}deg)`;   // 順時針：左端（撕開的那頭）往上翹
+      flap.style.setProperty('--peel', (deg / 30).toFixed(3));
+      p._tearDeg = deg;
+      const s = Math.floor(prog * 12);
+      if (s > step) { sound.tick(); const r = tilt.getBoundingClientRect(); fx.flake(r.left + X, r.top + H, 3); }
+      step = s;
+    }
+    /* 點一下、鍵盤、揮手：自己撕完（從撕到哪裡接著撕） */
+    function autoTear(then) {
+      if (tearing) return;
+      if (!geo) measure();
+      if (!G) { setProg(1); then(); return; }
+      const o = { v: prog };
+      tearing = G.to(o, { v: 1, duration: 0.18 + 0.5 * (1 - prog), ease: 'power1.in', onUpdate() { setProg(o.v); }, onComplete: then });
+    }
+    p._tear = () => { if (state === 'pack' && !busy) { busy = true; autoTear(() => { busy = false; openPack(p); }); } };   // 撕的時候算「忙」，別的操作先等
+    p.addEventListener('pointerdown', (e) => { if (state !== 'pack' || busy || tearing) return; firstTouch(); if (!geo) measure(); down = { x: e.clientX - prog * geo.W * 0.7, x0: e.clientX, w: geo.W }; try { p.setPointerCapture(e.pointerId); } catch (err) { /* 沒關係 */ } });
     p.addEventListener('pointermove', (e) => { if (down) setProg((e.clientX - down.x) / (down.w * 0.7)); });
     const up = (e) => {
       if (!down) return;
-      const moved = Math.abs(e.clientX - down.x); down = null;
-      if (prog > 0.55 || moved < 6) openPack(p);
-      else if (G) G.to(top, { rotation: 0, y: 0, duration: 0.3, ease: 'power2.out', onComplete() { prog = 0; step = 0; } });
+      const moved = Math.abs(e.clientX - down.x0); down = null;
+      if (prog > 0.55 || moved < 6) p._tear();
     };
     p.addEventListener('pointerup', up); p.addEventListener('pointercancel', () => { down = null; });
   }
@@ -479,9 +555,11 @@
   function openPack(p) {
     if (state !== 'pack' || busy) return;
     busy = true; firstTouch();
-    const top = $('.pack-top', p), tr = top.getBoundingClientRect(), box = p.getBoundingClientRect();
-    top.style.visibility = 'hidden';
-    phys.strip({ left: tr.left + tr.width / 2 - top.offsetWidth / 2, top: tr.top + tr.height / 2 - top.offsetHeight / 2, width: top.offsetWidth, height: top.offsetHeight });
+    const top = $('.pack-top', p), flap = $('.pack-flap', p), box = p.getBoundingClientRect(), tr = $('.pack-tilt', p).getBoundingClientRect();
+    // 撕下來的那一條交給 Matter.js：照翹起來的角度，繞撕口（右上角那個鉸鏈）算出中心
+    const SW = top.offsetWidth, SH = top.offsetHeight, ang = (p._tearDeg || 0) * Math.PI / 180, hx = tr.left + SW, hy = tr.top + SH, ox = -SW / 2, oy = -SH / 2;
+    top.style.visibility = 'hidden'; if (flap) flap.style.visibility = 'hidden';
+    phys.strip({ cx: hx + ox * Math.cos(ang) - oy * Math.sin(ang), cy: hy + ox * Math.sin(ang) + oy * Math.cos(ang), width: SW, height: SH, angle: ang });
     for (let i = 0; i < 4; i++) setTimeout(() => sound.tick(), i * 45);
     const cards = pull(); packs++;
     stack = cards.map((d) => makeCard(d, true));
@@ -506,6 +584,7 @@
     c.onclick = () => next();
     setHint(c._d.r === 'c' ? '點一下翻開' : '這張的邊在發光……點一下翻開');
   }
+  let raysTw = null;   // 閃卡背後光芒的旋轉；關掉 GSAP（80 倍速）時要另外抵銷，不然會狂轉
   function flip(c) {
     busy = true;
     const d = c._d, f = $('.card-flip', c), isNew = !have.has(d.id);
@@ -520,7 +599,7 @@
     const pop = () => { const m = centerOf(c); return m; };
     if (d.r === 's') {            // ★：天色暗下來、光柱亮起、卡片輕輕顫、慢慢翻開，金光爆開
       dusk(true);
-      G.set(rays, { rotation: 0 }); G.to(rays, { rotation: 360, duration: 120, ease: 'none', repeat: -1 });
+      G.set(rays, { rotation: 0 }); raysTw = G.to(rays, { rotation: 360, duration: 120, ease: 'none', repeat: -1 }); if (!on.gsap) raysTw.timeScale(1 / 80);
       tl.to(rays, { opacity: 0.75, duration: 0.7 }, 0)
         .to(glowEl, { opacity: 1, duration: 0.8 }, 0)
         .to(c, { scale: 1.06, duration: 0.6, ease: 'power2.out' }, 0)
@@ -555,7 +634,7 @@
       c.classList.remove('big', 'instack', 'top'); c.style.zIndex = '';
       G.set(c, { clearProps: 'transform,opacity' });
       ph.replaceWith(c);
-      Flip.from(st, { duration: 0.6, ease: 'power2.inOut', scale: true, absolute: true, onComplete: after });
+      Flip.from(st, { duration: 0.6, ease: 'power2.inOut', scale: true, absolute: false, onComplete: after });   // absolute: true 會讓下面那排少一格、整排移動
       say('gsap', 'Flip：卡片滑進第 ' + slot + ' 格');
     } else {
       c.classList.remove('big', 'instack', 'top'); c.style.zIndex = ''; c.style.transform = '';
@@ -620,7 +699,7 @@
     if (G && window.Flip) {
       const st = Flip.getState(cards);
       order.forEach((c) => rank.append(c));
-      Flip.from(st, { duration: 0.7, ease: 'power3.inOut', stagger: 0.04, absolute: true });
+      Flip.from(st, { duration: 0.7, ease: 'power3.inOut', stagger: 0.04, absolute: false });
       say('gsap', 'Flip：五張卡一起滑到新的名次');
     } else order.forEach((c) => rank.append(c));
   }
@@ -644,7 +723,7 @@
   function next() {
     if (busy) return;
     firstTouch();
-    if (state === 'pack') { const p = $('.pack', spot); if (p) openPack(p); }
+    if (state === 'pack') { const p = $('.pack', spot); if (p) { if (p._tear) p._tear(); else openPack(p); } }
     else if (state === 'reveal') { const c = stack[idx]; if (c.classList.contains('up')) stash(c); else flip(c); }
     else if (state === 'rank') {
       const ds = $$('.card', rank).map((c) => c._d), i = hero ? ds.indexOf(hero._d) : -1, d = ds[(i + 1) % ds.length];
@@ -738,7 +817,7 @@
     if (k === 'tilt') { if (on.tilt) tilts.forEach(tiltInit); else tilts.forEach((t) => { if (t.vanillaTilt) t.vanillaTilt.destroy(); t.style.setProperty('--tilt', '0'); }); say(k, on.tilt ? '打開了：卡片又會傾斜、反光' : off + '卡片變成平的'); }
     if (k === 'matter') { phys.set(on.matter); say(k, on.matter ? '打開了：貼紙回來了' : off + '貼紙不見了'); }
     if (k === 'sortable') { if (sortable) sortable.option('disabled', !on.sortable); say(k, on.sortable ? '打開了：可以拖拉排名次' : off + '卡片拖不動了'); }
-    if (k === 'gsap') { if (G) G.globalTimeline.timeScale(on.gsap ? 1 : 80); say(k, on.gsap ? '打開了：動作又滑順了' : off + '翻卡、移動都變成瞬間完成'); }
+    if (k === 'gsap') { if (G) G.globalTimeline.timeScale(on.gsap ? 1 : 80); if (raysTw) raysTw.timeScale(on.gsap ? 1 : 1 / 80); say(k, on.gsap ? '打開了：動作又滑順了' : off + '翻卡、移動都變成瞬間完成'); }
     if (k === 'vanta') { if (on.vanta) vantaStart(); else { vantaStop(); say(k, off + '背景只剩一張紙'); } }
     if (k === 'tone') { sound.mute(!on.tone); say(k, on.tone ? '打開了：每張卡又有聲音' : off + '全部靜音'); }
   }

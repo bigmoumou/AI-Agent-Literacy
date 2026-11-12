@@ -287,22 +287,22 @@
       href: "weeks/week10/",
       thumb: "weeks/week10/video/01-frontend/thumb.jpg",
       still: "weeks/week10/video/01-frontend/poster.jpg",
-      meta: "2 支影片・共 8 分 14 秒",
+      meta: "2 支影片・共 8 分 40 秒",
       i18n: {
         "zh-Hans": {
           title: "东西该放在哪里：前端、后端、数据库",
           summary: "你做的都是前端：浏览器把文件 GET 到你的电脑上跑，所以看得到、改得了、只在这台、各跑各的；登录和注册要交给后端。",
-          meta: "2 个视频・共 8 分 14 秒",
+          meta: "2 个视频・共 8 分 40 秒",
         },
         en: {
           title: "Where Things Belong: Front-end, Back-end, Database",
           summary: "Everything you have built is front-end: the browser GETs the files and runs them on your computer, so they can be seen, changed, stay on one machine and run separately; login and sign-up belong to the back-end.",
-          meta: "2 videos · 8 min 14 s in total",
+          meta: "2 videos · 8 min 40 s in total",
         },
         vi: {
           title: "Mọi thứ nên đặt ở đâu: front-end, back-end, cơ sở dữ liệu",
           summary: "Những gì bạn đã làm đều là front-end: trình duyệt GET tệp về và chạy trên máy bạn, nên xem được, sửa được, chỉ ở máy này, mỗi người một bản; đăng nhập và đăng ký phải giao cho back-end.",
-          meta: "2 video · tổng cộng 8 phút 14 giây",
+          meta: "2 video · tổng cộng 8 phút 40 giây",
         },
       },
     },

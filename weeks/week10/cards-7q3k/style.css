@@ -67,6 +67,12 @@ body:not(.dusk) #glow { background: radial-gradient(circle, rgba(255, 255, 255, 
 .pack-bottom { bottom: 0; height: 7%; --z: 9px;
   -webkit-mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% 100% / var(--z) 100%;
   mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% 100% / var(--z) 100%; }
+/* 撕卡包：撕下來的那段（.pack-flap，和 .pack-top 長得一樣）、撕口（.pack-tearfx：包裝內側＋白色紙纖維） */
+.pack-flap { visibility: hidden; pointer-events: none; will-change: transform; }
+.pack-flap::before { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(0deg, rgba(90, 30, 0, calc(var(--peel, 0) * .38)), transparent 75%); }
+.pack-flap svg { position: absolute; left: 0; top: 0; z-index: 2; overflow: visible; }
+.pack-tearfx { position: absolute; left: 0; pointer-events: none; overflow: visible; }
+.pack .fib { fill: none; stroke: #fff7ea; stroke-width: 1.5; stroke-linejoin: round; opacity: .95; }
 .pack-top::after, .pack-bottom::after { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .28) 0 2px, rgba(120, 40, 0, .12) 2px 6px); }
 .pack-body { top: 9%; bottom: 7%; overflow: hidden; container-type: inline-size; display: flex; flex-direction: column; align-items: center; text-align: center; }
 .pack-body::before { content: ''; position: absolute; inset: 0; pointer-events: none;
