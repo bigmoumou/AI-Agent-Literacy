@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <script>
+    // 課程網址：舊的 github.io 和 learning-analytics-tools.pages.dev（2026-10-21 改名前）都轉到 ai-agent-literacy.pages.dev 的同一頁，保留 #t= 等片段
+    if (location.hostname.endsWith("github.io") || /(^|\.)learning-analytics-tools\.pages\.dev$/.test(location.hostname)) {
+      location.replace("https://ai-agent-literacy.pages.dev" + (location.pathname.replace(/^\/(Learning-Analytics-Tools|AI-Agent-Literacy)(?=\/|$)/, "") || "/") + location.search + location.hash);
+    }
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>小安俱樂部・貼圖卡包</title>
+  <meta name="description" content="Week 10 影片 02 的示範：用七個前端套件做出來的抽卡包。">
+  <!-- Week 10 影片 02 的範例「小安俱樂部・貼圖卡包」（2026-11-12）：原始檔在 製作/week10/02-card-pack/demo，用 製作/week10/02-card-pack/tools/site_copy.py 複製過來 -->
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="author" content="JUNHAO CHEN">
+  <meta name="copyright" content="© 2026 JUNHAO CHEN">
+  <script src="../../../assets/i18n-strings.js"></script>
+  <script src="../../../assets/i18n.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <style>.copy { position: fixed; right: 12px; bottom: 6px; z-index: 5; font: 10px/1.4 var(--sans); color: var(--muted); opacity: .7; pointer-events: none; }</style>
+</head>
+<body>
+  <!-- Vanta.js 把會飛的鳥群畫在這一層 -->
+  <div id="bg" aria-hidden="true"></div>
+
+  <header class="top">
+    <div class="brand"><b>小安俱樂部</b><span>貼圖卡包・第 1 彈</span></div>
+    <div class="count">已收集 <b id="have">0</b> / 12</div>
+    <button id="again" class="txtbtn" type="button" hidden>再開一包</button>
+  </header>
+
+  <!-- 這一頁用到的套件：哪一個正在做事，名字前面的點就亮一下；按名字可以把它關掉，看看少了它差在哪 -->
+  <nav id="kit" aria-label="這一頁用到的套件">
+    <span class="kitlabel">這一頁的套件</span>
+    <button type="button" data-k="tilt" title="卡片跟著滑鼠傾斜、反光">vanilla-tilt</button>
+    <button type="button" data-k="matter" title="貼紙掉下來，可以抓起來丟">Matter.js</button>
+    <button type="button" data-k="sortable" title="拖拉卡片排名次">SortableJS</button>
+    <button type="button" data-k="gsap" title="翻卡、卡片滑進格子的動畫">GSAP</button>
+    <button type="button" data-k="vanta" title="背景會飛的鳥群">Vanta.js</button>
+    <button type="button" data-k="tone" title="每張卡一個音">Tone.js</button>
+    <button type="button" data-k="ml5" class="idle" title="開鏡頭：手往哪邊，卡片就往哪邊傾斜；揮手翻下一張">ml5.js（開鏡頭）</button>
+    <output id="say" aria-live="polite"></output>
+  </nav>
+
+  <main id="stage">
+    <div id="glow" aria-hidden="true"></div>
+    <div id="rays" aria-hidden="true"></div>
+    <div id="spot"></div>
+    <p id="hint"></p>
+  </main>
+
+  <section id="rankwrap" aria-label="抽到的卡">
+    <div class="rankhead">
+      <b id="ranktitle">這一包抽到的</b><span id="ranknote">翻開的卡會收進這五格</span>
+      <span class="rankbtns" hidden>
+        <button id="play" class="txtbtn" type="button" title="照名次，一張卡一個音">▶ 彈一次</button>
+        <button id="sortr" class="txtbtn" type="button">照稀有度排</button>
+      </span>
+    </div>
+    <div id="rank"></div>
+  </section>
+
+  <div id="floor">貼紙會掉在這裡，可以抓起來丟</div>
+
+  <figure id="cam" hidden>
+    <div class="view"><video playsinline muted></video><canvas width="320" height="240"></canvas></div>
+    <p>影像只在這台電腦上處理，不會上傳。</p>
+  </figure>
+
+  <div class="copy">Copyright © 2026 JUNHAO CHEN</div>
+  <canvas id="fx" aria-hidden="true"></canvas>
+  <div id="flash" aria-hidden="true"></div>
+  <canvas id="phys" aria-hidden="true"></canvas>
+
+  <!-- 套件都用 CDN 載入，版本號寫死（ml5.js 比較大，按了「開鏡頭」才載入） -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.1/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.1/dist/Flip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.7/Sortable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vanilla-tilt@1.8.1/dist/vanilla-tilt.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tone@15.1.22/build/Tone.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vanta@0.5.24/dist/vanta.birds.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

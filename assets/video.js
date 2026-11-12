@@ -155,7 +155,7 @@
     const load = () => {   // 遊戲在底下先載好（看不到），停在第一格等過場
       if (frame) return;
       frame = document.createElement("iframe");
-      frame.className = "hw-frame"; frame.allow = "fullscreen";
+      frame.className = "hw-frame"; frame.allow = game.dataset.allow || "fullscreen";   // data-allow：例如 Week 10 卡包要用鏡頭（ml5.js）
       frame.src = game.dataset.src + (game.dataset.src.indexOf("?") < 0 ? "?" : "&") + "stage=1";
       frame.title = steps[1] ? steps[1].textContent.replace(/^\s*2\s*/, "").trim() : "Sky Island";
       frame.addEventListener("load", () => { loaded = true; stage.dispatchEvent(new Event("hw-loaded")); }, { once: true });

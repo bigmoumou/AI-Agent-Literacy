@@ -1,0 +1,241 @@
+/* 小安俱樂部・貼圖卡包（Week 10 影片 02 的示範網站）
+   版面：上面一行標題、一行「這一頁的套件」，中間是舞台（卡包／正在翻的卡／放大看的卡），下面是五格排行，最底下是貼紙掉落的桌面。
+   顏色照課程影片的紙感：米色底、墨色字、一個橘色重點；★ 出現時天色變暗（body.dusk）。 */
+:root {
+  --paper: #f3eee4; --ink: #1d1a16; --muted: #6d655b; --hair: #d9d0c0; --accent: #e8641b; --gold: #c9982e; --navy: #232f4f;
+  --big: 260px; --small: 110px; --floor: 120px; --gap: 10px;
+  --sans: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "Heiti TC", system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", Consolas, "Courier New", monospace;
+}
+@property --a { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; overflow: hidden; overscroll-behavior: none; }
+body {
+  display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto var(--floor); height: 100dvh;
+  background: var(--paper); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased;
+  touch-action: manipulation; user-select: none; -webkit-user-select: none; transition: color .6s, background-color .6s;
+}
+body.dusk { --paper: #1c2540; --ink: #f3eee4; --muted: #aab3c7; --hair: rgba(255, 255, 255, .22); }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+
+/* 背景：Vanta.js 把鳥群畫在這一層 */
+#bg { position: fixed; inset: 0; z-index: 0; background: var(--paper); transition: background-color .6s; }
+#bg canvas { display: block; }
+
+/* ------------------------------------------------------------ 標題列、套件列 */
+.top, #kit, #stage, #rankwrap { position: relative; z-index: 2; }
+.top { display: flex; align-items: baseline; gap: 16px; padding: 12px 20px 4px; }
+.brand b { font-size: 17px; font-weight: 800; letter-spacing: .04em; }
+.brand span { margin-left: 10px; font-size: 13px; color: var(--muted); }
+.count { margin-left: auto; font: 13px/1 var(--mono); color: var(--muted); }
+.count b { color: var(--ink); font-size: 15px; }
+.txtbtn { font-size: 14px; font-weight: 700; color: var(--accent); border-bottom: 1px solid currentColor; padding-bottom: 1px; }
+.txtbtn[hidden] { display: none; }
+
+#kit { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; padding: 2px 20px 8px; border-bottom: 1px solid var(--hair); font: 12px/1.5 var(--mono); color: var(--muted); transition: border-color .6s; }
+#kit .kitlabel { font-family: var(--sans); font-size: 12px; }
+#kit button { position: relative; padding-left: 11px; color: var(--ink); white-space: nowrap; }
+#kit button::before { content: ''; position: absolute; left: 0; top: 50%; width: 6px; height: 6px; margin-top: -3px; border-radius: 50%; background: var(--hair); transition: background-color .5s, transform .5s; }
+#kit button.ping::before { background: var(--accent); transform: scale(1.5); transition: none; }
+#kit button.off { color: var(--muted); text-decoration: line-through; }
+#kit button.off::before, #kit button.idle::before { background: none; box-shadow: inset 0 0 0 1px var(--muted); }
+#kit button.idle { color: var(--muted); }
+#say { flex: 1 1 260px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--accent); font-family: var(--sans); font-size: 12px; }
+
+/* ------------------------------------------------------------ 舞台 */
+#stage { display: grid; place-items: center; min-height: 0; }
+#spot { position: relative; width: var(--big); height: calc(var(--big) * 88 / 63); }
+#hint { position: absolute; left: 0; right: 0; bottom: 6px; margin: 0; text-align: center; font-size: 13px; color: var(--muted); pointer-events: none; transition: color .6s; }
+#glow { position: absolute; left: 50%; top: 46%; width: calc(var(--big) * 2.6); aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; opacity: 0; pointer-events: none;
+  background: radial-gradient(circle, rgba(255, 226, 150, .75), rgba(255, 190, 90, .28) 35%, transparent 68%); }
+body:not(.dusk) #glow { background: radial-gradient(circle, rgba(255, 255, 255, .95), rgba(150, 190, 255, .45) 32%, transparent 68%); }
+#fx { position: fixed; inset: 0; z-index: 28; width: 100%; height: 100%; pointer-events: none; }
+#flash { position: fixed; inset: 0; z-index: 27; pointer-events: none; opacity: 0; }
+#rays { position: absolute; left: 50%; top: 50%; width: calc(var(--big) * 3.2); aspect-ratio: 1; margin: calc(var(--big) * -1.6) 0 0 calc(var(--big) * -1.6); border-radius: 50%; opacity: 0; pointer-events: none;
+  background: repeating-conic-gradient(from 0deg, rgba(242, 193, 78, 0) 0 5.2deg, rgba(242, 193, 78, .5) 5.2deg 6deg);
+  -webkit-mask: radial-gradient(circle, #000 18%, transparent 68%); mask: radial-gradient(circle, #000 18%, transparent 68%); }
+
+/* ------------------------------------------------------------ 卡包 */
+.pack { position: absolute; inset: 3% 5%; cursor: grab; touch-action: none; }
+.pack-tilt { position: absolute; inset: 0; transform-style: preserve-3d; filter: drop-shadow(0 16px 18px rgba(70, 35, 10, .28)); }
+.pack-top, .pack-body, .pack-bottom { position: absolute; left: 0; right: 0; color: #fff7ea;
+  background: linear-gradient(125deg, #f9b45a 0%, #ee7a25 30%, #e8641b 58%, #b9430e 100%); }
+.pack-top { top: 0; height: 9%; transform-origin: 100% 100%; --z: 9px;
+  -webkit-mask: conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) 50% 0 / var(--z) 100%;
+  mask: conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) 50% 0 / var(--z) 100%; }
+.pack-bottom { bottom: 0; height: 7%; --z: 9px;
+  -webkit-mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% 100% / var(--z) 100%;
+  mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% 100% / var(--z) 100%; }
+.pack-top::after, .pack-bottom::after { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .28) 0 2px, rgba(120, 40, 0, .12) 2px 6px); }
+.pack-body { top: 9%; bottom: 7%; overflow: hidden; container-type: inline-size; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.pack-body::before { content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(105deg, transparent 32%, rgba(255, 255, 255, .34) 46%, transparent 60%); background-size: 260% 100%; background-position: calc(100% - var(--px, 50) * 1%) 0; }
+.pack-holo { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: color-dodge; opacity: calc(.18 + var(--tilt, 0) * .4);
+  background: repeating-linear-gradient(115deg, rgba(255, 90, 160, .55) 0%, rgba(255, 220, 90, .55) 8%, rgba(90, 255, 190, .5) 16%, rgba(90, 180, 255, .55) 24%, rgba(200, 120, 255, .55) 32%, rgba(255, 90, 160, .55) 40%);
+  background-size: 250% 250%; background-position: calc(var(--px, 50) * 1%) calc(var(--py, 50) * 1%); }
+.pack .glit { display: block; }
+.pack-tear { width: 100%; margin-top: 2.2%; border-top: 1.5px dashed rgba(255, 247, 234, .8); font-size: 10px; letter-spacing: .1em; padding-top: 3px; opacity: .92; }
+.pack-ring { position: relative; width: 62%; aspect-ratio: 1; margin-top: 7%; border-radius: 50%; background: #fff3e0; box-shadow: 0 0 0 3px rgba(255, 255, 255, .5), inset 0 0 0 1px rgba(185, 67, 14, .25); }
+.pack-ring img { position: absolute; left: 50%; bottom: -4%; height: 116%; transform: translateX(-50%); pointer-events: none; }
+.pack-title { margin-top: 7%; line-height: 1.15; text-shadow: 0 1px 0 rgba(120, 40, 0, .35); }
+.pack-title b { display: block; font-size: calc(var(--big) * .105); font-weight: 900; letter-spacing: .08em; }
+.pack-title span { display: block; font-size: calc(var(--big) * .075); font-weight: 700; letter-spacing: .3em; margin-top: 2px; }
+.pack-sub { margin-top: auto; padding-bottom: 5%; font: calc(var(--big) * .042)/1.5 var(--sans); letter-spacing: .08em; opacity: .95; }
+.pack .js-tilt-glare { border-radius: 4px; }
+
+/* ------------------------------------------------------------ 卡片（大小都用同一份，字和邊距跟著卡片寬度縮放：cqw） */
+.card { position: relative; flex: none; width: var(--small); aspect-ratio: 63 / 88; container-type: inline-size; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.card.big { width: var(--big); }
+.card.instack { position: absolute; left: 0; top: 0; }
+.card.instack:not(.top) { pointer-events: none; }
+.card-tilt { position: absolute; inset: 0; transform-style: preserve-3d; border-radius: 5cqw; }
+.card-flip { position: absolute; inset: 0; transform-style: preserve-3d; border-radius: inherit; }
+.back, .face { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  box-shadow: 0 1.2cqw 3cqw rgba(40, 25, 10, .22), 0 0 0 .3cqw rgba(40, 25, 10, .12); }
+.face { transform: rotateY(180deg); }
+.js-tilt-glare { border-radius: inherit; }
+
+/* 背面 */
+.back { background: var(--navy) repeating-linear-gradient(45deg, rgba(255, 255, 255, .04) 0 2px, transparent 2px 9px); display: grid; place-items: center; }
+.back::before { content: ''; position: absolute; inset: 4cqw; border: .5cqw solid #d8b25a; border-radius: 3cqw; opacity: .85; }
+.back svg { width: 46cqw; height: 46cqw; }
+.back span { position: absolute; left: 0; right: 0; bottom: 13cqw; text-align: center; color: #d8b25a; font-size: 4.6cqw; font-weight: 700; letter-spacing: .5em; text-indent: .5em; }
+/* 稀有的卡，背面的邊會慢慢流過一道光（◆ 銀、★ 金） */
+.card[data-r="r"] .back::after, .card[data-r="s"] .back::after { content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 2cqw;
+  background: conic-gradient(from var(--a), transparent 0 62%, var(--edge) 80%, transparent 98%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation: edge 3.2s linear infinite; }
+.card[data-r="r"] { --edge: #ffffff; }
+.card[data-r="s"] { --edge: #ffe08a; }
+.card[data-r="s"] .back::after { animation-duration: 2s; }
+@keyframes edge { to { --a: 360deg; } }
+
+/* 正面 */
+.face { padding: 3.2cqw; background: var(--frame); color: #1d1a16; }
+.f-an { --frame: linear-gradient(140deg, #f5b06a, #ee8a3b 55%, #d96a1f); --art1: #fff1df; --art2: #ffd3a3; --tagc: #b4541a; }
+.f-star { --frame: linear-gradient(140deg, #5a6da3, #2f3d62 55%, #1f2a48); --art1: #eef2fd; --art2: #b9c6ec; --tagc: #2f3d62; }
+.f-snow { --frame: linear-gradient(140deg, #d9cef5, #b9a7e6 55%, #9a86d4); --art1: #f8f4ff; --art2: #ddd2f7; --tagc: #6a56a6; }
+.card[data-r="r"] .face { background: linear-gradient(135deg, #f4f7fb, #b4bdcb 26%, #ffffff 44%, #9fa9b8 62%, #eef2f7 80%, #aab3c1); background-size: 220% 220%; animation: metal 5s ease-in-out infinite alternate; }
+.card[data-r="s"] .face { background: linear-gradient(135deg, #fbe7a1, #c9982e 24%, #fff6c8 42%, #d4a43a 58%, #fff1b8 74%, #9b7420); background-size: 220% 220%; animation: metal 3.6s ease-in-out infinite alternate; }
+@keyframes metal { from { background-position: 0% 0%; } to { background-position: 100% 100%; } }
+/* 自己會發光：正面朝上的 ◆ 是冷冷的銀光，★ 是金光，一明一暗地呼吸 */
+.card.up[data-r="r"] .face { animation: metal 5s ease-in-out infinite alternate, auraS 2.4s ease-in-out infinite; }
+.card.up[data-r="s"] .face { animation: metal 3.6s ease-in-out infinite alternate, auraG 2s ease-in-out infinite; }
+@keyframes auraS {
+  0%, 100% { box-shadow: 0 0 0 .5cqw rgba(255, 255, 255, .95), 0 0 0 1.1cqw rgba(120, 165, 240, .45), 0 0 6cqw rgba(110, 160, 255, .7), 0 0 16cqw rgba(90, 140, 255, .38); }
+  50% { box-shadow: 0 0 0 .6cqw #fff, 0 0 0 1.4cqw rgba(140, 185, 255, .6), 0 0 10cqw rgba(120, 175, 255, .9), 0 0 26cqw rgba(100, 150, 255, .5); } }
+@keyframes auraG {
+  0%, 100% { box-shadow: 0 0 0 .6cqw rgba(255, 244, 196, .9), 0 0 6cqw rgba(255, 210, 100, .8), 0 0 16cqw rgba(255, 170, 60, .42), 0 0 30cqw rgba(255, 120, 200, .16); }
+  50% { box-shadow: 0 0 0 .7cqw #fff7d6, 0 0 10cqw rgba(255, 222, 120, 1), 0 0 26cqw rgba(255, 180, 70, .62), 0 0 44cqw rgba(160, 120, 255, .24); } }
+/* 背面朝上、輪到它的 ◆ ★：光從邊上漏出來 */
+.card.top[data-r="r"]:not(.up) .back { animation: peekS 1.5s ease-in-out infinite; }
+.card.top[data-r="s"]:not(.up) .back { animation: peekG 1.1s ease-in-out infinite; }
+@keyframes peekS { 0%, 100% { box-shadow: 0 0 0 .4cqw rgba(235, 242, 255, .8), 0 0 6cqw rgba(110, 160, 255, .5); } 50% { box-shadow: 0 0 0 .6cqw #fff, 0 0 13cqw rgba(120, 175, 255, .85); } }
+@keyframes peekG { 0%, 100% { box-shadow: 0 0 0 .5cqw rgba(255, 230, 150, .75), 0 0 7cqw rgba(255, 200, 90, .6); } 50% { box-shadow: 0 0 0 .7cqw #fff3c4, 0 0 16cqw rgba(255, 210, 100, .95); } }
+/* 一道光每隔幾秒掃過卡面 */
+.card.up[data-r="r"] .face::after, .card.up[data-r="s"] .face::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 3;
+  background: linear-gradient(112deg, transparent 38%, rgba(255, 255, 255, .0) 44%, rgba(255, 255, 255, .85) 50%, rgba(255, 255, 255, 0) 56%, transparent 62%); background-size: 320% 100%;
+  mix-blend-mode: overlay; animation: sweep 3.6s cubic-bezier(.5, 0, .3, 1) infinite; }
+.card.up[data-r="s"] .face::after { animation-duration: 2.8s; }
+@keyframes sweep { 0% { background-position: 130% 0; } 55%, 100% { background-position: -30% 0; } }
+/* 閃粉：一顆一顆小光點輪流亮 */
+.glit { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; display: none; z-index: 2; mix-blend-mode: screen; }
+.card.up[data-r="r"] .glit, .card.up[data-r="s"] .glit { display: block; }
+.glit::before, .glit::after { content: ''; position: absolute; inset: 0;
+  background-image: radial-gradient(circle at 12% 18%, #fff 0 .5cqw, transparent .9cqw), radial-gradient(circle at 78% 9%, #fff 0 .4cqw, transparent .8cqw), radial-gradient(circle at 91% 44%, #fff 0 .55cqw, transparent 1cqw),
+    radial-gradient(circle at 6% 61%, #fff 0 .45cqw, transparent .8cqw), radial-gradient(circle at 70% 83%, #fff 0 .5cqw, transparent .9cqw), radial-gradient(circle at 33% 94%, #fff 0 .4cqw, transparent .8cqw),
+    radial-gradient(circle at 47% 4%, #fff 0 .35cqw, transparent .7cqw), radial-gradient(circle at 96% 92%, #fff 0 .45cqw, transparent .8cqw);
+  animation: twinkle 1.7s ease-in-out infinite; }
+.glit::after { transform: rotate(180deg); animation-delay: .85s; }
+.card.up[data-r="s"] .glit::before, .card.up[data-r="s"] .glit::after { animation-duration: 1.2s; }
+@keyframes twinkle { 0%, 100% { opacity: .1; } 50% { opacity: 1; } }
+/* ★：整張卡蓋一層彩虹箔（跟著傾斜移動，自己也會慢慢流動），金邊閃爍 */
+.foil { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; display: none; z-index: 1; mix-blend-mode: color-dodge; }
+.card[data-r="s"] .foil { display: block; opacity: calc(.32 + var(--tilt, 0) * .45);
+  background: repeating-linear-gradient(118deg, rgba(255, 80, 150, .55) 0%, rgba(255, 210, 80, .55) 7%, rgba(80, 255, 180, .5) 14%, rgba(80, 175, 255, .55) 21%, rgba(190, 110, 255, .55) 28%, rgba(255, 80, 150, .55) 35%);
+  background-size: 300% 300%; background-position: calc(var(--px, 50) * 1%) calc(var(--py, 50) * 1%); animation: foil 7s linear infinite; }
+@keyframes foil { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
+.card[data-r="r"] .nm, .card[data-r="s"] .nm { -webkit-background-clip: text; background-clip: text; color: transparent; background-size: 220% 100%; animation: nameshine 3s linear infinite; }
+.card[data-r="r"] .nm { background-image: linear-gradient(90deg, #5d6675, #9aa4b4 30%, #e9eef6 46%, #7d8695 62%, #5d6675); }
+.card[data-r="s"] .nm { background-image: linear-gradient(90deg, #7a5612, #c9982e 28%, #fff1b8 46%, #d9a93a 60%, #7a5612); }
+@keyframes nameshine { from { background-position: 100% 0; } to { background-position: -120% 0; } }
+.card[data-r="s"] .hp { color: #b8860b; }
+.frame { position: relative; height: 100%; border-radius: 3cqw; background: #fcf8ef; padding: 3cqw 3.4cqw 2.4cqw; display: flex; flex-direction: column; box-shadow: inset 0 0 0 .4cqw var(--tagc); }
+.row1 { display: flex; align-items: baseline; justify-content: space-between; gap: 2cqw; }
+.nm { font-size: 7.2cqw; font-weight: 800; white-space: nowrap; letter-spacing: .02em; }
+.hp { font: 800 8cqw/1 var(--mono); color: var(--tagc); white-space: nowrap; }
+.hp i { font: 600 3.3cqw/1 var(--sans); margin-right: 1cqw; color: #6d655b; }
+.art { position: relative; flex: 1 1 0; min-height: 0; margin-top: 2cqw; border-radius: 2.4cqw; overflow: hidden; background: radial-gradient(circle at 50% 36%, var(--art1), var(--art2)); box-shadow: inset 0 0 0 .4cqw rgba(29, 26, 22, .22); }
+.art img { position: absolute; left: 50%; bottom: -2%; height: 100%; transform: translateX(-50%); pointer-events: none; -webkit-user-drag: none; }
+/* ★：整張圖是深色的箔，光芒和彩虹都在狐狸後面 */
+.card[data-r="s"] .f-an .art { background: radial-gradient(circle at 50% 38%, #ffb347, #ee6a2a 46%, #7a1f3d); }
+.card[data-r="s"] .f-star .art { background: radial-gradient(circle at 50% 38%, #5f8fe0, #25408a 48%, #101b40); }
+.card[data-r="s"] .f-snow .art { background: radial-gradient(circle at 50% 38%, #cdb0ff, #7a58d8 48%, #33246e); }
+.card[data-r="s"] .art::before { content: ''; position: absolute; inset: -40%; background: repeating-conic-gradient(from 8deg at 50% 46%, rgba(255, 232, 170, 0) 0 9deg, rgba(255, 232, 170, .3) 9deg 11deg); }
+.new { position: absolute; left: 2cqw; top: 2cqw; padding: .6cqw 2cqw; border-radius: 1cqw; background: var(--accent); color: #fff; font: 800 3.4cqw/1.4 var(--mono); letter-spacing: .08em; }
+.tag { margin-top: 2cqw; font-size: 3.5cqw; color: var(--tagc); font-weight: 700; letter-spacing: .08em; display: flex; justify-content: space-between; }
+.skill { flex: none; margin-top: 1.8cqw; padding: 2.4cqw 2.8cqw 2.6cqw; border-radius: 2cqw; background: color-mix(in srgb, var(--art2) 38%, #fcf8ef); }
+.sk1 { display: flex; align-items: baseline; gap: 2cqw; }
+.skill b { font-size: 6cqw; font-weight: 800; white-space: nowrap; }
+.skill em { margin-left: auto; font: 800 6.6cqw/1 var(--mono); font-style: normal; color: var(--tagc); }
+.txt { margin: 1cqw 0 0; font-size: 4.3cqw; line-height: 1.5; color: #4a443c; }
+.row9 { flex: none; margin-top: 2cqw; display: flex; align-items: center; justify-content: space-between; font: 3.3cqw/1 var(--mono); color: #6d655b; }
+.rar { font-size: 4.6cqw; color: #1d1a16; }
+.card[data-r="s"] .rar { color: var(--gold); }
+@container (max-width: 150px) { .txt { display: none; } .skill { padding: 1.6cqw 2.4cqw; } }
+/* 反光：◆ 一道白光，★ 彩虹箔（跟著傾斜的角度移動；--px、--py、--tilt 由 vanilla-tilt 的 tiltChange 事件寫進來） */
+.sheen, .holo { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .35s; }
+.holo { display: none; }
+.card[data-r="s"] .holo { display: block; }
+.sheen { background: linear-gradient(112deg, transparent 38%, rgba(255, 255, 255, .7) 50%, transparent 62%); background-size: 260% 100%; background-position: calc(100% - var(--px, 50) * 1%) 0; mix-blend-mode: soft-light; }
+.holo { mix-blend-mode: color-dodge;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, .95) 0 .5cqw, transparent .8cqw),
+    repeating-linear-gradient(118deg, rgba(255, 70, 130, .6) 0%, rgba(255, 205, 70, .6) 10%, rgba(70, 245, 170, .55) 20%, rgba(70, 170, 255, .6) 30%, rgba(190, 100, 255, .6) 40%, rgba(255, 70, 130, .6) 50%);
+  background-size: 7cqw 7cqw, 240% 240%;
+  background-position: calc(var(--px, 50) * .12cqw) calc(var(--py, 50) * .12cqw), calc(var(--px, 50) * 1%) calc(var(--py, 50) * 1%); }
+.card.up[data-r="r"] .sheen, .card.up[data-r="s"] .sheen { opacity: .9; }
+.card.up[data-r="s"] .holo { opacity: calc(.34 + var(--tilt, 0) * .55); }
+
+/* ------------------------------------------------------------ 排行（五格） */
+#rankwrap { padding: 0 20px 6px; }
+.rankhead { display: flex; align-items: baseline; gap: 14px; height: 26px; font-size: 13px; color: var(--muted); width: min(100%, calc(var(--small) * 5 + var(--gap) * 4)); margin: 0 auto; }
+.rankhead b { color: var(--ink); font-weight: 800; }
+.rankbtns { margin-left: auto; display: flex; gap: 16px; }
+.rankbtns[hidden] { display: none; }
+#rank { display: flex; justify-content: center; gap: var(--gap); padding: 20px 0 0; margin: 0; counter-reset: rk; min-height: calc(var(--small) * 88 / 63 + 20px); }
+#rank > * { counter-increment: rk; }
+#rank > *::before { content: counter(rk); position: absolute; left: 0; right: 0; top: -19px; text-align: center; font: 700 12px/1 var(--mono); color: var(--muted); transition: color .6s; }
+#rank > .card:first-child::before { color: var(--accent); }
+.ph { position: relative; flex: none; width: var(--small); aspect-ratio: 63 / 88; border: 1px dashed var(--hair); border-radius: calc(var(--small) * .05); transition: border-color .6s; }
+.card.ghost { opacity: .25; }
+.card.sortable-fallback { cursor: grabbing; opacity: 1 !important; }
+.card.sortable-fallback::before { display: none; }
+.card.sortable-fallback .face, .card.sortable-fallback .back { box-shadow: 0 6cqw 10cqw rgba(40, 25, 10, .3); }
+.card.sel::after { content: ''; position: absolute; left: 12%; right: 12%; bottom: -7px; height: 2px; background: var(--accent); border-radius: 1px; }
+body.sorting .card-tilt { pointer-events: none; }
+
+/* ------------------------------------------------------------ 桌面（Matter.js 的貼紙掉在這裡）、鏡頭 */
+#floor { position: relative; z-index: 2; border-top: 1px solid var(--hair); padding: 6px 20px; font-size: 12px; color: var(--muted); transition: border-color .6s; }
+#phys { position: fixed; inset: 0; z-index: 30; width: 100%; height: 100%; pointer-events: none; }
+#cam { position: fixed; z-index: 40; right: 16px; top: 92px; width: 176px; margin: 0; }
+#cam[hidden] { display: none; }
+#cam .view { position: relative; aspect-ratio: 4 / 3; border-radius: 6px; overflow: hidden; background: #111; box-shadow: 0 0 0 1px var(--hair); }
+#cam video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+#cam canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+#cam p { margin: 4px 0 0; font-size: 11px; line-height: 1.4; color: var(--muted); }
+
+@media (max-width: 640px) {
+  .top { padding: 10px 14px 2px; gap: 10px; }
+  .brand span { display: none; }
+  #kit { padding: 2px 14px 6px; gap: 2px 10px; font-size: 11px; }
+  #say { flex-basis: 100%; }
+  #rankwrap { padding: 0 14px 4px; }
+  #ranknote { display: none; }
+  .rankhead b { white-space: nowrap; }
+  .rankbtns { gap: 12px; }
+  #cam { width: 108px; top: 100px; right: 10px; }
+  #cam p { display: none; }
+  #floor { padding: 4px 14px; font-size: 11px; }
+}
+@media (prefers-reduced-motion: reduce) { .card .back::after, .card .face, .card .face::after, .glit::before, .glit::after, .foil, .card .nm { animation: none !important; } }
