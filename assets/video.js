@@ -354,6 +354,16 @@
     box.append(p);
   }
 
+  /* 放掉一支影片的串流（切到別支時用，見 select()）：記住看到哪一秒，回來時 select() 會接回這一秒 */
+  function detach(vid) {
+    vid._resume = vid.currentTime || 0;
+    if (vid._hls) { vid._hls.destroy(); vid._hls = null; }
+    vid.removeAttribute("src");
+    vid.load();
+    delete vid.dataset.attached;
+    delete vid.dataset.src;
+  }
+
   function seek(vid, t, play) {
     attach(vid);
     const go = () => {
@@ -693,7 +703,14 @@
       units.forEach((u) => { u.hidden = u !== unit; });
       items.forEach((b, k) => b.setAttribute("aria-current", units[k] === unit ? "true" : "false"));
       current = unit;
-      if (vid) attach(vid);
+      // iPhone、iPad（Safari 和 iOS 上的 Chrome 都是同一個引擎）同時能接上的串流有限：頁面一開，第一支就接上預載，
+      // 切到第二支時第一支沒放掉，第二支會卡在 00:00（2026-11-12 老師用 iPhone 看 Week 10 影片 02 遇到）。
+      // 所以切換時，把其他已經接上的影片放掉（記住看到哪一秒），切回來再重新接上，從那一秒接著看。
+      vids.forEach((v) => { if (v !== vid && v.dataset.attached) detach(v); });
+      if (vid) {
+        attach(vid);
+        if (vid._resume > 0.05) { seek(vid, vid._resume, false); vid._resume = 0; }
+      }
       revealItem(units.indexOf(unit), first);
       if (!first && !reduceMotion) {
         unit.querySelectorAll(".points li").forEach((li, k) => li.style.setProperty("--i", k));
